@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 6â€“11: these rules apply to cloud backup and device transfer alike.
+     Only device-to-device transfer is wanted, so cloud backup is excluded via
+     requireFlags (backup only when the transport is a device transfer). -->
+<full-backup-content>
+    <include domain="database" path="." requireFlags="deviceToDeviceTransfer" />
+    <include domain="file" path="." requireFlags="deviceToDeviceTransfer" />
+    <include domain="sharedpref" path="." requireFlags="deviceToDeviceTransfer" />
+</full-backup-content>
+

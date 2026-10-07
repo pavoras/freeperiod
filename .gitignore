@@ -9,3 +9,4 @@ local.properties
 keystore.properties
 .idea/
 *.iml
+.tools/
