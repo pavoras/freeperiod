@@ -1,0 +1,11 @@
+aufpasser/runden/*.jsonl
+aufpasser/runden/*.log
+.gradle/
+.kotlin/
+build/
+local.properties
+*.jks
+*.keystore
+keystore.properties
+.idea/
+*.iml
