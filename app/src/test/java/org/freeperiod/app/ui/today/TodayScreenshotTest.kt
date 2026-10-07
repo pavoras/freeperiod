@@ -3,15 +3,22 @@ package org.freeperiod.app.ui.today
 import android.content.res.Configuration
 import android.os.LocaleList
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.*
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import com.github.takahirom.roborazzi.captureRoboImage
 import java.time.LocalDate
 import java.time.YearMonth
@@ -53,6 +60,36 @@ class TodayScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun ongoing_deDark() = capture("ongoing_deDark", "ongoing", Locale.GERMANY, dark = true)
     @Test fun ongoing_enLarge() = capture("ongoing_enLarge", "ongoing", Locale.US, fontScale = 1.5f)
+
+    @Test fun calendarPredicted_enLight() {
+        Locale.setDefault(Locale.US)
+        val today = clock()
+        val month = YearMonth.from(today)
+        val periods = (0..3).map { index ->
+            val start = month.atDay(1).minusDays((3 - index) * 19L)
+            Period(index + 1L, start, start.plusDays(4))
+        }
+        val prediction = predict(periods, PredictionSettings(), today)
+        val predicted = predictedDays(prediction)!!
+        val logged = setOf(today, month.atDay(3), month.atDay(20))
+        val marks = (1..month.lengthOfMonth()).associate { day ->
+            val date = month.atDay(day)
+            date to DayMarks(PeriodRules.periodOn(periods, date, today) != null,
+                date in predicted, date in logged, date == today)
+        }
+        compose.setContent {
+            FreePeriodTheme(darkTheme = false) {
+                Box(Modifier.fillMaxSize()) {
+                    Surface {
+                        MonthCalendar(month, marks, {}, {}, Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("calendar"), Locale.US)
+                    }
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("20 April 2026, predicted period day, logged").assertExists()
+        compose.onNodeWithTag("calendar").captureRoboImage("src/test/screenshots/today/calendarPredicted_enLight.png")
+    }
 
     private fun capture(name: String, scenario: String, locale: Locale, dark: Boolean = false, fontScale: Float = 1f) {
         Locale.setDefault(locale)

@@ -1,0 +1,71 @@
+package org.freeperiod.app.ui.day
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.semantics.SemanticsActions
+import java.time.LocalDate
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
+import org.freeperiod.app.ui.theme.FreePeriodTheme
+import org.freeperiod.app.R
+import org.freeperiod.engine.*
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
+class DayEntrySheetTest {
+    @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
+    @Before fun setHostTheme() { compose.activity.setTheme(R.style.Theme_FreePeriod) }
+    private val today = LocalDate.of(2026, 4, 12)
+
+    @Test fun futureChipsAreDisabledAndOverlapIsText() {
+        val state = DayEntryUiState(today.plusDays(1), today, loading = false, error = DayEntryError.OVERLAP)
+        compose.setContent { FreePeriodTheme { DayEntrySheet(state, DayEntryActions(), {}, {}) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Light").assertIsNotEnabled()
+        compose.onNodeWithText("This overlaps another period.").assertExists()
+    }
+
+    @Test fun flowChipHasLabelAndCallsAction() {
+        var selected: FlowLevel? = null
+        compose.setContent {
+            FreePeriodTheme {
+                DayEntrySheet(DayEntryUiState(today, today, loading = false),
+                    DayEntryActions(flow = { selected = it }), {}, {})
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Light").performClick()
+        assertEquals(FlowLevel.LIGHT, selected)
+    }
+
+    @Test fun clearSnackbarUndoRestoresFullLog() {
+        val log = DayLog(today, mood = Mood.GOOD, note = "Test", tagIds = setOf(1))
+        val state = mutableStateOf(DayEntryUiState(today, today, log, listOf(Tag(1, "Travel")), loading = false))
+        val events = Channel<DayEntryEvent>(Channel.UNLIMITED)
+        val flow = events.receiveAsFlow()
+        compose.setContent {
+            FreePeriodTheme {
+                DayEntrySheet(state.value, DayEntryActions(clear = {
+                    state.value = state.value.copy(log = DayLog(today))
+                    events.trySend(DayEntryEvent.Cleared(log))
+                }, undo = { state.value = state.value.copy(log = it) }), {}, {}, flow)
+            }
+        }
+        compose.waitForIdle()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Clear day"))
+        compose.onNodeWithText("Clear day").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Undo").performClick()
+        compose.waitForIdle()
+        assertEquals(log, state.value.log)
+    }
+}

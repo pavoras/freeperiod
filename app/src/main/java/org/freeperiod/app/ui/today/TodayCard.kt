@@ -8,8 +8,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.FormatStyle
 import java.util.Locale
 import org.freeperiod.app.R
 import org.freeperiod.engine.Basis
@@ -32,7 +30,7 @@ fun TodayCard(
             state.cycleDay?.let {
                 Text(stringResource(R.string.cycle_day, it), style = MaterialTheme.typography.headlineLarge)
             }
-            Text(predictionText(prediction, locale), style = MaterialTheme.typography.bodyLarge)
+            Text(predictionText(prediction, state.today, locale), style = MaterialTheme.typography.bodyLarge)
             if (prediction is PredictionState.Range) {
                 val basis = when (prediction.basis) {
                     Basis.USER_ENTERED -> stringResource(R.string.basis_entered)
@@ -74,16 +72,11 @@ fun TodayCard(
 }
 
 @Composable
-private fun predictionText(prediction: PredictionState, locale: Locale): String = when (prediction) {
+private fun predictionText(prediction: PredictionState, today: LocalDate, locale: Locale): String = when (prediction) {
     PredictionState.NoData -> stringResource(R.string.today_welcome)
     is PredictionState.NeedMoreData -> stringResource(R.string.today_need_more)
-    is PredictionState.Range -> stringResource(R.string.today_range, formatRange(prediction.earliest, prediction.latest, locale))
+    is PredictionState.Range -> stringResource(R.string.today_range, formatPredictionRange(prediction.earliest, prediction.latest, today, locale))
     is PredictionState.Varies -> stringResource(R.string.today_varies, prediction.minLength, prediction.maxLength)
     is PredictionState.RangePassed -> stringResource(R.string.today_range_passed, prediction.daysPassed)
     PredictionState.Paused -> stringResource(R.string.today_paused)
-}
-
-private fun formatRange(start: LocalDate, end: LocalDate, locale: Locale): String {
-    val format = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-    return "${start.format(format)} – ${end.format(format)}"
 }
