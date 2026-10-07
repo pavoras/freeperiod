@@ -31,7 +31,8 @@ if ($Voll -or $Aufnehmen) {
     $tasks += ':app:testDebugUnitTest'
     if ($Voll) { $tasks += @(':app:lintDebug', ':app:assembleRelease') }
     $extra += if ($Aufnehmen) { '-Proborazzi.test.record=true' } else { '-Proborazzi.test.compare=true' }
-    if ($Tests) { $extra += @('--tests', $Tests) }
+    # A filter applies to the task right before it, so run only the unit tests then.
+    if ($Tests) { $tasks = @(':app:testDebugUnitTest', '--tests', $Tests) }
 }
 $gargs = @('--console=plain', '-Porg.gradle.java.installations.auto-download=false') + $extra + $tasks
 if (-not $Online) { $gargs = @('--offline') + $gargs }
