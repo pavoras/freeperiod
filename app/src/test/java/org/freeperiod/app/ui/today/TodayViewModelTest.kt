@@ -1,0 +1,79 @@
+package org.freeperiod.app.ui.today
+
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import androidx.lifecycle.ViewModelStore
+import java.time.YearMonth
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.*
+import org.freeperiod.app.data.DatabaseTest
+import org.freeperiod.app.data.SettingsStore
+import org.freeperiod.engine.PeriodRules
+import org.junit.After
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+@OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
+class TodayViewModelTest : DatabaseTest() {
+    private val models = ViewModelStore()
+    @Before fun setMain() { Dispatchers.setMain(UnconfinedTestDispatcher()) }
+    @After fun resetMain() { models.clear(); Dispatchers.resetMain() }
+
+    private fun viewModel(clock: () -> java.time.LocalDate = { today }) = TodayViewModel(repository,
+        SettingsStore(ApplicationProvider.getApplicationContext<Context>()), clock).also { models.put("today", it) }
+
+    @Test fun todayRecomputesOnResume() = runTest {
+        repository.addPeriod(today.minusDays(10), today.minusDays(6)).getOrThrow()
+        var date = today
+        val vm = viewModel { date }
+        vm.refresh().join()
+        assertEquals(11, vm.state.value.cycleDay)
+        date = today.plusDays(1)
+        vm.onResume().join()
+        assertEquals(12, vm.state.value.cycleDay)
+        assertTrue(vm.state.value.days[date]!!.today)
+        assertFalse(vm.state.value.days[today]!!.today)
+    }
+
+    @Test fun startPeriodTodayCreatesPeriod() = runTest {
+        val vm = viewModel()
+        vm.startPeriodToday().join()
+        assertEquals(today, repository.snapshot().periods.single().start)
+        assertNull(repository.snapshot().periods.single().end)
+    }
+
+    @Test fun endQuestionShownAfterThreshold() = runTest {
+        repository.addPeriod(today.minusDays(10), null).getOrThrow()
+        val vm = viewModel()
+        vm.refresh().join()
+        assertEquals(PeriodRules.endQuestion(repository.snapshot().periods, today), vm.state.value.endQuestion)
+        assertNotNull(vm.state.value.endQuestion)
+        vm.confirmEnd(vm.state.value.endQuestion!!).join()
+        assertNotNull(repository.snapshot().periods.single().end)
+    }
+
+    @Test fun changingMonthPreservesIndependentMarks() = runTest {
+        repository.addPeriod(today.minusDays(2), null).getOrThrow()
+        repository.saveDayLog(org.freeperiod.engine.DayLog(today, mood = org.freeperiod.engine.Mood.GOOD))
+        val vm = viewModel()
+        vm.refresh().join()
+        val marks = vm.state.value.days[today]!!
+        assertTrue(marks.period && marks.logged && marks.today)
+        vm.showMonth(YearMonth.of(2026, 3)).join()
+        assertEquals(31, vm.state.value.days.size)
+        assertEquals(YearMonth.of(2026, 3), vm.state.value.month)
+    }
+
+    @Test fun pausePredictionsPersistsDomainSetting() = runTest {
+        val vm = viewModel()
+        vm.pausePredictions().join()
+        assertTrue(repository.snapshot().settings.predictionsPaused)
+    }
+}

@@ -1,4 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">FreePeriod.</string>
+    <string name="nav_today">Today</string>
+    <string name="nav_history">History</string>
+    <string name="nav_settings">Settings</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="day_entry">Day entry</string>
+    <string name="back">Back</string>
+    <string name="cycle_day">Cycle day %1$d</string>
+    <string name="today_welcome">Welcome! Tap below when your period starts.</string>
+    <string name="today_need_more">Log your next period to see a prediction</string>
+    <string name="today_range">Next period likely %1$s</string>
+    <string name="today_varies">Your cycles vary a lot (%1$d–%2$d days)</string>
+    <string name="today_range_passed">Your expected range has passed (%1$d days ago)</string>
+    <string name="today_paused">Predictions paused</string>
+    <string name="basis_entered">based on what you entered</string>
+    <string name="basis_early">early estimate</string>
+    <string name="basis_history">based on your last %1$d cycles</string>
+    <string name="period_started">Period started</string>
+    <string name="period_ended_question">Has your period ended?</string>
+    <string name="log_today">Log today</string>
+    <string name="pause_predictions">Pause predictions</string>
+    <string name="previous_month">Previous month</string>
+    <string name="next_month">Next month</string>
+    <string name="calendar_period">period day</string>
+    <string name="calendar_predicted">predicted period day</string>
+    <string name="calendar_logged">logged</string>
+    <string name="calendar_today">today</string>
+    <string name="open_day">Open day entry</string>
+    <string name="confirm_period_end">Mark %1$s as the last day of your period?</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="error_period_overlap">These dates overlap another period. Choose different dates.</string>
+    <string name="error_period_end_before_start">The end date needs to be on or after the start.</string>
+    <string name="error_period_start_future">Choose today or an earlier start date.</string>
+    <string name="error_period_end_future">Choose today or an earlier end date.</string>
+    <string name="error_storage">Your data could not be loaded or saved. Please try again.</string>
 </resources>
