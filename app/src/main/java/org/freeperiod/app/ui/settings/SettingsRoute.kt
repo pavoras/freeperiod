@@ -23,20 +23,23 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import org.freeperiod.app.AppContainer
 import org.freeperiod.app.R
+import org.freeperiod.app.lock.lockAvailable
 
 private enum class SettingsPage { MAIN, BACKUP, PRIVACY, ABOUT }
 
 @Composable
 fun SettingsRoute(container: AppContainer) {
     val context = LocalContext.current
+    val appContext = context.applicationContext
     val model: SettingsViewModel = viewModel(factory = viewModelFactory {
-        initializer { SettingsViewModel(container.repository, container.settings) }
+        initializer { SettingsViewModel(container.repository, container.settings) { lockAvailable(appContext) } }
     })
     val backup: BackupViewModel = viewModel(factory = viewModelFactory {
         initializer { BackupViewModel(container.repository, container.backupIo, container.clock) }
     })
     val settings by model.state.collectAsStateWithLifecycle()
     val recovery by backup.state.collectAsStateWithLifecycle()
+    val reminderAccess = rememberReminderAccess(container.notifications)
     var page by rememberSaveable { mutableStateOf(SettingsPage.MAIN) }
     var externalError by remember { mutableStateOf(false) }
     val back = { page = SettingsPage.MAIN; backup.cancelRestore() }
@@ -77,7 +80,14 @@ fun SettingsRoute(container: AppContainer) {
                             }
                         }, backup = { page = SettingsPage.BACKUP }, csv = { backup.exportCsv() },
                         privacy = { page = SettingsPage.PRIVACY }, about = { page = SettingsPage.ABOUT },
-                        deleteAll = { model.deleteAllData() }), recovery.busy || recovery.awaitingDocument)
+                        deleteAll = { model.deleteAllData() },
+                        periodReminder = { model.setPeriodReminder(it); if (it) reminderAccess.requestPermission() },
+                        reminderDays = { model.setReminderDays(it) },
+                        dailyReminder = { model.setDailyReminder(it); if (it) reminderAccess.requestPermission() },
+                        reminderTime = { model.setReminderTime(it) }, explicitNotifications = { model.setExplicitNotifications(it) },
+                        notificationSettings = { openExternal(reminderAccess.settingsIntent) },
+                        lockEnabled = { model.setLockEnabled(it) }, lockTimeout = { model.setLockTimeout(it) }),
+                        recovery.busy || recovery.awaitingDocument, reminderAccess.available)
                 }
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
                     backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back)

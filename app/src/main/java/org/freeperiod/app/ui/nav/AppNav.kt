@@ -1,12 +1,11 @@
 package org.freeperiod.app.ui.nav
 
+import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -33,6 +32,9 @@ import org.freeperiod.app.ui.day.DayEntryActions
 import org.freeperiod.app.ui.day.DayEntrySheet
 import org.freeperiod.app.ui.day.DayEntryViewModel
 import org.freeperiod.app.ui.settings.SettingsRoute
+import org.freeperiod.app.ui.settings.rememberReminderAccess
+import org.freeperiod.app.ui.onboarding.*
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDone: Boolean) {
@@ -70,13 +72,25 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
             NavHost(navigation, startDestination = if (onboardingDone) "today" else "onboarding",
                 modifier = Modifier.padding(padding)) {
                 composable("onboarding") {
-                    Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
-                        horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineLarge)
-                        Button(onClick = { scope.launch { container.settings.update { it.copy(onboardingDone = true) } } }) {
-                            Text(stringResource(R.string.onboarding_continue))
-                        }
-                    }
+                    val model: OnboardingViewModel = viewModel(factory = viewModelFactory {
+                        initializer { OnboardingViewModel(container.repository, container.settings, container.clock) }
+                    })
+                    val state by model.state.collectAsStateWithLifecycle()
+                    ResumeAndMidnightEffect(model::onResume)
+                    val access = rememberReminderAccess(container.notifications)
+                    val context = LocalContext.current
+                    androidx.activity.compose.BackHandler(state.page > 0, onBack = model::back)
+                    OnboardingScreen(state, OnboardingActions(
+                        next = model::next, back = model::back, skip = { model.skip() }, finish = { model.finish() },
+                        start = model::setStart, ended = model::setHasEnded, end = model::setEnd,
+                        length = model::setTypicalLength, unknown = model::setUnknown,
+                        periodReminder = { model.setPeriodReminder(it); if (it) access.requestPermission() },
+                        dailyReminder = { model.setDailyReminder(it); if (it) access.requestPermission() },
+                        systemSettings = {
+                            try { context.startActivity(access.settingsIntent) }
+                            catch (_: ActivityNotFoundException) { model.systemSettingsUnavailable() }
+                            catch (_: SecurityException) { model.systemSettingsUnavailable() }
+                        }), access.available)
                 }
                 composable("today") {
                     val state by todayViewModel.state.collectAsStateWithLifecycle()

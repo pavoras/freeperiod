@@ -16,6 +16,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.R
+import org.freeperiod.app.data.LockTimeout
+import java.time.LocalTime
 
 data class SettingsActions(
     val typicalLength: (Int?) -> Unit = {},
@@ -27,13 +29,22 @@ data class SettingsActions(
     val privacy: () -> Unit = {},
     val about: () -> Unit = {},
     val deleteAll: () -> Unit = {},
+    val periodReminder: (Boolean) -> Unit = {},
+    val reminderDays: (Int) -> Unit = {},
+    val dailyReminder: (Boolean) -> Unit = {},
+    val reminderTime: (LocalTime) -> Unit = {},
+    val explicitNotifications: (Boolean) -> Unit = {},
+    val notificationSettings: () -> Unit = {},
+    val lockEnabled: (Boolean) -> Unit = {},
+    val lockTimeout: (LockTimeout) -> Unit = {},
 )
 
 @Composable
-fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false) {
+fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false, notificationsAvailable: Boolean = true) {
     var lengthDialog by rememberSaveable { mutableStateOf(false) }
     var csvDialog by rememberSaveable { mutableStateOf(false) }
     var deleteDialog by rememberSaveable { mutableStateOf(false) }
+    var timeoutDialog by rememberSaveable { mutableStateOf(false) }
     val enabled = !state.loading && !state.writing && !recoveryBusy
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp)) {
         item {
@@ -47,6 +58,18 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
                     ?: stringResource(R.string.cycle_unknown))
         }
         item { SettingsSwitch(R.string.pause_predictions, state.predictionsPaused, enabled, actions.paused) }
+        item {
+            HorizontalDivider(Modifier.padding(vertical = 12.dp))
+            Text(stringResource(R.string.reminders), style = MaterialTheme.typography.titleMedium)
+            ReminderOptions(state.device, enabled, notificationsAvailable, actions.periodReminder, actions.reminderDays,
+                actions.dailyReminder, actions.reminderTime, actions.explicitNotifications, actions.notificationSettings)
+        }
+        item {
+            HorizontalDivider(Modifier.padding(vertical = 12.dp))
+            SettingsSwitch(R.string.app_lock, state.device.lockEnabled, enabled && (state.device.lockEnabled || state.lockCanEnable), actions.lockEnabled)
+            if (!state.lockCanEnable && !state.device.lockEnabled) Text(stringResource(R.string.lock_unavailable), style = MaterialTheme.typography.bodySmall)
+            if (state.device.lockEnabled) SettingsRow(R.string.lock_timeout, enabled, { timeoutDialog = true }, stringResource(timeoutLabel(state.device.lockTimeout)))
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) item {
             SettingsSwitch(R.string.dynamic_color, state.dynamicColor, enabled, actions.dynamicColor)
         }
@@ -73,10 +96,22 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         onDismiss = { csvDialog = false }, onConfirm = { csvDialog = false; actions.csv() })
     if (deleteDialog) ConfirmationDialog(R.string.delete_all_data, R.string.delete_all_warning, R.string.delete_all_data,
         onDismiss = { deleteDialog = false }, onConfirm = { deleteDialog = false; actions.deleteAll() })
+    if (timeoutDialog) AlertDialog(onDismissRequest = { timeoutDialog = false },
+        title = { Text(stringResource(R.string.lock_timeout)) }, text = {
+            Column {
+                LockTimeout.entries.forEach { timeout ->
+                    Row(Modifier.fillMaxWidth().clickable { actions.lockTimeout(timeout); timeoutDialog = false }.heightIn(min = 48.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(timeout == state.device.lockTimeout, null)
+                        Text(stringResource(timeoutLabel(timeout)))
+                    }
+                }
+            }
+        }, confirmButton = {}, dismissButton = { TextButton(onClick = { timeoutDialog = false }) { Text(stringResource(R.string.cancel)) } })
 }
 
 @Composable
-private fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, detail: String? = null) {
+internal fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, detail: String? = null) {
     Column(Modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick)
         .heightIn(min = 56.dp).padding(vertical = 12.dp), verticalArrangement = Arrangement.Center) {
         Text(stringResource(label), style = MaterialTheme.typography.bodyLarge)
@@ -85,12 +120,18 @@ private fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, detai
 }
 
 @Composable
-private fun SettingsSwitch(label: Int, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
+internal fun SettingsSwitch(label: Int, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
     val text = stringResource(label)
     Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
         Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
         Switch(checked, onChange, enabled = enabled, modifier = Modifier.semantics { contentDescription = text })
     }
+}
+
+private fun timeoutLabel(timeout: LockTimeout): Int = when (timeout) {
+    LockTimeout.IMMEDIATELY -> R.string.lock_immediately
+    LockTimeout.ONE_MINUTE -> R.string.lock_one_minute
+    LockTimeout.FIVE_MINUTES -> R.string.lock_five_minutes
 }
 
 @Composable

@@ -82,4 +82,24 @@ class SettingsViewModelTest : DatabaseTest() {
         assertTrue(deviceSettings.settings.first().dynamicColor)
         assertEquals(before, repository.snapshot())
     }
+    @Test fun lockRequiresSecureDevice() = runTest {
+        val vm = model()
+        vm.setLockEnabled(true).join()
+        assertFalse(deviceSettings.settings.first().lockEnabled)
+        assertEquals(org.freeperiod.app.R.string.lock_unavailable, vm.state.value.message)
+    }
+    @Test fun reminderSettingsValidateOffsetAndPersistTime() = runTest {
+        val vm = model()
+        vm.setPeriodReminder(true).join()
+        vm.setReminderDays(5).join()
+        vm.setDailyReminder(true).join()
+        vm.setReminderTime(java.time.LocalTime.of(8, 15)).join()
+        vm.setExplicitNotifications(true).join()
+        val value = deviceSettings.settings.first()
+        assertTrue(value.periodReminder && value.dailyReminder && value.explicitNotifications)
+        assertEquals(5, value.periodReminderDaysBefore)
+        assertEquals(java.time.LocalTime.of(8, 15), value.dailyReminderTime)
+        vm.setReminderDays(6).join()
+        assertEquals(5, deviceSettings.settings.first().periodReminderDaysBefore)
+    }
 }

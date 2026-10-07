@@ -3,6 +3,7 @@ package org.freeperiod.app.ui.settings
 import android.os.Build
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.semantics.SemanticsActions
 import org.freeperiod.app.ui.theme.FreePeriodTheme
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -26,6 +27,11 @@ class SettingsScreenTest {
         compose.waitForIdle()
     }
 
+    private fun scrollTo(text: String) {
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText(text))
+        compose.waitForIdle()
+    }
+
     @Test fun api30HidesLanguageAndDynamicColor() {
         show(30)
         compose.onNodeWithText("Language").assertDoesNotExist()
@@ -35,17 +41,20 @@ class SettingsScreenTest {
     @Test fun api32ShowsDynamicColorButHidesLanguage() {
         show(32)
         compose.onNodeWithText("Language").assertDoesNotExist()
+        scrollTo("Use wallpaper colours")
         compose.onNodeWithText("Use wallpaper colours").assertExists()
     }
 
     @Test fun api33ShowsLanguage() {
         show(33)
+        scrollTo("Language")
         compose.onNodeWithText("Language").assertExists()
     }
 
     @Test fun csvRequiresWarningConfirmation() {
         var requests = 0
         show(35, SettingsActions(csv = { requests++ }))
+        scrollTo("Export as CSV")
         compose.onNodeWithText("Export as CSV").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("CSV files are not encrypted.", substring = true).assertExists()
@@ -58,7 +67,8 @@ class SettingsScreenTest {
     @Test fun deleteRequiresWarningConfirmation() {
         var deletions = 0
         show(35, SettingsActions(deleteAll = { deletions++ }))
-        compose.onNodeWithText("Delete all data").performScrollTo().performClick()
+        scrollTo("Delete all data")
+        compose.onNodeWithText("Delete all data").performClick()
         compose.waitForIdle()
         assertEquals(0, deletions)
         compose.onNode(hasText("Delete all data") and hasClickAction() and hasAnyAncestor(isDialog())).performClick()

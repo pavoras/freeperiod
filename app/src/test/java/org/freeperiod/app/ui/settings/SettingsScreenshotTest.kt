@@ -37,10 +37,10 @@ abstract class SettingsScreenshotFixture {
 @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
 class SettingsScreenshotTest : SettingsScreenshotFixture() {
     @Test fun main_enLight() = capture("settings/main_enLight", "Settings") {
-        SettingsScreen(SettingsUiState(28, loading = false), SettingsActions())
+        SettingsScreen(SettingsUiState(28, loading = false, lockCanEnable = true), SettingsActions())
     }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun main_deDark() = capture("settings/main_deDark", "Einstellungen", Locale.GERMANY, dark = true) {
-        SettingsScreen(SettingsUiState(28, loading = false), SettingsActions())
+        SettingsScreen(SettingsUiState(28, loading = false, lockCanEnable = true), SettingsActions())
     }
 }

@@ -9,6 +9,9 @@ import kotlinx.coroutines.launch
 import org.freeperiod.app.R
 import org.freeperiod.app.data.Repository
 import org.freeperiod.app.data.SettingsStore
+import org.freeperiod.app.data.AppSettings
+import org.freeperiod.app.data.LockTimeout
+import java.time.LocalTime
 import org.freeperiod.engine.backup.*
 
 data class SettingsUiState(
@@ -18,9 +21,12 @@ data class SettingsUiState(
     val loading: Boolean = true,
     val writing: Boolean = false,
     val message: Int? = null,
+    val device: AppSettings = AppSettings(),
+    val lockCanEnable: Boolean = false,
 )
 
-class SettingsViewModel(private val repository: Repository, private val settings: SettingsStore) : ViewModel() {
+class SettingsViewModel(private val repository: Repository, private val settings: SettingsStore,
+    private val canLock: () -> Boolean = { false }) : ViewModel() {
     private val mutableState = MutableStateFlow(SettingsUiState())
     val state = mutableState.asStateFlow()
     private var pending: Job? = null
@@ -28,7 +34,8 @@ class SettingsViewModel(private val repository: Repository, private val settings
     init {
         viewModelScope.launch {
             combine(repository.domainSettings, settings.settings) { domain, device ->
-                SettingsUiState(domain.typicalCycleLength, domain.predictionsPaused, device.dynamicColor, loading = false)
+                SettingsUiState(domain.typicalCycleLength, domain.predictionsPaused, device.dynamicColor, loading = false,
+                    device = device, lockCanEnable = canLock())
             }.catch { mutableState.update { it.copy(loading = false, message = R.string.error_storage) } }
                 .collect { value -> mutableState.update { value.copy(writing = it.writing, message = it.message) } }
         }
@@ -44,6 +51,20 @@ class SettingsViewModel(private val repository: Repository, private val settings
     }
 
     fun setDynamicColor(enabled: Boolean): Job = enqueue { settings.update { it.copy(dynamicColor = enabled) } }
+    fun setPeriodReminder(enabled: Boolean): Job = enqueue { settings.update { it.copy(periodReminder = enabled) } }
+    fun setReminderDays(days: Int): Job = enqueue {
+        require(days in 1..5)
+        settings.update { it.copy(periodReminderDaysBefore = days) }
+    }
+    fun setDailyReminder(enabled: Boolean): Job = enqueue { settings.update { it.copy(dailyReminder = enabled) } }
+    fun setReminderTime(time: LocalTime): Job = enqueue { settings.update { it.copy(dailyReminderTime = time) } }
+    fun setExplicitNotifications(enabled: Boolean): Job = enqueue { settings.update { it.copy(explicitNotifications = enabled) } }
+    fun setLockEnabled(enabled: Boolean): Job = enqueue {
+        if (enabled && !canLock()) {
+            mutableState.update { it.copy(message = R.string.lock_unavailable) }
+        } else settings.update { it.copy(lockEnabled = enabled) }
+    }
+    fun setLockTimeout(timeout: LockTimeout): Job = enqueue { settings.update { it.copy(lockTimeout = timeout) } }
 
     fun deleteAllData(): Job = enqueue {
         repository.replaceAll(BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(),
