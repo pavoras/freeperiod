@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -128,7 +129,8 @@ fun DayEntrySheet(
                                 onClick = { actions.mood(if (state.log.mood == mood) null else mood) }, enabled = editable,
                                 modifier = Modifier.heightIn(min = 48.dp),
                                 label = { Text(stringResource(moodLabel(mood))) },
-                                leadingIcon = { Icon(painterResource(moodIcon(mood)), null, Modifier.size(24.dp)) })
+                                leadingIcon = { Icon(painterResource(moodIcon(mood)), null,
+                                    Modifier.size(24.dp).testTag("mood-icon-${mood.name}"), tint = MaterialTheme.colorScheme.primary) })
                         }
                     }
                 }

@@ -32,6 +32,7 @@ import org.freeperiod.app.ui.history.HistoryViewModel
 import org.freeperiod.app.ui.day.DayEntryActions
 import org.freeperiod.app.ui.day.DayEntrySheet
 import org.freeperiod.app.ui.day.DayEntryViewModel
+import org.freeperiod.app.ui.settings.SettingsRoute
 
 @Composable
 fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDone: Boolean) {
@@ -92,7 +93,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     ResumeAndMidnightEffect(model::onResume)
                     HistoryScreen(state, onInclude = { id, included -> model.setCycleIncluded(id, included) })
                 }
-                composable("settings") { TitlePlaceholder(R.string.nav_settings) }
+                composable("settings") { SettingsRoute(container) }
                 composable("day/{epochDay}", arguments = listOf(navArgument("epochDay") { type = NavType.LongType })) { day ->
                     val date = LocalDate.ofEpochDay(requireNotNull(day.arguments).getLong("epochDay"))
                     val model: DayEntryViewModel = viewModel(factory = viewModelFactory {
@@ -125,11 +126,6 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
             }
         }
     }
-}
-
-@Composable
-private fun TitlePlaceholder(title: Int) {
-    Text(stringResource(title), Modifier.padding(24.dp), style = MaterialTheme.typography.headlineMedium)
 }
 
 @Composable

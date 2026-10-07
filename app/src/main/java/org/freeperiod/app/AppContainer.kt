@@ -6,6 +6,7 @@ import java.time.LocalDate
 import org.freeperiod.app.data.Repository
 import org.freeperiod.app.data.SettingsStore
 import org.freeperiod.app.data.db.FreePeriodDatabase
+import org.freeperiod.app.backup.BackupIo
 
 class AppContainer(context: Context) {
     val clock: () -> LocalDate = { LocalDate.now() }
@@ -13,4 +14,5 @@ class AppContainer(context: Context) {
         FreePeriodDatabase::class.java, "freeperiod.db").build()
     val repository = Repository(database, clock)
     val settings = SettingsStore(context)
+    val backupIo = BackupIo(context.applicationContext.contentResolver)
 }

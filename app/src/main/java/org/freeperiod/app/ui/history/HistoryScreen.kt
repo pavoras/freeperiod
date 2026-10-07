@@ -1,6 +1,8 @@
 package org.freeperiod.app.ui.history
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -74,7 +76,10 @@ private fun CycleRow(cycle: Cycle, maxLength: Int, enabled: Boolean, onInclude: 
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(date, style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.history_cycle_days, cycle.length))
-            LinearProgressIndicator(progress = { cycle.length.toFloat() / maxLength }, modifier = Modifier.fillMaxWidth())
+            Box(Modifier.fillMaxWidth().height(4.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))) {
+                Box(Modifier.fillMaxWidth((cycle.length.toFloat() / maxLength).coerceIn(0f, 1f)).fillMaxHeight()
+                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp)))
+            }
             cycle.periodLength?.let { Text(stringResource(R.string.history_period_days, it)) }
             cycle.ineligibleReason?.let { reason ->
                 Text(stringResource(when (reason) {
