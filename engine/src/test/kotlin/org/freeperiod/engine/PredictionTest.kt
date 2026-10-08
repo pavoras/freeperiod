@@ -79,8 +79,15 @@ class PredictionTest {
             predict(periods, PredictionSettings(), today(periods)))
     }
 
+    @Test fun centreUsesLastSixSpreadUsesLastTwelve() {
+        val periods = lengths(*IntArray(6) { 32 }, *IntArray(6) { 28 })
+        val last = periods.last().start
+        assertEquals(PredictionState.Range(last.plusDays(25), last.plusDays(31), Basis.HISTORY, 12, 5, 11),
+            predict(periods, PredictionSettings(), today(periods)))
+    }
+
     @Test fun rangePassed() {
-        assertEquals(PredictionState.RangePassed(d("04-24"), 3, 33), predict(regular(), PredictionSettings(), d("04-27")))
+        assertEquals(PredictionState.RangePassed(d("04-24"), 3, 33, d("04-22")), predict(regular(), PredictionSettings(), d("04-27")))
     }
 
     @Test fun predictedDaysAddsPeriodLength() {

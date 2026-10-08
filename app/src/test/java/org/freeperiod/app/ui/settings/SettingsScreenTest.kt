@@ -32,17 +32,17 @@ class SettingsScreenTest {
         compose.waitForIdle()
     }
 
-    @Test fun api30HidesLanguageAndDynamicColor() {
+    @Test fun api30ShowsAppearanceAndHidesLanguage() {
         show(30)
         compose.onNodeWithText("Language").assertDoesNotExist()
         compose.onNodeWithText("Use wallpaper colours").assertDoesNotExist()
     }
 
-    @Test fun api32ShowsDynamicColorButHidesLanguage() {
+    @Test fun api32ShowsAppearanceButHidesLanguage() {
         show(32)
         compose.onNodeWithText("Language").assertDoesNotExist()
-        scrollTo("Use wallpaper colours")
-        compose.onNodeWithText("Use wallpaper colours").assertExists()
+        scrollTo("Appearance")
+        compose.onNodeWithText("Appearance").assertExists()
     }
 
     @Test fun api33ShowsLanguage() {

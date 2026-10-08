@@ -24,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.freeperiod.app.AppContainer
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.components.FpNavBar
 import org.freeperiod.app.ui.today.TodayScreen
 import org.freeperiod.app.ui.today.TodayViewModel
 import org.freeperiod.app.ui.history.HistoryScreen
@@ -39,9 +40,6 @@ import androidx.compose.ui.platform.LocalContext
 @Composable
 fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDone: Boolean) {
     val scope = rememberCoroutineScope()
-    val destinations = listOf("today" to R.string.nav_today, "history" to R.string.nav_history,
-        "settings" to R.string.nav_settings)
-
     // Recreate the graph when onboarding completes, removing onboarding from back navigation.
     key(onboardingDone) {
         val navigation = rememberNavController()
@@ -49,22 +47,11 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
         val route = entry?.destination?.route
         Scaffold(bottomBar = {
             if (onboardingDone && route != "day/{epochDay}") {
-                NavigationBar {
-                    destinations.forEach { (destination, label) ->
-                        NavigationBarItem(selected = route == destination,
-                            onClick = {
-                                navigation.navigate(destination) {
-                                    popUpTo(navigation.graph.startDestinationId) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }, icon = {
-                                Icon(when (destination) {
-                                    "today" -> NavigationIcons.Today
-                                    "history" -> NavigationIcons.History
-                                    else -> NavigationIcons.Settings
-                                }, contentDescription = null)
-                            }, label = { Text(stringResource(label)) })
+                FpNavBar(route) { destination ->
+                    navigation.navigate(destination) {
+                        popUpTo(navigation.graph.startDestinationId) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
                     }
                 }
             }

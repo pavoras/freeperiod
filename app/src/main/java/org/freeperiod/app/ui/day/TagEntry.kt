@@ -14,6 +14,10 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.theme.*
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -24,22 +28,24 @@ internal fun TagEntry(state: DayEntryUiState, actions: DayEntryActions, editable
     LaunchedEffect(state.error) {
         if (state.error == DayEntryError.TAG_NAME) showField = true
     }
-    Text(stringResource(R.string.entry_tags), style = MaterialTheme.typography.titleMedium)
     Text(stringResource(R.string.tag_archive_hint), style = MaterialTheme.typography.bodySmall)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         state.tags.filter { !it.archived || it.id in state.log.tagIds }.forEach { tag ->
             val checked = tag.id in state.log.tagIds
             val archiveLabel = stringResource(R.string.archive_tag, tag.name)
             val editLabel = stringResource(R.string.rename_tag, tag.name)
-            Surface(shape = MaterialTheme.shapes.small,
-                color = if (checked) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surface,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+            val tones = LocalDaylight.current
+            val fill by animateColorAsState(if (checked) tones.accent.container else tones.surface, tween(120), label = "tagFill")
+            Surface(shape = if (checked) FpShapes.selectedChip else FpShapes.chip,
+                color = fill, contentColor = if (checked) tones.accent.onContainer else tones.ink,
+                border = BorderStroke(if (checked) 2.dp else 1.dp, if (checked) tones.accent.selectedChipBorder else tones.control)) {
                 Row(Modifier.heightIn(min = 48.dp).semantics { selected = checked }
                     .combinedClickable(enabled = editable, role = Role.Checkbox,
                         onClick = { actions.tag(tag.id) }, onLongClickLabel = archiveLabel,
                         onLongClick = { actions.archiveTag(tag.id) }).padding(start = 12.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (tag.archived) stringResource(R.string.tag_archived, tag.name) else tag.name)
+                    Text(if (tag.archived) stringResource(R.string.tag_archived, tag.name) else tag.name,
+                        fontWeight = if (checked) FontWeight.Medium else FontWeight.Normal)
                     TextButton(enabled = editable, modifier = Modifier.semantics { contentDescription = editLabel },
                         onClick = { editingId = tag.id; name = tag.name; showField = true }) {
                         Text(stringResource(R.string.edit_tag))

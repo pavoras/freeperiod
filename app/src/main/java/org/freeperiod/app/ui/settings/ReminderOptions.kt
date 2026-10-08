@@ -65,6 +65,7 @@ fun ReminderOptions(settings: AppSettings, enabled: Boolean, notificationsAvaila
         SettingsRow(R.string.daily_reminder_time, enabled, { timeDialog = true },
             settings.dailyReminderTime.format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale)))
     }
+    if (settings.periodReminder || settings.dailyReminder) Text(stringResource(R.string.reminder_timing), style = MaterialTheme.typography.bodySmall)
     if (showDetails) SettingsSwitch(R.string.explicit_notifications, settings.explicitNotifications, enabled, onExplicit)
     if ((settings.periodReminder || settings.dailyReminder) && !notificationsAvailable) {
         Text(stringResource(R.string.notifications_off), style = MaterialTheme.typography.bodyMedium)

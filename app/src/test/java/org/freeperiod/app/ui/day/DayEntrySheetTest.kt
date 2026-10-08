@@ -47,6 +47,38 @@ class DayEntrySheetTest {
         assertEquals(FlowLevel.LIGHT, selected)
     }
 
+    @Test fun noteAutosavesAndPreviews() {
+        var saved = ""
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(DayEntryUiState(today, today, loading = false),
+                DayEntryActions(note = { saved = it }), {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Note"))
+        compose.onNodeWithText("Note").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("entry-note").performTextInput("A calm day with time outside and friends")
+        compose.waitForIdle()
+        assertEquals("A calm day with time outside and friends", saved)
+        compose.onNodeWithText("Note").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("entry-note").assertDoesNotExist()
+        compose.onNodeWithText("A calm day with time outside and").assertExists()
+    }
+
+    @Test fun selectedMoodHasSelectedSemanticsAndCanBeCleared() {
+        val state = mutableStateOf(DayEntryUiState(today, today, log = DayLog(today, mood = Mood.GOOD), loading = false))
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(state.value, DayEntryActions(mood = {
+                state.value = state.value.copy(log = state.value.log.copy(mood = it))
+            }), {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Good").assertIsSelected().performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Good").assertIsNotSelected()
+    }
+
     @Test fun clearSnackbarUndoRestoresFullLog() {
         val log = DayLog(today, mood = Mood.GOOD, note = "Test", tagIds = setOf(1))
         val state = mutableStateOf(DayEntryUiState(today, today, log, listOf(Tag(1, "Travel")), loading = false))

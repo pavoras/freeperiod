@@ -2,21 +2,28 @@ package org.freeperiod.engine.export
 
 import java.util.Locale
 import org.freeperiod.engine.DayLog
+import org.freeperiod.engine.CustomCategory
 import org.freeperiod.engine.Period
 import org.freeperiod.engine.Tag
 
 /** Unencrypted RFC 4180 exports with ISO dates and stable lowercase enum names. */
 object CsvExport {
     /** Exports days in date order, symptoms by name, and referenced tag names by ID. */
-    fun days(logs: List<DayLog>, tags: List<Tag>): String {
-        val names = tags.associate { it.id to it.name }
+    fun days(logs: List<DayLog>, tags: List<Tag>, customCategories: List<CustomCategory> = emptyList()): String {
+        val byId = tags.associateBy { it.id }
+        val categoryNames = customCategories.associate { it.id to it.name }
         return buildString {
-            appendRow(listOf("date", "flow", "mood", "pain", "sex", "discharge", "symptoms", "tags", "note"))
+            appendRow(listOf("date", "flow", "mood", "pain", "sex", "discharge", "symptoms", "tags", "note", "ovulation_test", "custom_items"))
             logs.sortedBy { it.date }.forEach { log ->
                 appendRow(listOf(
                     log.date.toString(), name(log.flow), name(log.mood), name(log.pain), name(log.sex), name(log.discharge),
                     log.symptoms.sortedBy { it.name }.joinToString(";") { name(it) },
-                    log.tagIds.sorted().mapNotNull { names[it] }.joinToString(";"), log.note.orEmpty(),
+                    log.tagIds.sorted().mapNotNull { byId[it]?.takeIf { it.categoryId == null }?.name }.joinToString(";"), log.note.orEmpty(),
+                    name(log.ovulationTest), log.tagIds.sorted().mapNotNull { id ->
+                        val tag = byId[id] ?: return@mapNotNull null
+                        val category = categoryNames[tag.categoryId] ?: return@mapNotNull null
+                        "$category:${tag.name}"
+                    }.joinToString(";"),
                 ))
             }
         }

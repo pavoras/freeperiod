@@ -16,7 +16,21 @@ data class Period(val id: Long, val start: LocalDate, val end: LocalDate?, val c
 
 /** A custom tag retained in history even when archived. */
 @Serializable
-data class Tag(val id: Long, val name: String, val archived: Boolean = false)
+data class Tag(
+    val id: Long,
+    val name: String,
+    val archived: Boolean = false,
+    val categoryId: Long? = null,
+    val iconKey: String = "tag",
+)
+
+/** Custom multi-select category; archived entries remain available in history. */
+@Serializable
+data class CustomCategory(val id: Long, val name: String, val iconKey: String, val sortOrder: Int, val archived: Boolean)
+
+/** Stable keys: category:<field>, item:<field>:<ENUM>, customCategory:<id>, tag:<id>. */
+@Serializable
+data class UiOverride(val key: String, val hidden: Boolean, val sortOrder: Int)
 
 /** Optional observations for one calendar day; null means not logged. */
 @Serializable
@@ -30,11 +44,16 @@ data class DayLog(
     val discharge: Discharge? = null,
     val note: String? = null,
     val tagIds: Set<Long> = emptySet(),
+    val ovulationTest: OvulationTest? = null,
 ) {
     /** Returns true when all observations are null or empty, preserving explicit NONE values. */
     fun isEmpty(): Boolean = flow == null && mood == null && symptoms.isEmpty() && pain == null &&
-        sex == null && discharge == null && note.isNullOrEmpty() && tagIds.isEmpty()
+        sex == null && discharge == null && note.isNullOrEmpty() && tagIds.isEmpty() && ovulationTest == null
 }
+
+/** Logged ovulation test result, distinct from no observation. */
+@Serializable
+enum class OvulationTest { NEGATIVE, POSITIVE }
 
 /** Logged flow levels, distinct from an unlogged value. */
 @Serializable
@@ -61,6 +80,7 @@ enum class Discharge { NONE, STICKY, CREAMY, WATERY, EGG_WHITE, UNUSUAL }
 enum class Symptom {
     CRAMPS, HEADACHE, BACKACHE, BLOATING, BREAST_TENDERNESS, ACNE, FATIGUE, NAUSEA,
     CRAVINGS, INSOMNIA, DIGESTION, ANXIOUS, IRRITABLE, SAD, ENERGETIC,
+    HOT_FLUSHES, NIGHT_SWEATS, BRAIN_FOG, JOINT_PAIN,
 }
 
 /** A completed start-to-start interval with its prediction eligibility. */

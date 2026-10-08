@@ -11,12 +11,12 @@ class CsvExportTest {
 
     @Test fun csvQuotesCommasQuotesAndNewlines() {
         val csv = CsvExport.days(listOf(DayLog(date, note = "a,\"b\"\nc")), emptyList())
-        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note\r\n2026-03-01,,,,,,,,\"a,\"\"b\"\"\nc\"\r\n", csv)
+        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note,ovulation_test,custom_items\r\n2026-03-01,,,,,,,,\"a,\"\"b\"\"\nc\",,\r\n", csv)
     }
 
     @Test fun csvHeaderAndOrder() {
         val logs = listOf(DayLog(date.plusDays(1), flow = FlowLevel.NONE), DayLog(date, flow = FlowLevel.LIGHT))
-        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note\r\n2026-03-01,light,,,,,,,\r\n2026-03-02,none,,,,,,,\r\n",
+        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note,ovulation_test,custom_items\r\n2026-03-01,light,,,,,,,,,\r\n2026-03-02,none,,,,,,,,,\r\n",
             CsvExport.days(logs, emptyList()))
         val periods = listOf(Period(2, date.plusDays(28), null, CycleUse.EXCLUDE), Period(1, date, date.plusDays(4)))
         assertEquals("start,end,cycle_use\r\n2026-03-01,2026-03-05,auto\r\n2026-03-29,,exclude\r\n", CsvExport.periods(periods))
@@ -25,7 +25,7 @@ class CsvExportTest {
     @Test fun csvContainsAllFieldsAndArchivedTagsInStableOrder() {
         val log = DayLog(date, FlowLevel.MEDIUM, Mood.GOOD, linkedSetOf(Symptom.HEADACHE, Symptom.CRAMPS),
             Pain.MILD, Sex.UNPROTECTED, Discharge.EGG_WHITE, "note", linkedSetOf(2, 1))
-        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note\r\n2026-03-01,medium,good,mild,unprotected,egg_white,cramps;headache,\"Work;\"\"Walk\"\"\",note\r\n",
+        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note,ovulation_test,custom_items\r\n2026-03-01,medium,good,mild,unprotected,egg_white,cramps;headache,\"Work;\"\"Walk\"\"\",note,,\r\n",
             CsvExport.days(listOf(log), listOf(Tag(2, "\"Walk\"", true), Tag(1, "Work"))))
         assertEquals("start,end,cycle_use\r\n2026-03-01,,include\r\n", CsvExport.periods(listOf(Period(1, date, null, CycleUse.INCLUDE))))
     }
@@ -39,9 +39,16 @@ class CsvExportTest {
         } finally { Locale.setDefault(previous) }
     }
 
+    @Test fun exportsOvulationAndCustomCategoryItemNames() {
+        val log = DayLog(date, tagIds = setOf(1, 2), ovulationTest = OvulationTest.NEGATIVE)
+        val csv = CsvExport.days(listOf(log), listOf(Tag(1, "Work"), Tag(2, "Walk", categoryId = 9)),
+            listOf(CustomCategory(9, "Activities", "tag", 0, true)))
+        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note,ovulation_test,custom_items\r\n" +
+            "2026-03-01,,,,,,,Work,,negative,Activities:Walk\r\n", csv)
+    }
+
     @Test fun emptyExportsContainHeaders() {
-        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note\r\n", CsvExport.days(emptyList(), emptyList()))
+        assertEquals("date,flow,mood,pain,sex,discharge,symptoms,tags,note,ovulation_test,custom_items\r\n", CsvExport.days(emptyList(), emptyList()))
         assertEquals("start,end,cycle_use\r\n", CsvExport.periods(emptyList()))
     }
 }
-

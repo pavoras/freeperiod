@@ -1,50 +1,35 @@
 package org.freeperiod.app.ui.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-
-/** Warm coral seed (spec: calm & minimal, one warm accent). */
-val Coral = Color(0xFFE8735A)
-
-private val LightColors = lightColorScheme(
-    primary = Color(0xFFA23F2A),
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFFFDAD2),
-    onPrimaryContainer = Color(0xFF3D0700),
-    secondary = Color(0xFF77574F),
-    secondaryContainer = Color(0xFFFFDAD2),
-    background = Color(0xFFFFFBFF),
-    surface = Color(0xFFFFFBFF),
-)
-
-private val DarkColors = darkColorScheme(
-    primary = Color(0xFFFFB4A3),
-    onPrimary = Color(0xFF611301),
-    primaryContainer = Color(0xFF822915),
-    onPrimaryContainer = Color(0xFFFFDAD2),
-    secondary = Color(0xFFE7BDB3),
-    secondaryContainer = Color(0xFF5D3F38),
-    background = Color(0xFF201A19),
-    surface = Color(0xFF201A19),
-)
+import androidx.compose.runtime.CompositionLocalProvider
 
 @Composable
 fun FreePeriodTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false,
+    accent: Accent = Accent.CORAL,
     content: @Composable () -> Unit,
 ) {
-    val colors = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && dynamicColor) {
-        val context = LocalContext.current
-        if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-    } else if (darkTheme) DarkColors else LightColors
-    MaterialTheme(colorScheme = colors, content = content)
+    val t = daylightTokens(accent, darkTheme)
+    val base = if (darkTheme) darkColorScheme() else lightColorScheme()
+    val colors = base.copy(
+        primary = t.actionText, onPrimary = t.background,
+        primaryContainer = t.accent.container, onPrimaryContainer = t.accent.onContainer,
+        secondary = t.actionText, onSecondary = t.background,
+        secondaryContainer = t.accent.container, onSecondaryContainer = t.accent.onContainer,
+        tertiary = t.predicted, onTertiary = t.background,
+        tertiaryContainer = t.accent.container, onTertiaryContainer = t.accent.onContainer,
+        background = t.background, onBackground = t.ink, surface = t.surface, onSurface = t.ink,
+        surfaceVariant = t.accent.container, onSurfaceVariant = t.muted,
+        surfaceDim = t.background, surfaceBright = t.surface, surfaceContainerLowest = t.surface,
+        surfaceContainerLow = t.surface, surfaceContainer = t.background,
+        surfaceContainerHigh = t.accent.container, surfaceContainerHighest = t.accent.container,
+        surfaceTint = t.accent.accent, outline = t.control, outlineVariant = t.line,
+    )
+    CompositionLocalProvider(LocalDaylight provides t) {
+        MaterialTheme(colorScheme = colors, typography = FpTypography, shapes = FpMaterialShapes, content = content)
+    }
 }

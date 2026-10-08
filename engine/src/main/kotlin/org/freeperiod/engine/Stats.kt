@@ -26,3 +26,20 @@ object Stats {
         return if (sorted.size % 2 == 1) sorted[middle] else (sorted[middle - 1] + sorted[middle]) / 2
     }
 }
+
+/** Hints use up to twelve eligible prior cycles, including auto-excluded long candidates. */
+fun longCycleHints(cycles: List<Cycle>): Set<Long> {
+    val baseline = ArrayDeque<Int>()
+    val hints = mutableSetOf<Long>()
+    for (cycle in cycles.sortedBy { it.start }) {
+        if ((cycle.eligible || cycle.ineligibleReason == IneligibleReason.TOO_LONG) &&
+            baseline.size >= 3 && cycle.length > 1.6 * Stats.median(baseline.toList())) {
+            hints += cycle.startPeriodId
+        }
+        if (cycle.eligible) {
+            baseline.addLast(cycle.length)
+            if (baseline.size > 12) baseline.removeFirst()
+        }
+    }
+    return hints
+}

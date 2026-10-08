@@ -1,6 +1,7 @@
 package org.freeperiod.app.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +14,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.components.*
+import org.freeperiod.app.ui.theme.*
 
 @Composable
 fun BackupScreen(
@@ -30,7 +33,7 @@ fun BackupScreen(
     var restorePassword by remember { mutableStateOf("") }
     var askRestore by rememberSaveable { mutableStateOf(false) }
     val enabled = !state.busy && !state.awaitingDocument
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).imePadding().padding(24.dp),
+    Column(Modifier.fillMaxSize().background(LocalDaylight.current.background).verticalScroll(rememberScrollState()).imePadding().padding(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SettingsPageHeader(R.string.backup_restore, onBack)
         if (state.summary == null) {
@@ -38,28 +41,28 @@ fun BackupScreen(
             Text(stringResource(R.string.backup_forgotten_warning), style = MaterialTheme.typography.bodyMedium)
             PasswordField(password, { password = it }, R.string.backup_password, enabled)
             PasswordField(confirm, { confirm = it }, R.string.backup_confirm_password, enabled)
-            Button(onClick = { onBackup(password, confirm); password = ""; confirm = "" }, enabled = enabled) {
+            FpButton(onClick = { onBackup(password, confirm); password = ""; confirm = "" }, enabled = enabled) {
                 Text(stringResource(R.string.create_backup))
             }
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
             Text(stringResource(R.string.restore_backup), style = MaterialTheme.typography.titleLarge)
-            OutlinedButton(onClick = { restorePassword = ""; onOpen() }, enabled = enabled) {
+            FpButton(primary = false, onClick = { restorePassword = ""; onOpen() }, enabled = enabled) {
                 Text(stringResource(R.string.restore_choose_file))
             }
             if (state.restoreFileSelected) {
                 Text(stringResource(R.string.restore_file_selected), style = MaterialTheme.typography.bodySmall)
                 PasswordField(restorePassword, { restorePassword = it }, R.string.backup_password, enabled)
-                Button(onClick = { onDecode(restorePassword); restorePassword = "" }, enabled = enabled) {
+                FpButton(onClick = { onDecode(restorePassword); restorePassword = "" }, enabled = enabled) {
                     Text(stringResource(R.string.restore_read))
                 }
             }
         }
         state.summary?.let { summary ->
-            Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+            FpCard() {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(stringResource(R.string.restore_summary, summary.periods, summary.days), style = MaterialTheme.typography.titleMedium)
                     Text(stringResource(R.string.restore_replace_warning))
-                    Button(onClick = { askRestore = true }, enabled = enabled) { Text(stringResource(R.string.restore_replace)) }
+                    FpButton(onClick = { askRestore = true }, enabled = enabled) { Text(stringResource(R.string.restore_replace)) }
                     TextButton(onClick = onCancelRestore, enabled = enabled) { Text(stringResource(R.string.cancel)) }
                 }
             }

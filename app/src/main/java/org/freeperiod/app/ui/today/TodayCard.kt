@@ -79,4 +79,6 @@ private fun predictionText(prediction: PredictionState, today: LocalDate, locale
     is PredictionState.Varies -> stringResource(R.string.today_varies, prediction.minLength, prediction.maxLength)
     is PredictionState.RangePassed -> stringResource(R.string.today_range_passed, prediction.daysPassed)
     PredictionState.Paused -> stringResource(R.string.today_paused)
+    is PredictionState.ScheduledBreak -> formatPredictionRange(prediction.range.start, prediction.range.endInclusive, today, locale)
+    is PredictionState.ContinuousPill, PredictionState.NeedsPillRhythm, is PredictionState.Menopause -> stringResource(R.string.today_paused)
 }

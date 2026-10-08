@@ -1,6 +1,7 @@
 package org.freeperiod.app.ui.onboarding
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,8 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.components.*
+import org.freeperiod.app.ui.theme.*
 import org.freeperiod.app.data.AppSettings
 import org.freeperiod.app.ui.settings.ReminderOptions
 
@@ -34,7 +37,7 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
     var pickEnd by remember { mutableStateOf(false) }
     val locale = LocalConfiguration.current.locales[0]
     val dates = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-    Column(Modifier.fillMaxSize().imePadding().padding(24.dp)) {
+    Column(Modifier.fillMaxSize().background(LocalDaylight.current.background).imePadding().padding(FpSpacing.screen)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(stringResource(R.string.app_name), Modifier.weight(1f), style = MaterialTheme.typography.headlineMedium)
             TextButton(onClick = actions.skip, enabled = !state.busy) { Text(stringResource(R.string.onboarding_skip)) }
@@ -45,14 +48,14 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
                 0 -> {
                     Spacer(Modifier.height(40.dp))
                     Text(stringResource(R.string.onboarding_welcome), style = MaterialTheme.typography.headlineLarge)
-                    Text(stringResource(R.string.onboarding_promise), style = MaterialTheme.typography.titleLarge)
+                    FpPanel { Text(stringResource(R.string.onboarding_promise), Modifier.padding(20.dp), style = MaterialTheme.typography.titleLarge) }
                     Text(stringResource(R.string.onboarding_local))
                     Text(stringResource(R.string.onboarding_optional))
                 }
                 1 -> {
                     Text(stringResource(R.string.onboarding_your_cycle), style = MaterialTheme.typography.titleLarge)
                     Text(stringResource(R.string.onboarding_optional))
-                    OutlinedButton(onClick = { pickStart = true }, enabled = !state.busy) {
+                    FpButton(primary = false, onClick = { pickStart = true }, enabled = !state.busy) {
                         Text(state.start?.let { stringResource(R.string.onboarding_start_value, it.format(dates)) }
                             ?: stringResource(R.string.onboarding_choose_start))
                     }
@@ -62,7 +65,7 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
                             Checkbox(state.hasEnded, actions.ended, enabled = !state.busy)
                             Text(stringResource(R.string.onboarding_has_ended))
                         }
-                        if (state.hasEnded) OutlinedButton(onClick = { pickEnd = true }, enabled = !state.busy) {
+                        if (state.hasEnded) FpButton(primary = false, onClick = { pickEnd = true }, enabled = !state.busy) {
                             Text(state.end?.let { stringResource(R.string.onboarding_end_value, it.format(dates)) }
                                 ?: stringResource(R.string.onboarding_choose_end))
                         }
@@ -89,7 +92,7 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
         Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             if (state.page > 0) TextButton(onClick = actions.back, enabled = !state.busy) { Text(stringResource(R.string.back)) }
             else Spacer(Modifier.width(1.dp))
-            Button(onClick = if (state.page == 2) actions.finish else actions.next,
+            FpButton(onClick = if (state.page == 2) actions.finish else actions.next,
                 enabled = !state.busy && (state.page == 0 || state.valid)) {
                 Text(stringResource(if (state.page == 2) R.string.onboarding_finish else R.string.onboarding_continue))
             }

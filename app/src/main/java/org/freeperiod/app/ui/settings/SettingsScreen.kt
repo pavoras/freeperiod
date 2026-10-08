@@ -3,6 +3,7 @@ package org.freeperiod.app.ui.settings
 import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -11,18 +12,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.theme.*
+import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.data.LockTimeout
 import java.time.LocalTime
 
 data class SettingsActions(
     val typicalLength: (Int?) -> Unit = {},
     val paused: (Boolean) -> Unit = {},
-    val dynamicColor: (Boolean) -> Unit = {},
+    val appearance: () -> Unit = {},
     val language: () -> Unit = {},
     val backup: () -> Unit = {},
     val csv: () -> Unit = {},
@@ -46,11 +47,11 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
     var deleteDialog by rememberSaveable { mutableStateOf(false) }
     var timeoutDialog by rememberSaveable { mutableStateOf(false) }
     val enabled = !state.loading && !state.writing && !recoveryBusy
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp)) {
+    LazyColumn(Modifier.fillMaxSize().background(LocalDaylight.current.background), contentPadding = PaddingValues(FpSpacing.screen)) {
         item {
-            Text(stringResource(R.string.nav_settings), style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 16.dp))
+            FpTopBar(stringResource(R.string.nav_settings))
         }
+        item { SettingsRow(R.string.appearance, enabled, actions.appearance, stringResource(accentLabel(state.accent))) }
         if (state.loading) item { CircularProgressIndicator() }
         item {
             SettingsRow(R.string.typical_cycle_length, enabled, { lengthDialog = true },
@@ -69,9 +70,6 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
             SettingsSwitch(R.string.app_lock, state.device.lockEnabled, enabled && (state.device.lockEnabled || state.lockCanEnable), actions.lockEnabled)
             if (!state.lockCanEnable && !state.device.lockEnabled) Text(stringResource(R.string.lock_unavailable), style = MaterialTheme.typography.bodySmall)
             if (state.device.lockEnabled) SettingsRow(R.string.lock_timeout, enabled, { timeoutDialog = true }, stringResource(timeoutLabel(state.device.lockTimeout)))
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) item {
-            SettingsSwitch(R.string.dynamic_color, state.dynamicColor, enabled, actions.dynamicColor)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item {
             SettingsRow(R.string.language, enabled, actions.language)
@@ -112,20 +110,12 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
 
 @Composable
 internal fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, detail: String? = null) {
-    Column(Modifier.fillMaxWidth().clickable(enabled = enabled, onClick = onClick)
-        .heightIn(min = 56.dp).padding(vertical = 12.dp), verticalArrangement = Arrangement.Center) {
-        Text(stringResource(label), style = MaterialTheme.typography.bodyLarge)
-        detail?.let { Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
-    }
+    FpSectionRow(R.drawable.ic_fp_settings, stringResource(label), detail.orEmpty(), enabled = enabled, onClick = onClick)
 }
 
 @Composable
 internal fun SettingsSwitch(label: Int, checked: Boolean, enabled: Boolean, onChange: (Boolean) -> Unit) {
-    val text = stringResource(label)
-    Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically) {
-        Text(text, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        Switch(checked, onChange, enabled = enabled, modifier = Modifier.semantics { contentDescription = text })
-    }
+    FpSwitchRow(stringResource(label), checked, enabled, onChange)
 }
 
 private fun timeoutLabel(timeout: LockTimeout): Int = when (timeout) {

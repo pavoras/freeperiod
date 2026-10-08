@@ -65,6 +65,10 @@ internal fun symptomLabel(value: Symptom): Int = when (value) {
     Symptom.IRRITABLE -> R.string.symptom_irritable
     Symptom.SAD -> R.string.symptom_sad
     Symptom.ENERGETIC -> R.string.symptom_energetic
+    Symptom.HOT_FLUSHES -> R.string.symptom_hot_flushes
+    Symptom.NIGHT_SWEATS -> R.string.symptom_night_sweats
+    Symptom.BRAIN_FOG -> R.string.symptom_brain_fog
+    Symptom.JOINT_PAIN -> R.string.symptom_joint_pain
 }
 
 internal fun symptomIcon(value: Symptom): Int = when (value) {
@@ -83,4 +87,8 @@ internal fun symptomIcon(value: Symptom): Int = when (value) {
     Symptom.IRRITABLE -> R.drawable.ic_symptom_irritable
     Symptom.SAD -> R.drawable.ic_symptom_sad
     Symptom.ENERGETIC -> R.drawable.ic_symptom_energetic
+    Symptom.HOT_FLUSHES -> R.drawable.ic_symptom_hot_flushes
+    Symptom.NIGHT_SWEATS -> R.drawable.ic_symptom_night_sweats
+    Symptom.BRAIN_FOG -> R.drawable.ic_symptom_brain_fog
+    Symptom.JOINT_PAIN -> R.drawable.ic_symptom_joint_pain
 }

@@ -14,6 +14,8 @@ class ModelTest {
             DayLog(date, symptoms = setOf(Symptom.CRAMPS)), DayLog(date, pain = Pain.NONE),
             DayLog(date, sex = Sex.NONE), DayLog(date, discharge = Discharge.NONE),
             DayLog(date, note = "A note"), DayLog(date, tagIds = setOf(1)),
+            DayLog(date, ovulationTest = OvulationTest.NEGATIVE),
+            DayLog(date, ovulationTest = OvulationTest.POSITIVE),
         )
         logs.forEach { assertFalse(it.isEmpty()) }
     }

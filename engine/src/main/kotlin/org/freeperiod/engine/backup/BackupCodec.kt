@@ -8,7 +8,6 @@ import java.security.GeneralSecurityException
 import java.security.SecureRandom
 import java.time.DateTimeException
 import java.time.LocalDate
-import java.util.Locale
 import javax.crypto.Cipher
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
@@ -17,8 +16,10 @@ import javax.crypto.spec.SecretKeySpec
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import org.freeperiod.engine.Period
-import org.freeperiod.engine.PeriodRules
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.intOrNull
 
 /** A complete decode outcome; failures never expose partially restored data. */
 sealed interface DecodeResult {
@@ -104,9 +105,14 @@ object BackupCodec {
             // GCM authentication has succeeded before any UTF-8 or JSON parsing.
             val text = UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(plaintext)).toString()
-            val data = json.decodeFromString<BackupData>(text)
-            if (data.schemaVersion != 1) return DecodeResult.UnsupportedVersion
-            return if (valid(data, today)) DecodeResult.Ok(data) else DecodeResult.InvalidContent
+            val payload = json.parseToJsonElement(text).jsonObject
+            val version = payload["schemaVersion"]?.jsonPrimitive?.intOrNull ?: return DecodeResult.InvalidContent
+            val data = when (version) {
+                1 -> json.decodeFromJsonElement<BackupDataV1>(payload).toV2()
+                2 -> json.decodeFromJsonElement<BackupData>(payload)
+                else -> return DecodeResult.UnsupportedVersion
+            }
+            return if (validBackup(data, today)) DecodeResult.Ok(data) else DecodeResult.InvalidContent
         } catch (_: SerializationException) {
             return DecodeResult.InvalidContent
         } catch (_: DateTimeException) {
@@ -118,22 +124,6 @@ object BackupCodec {
         } finally {
             plaintext.fill(0)
         }
-    }
-
-    private fun valid(data: BackupData, today: LocalDate): Boolean {
-        if (data.settings.typicalCycleLength?.let { it !in 15..90 } == true) return false
-        if (data.periods.map { it.id }.toSet().size != data.periods.size) return false
-        if (data.dayLogs.map { it.date }.toSet().size != data.dayLogs.size) return false
-        val tagIds = data.tags.map { it.id }.toSet()
-        if (tagIds.size != data.tags.size) return false
-        if (data.tags.map { it.name.lowercase(Locale.ROOT) }.toSet().size != data.tags.size) return false
-        if (data.dayLogs.any { !tagIds.containsAll(it.tagIds) }) return false
-        var previous: Period? = null
-        for (period in data.periods.sortedBy { it.start }) {
-            if (PeriodRules.validate(listOfNotNull(previous), period, today) != null) return false
-            previous = period
-        }
-        return true
     }
 
     private fun crypt(

@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import java.time.LocalTime
+import org.freeperiod.app.ui.theme.Accent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -14,7 +15,7 @@ enum class LockTimeout { IMMEDIATELY, ONE_MINUTE, FIVE_MINUTES }
 
 data class AppSettings(
     val onboardingDone: Boolean = false,
-    val dynamicColor: Boolean = false,
+    val accent: Accent = Accent.CORAL,
     val lockEnabled: Boolean = false,
     val lockTimeout: LockTimeout = LockTimeout.ONE_MINUTE,
     val periodReminder: Boolean = false,
@@ -34,7 +35,8 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         store.edit { prefs ->
             val value = transform(read(prefs))
             prefs[onboardingDone] = value.onboardingDone
-            prefs[dynamicColor] = value.dynamicColor
+            prefs[accent] = value.accent.name
+            prefs.remove(booleanPreferencesKey("dynamic_color"))
             prefs[lockEnabled] = value.lockEnabled
             prefs[lockTimeout] = value.lockTimeout.name
             prefs[periodReminder] = value.periodReminder
@@ -49,7 +51,7 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
 
     private fun read(prefs: Preferences) = AppSettings(
         onboardingDone = prefs[onboardingDone] ?: false,
-        dynamicColor = prefs[dynamicColor] ?: false,
+        accent = Accent.entries.firstOrNull { it.name == prefs[accent] } ?: Accent.CORAL,
         lockEnabled = prefs[lockEnabled] ?: false,
         lockTimeout = prefs[lockTimeout]?.let(LockTimeout::valueOf) ?: LockTimeout.ONE_MINUTE,
         periodReminder = prefs[periodReminder] ?: false,
@@ -62,7 +64,7 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
 
     private companion object {
         val onboardingDone = booleanPreferencesKey("onboarding_done")
-        val dynamicColor = booleanPreferencesKey("dynamic_color")
+        val accent = stringPreferencesKey("accent")
         val lockEnabled = booleanPreferencesKey("lock_enabled")
         val lockTimeout = stringPreferencesKey("lock_timeout")
         val periodReminder = booleanPreferencesKey("period_reminder")

@@ -1,6 +1,7 @@
 package org.freeperiod.app.data
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import org.freeperiod.app.ui.theme.Accent
 import java.io.File
 import java.time.LocalTime
 import kotlinx.coroutines.*
@@ -35,7 +36,7 @@ class SettingsStoreTest {
         val settings = settingsStore.settings.first()
         assertEquals(AppSettings(), settings)
         assertFalse(settings.onboardingDone)
-        assertFalse(settings.dynamicColor)
+        assertEquals(Accent.CORAL, settings.accent)
         assertFalse(settings.lockEnabled)
         assertEquals(LockTimeout.ONE_MINUTE, settings.lockTimeout)
         assertFalse(settings.periodReminder)
@@ -46,8 +47,16 @@ class SettingsStoreTest {
         assertNull(settings.lastNotifiedPeriodId)
     }
 
+    @Test fun accentPersists() = runBlocking {
+        for (accent in Accent.entries) {
+            settingsStore.update { it.copy(accent = accent) }
+            scope.coroutineContext[Job]!!.cancelAndJoin()
+            assertEquals(accent, openStore().settings.first().accent)
+        }
+    }
+
     @Test fun updatePersists() = runBlocking {
-        val expected = AppSettings(true, true, true, LockTimeout.FIVE_MINUTES,
+        val expected = AppSettings(true, Accent.PLUM, true, LockTimeout.FIVE_MINUTES,
             true, 4, true, LocalTime.of(8, 15), true, 42)
         settingsStore.update { expected }
         scope.coroutineContext[Job]!!.cancelAndJoin()

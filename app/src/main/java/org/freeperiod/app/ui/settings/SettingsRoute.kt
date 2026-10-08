@@ -25,7 +25,7 @@ import org.freeperiod.app.AppContainer
 import org.freeperiod.app.R
 import org.freeperiod.app.lock.lockAvailable
 
-private enum class SettingsPage { MAIN, BACKUP, PRIVACY, ABOUT }
+private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT }
 
 @Composable
 fun SettingsRoute(container: AppContainer) {
@@ -66,7 +66,7 @@ fun SettingsRoute(container: AppContainer) {
         catch (_: SecurityException) { externalError = true }
     }
     val version = remember(context) { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }
-    Surface(Modifier.fillMaxSize()) {
+    Surface(Modifier.fillMaxSize(), color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
         Column {
             if (externalError) Text(stringResource(R.string.settings_external_error))
             when (page) {
@@ -74,7 +74,7 @@ fun SettingsRoute(container: AppContainer) {
                     RecoveryMessage(recovery)
                     SettingsScreen(settings, SettingsActions(
                         typicalLength = { model.setTypicalLength(it) }, paused = { model.setPaused(it) },
-                        dynamicColor = { model.setDynamicColor(it) }, language = {
+                        appearance = { page = SettingsPage.APPEARANCE }, language = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 openExternal(Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.parse("package:${context.packageName}")))
                             }
@@ -89,6 +89,7 @@ fun SettingsRoute(container: AppContainer) {
                         lockEnabled = { model.setLockEnabled(it) }, lockTimeout = { model.setLockTimeout(it) }),
                         recovery.busy || recovery.awaitingDocument, reminderAccess.available)
                 }
+                SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back)
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
                     backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back)
                 SettingsPage.PRIVACY -> PrivacyScreen(back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.PRIVACY_URL))) }

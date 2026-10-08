@@ -18,6 +18,7 @@ import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import org.freeperiod.app.ui.theme.Accent
 import org.freeperiod.app.ui.theme.FreePeriodTheme
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
@@ -75,7 +76,7 @@ class MainActivity : FragmentActivity() {
             val settings = deviceSettings
             val locked by appLock.locked.collectAsStateWithLifecycle()
             val navigationState = rememberSaveableStateHolder()
-            FreePeriodTheme(dynamicColor = settings?.dynamicColor ?: false) {
+            FreePeriodTheme(accent = settings?.accent ?: Accent.CORAL) {
                 settings?.let {
                     if (it.lockEnabled && locked) LockedScreen(::authenticate, unlockMessage)
                     else navigationState.SaveableStateProvider("app-navigation") {

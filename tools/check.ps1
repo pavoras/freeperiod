@@ -1,4 +1,4 @@
-﻿<#
+<#
   FreePeriod. gate.
   -Schnell   engine tests + app compile (offline; safe inside the Codex sandbox)
   -Voll      + app unit/Robolectric tests (Roborazzi compare), lint, release manifest INTERNET check

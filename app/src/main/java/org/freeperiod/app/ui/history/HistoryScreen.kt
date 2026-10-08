@@ -2,7 +2,6 @@ package org.freeperiod.app.ui.history
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
@@ -10,14 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import java.text.NumberFormat
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.components.*
+import org.freeperiod.app.ui.theme.*
 import org.freeperiod.app.ui.day.symptomLabel
 import org.freeperiod.engine.Cycle
 import org.freeperiod.engine.IneligibleReason
@@ -27,24 +27,37 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
     val locale = LocalConfiguration.current.locales[0]
     val numberFormat = NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = 1 }
     val maxLength = state.cycles.maxOfOrNull { it.length } ?: 1
-    LazyColumn(modifier.fillMaxSize(), contentPadding = PaddingValues(24.dp), verticalArrangement = Arrangement.spacedBy(24.dp)) {
-        item { Text(stringResource(R.string.nav_history), style = MaterialTheme.typography.headlineMedium) }
+    LazyColumn(modifier.fillMaxSize().background(LocalDaylight.current.background), contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        item { FpTopBar(stringResource(R.string.nav_history)) }
         if (state.loading) {
             item { CircularProgressIndicator() }
         } else {
             if (state.completedPeriods > 0 || state.cycles.isNotEmpty()) item {
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
-                    Column(Modifier.fillMaxWidth().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(stringResource(R.string.history_averages), style = MaterialTheme.typography.titleLarge)
-                        Text(state.cycleLength?.let { stringResource(R.string.history_cycle_length, numberFormat.format(it)) }
-                            ?: stringResource(R.string.history_need_cycle))
-                        if (state.eligibleCycles > 0) Text(stringResource(R.string.basis_history, state.eligibleCycles), style = MaterialTheme.typography.bodySmall)
-                        Text(state.periodLength?.let { stringResource(R.string.history_period_length, numberFormat.format(it)) }
-                            ?: stringResource(R.string.history_need_period))
-                        if (state.completedPeriods > 0) Text(stringResource(R.string.history_period_basis, state.completedPeriods), style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.history_averages), style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp))
+                FpPanel {
+                    val cycleValue = state.cycleLength?.let(numberFormat::format) ?: stringResource(R.string.history_no_value)
+                    val periodValue = state.periodLength?.let(numberFormat::format) ?: stringResource(R.string.history_no_value)
+                    if (LocalDensity.current.fontScale >= 1.3f) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            AverageValue(cycleValue, R.string.history_cycle_label)
+                            HorizontalDivider(color = LocalDaylight.current.accent.periodBorder)
+                            AverageValue(periodValue, R.string.history_period_label)
+                        }
+                    } else Row(Modifier.fillMaxWidth().padding(vertical = 14.dp).height(IntrinsicSize.Min)) {
+                        AverageValue(cycleValue, R.string.history_cycle_label, Modifier.weight(1f).padding(horizontal = 16.dp))
+                        VerticalDivider(color = LocalDaylight.current.accent.periodBorder)
+                        AverageValue(periodValue, R.string.history_period_label, Modifier.weight(1f).padding(horizontal = 16.dp))
                     }
                 }
+                Column(Modifier.padding(top = 8.dp)) {
+                    if (state.cycleLength == null) Text(stringResource(R.string.history_need_cycle), style = MaterialTheme.typography.bodySmall)
+                    if (state.periodLength == null) Text(stringResource(R.string.history_need_period), style = MaterialTheme.typography.bodySmall)
+                    if (state.eligibleCycles > 0) Text(stringResource(R.string.basis_history, state.eligibleCycles), style = MaterialTheme.typography.bodySmall)
+                    if (state.completedPeriods > 0) Text(stringResource(R.string.history_period_basis, state.completedPeriods), style = MaterialTheme.typography.bodySmall)
+                }
             }
+
             if (state.cycles.isEmpty()) {
                 item { Text(stringResource(R.string.history_empty), style = MaterialTheme.typography.bodyLarge) }
             } else {
@@ -69,16 +82,27 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
 }
 
 @Composable
+private fun AverageValue(value: String, label: Int, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(value, style = MaterialTheme.typography.displayMedium, modifier = Modifier.alignByBaseline())
+            Text(stringResource(R.string.history_days_unit), style = MaterialTheme.typography.bodySmall, modifier = Modifier.alignByBaseline())
+        }
+        Text(stringResource(label), style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
 private fun CycleRow(cycle: Cycle, maxLength: Int, enabled: Boolean, onInclude: (Long, Boolean) -> Unit) {
     val locale = LocalConfiguration.current.locales[0]
     val date = cycle.start.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
+    FpCard() {
         Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Text(date, style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.history_cycle_days, cycle.length))
-            Box(Modifier.fillMaxWidth().height(4.dp).background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(2.dp))) {
+            Box(Modifier.fillMaxWidth().height(4.dp).background(MaterialTheme.colorScheme.surfaceVariant, FpShapes.bar)) {
                 Box(Modifier.fillMaxWidth((cycle.length.toFloat() / maxLength).coerceIn(0f, 1f)).fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(2.dp)))
+                    .background(LocalDaylight.current.accent.periodBorder, FpShapes.bar))
             }
             cycle.periodLength?.let { Text(stringResource(R.string.history_period_days, it)) }
             cycle.ineligibleReason?.let { reason ->
@@ -88,13 +112,8 @@ private fun CycleRow(cycle: Cycle, maxLength: Int, enabled: Boolean, onInclude: 
                     IneligibleReason.TOO_LONG -> R.string.history_too_long
                 }), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.history_use_predictions), Modifier.weight(1f))
-                val description = stringResource(R.string.history_toggle_label, date)
-                Switch(checked = cycle.eligible, enabled = enabled,
-                    onCheckedChange = { onInclude(cycle.startPeriodId, it) },
-                    modifier = Modifier.semantics { contentDescription = description })
-            }
+            FpSwitchRow(stringResource(R.string.history_use_predictions), cycle.eligible, enabled,
+                { onInclude(cycle.startPeriodId, it) }, stringResource(R.string.history_toggle_label, date))
         }
     }
 }

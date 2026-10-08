@@ -76,10 +76,10 @@ class SettingsViewModelTest : DatabaseTest() {
         assertEquals(BackupSettings(30, true), repository.snapshot().settings)
     }
 
-    @Test fun dynamicColorUpdatesOnlyDeviceSettings() = runTest {
+    @Test fun accentUpdatesOnlyDeviceSettings() = runTest {
         val before = repository.snapshot()
-        model().setDynamicColor(true).join()
-        assertTrue(deviceSettings.settings.first().dynamicColor)
+        model().setAccent(org.freeperiod.app.ui.theme.Accent.OCEAN).join()
+        assertEquals(org.freeperiod.app.ui.theme.Accent.OCEAN, deviceSettings.settings.first().accent)
         assertEquals(before, repository.snapshot())
     }
     @Test fun lockRequiresSecureDevice() = runTest {

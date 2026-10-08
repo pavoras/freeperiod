@@ -7,6 +7,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.theme.Accent
 import org.freeperiod.app.data.Repository
 import org.freeperiod.app.data.SettingsStore
 import org.freeperiod.app.data.AppSettings
@@ -17,7 +18,7 @@ import org.freeperiod.engine.backup.*
 data class SettingsUiState(
     val typicalCycleLength: Int? = null,
     val predictionsPaused: Boolean = false,
-    val dynamicColor: Boolean = false,
+    val accent: Accent = Accent.CORAL,
     val loading: Boolean = true,
     val writing: Boolean = false,
     val message: Int? = null,
@@ -34,7 +35,7 @@ class SettingsViewModel(private val repository: Repository, private val settings
     init {
         viewModelScope.launch {
             combine(repository.domainSettings, settings.settings) { domain, device ->
-                SettingsUiState(domain.typicalCycleLength, domain.predictionsPaused, device.dynamicColor, loading = false,
+                SettingsUiState(domain.typicalCycleLength, domain.predictionsPaused, device.accent, loading = false,
                     device = device, lockCanEnable = canLock())
             }.catch { mutableState.update { it.copy(loading = false, message = R.string.error_storage) } }
                 .collect { value -> mutableState.update { value.copy(writing = it.writing, message = it.message) } }
@@ -50,7 +51,7 @@ class SettingsViewModel(private val repository: Repository, private val settings
         repository.updateDomainSettings(repository.snapshot().settings.copy(predictionsPaused = paused))
     }
 
-    fun setDynamicColor(enabled: Boolean): Job = enqueue { settings.update { it.copy(dynamicColor = enabled) } }
+    fun setAccent(accent: Accent): Job = enqueue { settings.update { it.copy(accent = accent) } }
     fun setPeriodReminder(enabled: Boolean): Job = enqueue { settings.update { it.copy(periodReminder = enabled) } }
     fun setReminderDays(days: Int): Job = enqueue {
         require(days in 1..5)
