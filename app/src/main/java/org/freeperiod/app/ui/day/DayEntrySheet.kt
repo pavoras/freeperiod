@@ -99,11 +99,8 @@ fun DayEntrySheet(
     }
     ModalBottomSheet(onDismissRequest = onDismiss, modifier = Modifier.fillMaxHeight(),
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = tones.surface, dragHandle = {
-            Box(Modifier.fillMaxWidth().height(12.dp), contentAlignment = Alignment.Center) {
-                Box(Modifier.size(24.dp, 3.dp).background(tones.muted, FpShapes.bar))
-            }
-        }) {
+        // No swipe-to-close: it was easy to trigger by accident while scrolling. The X button closes.
+        containerColor = tones.surface, sheetGesturesEnabled = false, dragHandle = null) {
         Scaffold(containerColor = tones.surface, snackbarHost = { SnackbarHost(snackbar) }, modifier = Modifier.fillMaxHeight()) { padding ->
             LazyColumn(Modifier.fillMaxSize().padding(padding).imePadding(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),

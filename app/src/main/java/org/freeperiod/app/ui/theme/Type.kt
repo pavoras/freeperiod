@@ -2,6 +2,8 @@ package org.freeperiod.app.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
@@ -21,9 +23,11 @@ private fun variableFamily(resource: Int, display: Boolean) = FontFamily(
 val Bricolage = variableFamily(R.font.bricolage_grotesque, true)
 val DmSans = variableFamily(R.font.dm_sans, false)
 private fun heading(size: Int, height: Int, weight: FontWeight = FontWeight.SemiBold) =
-    TextStyle(fontFamily = Bricolage, fontWeight = weight, fontSize = size.sp, lineHeight = height.sp, letterSpacing = (-0.4).sp)
+    TextStyle(fontFamily = Bricolage, fontWeight = weight, fontSize = size.sp, lineHeight = height.sp, letterSpacing = (-0.4).sp,
+        hyphens = Hyphens.Auto, lineBreak = LineBreak.Heading)
 private fun body(size: Int, height: Int, weight: FontWeight = FontWeight.Normal) =
-    TextStyle(fontFamily = DmSans, fontWeight = weight, fontSize = size.sp, lineHeight = height.sp)
+    TextStyle(fontFamily = DmSans, fontWeight = weight, fontSize = size.sp, lineHeight = height.sp,
+        hyphens = Hyphens.Auto, lineBreak = LineBreak.Paragraph)
 
 val FpTypography = Typography(
     displayLarge = heading(72, 76), displayMedium = heading(40, 46), displaySmall = heading(38, 44),
