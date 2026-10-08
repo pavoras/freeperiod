@@ -104,7 +104,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     val state by model.state.collectAsStateWithLifecycle()
                     ResumeAndMidnightEffect(model::onResume)
                     val actions = DayEntryActions(
-                        flow = { model.setFlow(it) }, mood = { model.setMood(it) }, pain = { model.setPain(it) },
+                        ovulationTest = { model.setOvulationTest(it) }, flow = { model.setFlow(it) }, mood = { model.setMood(it) }, pain = { model.setPain(it) },
                         sex = { model.setSex(it) }, discharge = { model.setDischarge(it) }, note = { model.setNote(it) },
                         symptom = { model.toggleSymptom(it) }, tag = { model.toggleTag(it) },
                         addTag = { model.addTag(it) }, renameTag = { id, name -> model.renameTag(id, name) },

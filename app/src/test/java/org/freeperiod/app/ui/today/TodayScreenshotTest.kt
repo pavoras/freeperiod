@@ -17,7 +17,6 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import java.time.LocalDate
 import java.util.Locale
 import org.freeperiod.app.ui.components.FpNavBar
-import org.freeperiod.app.ui.components.FpLegend
 import org.freeperiod.app.ui.theme.FreePeriodTheme
 import org.junit.After
 import org.junit.Rule
@@ -39,6 +38,8 @@ class TodayScreenshotTest {
     @Test fun regular_enLight() = capture("regular_enLight", "regular")
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun regular_deDark() = capture("regular_deDark", "regular", Locale.GERMANY, dark = true)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun regular_deLarge() = capture("regular_deLarge", "regular", Locale.GERMANY, dark = true, fontScale = 1.5f)
     @Test fun regular_enLarge() = capture("regular_enLarge", "regular", fontScale = 1.5f)
     @Test fun ongoingDay3_enLight() = capture("ongoingDay3_enLight", "ongoing")
     @Test fun rangePassed_enLight() = capture("rangePassed_enLight", "rangePassed")
@@ -53,7 +54,7 @@ class TodayScreenshotTest {
             Surface(color = MaterialTheme.colorScheme.background) {
                 Column(Modifier.fillMaxWidth().padding(horizontal = 12.dp).testTag("calendar")) {
                     MonthCalendar(state.month, state.days, {}, {}, locale = Locale.US)
-                    FpLegend(Modifier.padding(vertical = 8.dp))
+                    TodayLegend(Modifier.padding(vertical = 8.dp))
                 }
             }
         } }

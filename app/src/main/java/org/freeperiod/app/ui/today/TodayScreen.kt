@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.YearMonth
 import org.freeperiod.app.R
-import org.freeperiod.app.ui.components.FpLegend
 import org.freeperiod.app.ui.theme.LocalDaylight
 import org.freeperiod.engine.PeriodError
 import org.freeperiod.engine.PredictionState
@@ -87,9 +86,8 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                     Modifier.padding(horizontal = 12.dp))
                 MonthCalendar(state.month, state.days, onMonthChange, onDayClick, Modifier.padding(horizontal = 12.dp),
                     scheduledBreak = state.prediction is PredictionState.ScheduledBreak)
-                if (state.prediction is PredictionState.ScheduledBreak) {
-                    TodayLegend(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), scheduledBreak = true)
-                } else FpLegend(Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
+                TodayLegend(Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    scheduledBreak = state.prediction is PredictionState.ScheduledBreak)
             }
             state.error?.let { error ->
                 val message = when (error.periodError) {

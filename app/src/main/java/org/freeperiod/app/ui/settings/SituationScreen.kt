@@ -1,0 +1,117 @@
+package org.freeperiod.app.ui.settings
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import org.freeperiod.app.R
+import org.freeperiod.app.ui.components.*
+import org.freeperiod.app.ui.theme.FpSpacing
+import org.freeperiod.engine.*
+import java.time.LocalDate
+import java.time.LocalTime
+
+internal fun phaseLabel(value: LifePhase): Int = when (value) {
+    LifePhase.REGULAR -> R.string.phase_regular
+    LifePhase.TRYING_TO_CONCEIVE -> R.string.phase_ttc
+    LifePhase.PREGNANT -> R.string.phase_pregnant
+    LifePhase.POSTPARTUM -> R.string.phase_postpartum
+    LifePhase.PERIMENOPAUSE -> R.string.phase_perimenopause
+    LifePhase.MENOPAUSE -> R.string.phase_menopause
+}
+internal fun methodLabel(value: Method): Int = when (value) {
+    Method.NONE -> R.string.method_none
+    Method.PILL_COMBINED -> R.string.method_combined
+    Method.PILL_PROGESTIN -> R.string.method_minipill
+    Method.RING -> R.string.method_ring
+    Method.PATCH -> R.string.method_patch
+    Method.IUD_HORMONAL -> R.string.method_iud_hormonal
+    Method.IUD_COPPER -> R.string.method_iud_copper
+    Method.IMPLANT -> R.string.method_implant
+    Method.INJECTION -> R.string.method_injection
+    Method.CONDOM -> R.string.method_condom
+    Method.OTHER -> R.string.method_other
+}
+
+/** Presets are drafts only. The editor requires explicit saving and enabling. */
+internal fun methodReminderPreset(method: Method, today: LocalDate): Reminder? {
+    val recurrence = when (method) {
+        Method.PILL_COMBINED, Method.PILL_PROGESTIN -> Recurrence.Daily
+        Method.RING -> Recurrence.EveryNDays(1, today)
+        Method.PATCH -> Recurrence.EveryNDays(1, today)
+        Method.INJECTION -> Recurrence.EveryNDays(1, today)
+        Method.IUD_HORMONAL, Method.IUD_COPPER, Method.IMPLANT -> Recurrence.Once(today)
+        else -> return null
+    }
+    return Reminder(0, if (method in listOf(Method.PILL_COMBINED, Method.PILL_PROGESTIN)) ReminderKind.PILL else ReminderKind.METHOD,
+        null, recurrence, LocalTime.of(20, 0), false)
+}
+
+@Composable
+fun SituationScreen(situation: Situation, today: LocalDate, onSave: (Situation) -> Unit, onBack: () -> Unit,
+    onOfferReminder: (Reminder) -> Unit) {
+    var offer by remember { mutableStateOf<Method?>(null) }
+    var pillDialog by rememberSaveable { mutableStateOf(false) }
+    LazyColumn(contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+        item { FpTopBar(stringResource(R.string.my_situation), onBack) }
+        item { Text(stringResource(R.string.situation_intro)) }
+        item { Text(stringResource(R.string.life_phase), style = MaterialTheme.typography.titleMedium) }
+        items(LifePhase.entries.size) { index ->
+            val phase = LifePhase.entries[index]
+            FpChip(situation.phase == phase, { onSave(situation.copy(phase = phase)) }, stringResource(phaseLabel(phase)), Modifier.fillMaxWidth())
+        }
+        item { Text(stringResource(R.string.tracking_method), style = MaterialTheme.typography.titleMedium) }
+        items(Method.entries.size) { index ->
+            val method = Method.entries[index]
+            FpChip(situation.method == method, {
+                onSave(situation.copy(method = method))
+                if (method != situation.method && methodReminderPreset(method, today) != null) offer = method
+            }, stringResource(methodLabel(method)), Modifier.fillMaxWidth())
+        }
+        if (situation.method == Method.PILL_COMBINED) item {
+            SettingsRow(R.string.pill_rhythm, true, { pillDialog = true }, situation.pill?.let {
+                stringResource(R.string.pill_rhythm_summary, it.activeDays, it.breakDays, it.packStart.toString())
+            } ?: stringResource(R.string.pill_rhythm_missing))
+        }
+        if (situation.method == Method.PILL_PROGESTIN) item { Text(stringResource(R.string.method_irregular)) }
+        if (situation.phase == LifePhase.PERIMENOPAUSE) item { Text(stringResource(R.string.phase_vary)) }
+        item { Text(stringResource(R.string.situation_disclosure), style = MaterialTheme.typography.bodySmall) }
+    }
+    offer?.let { method ->
+        AlertDialog(onDismissRequest = { offer = null }, title = { Text(stringResource(R.string.method_reminder_offer)) },
+            text = { Text(stringResource(R.string.method_reminder_offer_body)) },
+            confirmButton = { TextButton(onClick = { offer = null; onOfferReminder(requireNotNull(methodReminderPreset(method, today))) }) { Text(stringResource(R.string.add_reminder)) } },
+            dismissButton = { TextButton(onClick = { offer = null }) { Text(stringResource(R.string.cancel)) } })
+    }
+    if (pillDialog) PillRhythmDialog(situation.pill, today, { pillDialog = false }) {
+        pillDialog = false; onSave(situation.copy(pill = it))
+    }
+}
+
+@Composable
+internal fun PillRhythmDialog(current: PillSchedule?, today: LocalDate, onDismiss: () -> Unit, onSave: (PillSchedule?) -> Unit) {
+    var active by rememberSaveable { mutableStateOf((current?.activeDays ?: 21).toString()) }
+    var rest by rememberSaveable { mutableStateOf((current?.breakDays ?: 7).toString()) }
+    var start by rememberSaveable { mutableStateOf((current?.packStart ?: today).toString()) }
+    val date = runCatching { LocalDate.parse(start) }.getOrNull()
+    val valid = active.toIntOrNull() in 1..365 && rest.toIntOrNull() in 0..30 && date != null
+    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.pill_rhythm)) }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+                listOf(21 to 7, 24 to 4, 28 to 0).forEach { (a, b) ->
+                    FpChip(active == a.toString() && rest == b.toString(), { active = a.toString(); rest = b.toString() },
+                        if (b == 0) stringResource(R.string.pill_continuous) else "$a+$b", Modifier.weight(1f))
+                }
+            }
+            OutlinedTextField(active, { active = it }, label = { Text(stringResource(R.string.pill_active_days)) }, singleLine = true)
+            OutlinedTextField(rest, { rest = it }, label = { Text(stringResource(R.string.pill_break_days)) }, singleLine = true)
+            OutlinedTextField(start, { start = it }, label = { Text(stringResource(R.string.pack_start_date)) }, singleLine = true)
+            Text(stringResource(R.string.date_format_hint), style = MaterialTheme.typography.bodySmall)
+            TextButton(onClick = { onSave(null) }) { Text(stringResource(R.string.pill_clear_rhythm)) }
+        }
+    }, confirmButton = { TextButton(onClick = { onSave(PillSchedule(requireNotNull(date), active.toInt(), rest.toInt())) }, enabled = valid) { Text(stringResource(R.string.settings_save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
+}

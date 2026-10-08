@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -22,7 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit.DAYS
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.theme.LocalDaylight
 import org.freeperiod.engine.BracketKind
@@ -31,6 +31,7 @@ import org.freeperiod.engine.CycleTimeline
 @Composable
 fun CycleTimelineView(timeline: CycleTimeline, modifier: Modifier = Modifier, pack: Boolean = false) {
     val t = LocalDaylight.current
+    val colors = remember(t) { todayFillColors(t) }
     val locale = LocalConfiguration.current.locales[0]
     val description = timelineDescription(timeline, LocalContext.current, locale, pack)
     val dateFormat = DateTimeFormatter.ofPattern(if (locale.language == "de") "d. MMM" else "MMM d", locale)
@@ -38,10 +39,9 @@ fun CycleTimelineView(timeline: CycleTimeline, modifier: Modifier = Modifier, pa
     Column(modifier.clearAndSetSemantics { contentDescription = description }) {
         // Today has its own label lane: day 1 and day 3 remain readable on a full-cycle axis.
         BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val fraction = (DAYS.between(timeline.axisStart, timeline.today).toFloat() /
-                DAYS.between(timeline.axisStart, timeline.axisEnd).coerceAtLeast(1)).coerceIn(0f, 1f)
             val labelWidth = minOf(80.dp, maxWidth)
-            val left = (8.dp + (maxWidth - 16.dp) * fraction - labelWidth / 2).coerceIn(0.dp, maxWidth - labelWidth)
+            val todayX = 8.dp + timelinePosition(timeline, timeline.today, (maxWidth - 16.dp).value, 40f).dp
+            val left = (todayX - labelWidth / 2).coerceIn(0.dp, maxWidth - labelWidth)
             Column(Modifier.width(labelWidth).offset(x = left)) {
                 Text(timeline.today.format(dateFormat), Modifier.fillMaxWidth(), color = t.ink,
                     style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
@@ -51,9 +51,7 @@ fun CycleTimelineView(timeline: CycleTimeline, modifier: Modifier = Modifier, pa
         }
         Canvas(Modifier.fillMaxWidth().height(32.dp)) {
             val inset = 8.dp.toPx()
-            val span = DAYS.between(timeline.axisStart, timeline.axisEnd).coerceAtLeast(1).toFloat()
-            fun x(date: LocalDate) = inset + (size.width - 2 * inset) *
-                (DAYS.between(timeline.axisStart, date).toFloat() / span).coerceIn(0f, 1f)
+            fun x(date: LocalDate) = inset + timelinePosition(timeline, date, size.width - 2 * inset, 40.dp.toPx())
             val y = size.height / 2
             val todayX = x(timeline.today)
             val dash = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))
@@ -64,8 +62,8 @@ fun CycleTimelineView(timeline: CycleTimeline, modifier: Modifier = Modifier, pa
                 val right = x(range.endInclusive) + 3.dp.toPx()
                 val top = Offset(left, y - 4.dp.toPx())
                 val dimensions = Size(right - left, 8.dp.toPx())
-                drawRoundRect(if (expected) t.accent.container else t.accent.periodFill, top, dimensions, CornerRadius(4.dp.toPx()))
-                drawRoundRect(t.accent.periodBorder, top, dimensions, CornerRadius(4.dp.toPx()), style = Stroke(1.dp.toPx()))
+                drawRoundRect(if (expected) t.accent.container else colors.fill, top, dimensions, CornerRadius(4.dp.toPx()))
+                if (expected) drawRoundRect(t.accent.periodBorder, top, dimensions, CornerRadius(4.dp.toPx()), style = Stroke(1.dp.toPx()))
             }
             timeline.expectedPeriodRest?.let { segment(it, true) }
             timeline.recordedPeriod?.let { segment(it, false) }
@@ -76,7 +74,7 @@ fun CycleTimelineView(timeline: CycleTimeline, modifier: Modifier = Modifier, pa
                 drawRoundRect(t.predicted, top, dimensions, CornerRadius(4.dp.toPx()), style = Stroke(1.5.dp.toPx(), pathEffect = dash))
             }
             // The surface separates the today ring from both light period fills and dark backgrounds.
-            drawCircle(t.surface, 7.dp.toPx(), Offset(todayX, y))
+            drawCircle(t.surface, 9.dp.toPx(), Offset(todayX, y))
             drawCircle(t.accent.todayRing, 7.dp.toPx(), Offset(todayX, y), style = Stroke(2.dp.toPx()))
             drawCircle(t.ink, 2.dp.toPx(), Offset(todayX, y))
         }

@@ -40,6 +40,7 @@ data class DayEntryActions(
     val endPeriod: (Boolean) -> Unit = {},
     val clear: () -> Unit = {},
     val undo: (DayLog) -> Unit = {},
+    val ovulationTest: (OvulationTest?) -> Unit = {},
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -57,6 +58,7 @@ fun DayEntrySheet(
     var dischargeOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
     var tagsOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
     var noteOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
+    var customOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf("") }
     var moreSymptoms by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
     val largeText = LocalDensity.current.fontScale >= 1.3f
     val tones = LocalDaylight.current
@@ -135,60 +137,70 @@ fun DayEntrySheet(
                     }
                     HorizontalDivider(color = tones.line)
                 }
-                item {
-                    Text(stringResource(R.string.entry_mood), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium)
-                    ChoiceGrid(listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT), if (largeText) 3 else 5) { mood ->
-                        FpFaceChip(state.log.mood == mood,
-                            { actions.mood(if (state.log.mood == mood) null else mood) }, stringResource(moodLabel(mood)),
-                            Modifier.fillMaxWidth().fillMaxHeight(), editable) {
-                            Icon(painterResource(moodIcon(mood)), null, Modifier.size(27.dp).testTag("mood-icon-${mood.name}"))
+                entryCategories(state).forEach { category ->
+                    item(key = category.key) {
+                        when (category.key) {
+                            "mood" -> {
+                                Text(stringResource(R.string.entry_mood), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium)
+                                ChoiceGrid(listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT).filter { state.itemVisible("mood", it.name) }, if (largeText) 3 else 5) { mood ->
+                                    FpFaceChip(state.log.mood == mood, { actions.mood(if (state.log.mood == mood) null else mood) },
+                                        stringResource(moodLabel(mood)), Modifier.fillMaxWidth().fillMaxHeight(), editable) {
+                                        Icon(painterResource(moodIcon(mood)), null, Modifier.size(27.dp).testTag("mood-icon-${mood.name}"))
+                                    }
+                                }
+                            }
+                            "flow" -> Choices(category.label, FlowLevel.entries.filter { state.itemVisible("flow", it.name) }, state.log.flow, editable, ::flowLabel, actions.flow)
+                            "pain" -> Choices(category.label, Pain.entries.filter { state.itemVisible("pain", it.name) }, state.log.pain, editable, ::painLabel, actions.pain)
+                            "symptoms" -> {
+                                Text(stringResource(R.string.entry_symptoms), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium)
+                                ChoiceGrid(state.visibleSymptoms(moreSymptoms) + listOf(null), if (largeText) 2 else 4) { symptom ->
+                                    if (symptom == null) FpChip(moreSymptoms, { moreSymptoms = !moreSymptoms },
+                                        stringResource(if (moreSymptoms) R.string.entry_less else R.string.entry_more), Modifier.fillMaxWidth(), stacked = true,
+                                        icon = { Icon(painterResource(R.drawable.ic_fp_more), null, Modifier.size(20.dp)) })
+                                    else FpChip(symptom in state.log.symptoms, { actions.symptom(symptom) }, stringResource(symptomLabel(symptom)),
+                                        Modifier.fillMaxWidth().fillMaxHeight(), editable, stacked = true,
+                                        icon = { Icon(painterResource(symptomIcon(symptom)), null, Modifier.size(20.dp)) })
+                                }
+                                CustomItemChips(state.visibleTags(category), state, actions, editable)
+                            }
+                            "sex" -> {
+                                FpSectionRow(category.icon, stringResource(category.label), state.log.sex?.let { stringResource(sexLabel(it)) }
+                                    ?: stringResource(R.string.entry_none), sexOpen) { sexOpen = !sexOpen }
+                                if (sexOpen) Choices(null, Sex.entries.filter { state.itemVisible("sex", it.name) }, state.log.sex, editable, ::sexLabel, actions.sex)
+                            }
+                            "discharge" -> {
+                                FpSectionRow(category.icon, stringResource(category.label), state.log.discharge?.let { stringResource(dischargeLabel(it)) }
+                                    ?: stringResource(R.string.entry_none), dischargeOpen) { dischargeOpen = !dischargeOpen }
+                                if (dischargeOpen) Choices(null, Discharge.entries.filter { state.itemVisible("discharge", it.name) }, state.log.discharge, editable, ::dischargeLabel, actions.discharge)
+                            }
+                            "note" -> {
+                                FpSectionRow(category.icon, stringResource(category.label), notePreview(note).ifBlank { stringResource(R.string.entry_none) }, noteOpen) { noteOpen = !noteOpen }
+                                if (noteOpen) TextField(value = note, onValueChange = {
+                                    if (it.length <= 2000 || it.length < note.length) { note = it; noteDirty = true; actions.note(it) }
+                                }, placeholder = { Text(stringResource(R.string.entry_note_placeholder)) }, enabled = editable,
+                                    modifier = Modifier.fillMaxWidth().testTag("entry-note"), minLines = 3, shape = FpShapes.button,
+                                    colors = TextFieldDefaults.colors(focusedContainerColor = tones.accent.container, unfocusedContainerColor = tones.accent.container,
+                                        focusedTextColor = tones.accent.onContainer, unfocusedTextColor = tones.accent.onContainer,
+                                        focusedPlaceholderColor = tones.accent.onContainer, unfocusedPlaceholderColor = tones.accent.onContainer))
+                            }
+                            "ovulation_test" -> Choices(category.label, OvulationTest.entries.filter { state.itemVisible("ovulation_test", it.name) },
+                                state.log.ovulationTest, editable, { if (it == OvulationTest.POSITIVE) R.string.ovulation_positive else R.string.ovulation_negative }, actions.ovulationTest)
+                            else -> {
+                                val tags = state.visibleTags(category)
+                                val open = if (category.key == "tags") tagsOpen else category.key in customOpen.split(',')
+                                FpSectionRow(category.icon, category.category?.name ?: stringResource(category.label),
+                                    tags.filter { it.id in state.log.tagIds }.joinToString { it.name }.ifBlank { stringResource(R.string.entry_none) }, open) {
+                                    if (category.key == "tags") tagsOpen = !tagsOpen
+                                    else { val keys = customOpen.split(',').filter { it.isNotBlank() }.toSet()
+                                        customOpen = (if (open) keys - category.key else keys + category.key).joinToString(",") }
+                                }
+                                if (open) {
+                                    if (category.key == "tags") TagEntry(state.copy(tags = tags), actions, editable)
+                                    else CustomItemChips(tags, state, actions, editable)
+                                }
+                            }
                         }
                     }
-                }
-                item { Choices(R.string.entry_flow, FlowLevel.entries, state.log.flow, editable, ::flowLabel, actions.flow) }
-                item { Choices(R.string.entry_pain, Pain.entries, state.log.pain, editable, ::painLabel, actions.pain) }
-                item {
-                    Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(stringResource(R.string.entry_symptoms), style = MaterialTheme.typography.titleMedium)
-                        if (state.log.symptoms.isNotEmpty()) Text(stringResource(R.string.entry_selected_count, state.log.symptoms.size),
-                            style = MaterialTheme.typography.bodySmall, color = tones.muted)
-                    }
-                    val short = listOf(Symptom.CRAMPS, Symptom.BLOATING, Symptom.HEADACHE)
-                    val visible = if (moreSymptoms) Symptom.entries else short
-                    ChoiceGrid(visible + listOf(null), if (largeText) 2 else 4) { symptom ->
-                        if (symptom == null) FpChip(moreSymptoms, { moreSymptoms = !moreSymptoms },
-                            stringResource(if (moreSymptoms) R.string.entry_less else R.string.entry_more), Modifier.fillMaxWidth(), stacked = true,
-                            icon = { Icon(painterResource(R.drawable.ic_fp_more), null, Modifier.size(20.dp)) })
-                        else FpChip(symptom in state.log.symptoms, { actions.symptom(symptom) }, stringResource(symptomLabel(symptom)),
-                            Modifier.fillMaxWidth().fillMaxHeight(), editable, stacked = true,
-                            icon = { Icon(painterResource(symptomIcon(symptom)), null, Modifier.size(20.dp)) })
-                    }
-                }
-                item {
-                    FpSectionRow(R.drawable.ic_fp_sex, stringResource(R.string.entry_sex),
-                        state.log.sex?.let { stringResource(sexLabel(it)) } ?: stringResource(R.string.entry_none), sexOpen) { sexOpen = !sexOpen }
-                    if (sexOpen) Choices(null, Sex.entries, state.log.sex, editable, ::sexLabel, actions.sex)
-                    FpSectionRow(R.drawable.ic_fp_discharge, stringResource(R.string.entry_discharge),
-                        state.log.discharge?.let { stringResource(dischargeLabel(it)) } ?: stringResource(R.string.entry_none), dischargeOpen) { dischargeOpen = !dischargeOpen }
-                    if (dischargeOpen) Choices(null, Discharge.entries, state.log.discharge, editable, ::dischargeLabel, actions.discharge)
-                    FpSectionRow(R.drawable.ic_fp_tags, stringResource(R.string.entry_tags),
-                        state.tags.filter { it.id in state.log.tagIds }.joinToString { it.name }.ifBlank { stringResource(R.string.entry_none) },
-                        tagsOpen) { tagsOpen = !tagsOpen }
-                    if (tagsOpen) TagEntry(state, actions, editable)
-                    FpSectionRow(R.drawable.ic_fp_note, stringResource(R.string.entry_note),
-                        notePreview(note).ifBlank { stringResource(R.string.entry_none) }, noteOpen) { noteOpen = !noteOpen }
-                    if (noteOpen) TextField(value = note, onValueChange = {
-                        // Existing long imported notes remain intact; the limit only constrains typing.
-                        if (it.length <= 2000 || it.length < note.length) {
-                            note = it; noteDirty = true; actions.note(it)
-                        }
-                    }, placeholder = { Text(stringResource(R.string.entry_note_placeholder)) }, enabled = editable,
-                        modifier = Modifier.fillMaxWidth().testTag("entry-note"), minLines = 3,
-                        shape = FpShapes.button, colors = TextFieldDefaults.colors(
-                            focusedContainerColor = tones.accent.container, unfocusedContainerColor = tones.accent.container,
-                            focusedTextColor = tones.accent.onContainer, unfocusedTextColor = tones.accent.onContainer,
-                            focusedPlaceholderColor = tones.accent.onContainer, unfocusedPlaceholderColor = tones.accent.onContainer))
-                    HorizontalDivider(color = tones.line)
                 }
                 item {
                     TextButton(onClick = { note = ""; noteDirty = true; actions.clear() },
@@ -220,7 +232,7 @@ private fun <T> ChoiceGrid(values: List<T>, columns: Int, content: @Composable (
 @Composable
 private fun <T> Choices(title: Int?, values: List<T>, selected: T?, enabled: Boolean, label: (T) -> Int, onChange: (T?) -> Unit) {
     title?.let { Text(stringResource(it), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium) }
-    val columns = if (LocalDensity.current.fontScale >= 1.3f) 2 else minOf(values.size, 5)
+    val columns = if (LocalDensity.current.fontScale >= 1.3f) 2 else minOf(values.size, 5).coerceAtLeast(1)
     ChoiceGrid(values, columns) { value ->
         FpChip(selected == value, { onChange(if (selected == value) null else value) },
             stringResource(label(value)), Modifier.fillMaxWidth().fillMaxHeight(), enabled)
@@ -236,4 +248,13 @@ internal fun errorLabel(error: DayEntryError): Int = when (error) {
     DayEntryError.END_IN_FUTURE -> R.string.error_period_end_future
     DayEntryError.TAG_NAME -> R.string.tag_name_error
     DayEntryError.STORAGE -> R.string.error_storage
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CustomItemChips(tags: List<Tag>, state: DayEntryUiState, actions: DayEntryActions, enabled: Boolean) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(FpSpacing.gap), verticalArrangement = Arrangement.spacedBy(FpSpacing.compact)) {
+        tags.forEach { tag -> FpChip(tag.id in state.log.tagIds, { actions.tag(tag.id) }, tag.name, enabled = enabled,
+            icon = { Icon(painterResource(FpIcons.byKey[tag.iconKey] ?: R.drawable.ic_fp_tags), null, Modifier.size(20.dp)) }) }
+    }
 }

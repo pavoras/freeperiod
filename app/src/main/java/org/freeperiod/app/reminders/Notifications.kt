@@ -14,10 +14,16 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import org.freeperiod.app.MainActivity
 import org.freeperiod.app.R
+import org.freeperiod.engine.Reminder
+import org.freeperiod.engine.ReminderKind
 
 interface NotificationDelivery {
     fun period(days: Int, explicit: Boolean): Boolean
     fun daily(explicit: Boolean): Boolean
+    fun reminder(reminder: Reminder, days: Int?, explicit: Boolean): Boolean = when (reminder.kind) {
+        ReminderKind.PERIOD_DUE -> period(requireNotNull(days), explicit)
+        else -> daily(explicit)
+    }
 }
 
 class Notifications(private val context: Context) : NotificationDelivery {
@@ -38,6 +44,11 @@ class Notifications(private val context: Context) : NotificationDelivery {
     override fun period(days: Int, explicit: Boolean): Boolean = post(1,
         if (explicit) context.getString(R.string.reminder_period_explicit, days) else context.getString(R.string.reminder_period_neutral))
     override fun daily(explicit: Boolean): Boolean = post(2, context.getString(R.string.reminder_daily))
+    override fun reminder(reminder: Reminder, days: Int?, explicit: Boolean): Boolean = post(reminder.id.toInt(), when (reminder.kind) {
+        ReminderKind.PERIOD_DUE -> if (explicit) context.getString(R.string.reminder_period_explicit, requireNotNull(days)) else context.getString(R.string.reminder_period_neutral)
+        ReminderKind.DAILY_LOG -> context.getString(R.string.reminder_daily)
+        else -> if (explicit) reminder.title ?: context.getString(R.string.reminder_general) else context.getString(R.string.reminder_general)
+    })
 
     @SuppressLint("MissingPermission") // available() checks POST_NOTIFICATIONS before notify().
     private fun post(id: Int, text: String): Boolean {

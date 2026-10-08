@@ -35,11 +35,12 @@ class DayEntryScreenshotTest {
     @After fun restoreLocale() { Locale.setDefault(originalLocale) }
 
     @Test fun filled_enLight() = capture("filled_enLight", Locale.US)
+    @Test fun menopause_enLight() = capture("menopause_enLight", Locale.US, menopause = true)
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun filled_deDark() = capture("filled_deDark", Locale.GERMANY, dark = true)
     @Test fun empty_enLarge() = capture("empty_enLarge", Locale.US, empty = true, fontScale = 1.5f)
 
-    private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false, fontScale: Float = 1f) {
+    private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false, fontScale: Float = 1f, menopause: Boolean = false) {
         Locale.setDefault(locale)
         val today = clock()
         val log = DayLog(today, FlowLevel.MEDIUM, Mood.GOOD, setOf(Symptom.CRAMPS, Symptom.FATIGUE),
@@ -47,7 +48,7 @@ class DayEntryScreenshotTest {
         val data = BackupData(periods = if (empty) emptyList() else listOf(Period(1, today.minusDays(2), null)),
             dayLogs = if (empty) emptyList() else listOf(log),
             tags = if (empty) emptyList() else listOf(Tag(1, if (locale.language == "de") "Bewegung" else "Exercise")),
-            settings = BackupSettings(null, false))
+            settings = BackupSettings(null, false), situation = Situation(phase = if (menopause) LifePhase.MENOPAUSE else LifePhase.REGULAR))
         val state = dayEntryState(data, today, today)
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {

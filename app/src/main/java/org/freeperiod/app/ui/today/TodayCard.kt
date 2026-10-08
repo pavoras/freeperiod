@@ -3,10 +3,15 @@ package org.freeperiod.app.ui.today
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -42,7 +47,7 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
     val numeral: @Composable () -> Unit = {
         if (number != null) Column {
             Text(label, style = MaterialTheme.typography.bodyMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.Bottom) {
                 Text(number.toString(), Modifier.alignByBaseline(), style = MaterialTheme.typography.displayLarge)
                 Text(stringResource(R.string.wordmark_stop), Modifier.alignByBaseline().clearAndSetSemantics {},
                     style = MaterialTheme.typography.displayLarge.copy(fontFamily = DmSans), color = t.accent.accent)
@@ -78,22 +83,49 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
                     Text(stringResource(R.string.today_irregular_method), style = MaterialTheme.typography.bodySmall, color = t.muted)
                 }
             }
-            val primary: @Composable (Modifier) -> Unit = { buttonModifier ->
-                FpButton(onClick = { state.periodEndForToday?.let(onConfirmEnd) ?: onStartPeriod() },
-                    modifier = buttonModifier, enabled = !state.writing) {
-                    Text(stringResource(if (state.ongoingPeriodId == null) R.string.period_started else R.string.period_ended))
-                }
-            }
-            if (large) {
-                primary(Modifier.fillMaxWidth())
-                TextButton(onClick = onLogToday, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.log_today)) }
-            } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                primary(Modifier.weight(1f))
-                TextButton(onClick = onLogToday, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.log_today)) }
-            }
+            TodayActions(stringResource(if (state.ongoingPeriodId == null) R.string.period_started else R.string.period_ended),
+                stringResource(R.string.log_today), !state.writing,
+                { state.periodEndForToday?.let(onConfirmEnd) ?: onStartPeriod() }, onLogToday)
             if (prediction is PredictionState.RangePassed) TextButton(onClick = onPausePredictions, enabled = !state.writing) {
                 Text(stringResource(R.string.pause_predictions))
             }
+        }
+    }
+}
+
+@Composable
+private fun TodayActions(primaryLabel: String, secondaryLabel: String, enabled: Boolean,
+    onPrimary: () -> Unit, onSecondary: () -> Unit) {
+    val tokens = LocalDaylight.current
+    val colors = remember(tokens) { todayFillColors(tokens) }
+    val density = LocalDensity.current
+    val measurer = rememberTextMeasurer()
+    val style = MaterialTheme.typography.labelLarge
+    val primaryTextWidth = measurer.measure(AnnotatedString(primaryLabel), style, softWrap = false).size.width
+    val secondaryTextWidth = measurer.measure(AnnotatedString(secondaryLabel), style, softWrap = false).size.width
+    val primaryPadding = ButtonDefaults.ContentPadding.calculateLeftPadding(LayoutDirection.Ltr) +
+        ButtonDefaults.ContentPadding.calculateRightPadding(LayoutDirection.Ltr)
+    val secondaryPadding = PaddingValues(horizontal = 12.dp)
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val secondaryWidth = maxOf(48.dp, with(density) { secondaryTextWidth.toDp() } + 24.dp)
+        val fitsSideBySide = with(density) { primaryTextWidth.toDp() } + primaryPadding + 8.dp + secondaryWidth <= maxWidth
+        val primary: @Composable (Modifier) -> Unit = { modifier ->
+            FpButton(onPrimary, modifier, enabled, border = null,
+                colors = ButtonDefaults.buttonColors(containerColor = colors.fill, contentColor = colors.onFill)) {
+                Text(primaryLabel, Modifier.fillMaxWidth(), style = style, maxLines = 1, softWrap = false, textAlign = TextAlign.Center)
+            }
+        }
+        val secondary: @Composable (Modifier) -> Unit = { modifier ->
+            TextButton(onSecondary, modifier.heightIn(min = 48.dp), contentPadding = secondaryPadding) {
+                Text(secondaryLabel, Modifier.fillMaxWidth(), style = style, maxLines = 1, softWrap = false, textAlign = TextAlign.Center)
+            }
+        }
+        if (fitsSideBySide) Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            primary(Modifier.weight(1f))
+            secondary(Modifier.width(secondaryWidth))
+        } else Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            primary(Modifier.fillMaxWidth())
+            secondary(Modifier.fillMaxWidth())
         }
     }
 }

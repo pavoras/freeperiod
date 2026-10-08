@@ -30,6 +30,9 @@ data class DayEntryUiState(
     val canEndPeriod: Boolean = false,
     val loading: Boolean = true,
     val error: DayEntryError? = null,
+    val situation: Situation = Situation(),
+    val customCategories: List<CustomCategory> = emptyList(),
+    val overrides: List<UiOverride> = emptyList(),
 ) {
     val readOnly: Boolean get() = date > today
 }
@@ -38,6 +41,7 @@ internal fun dayEntryState(data: BackupData, date: LocalDate, today: LocalDate) 
     date, today, log = data.dayLogs.find { it.date == date } ?: DayLog(date), tags = data.tags,
     periodStart = data.periods.any { it.start == date }, periodEnd = data.periods.any { it.end == date },
     canEndPeriod = data.periods.any { it.start <= date }, loading = false,
+    situation = data.situation, customCategories = data.customCategories, overrides = data.overrides,
 )
 
 class DayEntryViewModel(
@@ -53,7 +57,8 @@ class DayEntryViewModel(
 
     init {
         viewModelScope.launch {
-            combine(repository.periods, repository.dayLogs, repository.tags) { _, _, _ -> Unit }
+            merge(repository.periods.map { Unit }, repository.dayLogs.map { Unit }, repository.tags.map { Unit },
+                repository.situation.map { Unit }, repository.customCategories.map { Unit }, repository.overrides.map { Unit })
                 .collect { refresh().join() }
         }
     }
@@ -68,6 +73,7 @@ class DayEntryViewModel(
     fun setPain(value: Pain?): Job = editLog { it.copy(pain = value) }
     fun setSex(value: Sex?): Job = editLog { it.copy(sex = value) }
     fun setDischarge(value: Discharge?): Job = editLog { it.copy(discharge = value) }
+    fun setOvulationTest(value: OvulationTest?): Job = editLog { it.copy(ovulationTest = value) }
     fun setNote(value: String): Job = editLog { it.copy(note = value.takeUnless(String::isEmpty)) }
     fun toggleSymptom(value: Symptom): Job = editLog {
         it.copy(symptoms = if (value in it.symptoms) it.symptoms - value else it.symptoms + value)

@@ -19,9 +19,9 @@ class AppContainer(context: Context) {
     private val database = Room.databaseBuilder(context.applicationContext,
         FreePeriodDatabase::class.java, "freeperiod.db").addMigrations(MIGRATION_1_2).build()
     val settings = SettingsStore(context)
-    val repository = Repository(database, afterRestore = { data ->
+    val repository: Repository = Repository(database, afterRestore = { data ->
         settings.resetReminderDelivery(data.reminders)
-        reminderScheduler.sync(data.reminders, data.periodRemindersPaused())
+        reminderScheduler.reconcile(repository, force = true)
     }, clock = clock)
     val backupIo = BackupIo(context.applicationContext.contentResolver)
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -33,15 +33,8 @@ class AppContainer(context: Context) {
         notifications.createChannel()
         applicationScope.launch {
             settings.migrateReminders(repository)
-            var previousDaily: Pair<Boolean, java.time.LocalTime>? = null
-            combine(repository.reminders, repository.domainSettings, repository.situation) { reminders, domain, situation ->
-                reminders to (domain.predictionsPaused || situation.predictionMode() != org.freeperiod.engine.PredictionMode.STATISTICAL)
-            }.distinctUntilChanged().collect { (reminders, paused) ->
-                    val dailyReminder = reminders.firstOrNull { it.kind == org.freeperiod.engine.ReminderKind.DAILY_LOG && it.enabled }
-                    val daily = (dailyReminder != null) to (dailyReminder?.time ?: java.time.LocalTime.of(20, 0))
-                    reminderScheduler.sync(reminders, paused, rescheduleDaily = previousDaily != null && previousDaily != daily)
-                    previousDaily = daily
-                }
+            combine(repository.reminders, repository.domainSettings, repository.situation, repository.periods) { _, _, _, _ -> Unit }
+                .collect { reminderScheduler.reconcile(repository) }
         }
     }
 }

@@ -17,6 +17,7 @@ import org.freeperiod.app.ui.theme.LocalDaylight
 @Composable
 internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean = false) {
     val t = LocalDaylight.current
+    val colors = todayFillColors(t)
     FlowRow(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf(R.string.legend_period, if (scheduledBreak) R.string.timeline_scheduled_break else R.string.legend_predicted, R.string.legend_today, R.string.legend_entry)
@@ -24,7 +25,7 @@ internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean 
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Canvas(Modifier.size(12.dp)) {
                         when (index) {
-                            0 -> { drawCircle(t.accent.periodFill); drawCircle(t.accent.periodBorder, style = Stroke(1.dp.toPx())) }
+                            0 -> drawCircle(colors.fill)
                             1 -> drawCircle(t.predicted, style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 2.dp.toPx()))))
                             2 -> drawCircle(t.accent.todayRing, style = Stroke(1.5.dp.toPx()))
                             else -> drawCircle(t.ink, radius = 2.dp.toPx())

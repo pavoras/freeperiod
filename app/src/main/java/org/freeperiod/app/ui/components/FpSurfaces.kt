@@ -25,10 +25,12 @@ fun FpPanel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -
 
 @Composable
 fun FpButton(onClick: () -> Unit, modifier: Modifier = Modifier, enabled: Boolean = true,
-    primary: Boolean = true, content: @Composable RowScope.() -> Unit) {
+    primary: Boolean = true,
+    border: BorderStroke? = BorderStroke(1.dp, if (primary) LocalDaylight.current.accent.periodBorder else LocalDaylight.current.control),
+    colors: ButtonColors? = null, content: @Composable RowScope.() -> Unit) {
     val t = LocalDaylight.current
     Button(onClick, modifier.heightIn(min = FpSpacing.touch), enabled = enabled, shape = FpShapes.button,
-        border = BorderStroke(1.dp, if (primary) t.accent.periodBorder else t.control),
-        colors = ButtonDefaults.buttonColors(containerColor = if (primary) t.accent.accent else t.surface,
+        border = border,
+        colors = colors ?: ButtonDefaults.buttonColors(containerColor = if (primary) t.accent.accent else t.surface,
             contentColor = if (primary) t.accent.onAccent else t.ink), content = content)
 }

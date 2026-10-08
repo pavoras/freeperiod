@@ -10,7 +10,6 @@ import androidx.work.testing.WorkManagerTestInitHelper
 import java.io.File
 import java.time.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.first
 import org.freeperiod.app.data.DatabaseTest
 import org.freeperiod.app.FreePeriodApp
 import org.freeperiod.app.data.SettingsStore
@@ -33,9 +32,8 @@ class ReminderWorkerTest : DatabaseTest() {
     private lateinit var work: WorkManager
     private lateinit var scheduler: ReminderScheduler
     private lateinit var delivery: ReminderDelivery
-    private val posted = mutableListOf<Pair<Boolean, Int>>()
+    private val posted = mutableListOf<Long>()
     private var notificationsEnabled = true
-    private var dailyPosted = 0
     private var now = ZonedDateTime.of(2026, 4, 12, 19, 0, 0, 0, ZoneId.of("Europe/Berlin"))
     @Before fun setup() {
         scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -45,132 +43,106 @@ class ReminderWorkerTest : DatabaseTest() {
         work = WorkManager.getInstance(context)
         scheduler = ReminderScheduler(work) { now }
         delivery = ReminderDelivery(repository, settings, object : NotificationDelivery {
-            override fun period(days: Int, explicit: Boolean): Boolean {
-                if (notificationsEnabled) posted += explicit to days
+            override fun period(days: Int, explicit: Boolean) = notificationsEnabled
+            override fun daily(explicit: Boolean) = notificationsEnabled
+            override fun reminder(reminder: Reminder, days: Int?, explicit: Boolean): Boolean {
+                if (notificationsEnabled) posted += reminder.id
                 return notificationsEnabled
             }
-            override fun daily(explicit: Boolean): Boolean {
-                if (notificationsEnabled) dailyPosted++
-                return notificationsEnabled
-            }
-        }) { today }
+        }) { now.toLocalDate() }
     }
     @After fun closeStore() = runBlocking { scope.coroutineContext[Job]!!.cancelAndJoin() }
-    private fun worker(): ReminderWorker = TestListenableWorkerBuilder<ReminderWorker>(context)
+    private suspend fun daily(recurrence: Recurrence = Recurrence.Daily) = repository.saveReminder(
+        Reminder(0, ReminderKind.DAILY_LOG, null, recurrence, LocalTime.of(20, 0), true))
+    private fun active() = work.getWorkInfosByTag(ReminderScheduler.TAG).get().filter { !it.state.isFinished }
+    private fun worker(id: Long, date: LocalDate): ScheduledReminderWorker = TestListenableWorkerBuilder<ScheduledReminderWorker>(context)
+        .setInputData(workDataOf("reminderId" to id, "date" to date.toEpochDay()))
         .setWorkerFactory(object : WorkerFactory() {
             override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker =
-                ReminderWorker(appContext, workerParameters, delivery)
+                ScheduledReminderWorker(appContext, workerParameters, delivery, repository, scheduler)
         }).build()
-    private fun org.freeperiod.app.data.AppSettings.reminders() = listOf(
-        Reminder(1, ReminderKind.PERIOD_DUE, null, Recurrence.Daily, LocalTime.of(20, 0), periodReminder, periodReminderDaysBefore),
-        Reminder(2, ReminderKind.DAILY_LOG, null, Recurrence.Daily, dailyReminderTime, dailyReminder),
-    )
-    private suspend fun seed() {
-        repository.addPeriod(today.minusDays(23), today.minusDays(19)).getOrThrow()
-        repository.updateDomainSettings(BackupSettings(28, false))
-        settings.update { it.copy(periodReminder = true) }
-    }
-
-    @Test fun postsOnceTwoDaysBefore() = runBlocking {
-        seed()
-        assertEquals(ListenableWorker.Result.success(), worker().doWork())
-        worker().doWork()
-        assertEquals(listOf(false to 2), posted)
-        assertEquals(repository.snapshot().periods.single().id, settings.settings.first().lastNotifiedPeriodId)
-    }
-    @Test fun neutralTextByDefault() = runBlocking {
-        seed(); worker().doWork()
-        assertFalse(posted.single().first)
-    }
-    @Test fun nothingWhenPaused() = runBlocking {
-        seed(); repository.updateDomainSettings(BackupSettings(28, true)); worker().doWork()
-        assertTrue(posted.isEmpty())
-    }
-    @Test fun tableEnabledFlagControlsDelivery() = runBlocking {
-        seed()
-        settings.migrateReminders(repository)
-        val reminder = repository.snapshot().reminders.single { it.kind == ReminderKind.PERIOD_DUE }
-        repository.saveReminder(reminder.copy(enabled = false))
-        worker().doWork()
-        assertTrue(posted.isEmpty())
-        settings.update { it.copy(periodReminder = false) }
-        repository.saveReminder(reminder.copy(enabled = true))
-        worker().doWork()
+    @Test fun reminderReschedulesAfterFiring() = runBlocking {
+        val reminder = daily()
+        scheduler.reconcile(repository)
+        now = now.withHour(20).withMinute(1)
+        assertEquals(ListenableWorker.Result.success(), worker(reminder.id, today).doWork())
+        assertEquals(listOf(reminder.id), posted)
+        assertEquals(today, repository.lastDeliveredDate(reminder.id))
+        assertTrue(active().single().tags.contains(ReminderScheduler.workName(reminder.id, today.plusDays(1))))
+        worker(reminder.id, today).doWork()
         assertEquals(1, posted.size)
-        assertEquals(repository.snapshot().periods.single().id, settings.settings.first().lastNotifiedPeriodId)
     }
-
-    @Test fun situationPausesPeriodDelivery() = runBlocking {
-        seed()
-        repository.updateSituation(Situation(phase = LifePhase.PREGNANT))
-        worker().doWork()
-        assertTrue(posted.isEmpty())
-        repository.updateSituation(Situation())
-        worker().doWork()
-        assertEquals(1, posted.size)
+    @Test fun everyNMonthsNoDrift() = runBlocking {
+        val recurrence = Recurrence.EveryNMonths(3, LocalDate.of(2026, 1, 31))
+        val reminder = daily(recurrence)
+        val expected = listOf(LocalDate.of(2026, 4, 30), LocalDate.of(2026, 7, 31), LocalDate.of(2026, 10, 31))
+        for (date in expected) {
+            scheduler.reconcile(repository)
+            assertTrue(active().single().tags.contains(ReminderScheduler.workName(reminder.id, date)))
+            now = date.atTime(20, 1).atZone(now.zone)
+            worker(reminder.id, date).doWork()
+        }
+        assertEquals(3, posted.size)
     }
     @Test fun disabledNotificationsDoNotMarkDelivered() = runBlocking {
-        seed(); notificationsEnabled = false; worker().doWork()
-        assertNull(settings.settings.first().lastNotifiedPeriodId)
-        notificationsEnabled = true; worker().doWork()
-        assertEquals(1, posted.size)
+        val reminder = daily()
+        notificationsEnabled = false
+        now = now.withHour(20)
+        worker(reminder.id, today).doWork()
+        assertNull(repository.lastDeliveredDate(reminder.id))
+        assertTrue(posted.isEmpty())
     }
-    @Test fun scheduleCancelledWhenDisabled() = runBlocking {
-        scheduler.sync(org.freeperiod.app.data.AppSettings(periodReminder = true, dailyReminder = true).reminders(), paused = false)
-        scheduler.sync(org.freeperiod.app.data.AppSettings().reminders(), paused = false)
-        assertTrue(work.getWorkInfosForUniqueWork(ReminderScheduler.PERIOD_WORK).get().all { it.state == WorkInfo.State.CANCELLED })
-        assertTrue(work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().all { it.state == WorkInfo.State.CANCELLED })
+    @Test fun scheduleCancelledWhenDisabledOrDeleted() = runBlocking {
+        val reminder = daily()
+        scheduler.reconcile(repository)
+        assertEquals(1, active().size)
+        repository.saveReminder(reminder.copy(enabled = false)); scheduler.reconcile(repository)
+        assertTrue(active().isEmpty())
+        repository.saveReminder(reminder); scheduler.reconcile(repository)
+        repository.deleteReminder(reminder.id); scheduler.reconcile(repository)
+        assertTrue(active().isEmpty())
     }
-    @Test fun pauseCancelsOnlyPeriodWork() = runBlocking {
-        scheduler.sync(org.freeperiod.app.data.AppSettings(periodReminder = true, dailyReminder = true).reminders(), paused = true)
-        assertTrue(work.getWorkInfosForUniqueWork(ReminderScheduler.PERIOD_WORK).get().isEmpty())
-        assertEquals(WorkInfo.State.ENQUEUED, work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().state)
+    @Test fun periodSuppressedForEveryIncompatibleSituation() = runBlocking {
+        repository.addPeriod(today.minusDays(23), today.minusDays(19)).getOrThrow()
+        repository.updateDomainSettings(BackupSettings(28, false))
+        val reminder = repository.saveReminder(Reminder(0, ReminderKind.PERIOD_DUE, null, Recurrence.Daily, LocalTime.of(20, 0), true, 2))
+        val situations = listOf(Situation(phase = LifePhase.PREGNANT), Situation(phase = LifePhase.POSTPARTUM),
+            Situation(phase = LifePhase.MENOPAUSE), Situation(method = Method.PILL_COMBINED),
+            Situation(method = Method.PILL_COMBINED, pill = PillSchedule(today.minusDays(1), 21, 7)),
+            Situation(method = Method.PILL_COMBINED, pill = PillSchedule(today.minusDays(1), 28, 0)))
+        for (situation in situations) {
+            repository.updateSituation(situation); scheduler.reconcile(repository)
+            assertTrue(active().isEmpty())
+            delivery.deliver(reminder.id, today)
+        }
+        assertTrue(posted.isEmpty())
     }
-    @Test fun dailyReminderRescheduledAfterTimeChange() = runBlocking {
-        val preferences = org.freeperiod.app.data.AppSettings(dailyReminder = true, dailyReminderTime = LocalTime.of(20, 0))
-        scheduler.sync(preferences.reminders(), paused = false)
-        val first = work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id
+    @Test fun periodPostsOncePerOccurrence() = runBlocking {
+        repository.addPeriod(today.minusDays(23), today.minusDays(19)).getOrThrow()
+        repository.updateDomainSettings(BackupSettings(28, false))
+        val reminder = repository.saveReminder(Reminder(0, ReminderKind.PERIOD_DUE, null, Recurrence.Daily, LocalTime.of(20, 0), true, 2))
+        val occurrence = requireNotNull(reminderOccurrence(reminder, repository.snapshot(), now, null))
+        delivery.deliver(reminder.id, occurrence.date); delivery.deliver(reminder.id, occurrence.date)
+        assertEquals(listOf(reminder.id), posted)
+    }
+    @Test fun timeChangeReplacesPendingRun() = runBlocking {
+        daily(); scheduler.reconcile(repository)
+        val first = active().single().id
         now = now.withZoneSameInstant(ZoneId.of("America/New_York"))
-        settings.update { preferences }
         rescheduleAfterTimeChange(Intent.ACTION_TIMEZONE_CHANGED, repository, settings, scheduler)
-        val active = work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().filter { !it.state.isFinished }
-        assertEquals(1, active.size)
-        assertNotEquals(first, active.single().id)
-        assertEquals(LocalTime.of(20, 0), nextDailyTime(now, preferences.dailyReminderTime).toLocalTime())
-        assertEquals(now.zone, nextDailyTime(now, preferences.dailyReminderTime).zone)
+        assertNotEquals(first, active().single().id)
     }
-    @Test fun dailyTimeUsesNextLocalDateAndDst() {
+    @Test fun unchangedSyncKeepsPendingRun() = runBlocking {
+        daily(); scheduler.reconcile(repository)
+        val first = active().single().id
+        scheduler.reconcile(repository)
+        assertEquals(first, active().single().id)
+    }
+    @Test fun dstGapAndOverlapUseCalendarRules() {
         val berlin = ZoneId.of("Europe/Berlin")
-        val before = ZonedDateTime.of(2026, 3, 28, 21, 0, 0, 0, berlin)
-        val next = nextDailyTime(before, LocalTime.of(20, 0))
-        assertEquals(LocalDate.of(2026, 3, 29), next.toLocalDate())
-        assertEquals(LocalTime.of(20, 0), next.toLocalTime())
-        assertEquals(22, Duration.between(before, next).toHours())
-    }
-    @Test fun dailyWorkerRequeuesNextRunEvenWhenPredictionsPaused() = runBlocking {
-        settings.update { it.copy(dailyReminder = true) }
-        repository.updateDomainSettings(BackupSettings(null, true))
-        val worker = TestListenableWorkerBuilder<DailyReminderWorker>(context)
-            .setWorkerFactory(object : WorkerFactory() {
-                override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker =
-                    DailyReminderWorker(appContext, workerParameters, delivery, repository, scheduler)
-            }).build()
-        assertEquals(ListenableWorker.Result.success(), worker.doWork())
-        assertEquals(1, dailyPosted)
-        assertEquals(1, work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().count { !it.state.isFinished })
-    }
-    @Test fun initialSyncKeepsDueDailyWork() = runBlocking {
-        val preferences = org.freeperiod.app.data.AppSettings(dailyReminder = true)
-        scheduler.sync(preferences.reminders(), paused = false)
-        val first = work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id
-        scheduler.sync(preferences.reminders(), paused = false, rescheduleDaily = false)
-        assertEquals(first, work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id)
-    }
-    @Test fun periodChangesKeepPendingDailyRun() = runBlocking {
-        val preferences = org.freeperiod.app.data.AppSettings(dailyReminder = true, periodReminder = true)
-        scheduler.sync(preferences.reminders(), paused = false)
-        val first = work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id
-        scheduler.sync(preferences.reminders(), paused = true, rescheduleDaily = false)
-        assertEquals(first, work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id)
+        val gap = nextReminderTime(Recurrence.Daily, LocalTime.of(2, 30), ZonedDateTime.of(2026, 3, 28, 21, 0, 0, 0, berlin))!!
+        assertEquals(LocalTime.of(3, 30), gap.toLocalTime())
+        val overlap = nextReminderTime(Recurrence.Daily, LocalTime.of(2, 30), ZonedDateTime.of(2026, 10, 24, 21, 0, 0, 0, berlin))!!
+        assertEquals(ZoneOffset.ofHours(2), overlap.offset)
     }
 }

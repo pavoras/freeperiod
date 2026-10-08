@@ -4,6 +4,7 @@ import java.time.LocalDate
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.*
 
+/** Shared history keeps screenshots, layout checks and timeline checks on the same dates. */
 internal fun todayFixture(scenario: String, today: LocalDate = LocalDate.of(2026, 4, 12)): TodayUiState {
     val latest = when (scenario) {
         "ongoing" -> LocalDate.of(2026, 4, 10)

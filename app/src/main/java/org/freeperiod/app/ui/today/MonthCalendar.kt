@@ -97,8 +97,9 @@ private fun MonthGrid(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: 
 @Composable
 private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClick: () -> Unit, modifier: Modifier, scheduledBreak: Boolean) {
     val t = LocalDaylight.current
-    val fill by animateColorAsState(if (marks.period) t.accent.periodFill else t.background, tween(160), label = "periodFill")
-    val numberColor by animateColorAsState(if (marks.period) t.accent.onAccent else t.ink, tween(160), label = "dayText")
+    val colors = remember(t) { todayFillColors(t) }
+    val fill by animateColorAsState(if (marks.period) colors.fill else t.background, tween(160), label = "periodFill")
+    val numberColor by animateColorAsState(if (marks.period) colors.onFill else t.ink, tween(160), label = "dayText")
     val cellHeight = maxOf(48.dp, 40.dp * LocalDensity.current.fontScale)
     val radius = maxOf(16.dp, 12.dp * LocalDensity.current.fontScale)
     val description = buildList {
@@ -114,12 +115,10 @@ private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClic
             val center = Offset(size.width / 2, size.height / 2 - 2.dp.toPx())
             val r = radius.toPx()
             drawCircle(fill, r, center)
-            if (marks.period) drawCircle(t.accent.periodBorder, r, center, style = Stroke(1.dp.toPx()))
             if (marks.predicted) drawCircle(t.predicted, r + if (marks.period) 3.dp.toPx() else 0f, center,
                 style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))))
             if (marks.today) {
                 drawCircle(t.accent.todayRing, r + 2.dp.toPx(), center, style = Stroke(2.dp.toPx()))
-                if (marks.period) drawCircle(t.accent.onAccent, r - 1.dp.toPx(), center, style = Stroke(1.dp.toPx()))
             }
             if (marks.logged) drawCircle(t.ink, 2.dp.toPx(), Offset(center.x, size.height - 3.dp.toPx()))
         }

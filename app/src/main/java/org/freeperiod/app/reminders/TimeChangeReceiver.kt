@@ -13,8 +13,7 @@ private val timeChangeActions = setOf(Intent.ACTION_TIMEZONE_CHANGED, Intent.ACT
 internal suspend fun rescheduleAfterTimeChange(action: String?, repository: Repository, settings: SettingsStore, scheduler: ReminderScheduler) {
     if (action in timeChangeActions) {
         settings.migrateReminders(repository)
-        val data = repository.snapshot()
-        scheduler.sync(data.reminders, data.periodRemindersPaused())
+        scheduler.reconcile(repository, force = true)
     }
 }
 

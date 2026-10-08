@@ -19,30 +19,26 @@ import org.freeperiod.app.R
 import org.freeperiod.app.ui.theme.*
 import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.data.LockTimeout
-import java.time.LocalTime
 
 data class SettingsActions(
     val typicalLength: (Int?) -> Unit = {},
     val paused: (Boolean) -> Unit = {},
     val appearance: () -> Unit = {},
+    val situation: () -> Unit = {},
+    val reminders: () -> Unit = {},
+    val dayEntry: () -> Unit = {},
     val language: () -> Unit = {},
     val backup: () -> Unit = {},
     val csv: () -> Unit = {},
     val privacy: () -> Unit = {},
     val about: () -> Unit = {},
     val deleteAll: () -> Unit = {},
-    val periodReminder: (Boolean) -> Unit = {},
-    val reminderDays: (Int) -> Unit = {},
-    val dailyReminder: (Boolean) -> Unit = {},
-    val reminderTime: (LocalTime) -> Unit = {},
-    val explicitNotifications: (Boolean) -> Unit = {},
-    val notificationSettings: () -> Unit = {},
     val lockEnabled: (Boolean) -> Unit = {},
     val lockTimeout: (LockTimeout) -> Unit = {},
 )
 
 @Composable
-fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false, notificationsAvailable: Boolean = true) {
+fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false) {
     var lengthDialog by rememberSaveable { mutableStateOf(false) }
     var csvDialog by rememberSaveable { mutableStateOf(false) }
     var deleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -60,12 +56,9 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
                     ?: stringResource(R.string.cycle_unknown))
         }
         item { SettingsSwitch(R.string.pause_predictions, state.predictionsPaused, enabled, actions.paused) }
-        item {
-            HorizontalDivider(Modifier.padding(vertical = 12.dp))
-            Text(stringResource(R.string.reminders), style = MaterialTheme.typography.titleMedium)
-            ReminderOptions(state.device, enabled, notificationsAvailable, actions.periodReminder, actions.reminderDays,
-                actions.dailyReminder, actions.reminderTime, actions.explicitNotifications, actions.notificationSettings)
-        }
+        item { SettingsRow(R.string.my_situation, enabled, actions.situation) }
+        item { SettingsRow(R.string.reminders, enabled, actions.reminders) }
+        item { SettingsRow(R.string.day_entry, enabled, actions.dayEntry) }
         item {
             HorizontalDivider(Modifier.padding(vertical = 12.dp))
             SettingsSwitch(R.string.app_lock, state.device.lockEnabled, enabled && (state.device.lockEnabled || state.lockCanEnable), actions.lockEnabled)

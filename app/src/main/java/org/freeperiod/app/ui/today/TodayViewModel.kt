@@ -44,15 +44,15 @@ class TodayViewModel(
     private val repository: Repository,
     settings: SettingsStore,
     private val clock: () -> LocalDate = { LocalDate.now() },
-    private val situation: () -> Situation = { Situation() },
+    private val situation: (() -> Situation)? = null,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TodayUiState(clock()))
     val state: StateFlow<TodayUiState> = mutableState.asStateFlow()
 
     init {
         viewModelScope.launch {
-            combine(repository.periods, repository.dayLogs, repository.domainSettings, settings.settings) {
-                    _, _, _, _ -> Unit
+            combine(repository.periods, repository.dayLogs, repository.domainSettings, settings.settings, repository.situation) {
+                    _, _, _, _, _ -> Unit
             }.collect { refresh().join() }
         }
     }
@@ -117,7 +117,7 @@ class TodayViewModel(
 
     private fun recompute(data: BackupData) {
         mutableState.update { previous ->
-            todayState(data, clock(), previous.month, situation()).copy(writing = previous.writing,
+            todayState(data, clock(), previous.month, situation?.invoke() ?: data.situation).copy(writing = previous.writing,
                 error = previous.error, endSaved = previous.endSaved, startedPeriodId = previous.startedPeriodId)
         }
     }
@@ -125,7 +125,7 @@ class TodayViewModel(
 
 /** The card, timeline and calendar share one snapshot and one injected calendar date. */
 internal fun todayState(data: BackupData, today: LocalDate, month: YearMonth = YearMonth.from(today),
-    situation: Situation = Situation()): TodayUiState {
+    situation: Situation = data.situation): TodayUiState {
     val periods = data.periods.filter { it.start <= today }.sortedBy { it.start }
     val prediction = predict(periods, PredictionSettings(data.settings.typicalCycleLength, data.settings.predictionsPaused), situation, today)
     val predicted = predictedDays(prediction)

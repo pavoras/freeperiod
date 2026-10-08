@@ -103,6 +103,18 @@ class RestoreTest : DatabaseTest() {
         assertEquals(R.string.csv_saved, vm.state.value.message)
         assertTrue(io.contents.first().contains("good"))
     }
+    @Test fun csvIncludesCustomItems() = runTest {
+        val category = repository.addCustomCategory("Movement")
+        val item = repository.addTag("Walk", category.id, "energetic")
+        repository.saveDayLog(DayLog(today, tagIds = setOf(item.id)))
+        val vm = model()
+        vm.exportCsv().join()
+        vm.createdDocument(uri).join()
+        assertTrue(io.contents.single().contains("Movement:Walk"))
+        assertTrue(vm.state.value.awaitingDocument)
+        vm.createdDocument(uri).join()
+        assertEquals(R.string.csv_saved, vm.state.value.message)
+    }
 
     @Test fun decodeErrorsMapToMessages() {
         val results = listOf(DecodeResult.NotABackup, DecodeResult.UnsupportedVersion,

@@ -21,6 +21,12 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class TodayViewModelTest : DatabaseTest() {
+    @Test fun todayUsesStoredSituation() = runTest {
+        repository.updateSituation(org.freeperiod.engine.Situation(phase = org.freeperiod.engine.LifePhase.MENOPAUSE))
+        val vm = viewModel()
+        vm.refresh().join()
+        assertTrue(vm.state.value.prediction is org.freeperiod.engine.PredictionState.Menopause)
+    }
     private val models = ViewModelStore()
     @Before fun setMain() { Dispatchers.setMain(UnconfinedTestDispatcher()) }
     @After fun resetMain() { models.clear(); Dispatchers.resetMain() }

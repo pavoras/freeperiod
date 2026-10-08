@@ -24,6 +24,8 @@ $gradle = Join-Path $tools 'gradle-8.11.1\bin\gradle.bat'
 
 if (-not ($Schnell -or $Voll -or $Aufnehmen)) { $Schnell = $true }
 $mode = if ($Aufnehmen) { 'aufnehmen' } elseif ($Voll) { 'voll' } else { 'schnell' }
+# Quick mode runs inside the Codex sandbox: keep AGP's user dir inside the repo (no debug key needed).
+if ($mode -eq 'schnell') { $env:ANDROID_USER_HOME = Join-Path $repo '.tools\android-user-home' }
 
 # Quick mode compiles only: packaging needs the debug key in ~/.android, outside the Codex sandbox.
 $tasks = @(':engine:test', ':app:compileDebugKotlin', ':app:compileDebugUnitTestKotlin')
@@ -39,7 +41,8 @@ $gargs = @('--console=plain', '-Porg.gradle.java.installations.auto-download=fal
 if (-not $Online) { $gargs = @('--offline') + $gargs }
 
 New-Item -ItemType Directory -Force (Join-Path $repo '.tools') | Out-Null
-$log = Join-Path $repo ".tools\check-$mode.log"
+# One log per run, so parallel rounds never overwrite each other's output.
+$log = Join-Path $repo ".tools\check-$mode-$PID.log"
 $proc = Start-Process -FilePath $gradle -ArgumentList $gargs -WorkingDirectory $repo -NoNewWindow -Wait -PassThru `
     -RedirectStandardOutput $log -RedirectStandardError "$log.err"
 $code = $proc.ExitCode

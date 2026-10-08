@@ -24,8 +24,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import org.freeperiod.app.AppContainer
 import org.freeperiod.app.R
 import org.freeperiod.app.lock.lockAvailable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
-private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT }
+private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY }
 
 @Composable
 fun SettingsRoute(container: AppContainer) {
@@ -37,12 +40,23 @@ fun SettingsRoute(container: AppContainer) {
     val backup: BackupViewModel = viewModel(factory = viewModelFactory {
         initializer { BackupViewModel(container.repository, container.backupIo, container.clock) }
     })
+    val tracking: TrackingSettingsViewModel = viewModel(factory = viewModelFactory {
+        initializer { TrackingSettingsViewModel(container.repository) }
+    })
+    val trackingState by tracking.state.collectAsStateWithLifecycle()
+    var editingReminderJson by rememberSaveable { mutableStateOf<String?>(null) }
+    val editingReminder = remember(editingReminderJson) { editingReminderJson?.let { Json.decodeFromString<org.freeperiod.engine.Reminder>(it) } }
+    fun editReminder(value: org.freeperiod.engine.Reminder) { editingReminderJson = Json.encodeToString(value) }
     val settings by model.state.collectAsStateWithLifecycle()
     val recovery by backup.state.collectAsStateWithLifecycle()
     val reminderAccess = rememberReminderAccess(container.notifications)
     var page by rememberSaveable { mutableStateOf(SettingsPage.MAIN) }
     var externalError by remember { mutableStateOf(false) }
-    val back = { page = SettingsPage.MAIN; backup.cancelRestore() }
+    val back = { page = if (page == SettingsPage.REMINDER_EDITOR) SettingsPage.REMINDERS else SettingsPage.MAIN; backup.cancelRestore() }
+    fun saveReminder(value: org.freeperiod.engine.Reminder) {
+        if (value.enabled && trackingState.data.reminders.none { it.enabled }) reminderAccess.requestPermission()
+        tracking.reminder(value)
+    }
     BackHandler(page != SettingsPage.MAIN, onBack = back)
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { backup.createdDocument(it) }
     val createCsv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { backup.createdDocument(it) }
@@ -68,12 +82,15 @@ fun SettingsRoute(container: AppContainer) {
     val version = remember(context) { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }
     Surface(Modifier.fillMaxSize(), color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
         Column {
+            if (trackingState.error) Text(stringResource(R.string.error_storage))
             if (externalError) Text(stringResource(R.string.settings_external_error))
             when (page) {
                 SettingsPage.MAIN -> Column {
                     RecoveryMessage(recovery)
                     SettingsScreen(settings, SettingsActions(
                         typicalLength = { model.setTypicalLength(it) }, paused = { model.setPaused(it) },
+                        situation = { page = SettingsPage.SITUATION }, reminders = { page = SettingsPage.REMINDERS },
+                        dayEntry = { page = SettingsPage.DAY_ENTRY },
                         appearance = { page = SettingsPage.APPEARANCE }, language = {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 openExternal(Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.parse("package:${context.packageName}")))
@@ -81,14 +98,26 @@ fun SettingsRoute(container: AppContainer) {
                         }, backup = { page = SettingsPage.BACKUP }, csv = { backup.exportCsv() },
                         privacy = { page = SettingsPage.PRIVACY }, about = { page = SettingsPage.ABOUT },
                         deleteAll = { model.deleteAllData() },
-                        periodReminder = { model.setPeriodReminder(it); if (it) reminderAccess.requestPermission() },
-                        reminderDays = { model.setReminderDays(it) },
-                        dailyReminder = { model.setDailyReminder(it); if (it) reminderAccess.requestPermission() },
-                        reminderTime = { model.setReminderTime(it) }, explicitNotifications = { model.setExplicitNotifications(it) },
-                        notificationSettings = { openExternal(reminderAccess.settingsIntent) },
                         lockEnabled = { model.setLockEnabled(it) }, lockTimeout = { model.setLockTimeout(it) }),
-                        recovery.busy || recovery.awaitingDocument, reminderAccess.available)
+                        recovery.busy || recovery.awaitingDocument)
                 }
+                SettingsPage.SITUATION -> SituationScreen(trackingState.data.situation, container.clock(), { tracking.situation(it) }, back) {
+                    editReminder(it); page = SettingsPage.REMINDER_EDITOR
+                }
+                SettingsPage.REMINDERS -> RemindersScreen(trackingState.data.reminders, ::saveReminder,
+                    { editReminder(it); page = SettingsPage.REMINDER_EDITOR }, {
+                        editReminder(org.freeperiod.engine.Reminder(0, org.freeperiod.engine.ReminderKind.CUSTOM, null,
+                            org.freeperiod.engine.Recurrence.Daily, java.time.LocalTime.of(20, 0), false))
+                        page = SettingsPage.REMINDER_EDITOR
+                    }, { tracking.deleteReminder(it) }, back, settings.device.explicitNotifications, { model.setExplicitNotifications(it) },
+                    reminderAccess.available, { openExternal(reminderAccess.settingsIntent) })
+                SettingsPage.REMINDER_EDITOR -> editingReminder?.let {
+                    ReminderEditor(it, container.clock(), { value -> saveReminder(value); page = SettingsPage.REMINDERS }, back)
+                } ?: RemindersScreen(trackingState.data.reminders, ::saveReminder, {}, {}, {}, back)
+                SettingsPage.DAY_ENTRY -> DayEntrySettingsScreen(trackingState.data, container.clock(), back,
+                    { key, hidden, order -> tracking.override(key, hidden, order) }, { tracking.reorder(it) },
+                    { name, category -> tracking.category(name, category) }, { tracking.archive(it) },
+                    { name, icon, category, symptoms -> tracking.item(name, icon, category, symptoms, context.getString(R.string.entry_symptoms)) })
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back)
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
                     backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back)

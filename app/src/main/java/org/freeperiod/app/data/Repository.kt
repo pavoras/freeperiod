@@ -139,6 +139,7 @@ class Repository(
     }
     suspend fun deleteReminder(id: Long) { write { remindersDao.delete(id) } }
     suspend fun markReminderDelivered(id: Long, date: LocalDate) { write { remindersDao.markDelivered(id, date.toEpochDay()) } }
+    suspend fun lastDeliveredDate(id: Long): LocalDate? = remindersDao.get(id)?.lastDeliveredDate?.let(LocalDate::ofEpochDay)
     suspend fun dismissLongCycleHint(startPeriodId: Long) { write { dismissalsDao.insert(HintDismissalEntity(startPeriodId)) } }
 
     /** A retry after a crash between Room commit and the DataStore flag keeps existing rows. */

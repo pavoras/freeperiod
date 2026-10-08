@@ -26,6 +26,36 @@ class DayEntrySheetTest {
     @Before fun setHostTheme() { compose.activity.setTheme(R.style.Theme_FreePeriod) }
     private val today = LocalDate.of(2026, 4, 12)
 
+    @Test fun customCategoryShowsInEntry() {
+        val category = CustomCategory(5, "Movement", "energetic", -1, false)
+        var selected: Long? = null
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(DayEntryUiState(today, today, tags = listOf(Tag(7, "Walk", categoryId = 5, iconKey = "energetic")),
+                loading = false, customCategories = listOf(category)), DayEntryActions(tag = { selected = it }), {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Movement").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Walk").performClick()
+        assertEquals(7L, selected)
+    }
+
+    @Test fun ttcOffersOvulationTestAndRegularDoesNot() {
+        val state = mutableStateOf(DayEntryUiState(today, today, loading = false,
+            situation = Situation(phase = LifePhase.TRYING_TO_CONCEIVE),
+            overrides = listOf(UiOverride("category:ovulation_test", false, -1))))
+        var selected: OvulationTest? = null
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(state.value, DayEntryActions(ovulationTest = { selected = it }), {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Positive").performClick()
+        assertEquals(OvulationTest.POSITIVE, selected)
+        state.value = state.value.copy(situation = Situation(), overrides = emptyList())
+        compose.waitForIdle()
+        compose.onNodeWithText("Ovulation test").assertDoesNotExist()
+    }
+
     @Test fun futureChipsAreDisabledAndOverlapIsText() {
         val state = DayEntryUiState(today.plusDays(1), today, loading = false, error = DayEntryError.OVERLAP)
         compose.setContent { FreePeriodTheme { DayEntrySheet(state, DayEntryActions(), {}, {}) } }
