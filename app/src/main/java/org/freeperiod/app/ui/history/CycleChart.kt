@@ -16,6 +16,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -47,7 +48,7 @@ internal fun CycleChart(cycles: List<Cycle>, onSelect: (Long) -> Unit, onVisible
         LazyRow(state = list, horizontalArrangement = Arrangement.spacedBy(FpSpacing.gap), modifier = Modifier.fillMaxSize().testTag("cycle-chart")) {
             items(cycles, key = { it.startPeriodId }) { cycle ->
                 val reason = cycle.ineligibleReason?.let { stringResource(reasonLabel(it)) } ?: stringResource(R.string.history_included)
-                val periodLength = cycle.periodLength?.let { stringResource(R.string.history_period_days, it) } ?: stringResource(R.string.history_need_period)
+                val periodLength = cycle.periodLength?.let { pluralStringResource(R.plurals.history_period_days, it, it) } ?: stringResource(R.string.history_need_period)
                 val description = stringResource(R.string.history_bar_description, cycle.start.format(fullDate),
                     cycle.nextStart.minusDays(1).format(fullDate), cycle.length, periodLength, reason)
                 Column(Modifier.width(68.dp).fillMaxHeight().testTag("history-bar-${cycle.startPeriodId}")

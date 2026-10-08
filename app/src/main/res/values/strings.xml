@@ -46,7 +46,10 @@
     <string name="history_empty">Log your periods to see your cycle history.</string>
     <string name="history_cycles">Your cycles</string>
     <string name="history_cycle_days">%1$d-day cycle</string>
-    <string name="history_period_days">Period: %1$d days</string>
+    <plurals name="history_period_days">
+        <item quantity="one">Period: %1$d day</item>
+        <item quantity="other">Period: %1$d days</item>
+    </plurals>
     <string name="history_excluded">Excluded by you · not used for predictions</string>
     <string name="history_too_short">Unusually short · not used for predictions</string>
     <string name="history_too_long">Unusually long · not used for predictions</string>
@@ -55,7 +58,10 @@
     <string name="history_symptoms">Logged symptoms</string>
     <string name="history_symptom_basis">in your last %1$d completed cycles</string>
     <string name="history_no_symptoms">No symptoms logged in these cycles.</string>
-    <string name="history_symptom_count">%1$s: %2$d days</string>
+    <plurals name="history_symptom_count">
+        <item quantity="one">%2$s: %1$d day</item>
+        <item quantity="other">%2$s: %1$d days</item>
+    </plurals>
     <string name="close">Close</string>
     <string name="previous_day">Previous day</string>
     <string name="next_day">Next day</string>

@@ -42,6 +42,8 @@ class TodayScreenshotTest {
     fun regular_deLarge() = capture("regular_deLarge", "regular", Locale.GERMANY, dark = true, fontScale = 1.5f)
     @Test fun regular_enLarge() = capture("regular_enLarge", "regular", fontScale = 1.5f)
     @Test fun ongoingDay3_enLight() = capture("ongoingDay3_enLight", "ongoing")
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun ongoingDay3_deDark() = capture("ongoingDay3_deDark", "ongoing", Locale.GERMANY, dark = true)
     @Test fun rangePassed_enLight() = capture("rangePassed_enLight", "rangePassed")
     @Test fun scheduledBreak_enLight() = capture("scheduledBreak_enLight", "scheduledBreak")
     @Test fun menopause_enLight() = capture("menopause_enLight", "menopause")

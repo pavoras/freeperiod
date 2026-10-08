@@ -84,8 +84,8 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                             catch (_: SecurityException) { model.systemSettingsUnavailable() }
                         }), access.available)
                 }
-                composable("import") {
-                    val onboardingEntry = remember { navigation.getBackStackEntry("onboarding") }
+                composable("import") { importEntry ->
+                    val onboardingEntry = remember(importEntry) { navigation.getBackStackEntry("onboarding") }
                     val model: OnboardingViewModel = viewModel(viewModelStoreOwner = onboardingEntry, factory = viewModelFactory {
                         initializer { OnboardingViewModel(container.repository, container.settings, container.clock, createSavedStateHandle()) }
                     })

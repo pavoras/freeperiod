@@ -46,7 +46,10 @@
     <string name="history_empty">Trage deine Perioden ein, um deinen Zyklusverlauf zu sehen.</string>
     <string name="history_cycles">Deine Zyklen</string>
     <string name="history_cycle_days">Zyklus: %1$d Tage</string>
-    <string name="history_period_days">Periode: %1$d Tage</string>
+    <plurals name="history_period_days">
+        <item quantity="one">Periode: %1$d Tag</item>
+        <item quantity="other">Periode: %1$d Tage</item>
+    </plurals>
     <string name="history_excluded">Von dir ausgeschlossen · nicht für Vorhersagen verwendet</string>
     <string name="history_too_short">Ungewöhnlich kurz · nicht für Vorhersagen verwendet</string>
     <string name="history_too_long">Ungewöhnlich lang · nicht für Vorhersagen verwendet</string>
@@ -55,7 +58,10 @@
     <string name="history_symptoms">Eingetragene Symptome</string>
     <string name="history_symptom_basis">in deinen letzten %1$d abgeschlossenen Zyklen</string>
     <string name="history_no_symptoms">Keine Symptome in diesen Zyklen eingetragen.</string>
-    <string name="history_symptom_count">%1$s: %2$d Tage</string>
+    <plurals name="history_symptom_count">
+        <item quantity="one">%2$s: %1$d Tag</item>
+        <item quantity="other">%2$s: %1$d Tage</item>
+    </plurals>
     <string name="close">Schließen</string>
     <string name="previous_day">Vorheriger Tag</string>
     <string name="next_day">Nächster Tag</string>

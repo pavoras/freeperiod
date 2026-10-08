@@ -118,7 +118,7 @@ internal fun CycleDetailsSheet(cycle: Cycle, enabled: Boolean, onInclude: (Long,
             Text(stringResource(R.string.history_cycle_dates, cycle.start.format(date), cycle.nextStart.minusDays(1).format(date)))
             Text(stringResource(R.string.history_cycle_days, cycle.length))
             cycle.periodLength?.let { length ->
-                Text(stringResource(R.string.history_period_days, length))
+                Text(pluralStringResource(R.plurals.history_period_days, length, length))
                 Text(stringResource(R.string.history_period_dates, cycle.start.format(date), cycle.start.plusDays(length.toLong() - 1).format(date)))
             }
             cycle.ineligibleReason?.let { Text(stringResource(reasonLabel(it)), color = LocalDaylight.current.muted) }
@@ -155,7 +155,7 @@ private fun SymptomFrequency(counts: Map<Symptom, Int>, basis: String) {
         Text(basis, style = MaterialTheme.typography.bodySmall, color = LocalDaylight.current.muted)
         if (counts.isEmpty()) Text(stringResource(R.string.history_no_symptoms))
         counts.entries.sortedByDescending { it.value }.forEach { (symptom, count) ->
-            Text(stringResource(R.string.history_symptom_count, stringResource(symptomLabel(symptom)), count))
+            Text(pluralStringResource(R.plurals.history_symptom_count, count, count, stringResource(symptomLabel(symptom))))
         }
     }
 }
