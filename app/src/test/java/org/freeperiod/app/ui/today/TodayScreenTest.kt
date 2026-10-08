@@ -24,6 +24,38 @@ class TodayScreenTest {
     private val before = Period(4, LocalDate.of(2026, 4, 10), null)
     private val receipt = PeriodEndReceipt(before, before.copy(end = LocalDate.of(2026, 4, 11)))
 
+    @Test fun estimateInfoOpensSharedDisclaimerAndCanBeDismissed() {
+        compose.setContent { FreePeriodTheme {
+            TodayScreen(todayFixture("fertile"), {}, {}, {}, {}, {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("About this calendar estimate").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Not a medical device").assertIsDisplayed()
+        compose.onNodeWithText("FreePeriod. is not a medical device.", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Got it").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Not a medical device").assertDoesNotExist()
+    }
+
+    @Test fun pastWindowHasCalendarMarksButNoCardLineOrInfoButton() {
+        val state = todayFixture("fertile", LocalDate.of(2026, 4, 20))
+        assertTrue(requireNotNull(state.fertileWindow).endInclusive < state.today)
+        compose.setContent { FreePeriodTheme { TodayScreen(state, {}, {}, {}, {}, {}, {}) } }
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("About this calendar estimate").assertDoesNotExist()
+        compose.onNodeWithText("Higher chance of pregnancy: ", substring = true).assertDoesNotExist()
+    }
+
+    @Test fun upcomingWindowShowsDatesAndCalendarEstimate() {
+        val state = todayFixture("fertile", LocalDate.of(2026, 4, 6))
+        assertTrue(state.today < requireNotNull(state.fertileWindow).start)
+        compose.setContent { FreePeriodTheme { TodayScreen(state, {}, {}, {}, {}, {}, {}) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Higher chance of pregnancy: Apr 9–16 · calendar estimate").assertIsDisplayed()
+        compose.onNodeWithContentDescription("About this calendar estimate").assertExists()
+    }
+
     @Test fun endingSavesImmediatelyThenUndoUsesTheSavedReceipt() {
         val state = mutableStateOf(initial)
         var ended: LocalDate? = null

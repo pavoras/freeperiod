@@ -42,6 +42,7 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
     var lengthDialog by rememberSaveable { mutableStateOf(false) }
     var csvDialog by rememberSaveable { mutableStateOf(false) }
     var deleteDialog by rememberSaveable { mutableStateOf(false) }
+    var feedbackDialog by rememberSaveable { mutableStateOf(false) }
     var timeoutDialog by rememberSaveable { mutableStateOf(false) }
     val enabled = !state.loading && !state.writing && !recoveryBusy
     LazyColumn(Modifier.fillMaxSize().background(LocalDaylight.current.background), contentPadding = PaddingValues(FpSpacing.screen)) {
@@ -58,7 +59,7 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         item { SettingsSwitch(R.string.pause_predictions, state.predictionsPaused, enabled, actions.paused) }
         item { SettingsRow(R.string.my_situation, enabled, actions.situation) }
         item { SettingsRow(R.string.reminders, enabled, actions.reminders) }
-        item { SettingsRow(R.string.day_entry, enabled, actions.dayEntry) }
+        item { SettingsRow(R.string.customize_day_entry, enabled, actions.dayEntry) }
         item {
             HorizontalDivider(Modifier.padding(vertical = 12.dp))
             SettingsSwitch(R.string.app_lock, state.device.lockEnabled, enabled && (state.device.lockEnabled || state.lockCanEnable), actions.lockEnabled)
@@ -71,6 +72,7 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         item { SettingsRow(R.string.backup_restore, enabled, actions.backup) }
         item { SettingsRow(R.string.export_csv, enabled, { csvDialog = true }) }
         item { SettingsRow(R.string.privacy_policy, enabled, actions.privacy) }
+        item { SettingsRow(R.string.feedback, enabled, { feedbackDialog = true }) }
         item { SettingsRow(R.string.about, enabled, actions.about) }
         item {
             TextButton(onClick = { deleteDialog = true }, enabled = enabled, modifier = Modifier.heightIn(min = 48.dp)) {
@@ -87,6 +89,7 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
     }
     if (csvDialog) ConfirmationDialog(R.string.export_csv, R.string.csv_warning, R.string.export_csv,
         onDismiss = { csvDialog = false }, onConfirm = { csvDialog = false; actions.csv() })
+    if (feedbackDialog) FeedbackDialog { feedbackDialog = false }
     if (deleteDialog) ConfirmationDialog(R.string.delete_all_data, R.string.delete_all_warning, R.string.delete_all_data,
         onDismiss = { deleteDialog = false }, onConfirm = { deleteDialog = false; actions.deleteAll() })
     if (timeoutDialog) AlertDialog(onDismissRequest = { timeoutDialog = false },
@@ -109,7 +112,8 @@ internal fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, deta
         R.string.appearance -> R.drawable.ic_fp_appearance
         R.string.my_situation -> R.drawable.ic_fp_situation
         R.string.reminders -> R.drawable.ic_fp_reminder
-        R.string.day_entry -> R.drawable.ic_fp_note
+        R.string.customize_day_entry -> R.drawable.ic_fp_note
+        R.string.feedback -> R.drawable.ic_fp_export
         R.string.pill_rhythm -> R.drawable.ic_fp_cycle
         R.string.typical_cycle_length -> R.drawable.ic_fp_cycle
         R.string.language -> R.drawable.ic_fp_language

@@ -31,6 +31,7 @@
     <string name="confirm_period_end">Mark %1$s as the last day of your period?</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
+    <string name="got_it">Got it</string>
     <string name="dismiss">Dismiss</string>
     <string name="error_period_overlap">These dates overlap another period. Choose different dates.</string>
     <string name="error_period_end_before_start">The end date needs to be on or after the start.</string>
@@ -66,6 +67,7 @@
     <string name="previous_day">Previous day</string>
     <string name="next_day">Next day</string>
     <string name="day_read_only">You can view future days. Log them when the day arrives.</string>
+    <string name="day_period_heading">Period</string>
     <string name="period_start_day">Period started on this day</string>
     <string name="period_end_day">Period ended on this day</string>
     <string name="period_end_date">When did your period end?</string>
@@ -244,7 +246,16 @@
     <string name="history_cycle_label">Cycle length</string>
     <string name="history_period_label">Period length</string>
     <string name="history_days_unit">days</string>
-    <string name="app_estimates">FreePeriod. records what you enter and shows calendar estimates. It does not diagnose conditions or recommend treatment.</string>
+    <string name="app_estimates">FreePeriod. is not a medical device. It is not a method of contraception, not a tool to help you get pregnant, and gives no medical advice, diagnosis or treatment. All dates are calendar estimates from your own entries and can be wrong; they are not reliable. Talk to a doctor or pharmacist about contraception, pregnancy or health questions.</string>
+    <string name="medical_disclaimer_title">Not a medical device</string>
+    <string name="medical_disclaimer_note">These calendar estimates can be wrong and are not reliable. FreePeriod. is not for contraception, help getting pregnant, or medical advice.</string>
+    <string name="pregnancy_chance_label">Higher chance of pregnancy</string>
+    <string name="pregnancy_chance_estimate">%1$s · calendar estimate</string>
+    <string name="pregnancy_chance_dates">%1$s: %2$s · calendar estimate</string>
+    <string name="pregnancy_chance_info">About this calendar estimate</string>
+    <string name="calendar_pregnancy_chance">higher chance of pregnancy, calendar estimate</string>
+    <string name="show_pregnancy_chance">Show days with a higher chance of pregnancy</string>
+    <string name="pregnancy_chance_detail">A calendar estimate from your own entries; dates can be wrong.</string>
     <string name="reminder_timing">Notifications may arrive later than the time you choose.</string>
     <string name="history_no_value">–</string>
     <string name="symptom_hot_flushes">Hot flushes</string>
@@ -421,4 +432,11 @@
     <string name="import_confirm">Import periods</string>
     <string name="import_result">%1$d imported. %2$d overlapping periods skipped.</string>
     <string name="import_invalid">No valid periods found. Check the columns and dates; dates must not be in the future.</string>
+    <string name="customize_day_entry">Customize day entry</string>
+    <string name="feedback">Send feedback</string>
+    <string name="feedback_subject">FreePeriod. feedback</string>
+    <string name="feedback_text">Opens your email app with a message to us. You see everything before you send it. FreePeriod. never adds your periods, entries or notes.</string>
+    <string name="feedback_include_info">Add technical info (app and Android version, device model, language)</string>
+    <string name="feedback_open">Open email</string>
+    <string name="feedback_no_app">No email app found. You can write to %1$s.</string>
 </resources>

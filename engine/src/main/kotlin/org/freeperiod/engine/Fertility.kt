@@ -1,11 +1,14 @@
 package org.freeperiod.engine
 
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit.DAYS
 
-/** Opt-in calendar estimate only for statistical ranges in compatible situations. */
+/**
+ * Calendar estimate only for statistical ranges with the display preference enabled in a
+ * compatible situation. Estimated ovulation is each possible next period start minus 14 days.
+ * The five preceding days and that day span `(earliest - 19)..(latest - 14)`, inclusive, over
+ * the whole predicted range: six days for a single-day range, eight for a three-day range.
+ */
 fun fertileWindow(state: PredictionState, situation: Situation): ClosedRange<LocalDate>? {
     if (state !is PredictionState.Range || !situation.fertileWindowAllowed()) return null
-    val centre = state.earliest.plusDays((DAYS.between(state.earliest, state.latest) + 1) / 2)
-    return centre.minusDays(19)..centre.minusDays(13)
+    return state.earliest.minusDays(19)..state.latest.minusDays(14)
 }

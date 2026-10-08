@@ -21,6 +21,14 @@ class TrackingSettingsViewModelTest : DatabaseTest() {
     @Before fun setup() { Dispatchers.setMain(UnconfinedTestDispatcher()) }
     @After fun reset() { models.clear(); Dispatchers.resetMain() }
     private fun model() = TrackingSettingsViewModel(repository).also { models.put("tracking", it) }
+    @Test fun situationPreferencePersistsAcrossPhaseChanges() = runTest {
+        val vm = model()
+        vm.situation(Situation(fertileWindowEnabled = false)).join()
+        assertFalse(repository.snapshot().situation.fertileWindowEnabled)
+        vm.situation(repository.snapshot().situation.copy(phase = LifePhase.PREGNANT)).join()
+        vm.situation(repository.snapshot().situation.copy(phase = LifePhase.REGULAR)).join()
+        assertFalse(repository.snapshot().situation.fertileWindowEnabled)
+    }
     @Test fun customSymptomsStayInSymptomsAndKeepCategoryNamesUnique() = runTest {
         repository.addCustomCategory("Symptoms")
         val vm = model()

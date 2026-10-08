@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.components.*
@@ -56,6 +57,7 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
                 when (state.page) {
                     0 -> {
                         Text(stringResource(R.string.onboarding_welcome), style = MaterialTheme.typography.headlineLarge)
+                        FpPanel { MedicalDisclaimer(Modifier.padding(12.dp), compact = true) }
                         FpPanel { Text(stringResource(R.string.onboarding_promise), Modifier.padding(FpSpacing.screen), style = MaterialTheme.typography.titleLarge) }
                         Text(stringResource(R.string.onboarding_local))
                         Text(stringResource(R.string.onboarding_optional))

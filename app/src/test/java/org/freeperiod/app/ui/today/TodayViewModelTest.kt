@@ -21,6 +21,24 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class TodayViewModelTest : DatabaseTest() {
+    @Test fun windowUsesThePersistedPreferenceAndSituation() = runTest {
+        repository.addPeriod(today.minusDays(10), today.minusDays(6)).getOrThrow()
+        repository.updateDomainSettings(org.freeperiod.engine.backup.BackupSettings(28, false))
+        val vm = viewModel()
+        vm.refresh().join()
+        assertNotNull(vm.state.value.fertileWindow)
+        repository.updateSituation(org.freeperiod.engine.Situation(fertileWindowEnabled = false))
+        vm.refresh().join()
+        assertNull(vm.state.value.fertileWindow)
+        assertTrue(vm.state.value.days.values.none { it.higherChance })
+        repository.updateSituation(org.freeperiod.engine.Situation(phase = org.freeperiod.engine.LifePhase.PREGNANT))
+        vm.refresh().join()
+        assertNull(vm.state.value.fertileWindow)
+        repository.updateSituation(org.freeperiod.engine.Situation())
+        vm.refresh().join()
+        assertNotNull(vm.state.value.fertileWindow)
+    }
+
     @Test fun todayUsesStoredSituation() = runTest {
         repository.updateSituation(org.freeperiod.engine.Situation(phase = org.freeperiod.engine.LifePhase.MENOPAUSE))
         val vm = viewModel()

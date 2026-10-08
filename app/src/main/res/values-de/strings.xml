@@ -31,6 +31,7 @@
     <string name="confirm_period_end">Den %1$s als letzten Tag deiner Periode markieren?</string>
     <string name="confirm">Bestätigen</string>
     <string name="cancel">Abbrechen</string>
+    <string name="got_it">Verstanden</string>
     <string name="dismiss">Schließen</string>
     <string name="error_period_overlap">Diese Daten überschneiden sich mit einer anderen Periode. Wähle andere Daten.</string>
     <string name="error_period_end_before_start">Das Ende muss am oder nach dem Beginn liegen.</string>
@@ -66,6 +67,7 @@
     <string name="previous_day">Vorheriger Tag</string>
     <string name="next_day">Nächster Tag</string>
     <string name="day_read_only">Du kannst zukünftige Tage ansehen und sie eintragen, sobald der Tag da ist.</string>
+    <string name="day_period_heading">Periode</string>
     <string name="period_start_day">Periode an diesem Tag begonnen</string>
     <string name="period_end_day">Periode an diesem Tag beendet</string>
     <string name="period_end_date">Wann ist deine Periode zu Ende gegangen?</string>
@@ -85,15 +87,15 @@
     <string name="entry_tags">Tags</string>
     <string name="entry_note">Notiz</string>
     <string name="entry_none">Keine</string>
-    <string name="flow_spotting">Schmierblutung</string>
+    <string name="flow_spotting">Schmier­blutung</string>
     <string name="flow_light">Leicht</string>
     <string name="flow_medium">Mittel</string>
     <string name="flow_heavy">Stark</string>
-    <string name="mood_great">Sehr gut</string>
+    <string name="mood_great">Super</string>
     <string name="mood_good">Gut</string>
     <string name="mood_okay">Okay</string>
     <string name="mood_low">Mäßig</string>
-    <string name="mood_bad">Schlecht</string>
+    <string name="mood_bad">Mies</string>
     <string name="pain_mild">Leicht</string>
     <string name="pain_moderate">Mittel</string>
     <string name="pain_severe">Stark</string>
@@ -107,7 +109,7 @@
     <string name="discharge_egg_white">Wie Eiweiß</string>
     <string name="discharge_unusual">Ungewöhnlich</string>
     <string name="symptom_cramps">Krämpfe</string>
-    <string name="symptom_headache">Kopfschmerzen</string>
+    <string name="symptom_headache">Kopf­schmerzen</string>
     <string name="symptom_backache">Rückenschmerzen</string>
     <string name="symptom_bloating">Blähungen</string>
     <string name="symptom_breast_tenderness">Brustspannen</string>
@@ -244,7 +246,16 @@
     <string name="history_cycle_label">Zykluslänge</string>
     <string name="history_period_label">Periodenlänge</string>
     <string name="history_days_unit">Tage</string>
-    <string name="app_estimates">FreePeriod. speichert deine Einträge und zeigt Kalenderschätzungen. Die App stellt keine Diagnosen und empfiehlt keine Behandlungen.</string>
+    <string name="app_estimates">FreePeriod. ist kein Medizinprodukt. Die App ist keine Verhütungsmethode, hilft dir nicht dabei, schwanger zu werden, und gibt keine medizinischen Ratschläge, Diagnosen oder Behandlungen. Alle Datumsangaben sind Kalenderschätzungen aus deinen eigenen Einträgen. Sie können falsch sein und sind nicht verlässlich. Bei Fragen zu Verhütung, Schwangerschaft oder Gesundheit sprich mit deiner Arztpraxis oder Apotheke.</string>
+    <string name="medical_disclaimer_title">Kein Medizinprodukt</string>
+    <string name="medical_disclaimer_note">Diese Kalenderschätzungen können falsch sein und sind nicht verlässlich. FreePeriod. dient weder zur Verhütung noch dazu, schwanger zu werden, und gibt keine medizinischen Ratschläge.</string>
+    <string name="pregnancy_chance_label">Erhöhte Chance auf Schwangerschaft</string>
+    <string name="pregnancy_chance_estimate">%1$s · Kalenderschätzung</string>
+    <string name="pregnancy_chance_dates">%1$s: %2$s · Kalenderschätzung</string>
+    <string name="pregnancy_chance_info">Über diese Kalenderschätzung</string>
+    <string name="calendar_pregnancy_chance">erhöhte Chance auf Schwangerschaft, Kalenderschätzung</string>
+    <string name="show_pregnancy_chance">Tage mit erhöhter Chance auf Schwangerschaft anzeigen</string>
+    <string name="pregnancy_chance_detail">Eine Kalenderschätzung aus deinen Einträgen; Datumsangaben können falsch sein.</string>
     <string name="reminder_timing">Benachrichtigungen können später als zur gewählten Uhrzeit ankommen.</string>
     <string name="history_no_value">–</string>
     <string name="symptom_hot_flushes">Hitzewallungen</string>
@@ -421,4 +432,11 @@
     <string name="import_confirm">Perioden importieren</string>
     <string name="import_result">%1$d importiert. %2$d überlappende Perioden übersprungen.</string>
     <string name="import_invalid">Keine gültigen Perioden gefunden. Prüfe Spalten und Daten; Daten dürfen nicht in der Zukunft liegen.</string>
+    <string name="customize_day_entry">Tageseintrag anpassen</string>
+    <string name="feedback">Feedback senden</string>
+    <string name="feedback_subject">Feedback zu FreePeriod.</string>
+    <string name="feedback_text">Öffnet deine E-Mail-App mit einer Nachricht an uns. Du siehst alles, bevor du sie sendest. FreePeriod. hängt nie deine Perioden, Einträge oder Notizen an.</string>
+    <string name="feedback_include_info">Technische Infos anhängen (App- und Android-Version, Gerätemodell, Sprache)</string>
+    <string name="feedback_open">E-Mail öffnen</string>
+    <string name="feedback_no_app">Keine E-Mail-App gefunden. Du kannst an %1$s schreiben.</string>
 </resources>

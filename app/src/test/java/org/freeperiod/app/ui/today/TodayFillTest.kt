@@ -7,6 +7,14 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class TodayFillTest {
+    @Test fun estimateUnderlinesMeetContrastOnEmptyAndPeriodDaysInEveryAccentAndMode() {
+        for (accent in Accent.entries) for (dark in listOf(false, true)) {
+            val t = daylightTokens(accent, dark)
+            val colors = todayFillColors(t)
+            assertTrue("$accent dark=$dark empty day", contrast(t.muted, t.background) >= 3.0)
+            assertTrue("$accent dark=$dark period day", contrast(colors.onFill, colors.fill) >= 3.0)
+        }
+    }
     @Test fun borderlessFillsAndTheirTextMeetContrastForAllAccentsAndModes() {
         Accent.entries.forEach { accent ->
             listOf(false, true).forEach { dark ->

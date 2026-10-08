@@ -98,6 +98,13 @@ fun SituationScreen(situation: Situation, today: LocalDate, onSave: (Situation) 
                     style = MaterialTheme.typography.bodySmall, color = t.muted)
             }
         }
+        if (situation.copy(fertileWindowEnabled = true).fertileWindowAllowed()) item {
+            SettingsPanel {
+                FpSwitchRow(stringResource(R.string.show_pregnancy_chance), situation.fertileWindowEnabled,
+                    onChange = { onSave(situation.copy(fertileWindowEnabled = it)) })
+                Text(stringResource(R.string.pregnancy_chance_detail), style = MaterialTheme.typography.bodySmall, color = t.muted)
+            }
+        }
         if (situation.phase == LifePhase.PERIMENOPAUSE) item { Text(stringResource(R.string.phase_vary), color = t.muted) }
         item { Text(stringResource(R.string.situation_disclosure), style = MaterialTheme.typography.bodySmall, color = t.muted) }
     }

@@ -29,6 +29,17 @@ class ImportTest : DatabaseTest() {
     @After fun cleanup() { models.clear(); Dispatchers.resetMain() }
     private fun model() = ImportViewModel(repository, io) { today }.also { models.put("import", it) }
 
+    @Test fun csvWithoutSituationKeepsDefaultOnAndRespectsAnExistingOptOut() = runTest {
+        val vm = model()
+        vm.read(Uri.parse("content://test/csv")).join()
+        vm.confirm().join()
+        assertTrue(repository.snapshot().situation.fertileWindowEnabled)
+        repository.updateSituation(org.freeperiod.engine.Situation(fertileWindowEnabled = false))
+        vm.read(Uri.parse("content://test/csv")).join()
+        vm.confirm().join()
+        assertFalse(repository.snapshot().situation.fertileWindowEnabled)
+    }
+
     @Test fun previewDoesNotWriteAndImportReportsOverlaps() = runTest {
         repository.addPeriod(today.withDayOfMonth(1), today.withDayOfMonth(5)).getOrThrow()
         val before = repository.snapshot()

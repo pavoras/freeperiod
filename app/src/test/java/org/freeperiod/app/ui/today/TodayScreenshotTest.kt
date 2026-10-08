@@ -48,6 +48,10 @@ class TodayScreenshotTest {
     @Test fun scheduledBreak_enLight() = capture("scheduledBreak_enLight", "scheduledBreak")
     @Test fun menopause_enLight() = capture("menopause_enLight", "menopause")
     @Test fun empty_enLight() = capture("empty_enLight", "empty")
+    @Test fun fertile_enLight() = capture("fertile_enLight", "fertile")
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun fertile_deDark() = capture("fertile_deDark", "fertile", Locale.GERMANY, dark = true)
+    @Test fun disclaimer_enLight() = capture("disclaimer_enLight", "fertile", disclaimer = true)
 
     @Test fun calendarPredicted_enLight() {
         Locale.setDefault(Locale.US)
@@ -65,7 +69,8 @@ class TodayScreenshotTest {
         compose.onNodeWithTag("calendar").captureRoboImage("src/test/screenshots/today/calendarPredicted_enLight.png")
     }
 
-    private fun capture(name: String, scenario: String, locale: Locale = Locale.US, dark: Boolean = false, fontScale: Float = 1f) {
+    private fun capture(name: String, scenario: String, locale: Locale = Locale.US, dark: Boolean = false,
+        fontScale: Float = 1f, disclaimer: Boolean = false) {
         Locale.setDefault(locale)
         val state = todayFixture(scenario, clock())
         compose.setContent {
@@ -81,6 +86,16 @@ class TodayScreenshotTest {
         }
         compose.waitForIdle()
         compose.onNodeWithText(if (locale.language == "de") "Einstellungen" else "Settings").assertExists()
+        if (disclaimer) {
+            compose.onNodeWithContentDescription("About this calendar estimate").performClick()
+            compose.waitForIdle()
+            compose.onNodeWithText("Not a medical device").assertIsDisplayed()
+            compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/today/$name.png")
+            return
+        }
+        if (scenario == "fertile") compose.onNodeWithContentDescription(
+            if (locale.language == "de") "9 April 2026, erhöhte Chance auf Schwangerschaft, Kalenderschätzung"
+            else "9 April 2026, higher chance of pregnancy, calendar estimate").assertExists()
         compose.onRoot().captureRoboImage("src/test/screenshots/today/$name.png")
     }
 }

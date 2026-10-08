@@ -41,7 +41,9 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
             repository.updateSituation(current.copy(
                 phase = if (value.phase != previous.phase) value.phase else current.phase,
                 method = if (value.method != previous.method) value.method else current.method,
-                pill = if (value.pill != previous.pill) value.pill else current.pill))
+                pill = if (value.pill != previous.pill) value.pill else current.pill,
+                fertileWindowEnabled = if (value.fertileWindowEnabled != previous.fertileWindowEnabled) value.fertileWindowEnabled
+                    else current.fertileWindowEnabled))
         }
     }
     fun reminder(value: Reminder) = write { repository.saveReminder(value) }

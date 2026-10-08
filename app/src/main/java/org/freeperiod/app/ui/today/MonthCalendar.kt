@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -106,6 +107,7 @@ private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClic
         add(date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale)))
         if (marks.period) add(stringResource(R.string.calendar_period))
         if (marks.predicted) add(stringResource(if (scheduledBreak) R.string.calendar_scheduled_break else R.string.calendar_predicted))
+        if (marks.higherChance) add(stringResource(R.string.calendar_pregnancy_chance))
         if (marks.logged) add(stringResource(R.string.calendar_logged))
         if (marks.today) add(stringResource(R.string.calendar_today))
     }.joinToString(", ")
@@ -119,6 +121,12 @@ private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClic
                 style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))))
             if (marks.today) {
                 drawCircle(t.accent.todayRing, r + 2.dp.toPx(), center, style = Stroke(2.dp.toPx()))
+            }
+            if (marks.higherChance) {
+                val y = center.y + r - 4.dp.toPx()
+                drawLine(if (marks.period) colors.onFill else t.muted,
+                    Offset(center.x - 3.dp.toPx(), y), Offset(center.x + 3.dp.toPx(), y),
+                    strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             }
             if (marks.logged) drawCircle(t.ink, 2.dp.toPx(), Offset(center.x, size.height - 3.dp.toPx()))
         }

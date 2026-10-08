@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -16,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.YearMonth
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.components.MedicalDisclaimer
 import org.freeperiod.app.ui.theme.LocalDaylight
 import org.freeperiod.engine.PeriodError
 import org.freeperiod.engine.PredictionState
@@ -26,6 +28,7 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
     onDismissError: () -> Unit, modifier: Modifier = Modifier,
     onUndoEnd: ((PeriodEndReceipt) -> Unit)? = null) {
     val t = LocalDaylight.current
+    var disclaimer by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
     val locale = LocalConfiguration.current.locales[0]
     val haptic = LocalHapticFeedback.current
@@ -83,11 +86,12 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
             if (state.loading) CircularProgressIndicator(Modifier.padding(24.dp))
             else {
                 TodayCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,
-                    Modifier.padding(horizontal = 12.dp))
+                    Modifier.padding(horizontal = 12.dp), onEstimateInfo = { disclaimer = true })
                 MonthCalendar(state.month, state.days, onMonthChange, onDayClick, Modifier.padding(horizontal = 12.dp),
                     scheduledBreak = state.prediction is PredictionState.ScheduledBreak)
                 TodayLegend(Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    scheduledBreak = state.prediction is PredictionState.ScheduledBreak)
+                    scheduledBreak = state.prediction is PredictionState.ScheduledBreak,
+                    higherChance = state.days.values.any { it.higherChance })
             }
             state.error?.let { error ->
                 val message = when (error.periodError) {
@@ -102,4 +106,7 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
             }
         }
     }
+    if (disclaimer) AlertDialog(onDismissRequest = { disclaimer = false }, containerColor = t.surface, textContentColor = t.ink,
+        text = { MedicalDisclaimer(Modifier.verticalScroll(rememberScrollState())) },
+        confirmButton = { TextButton(onClick = { disclaimer = false }) { Text(stringResource(R.string.got_it)) } })
 }

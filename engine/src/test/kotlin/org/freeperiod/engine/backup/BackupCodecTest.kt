@@ -133,9 +133,19 @@ class BackupCodecTest {
         assertEquals(2, result.data.schemaVersion)
         assertEquals(listOf(Tag(7, "Walk", true)), result.data.tags)
         assertEquals(Situation(), result.data.situation)
+        assertTrue(result.data.situation.fertileWindowEnabled)
         assertTrue(result.data.customCategories.isEmpty())
         assertEquals(2001, result.data.dayLogs.single().note!!.length)
         assertNull(result.data.dayLogs.single().ovulationTest)
+    }
+
+    @Test fun missingV2PreferenceDefaultsOnAndExplicitFalseSurvivesRestore() {
+        val json = Json { encodeDefaults = true }.encodeToString(data)
+        val withoutPreference = json.replace(Regex(",?\"fertileWindowEnabled\":(?:true|false)"), "")
+        val restored = decode(rawBackup(withoutPreference)) as DecodeResult.Ok
+        assertTrue(restored.data.situation.fertileWindowEnabled)
+        val disabled = data.copy(situation = Situation(fertileWindowEnabled = false))
+        assertEquals(DecodeResult.Ok(disabled), decode(encode(disabled)))
     }
 
     @Test fun roundTripV2() {
@@ -262,4 +272,3 @@ class BackupCodecTest {
         } finally { keyBytes.fill(0) }
     }
 }
-

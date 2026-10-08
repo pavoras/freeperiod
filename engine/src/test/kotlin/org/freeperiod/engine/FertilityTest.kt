@@ -9,9 +9,22 @@ class FertilityTest {
     private val range = PredictionState.Range(centre.minusDays(1), centre.plusDays(1), Basis.HISTORY, 3, 5, 10)
     private val enabled = Situation(fertileWindowEnabled = true)
 
-    @Test fun fertileWindowFromCentre() {
-        assertEquals(LocalDate.of(2026, 4, 4)..LocalDate.of(2026, 4, 10), fertileWindow(range, enabled))
-        assertNull(fertileWindow(range, Situation()))
+    @Test fun threeDayPredictionSpansEightDays() {
+        val window = requireNotNull(fertileWindow(range, enabled))
+        assertEquals(LocalDate.of(2026, 4, 3)..LocalDate.of(2026, 4, 10), window)
+        assertEquals(8L, java.time.temporal.ChronoUnit.DAYS.between(window.start, window.endInclusive) + 1)
+    }
+
+    @Test fun singleDayPredictionSpansSixDays() {
+        val window = requireNotNull(fertileWindow(range.copy(earliest = centre, latest = centre), enabled))
+        assertEquals(centre.minusDays(19)..centre.minusDays(14), window)
+        assertEquals(6L, java.time.temporal.ChronoUnit.DAYS.between(window.start, window.endInclusive) + 1)
+    }
+
+    @Test fun enabledByDefaultAndCanBeDisabled() {
+        assertTrue(Situation().fertileWindowEnabled)
+        assertNotNull(fertileWindow(range, Situation()))
+        assertNull(fertileWindow(range, Situation(fertileWindowEnabled = false)))
     }
 
     @Test fun noFertileWindowWhenVaries() {
@@ -21,13 +34,12 @@ class FertilityTest {
     }
 
     @Test fun hormonalMethodsDisallowFertileWindow() {
-        Method.entries.forEach { method ->
-            val allowed = method in setOf(Method.NONE, Method.IUD_COPPER, Method.CONDOM, Method.OTHER)
-            assertEquals(method.name, allowed, fertileWindow(range, enabled.copy(method = method)) != null)
-        }
-        LifePhase.entries.forEach { phase ->
-            val allowed = phase in setOf(LifePhase.REGULAR, LifePhase.TRYING_TO_CONCEIVE, LifePhase.PERIMENOPAUSE)
-            assertEquals(phase.name, allowed, fertileWindow(range, enabled.copy(phase = phase)) != null)
+        for (phase in LifePhase.entries) for (method in Method.entries) for (on in listOf(false, true)) {
+            val allowed = on && phase in setOf(LifePhase.REGULAR, LifePhase.TRYING_TO_CONCEIVE, LifePhase.PERIMENOPAUSE) &&
+                method in setOf(Method.NONE, Method.IUD_COPPER, Method.CONDOM, Method.OTHER)
+            val situation = Situation(phase = phase, method = method, fertileWindowEnabled = on)
+            assertEquals("$phase/$method/$on", allowed, situation.fertileWindowAllowed())
+            assertEquals("$phase/$method/$on", allowed, fertileWindow(range, situation) != null)
         }
     }
 }

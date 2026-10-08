@@ -11,6 +11,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -60,7 +62,6 @@ fun DayEntrySheet(
     var noteOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
     var customOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf("") }
     var moreSymptoms by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
-    val largeText = LocalDensity.current.fontScale >= 1.3f
     val tones = LocalDaylight.current
     val editable = !state.readOnly && !state.loading
     var askEndDate by remember(state.date) { mutableStateOf(false) }
@@ -126,20 +127,20 @@ fun DayEntrySheet(
                     item { Text(stringResource(errorLabel(error)), color = MaterialTheme.colorScheme.error) }
                 }
                 item {
-                    FpSwitchRow(stringResource(R.string.period_start_day), state.periodStart, editable, onChange = {
-                        if (it) requestStart() else actions.removePeriodStart()
-                    })
-                    if (state.canEndPeriod || state.periodEnd) {
-                        FpSwitchRow(stringResource(R.string.period_end_day), state.periodEnd, editable && state.canEndPeriod, actions.endPeriod)
-                    }
-                    HorizontalDivider(color = tones.line)
+                    Spacer(Modifier.height(8.dp))
+                    PeriodBlock(started = state.periodStart, ended = state.periodEnd,
+                        showEnd = state.canEndPeriod || state.periodEnd, startEnabled = editable,
+                        endEnabled = editable && state.canEndPeriod,
+                        onStart = { if (it) requestStart() else actions.removePeriodStart() }, onEnd = actions.endPeriod)
+                    Spacer(Modifier.height(8.dp))
                 }
                 entryCategories(state).forEach { category ->
                     item(key = category.key) {
                         when (category.key) {
                             "mood" -> {
                                 Text(stringResource(R.string.entry_mood), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium)
-                                ChoiceGrid(listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT).filter { state.itemVisible("mood", it.name) }, if (largeText) 3 else 5) { mood ->
+                                val moods = listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT).filter { state.itemVisible("mood", it.name) }
+                                ChoiceGrid(moods, moods.map { stringResource(moodLabel(it)) }, 5) { mood ->
                                     FpFaceChip(state.log.mood == mood, { actions.mood(if (state.log.mood == mood) null else mood) },
                                         stringResource(moodLabel(mood)), Modifier.fillMaxWidth().fillMaxHeight(), editable) {
                                         Icon(painterResource(moodIcon(mood)), null, Modifier.size(27.dp).testTag("mood-icon-${mood.name}"))
@@ -150,9 +151,11 @@ fun DayEntrySheet(
                             "pain" -> Choices(category.label, Pain.entries.filter { state.itemVisible("pain", it.name) }, state.log.pain, editable, ::painLabel, actions.pain)
                             "symptoms" -> {
                                 Text(stringResource(R.string.entry_symptoms), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium)
-                                ChoiceGrid(state.visibleSymptoms(moreSymptoms) + listOf(null), if (largeText) 2 else 4) { symptom ->
+                                val symptoms = state.visibleSymptoms(moreSymptoms) + listOf(null)
+                                val moreLabel = stringResource(if (moreSymptoms) R.string.entry_less else R.string.entry_more)
+                                ChoiceGrid(symptoms, symptoms.map { if (it == null) moreLabel else stringResource(symptomLabel(it)) }, 4) { symptom ->
                                     if (symptom == null) FpChip(moreSymptoms, { moreSymptoms = !moreSymptoms },
-                                        stringResource(if (moreSymptoms) R.string.entry_less else R.string.entry_more), Modifier.fillMaxWidth(), stacked = true,
+                                        moreLabel, Modifier.fillMaxWidth(), stacked = true,
                                         icon = { Icon(painterResource(R.drawable.ic_fp_more), null, Modifier.size(20.dp)) })
                                     else FpChip(symptom in state.log.symptoms, { actions.symptom(symptom) }, stringResource(symptomLabel(symptom)),
                                         Modifier.fillMaxWidth().fillMaxHeight(), editable, stacked = true,
@@ -214,8 +217,31 @@ fun DayEntrySheet(
     }
 }
 
+/**
+ * As many columns as fit without breaking a word inside: the longest word (or soft-hyphen part) of any
+ * label decides. Large fonts and long German words get fewer, wider chips instead of broken letters.
+ */
 @Composable
-private fun <T> ChoiceGrid(values: List<T>, columns: Int, content: @Composable (T) -> Unit) {
+private fun <T> ChoiceGrid(values: List<T>, labels: List<String>, maxColumns: Int, content: @Composable (T) -> Unit) {
+    val measurer = rememberTextMeasurer()
+    val style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val parts = labels.flatMap { it.split(' ') }.flatMap { word ->
+            word.split('­').let { pieces -> pieces.mapIndexed { i, piece -> if (i < pieces.lastIndex) "$piece-" else piece } }
+        }
+        val longest = parts.maxOfOrNull { measurer.measure(it, style, softWrap = false).size.width } ?: 0
+        val gap = 4.dp
+        val needed = with(LocalDensity.current) { longest.toDp() } + 16.dp // chip padding + borders
+        val columns = ((maxWidth + gap) / (needed + gap)).toInt().coerceIn(1, maxOf(1, maxColumns))
+        // Balance the rows (5 items in 4 columns become 3 + 2, not 4 + 1).
+        val rows = (values.size + columns - 1) / columns
+        val balanced = if (rows > 1) (values.size + rows - 1) / rows else columns
+        ChoiceRows(values, balanced, content)
+    }
+}
+
+@Composable
+private fun <T> ChoiceRows(values: List<T>, columns: Int, content: @Composable (T) -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top = 4.dp)) {
         values.chunked(columns).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.height(IntrinsicSize.Min)) {
@@ -229,8 +255,7 @@ private fun <T> ChoiceGrid(values: List<T>, columns: Int, content: @Composable (
 @Composable
 private fun <T> Choices(title: Int?, values: List<T>, selected: T?, enabled: Boolean, label: (T) -> Int, onChange: (T?) -> Unit) {
     title?.let { Text(stringResource(it), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium) }
-    val columns = if (LocalDensity.current.fontScale >= 1.3f) 2 else minOf(values.size, 5).coerceAtLeast(1)
-    ChoiceGrid(values, columns) { value ->
+    ChoiceGrid(values, values.map { stringResource(label(it)) }, minOf(values.size, 5)) { value ->
         FpChip(selected == value, { onChange(if (selected == value) null else value) },
             stringResource(label(value)), Modifier.fillMaxWidth().fillMaxHeight(), enabled)
     }

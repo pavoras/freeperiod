@@ -45,7 +45,7 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     var categoryDialog by rememberSaveable { mutableStateOf(false) }
     val t = LocalDaylight.current
     LazyColumn(Modifier.fillMaxSize().background(t.background), contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        item { FpTopBar(stringResource(R.string.day_entry), onBack) }
+        item { FpTopBar(stringResource(R.string.customize_day_entry), onBack) }
         item { Text(stringResource(R.string.entry_customization_intro), style = MaterialTheme.typography.bodyMedium, color = t.muted) }
         items(categories.size, key = { categories[it].overrideKey }) { index ->
             val category = categories[index]

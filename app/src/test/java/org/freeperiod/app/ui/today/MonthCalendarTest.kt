@@ -23,12 +23,12 @@ class MonthCalendarTest {
         var selected: LocalDate? = null
         compose.setContent {
             FreePeriodTheme {
-                MonthCalendar(YearMonth.from(date), mapOf(date to DayMarks(true, true, true, true)),
+                MonthCalendar(YearMonth.from(date), mapOf(date to DayMarks(true, true, true, true, higherChance = true)),
                     {}, { selected = it }, locale = Locale.US)
             }
         }
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("12 April 2026, period day, predicted period day, logged, today")
+        compose.onNodeWithContentDescription("12 April 2026, period day, predicted period day, higher chance of pregnancy, calendar estimate, logged, today")
             .assertHasClickAction().performClick()
         assertEquals(date, selected)
     }

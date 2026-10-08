@@ -56,12 +56,13 @@ class SettingsViewModelTest : DatabaseTest() {
         val category = repository.addCustomCategory("Activities", "leaf")
         repository.addTag("Walk", category.id, "leaf")
         repository.setUiOverride(UiOverride("customCategory:${category.id}", true, 2))
-        repository.updateSituation(Situation(phase = LifePhase.POSTPARTUM))
+        repository.updateSituation(Situation(phase = LifePhase.POSTPARTUM, fertileWindowEnabled = false))
         repository.saveReminder(Reminder(0, ReminderKind.CUSTOM, "Check", Recurrence.Once(today), java.time.LocalTime.NOON, true))
         repository.dismissLongCycleHint(repository.snapshot().periods.single().id)
         model().deleteAllData().join()
         assertEquals(BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(),
             settings = BackupSettings(null, false)), repository.snapshot())
+        assertTrue(repository.snapshot().situation.fertileWindowEnabled)
     }
 
     @Test fun typicalLengthAcceptsBoundsAndUnknown() = runTest {

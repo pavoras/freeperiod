@@ -19,7 +19,8 @@ internal fun todayFixture(scenario: String, today: LocalDate = LocalDate.of(2026
     val situation = when (scenario) {
         "scheduledBreak" -> Situation(method = Method.PILL_COMBINED, pill = PillSchedule(LocalDate.of(2026, 4, 1), 21, 7))
         "menopause" -> Situation(phase = LifePhase.MENOPAUSE)
-        else -> Situation()
+        "fertile" -> Situation()
+        else -> Situation(fertileWindowEnabled = false)
     }
     val data = BackupData(periods = periods, dayLogs = if (scenario == "empty") emptyList() else listOf(DayLog(today, mood = Mood.GOOD)),
         tags = emptyList(), settings = BackupSettings(null, false))

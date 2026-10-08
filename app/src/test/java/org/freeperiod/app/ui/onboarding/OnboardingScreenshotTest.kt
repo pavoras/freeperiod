@@ -16,6 +16,10 @@ class OnboardingScreenshotTest : SettingsScreenshotFixture() {
     @Test fun welcome_enLight() = capture("onboarding/welcome_enLight", "Welcome to FreePeriod.") {
         OnboardingScreen(OnboardingUiState(today = clock()), OnboardingActions())
     }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun welcome_deDark() = capture("onboarding/welcome_deDark", "Kein Medizinprodukt", Locale.GERMANY, dark = true) {
+        OnboardingScreen(OnboardingUiState(today = clock()), OnboardingActions())
+    }
     @Test fun phase_enLight() = capture("onboarding/phase_enLight", "Life phase") {
         OnboardingScreen(OnboardingUiState(page = 1, today = clock()), OnboardingActions())
     }

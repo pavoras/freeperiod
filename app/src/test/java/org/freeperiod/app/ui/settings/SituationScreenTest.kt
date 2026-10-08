@@ -18,6 +18,29 @@ import org.robolectric.annotation.Config
 @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
 class SituationScreenTest {
     @get:Rule val compose = createComposeRule()
+    @Test fun estimateSwitchCanBeReenabledAndIsHiddenForIncompatibleSituations() {
+        val situation = mutableStateOf(Situation())
+        val label = "Show days with a higher chance of pregnancy"
+        compose.setContent { FreePeriodTheme {
+            SituationScreen(situation.value, LocalDate.of(2026, 4, 12), { situation.value = it }, {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex))
+            .performScrollToNode(hasContentDescription(label))
+        compose.onNodeWithContentDescription(label).assertIsOn().performClick()
+        compose.waitForIdle()
+        assertFalse(situation.value.fertileWindowEnabled)
+        compose.onNodeWithContentDescription(label).assertIsOff().performClick()
+        compose.waitForIdle()
+        assertTrue(situation.value.fertileWindowEnabled)
+        compose.runOnIdle { situation.value = situation.value.copy(method = Method.IUD_HORMONAL) }
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription(label).assertDoesNotExist()
+        compose.runOnIdle { situation.value = situation.value.copy(method = Method.NONE, phase = LifePhase.PREGNANT) }
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription(label).assertDoesNotExist()
+    }
+
     @Test fun methodOffersReminderWithoutEnablingIt() {
         val situation = mutableStateOf(Situation())
         var draft: Reminder? = null

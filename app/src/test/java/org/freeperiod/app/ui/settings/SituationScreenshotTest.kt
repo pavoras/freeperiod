@@ -34,6 +34,15 @@ class SituationScreenshotTest {
     private val today = LocalDate.of(2026, 4, 12)
     @Before fun setup() { compose.activity.setTheme(R.style.Theme_FreePeriod); Locale.setDefault(Locale.US) }
     @After fun reset() { Locale.setDefault(originalLocale) }
+    @Test fun situationFertile_enLight() {
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { SituationScreen(Situation(), today, {}, {}, {}) } } }
+        compose.waitForIdle()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex))
+            .performScrollToNode(hasContentDescription("Show days with a higher chance of pregnancy"))
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("Show days with a higher chance of pregnancy").assertIsOn()
+        compose.onRoot().captureRoboImage("src/test/screenshots/settings/situationFertile_enLight.png")
+    }
     @Test fun situation_enLight() {
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { SituationScreen(Situation(), today, {}, {}, {}) } } }
         compose.waitForIdle()

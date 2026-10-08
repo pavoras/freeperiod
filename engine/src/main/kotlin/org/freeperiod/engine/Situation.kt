@@ -18,7 +18,7 @@ data class Situation(
     val phase: LifePhase = LifePhase.REGULAR,
     val method: Method = Method.NONE,
     val pill: PillSchedule? = null,
-    val fertileWindowEnabled: Boolean = false,
+    val fertileWindowEnabled: Boolean = true,
 )
 
 /** Prediction source before manual pause and calendar-date checks are applied. */
@@ -34,7 +34,7 @@ fun Situation.predictionMode(): PredictionMode = when {
     else -> PredictionMode.SCHEDULED_BREAK
 }
 
-/** Calendar fertility estimates require opt-in and a compatible phase and method. */
+/** Calendar estimates require the display preference and a compatible phase and method. */
 fun Situation.fertileWindowAllowed(): Boolean = fertileWindowEnabled &&
     phase in setOf(LifePhase.REGULAR, LifePhase.TRYING_TO_CONCEIVE, LifePhase.PERIMENOPAUSE) &&
     method in setOf(Method.NONE, Method.IUD_COPPER, Method.CONDOM, Method.OTHER)

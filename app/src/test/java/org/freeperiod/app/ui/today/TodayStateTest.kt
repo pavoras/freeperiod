@@ -43,12 +43,34 @@ class TodayStateTest {
         assertTrue(state.days.values.none { it.predicted })
     }
 
-    @Test fun noFertilityMarksAreAddedEvenWhenStoredPreferenceIsEnabled() {
+    @Test fun windowAndCalendarMarksShareTheFullPredictionRange() {
         val start = LocalDate.of(2026, 4, 1)
         val periods = (0..3).map { i -> start.minusDays(i * 28L).let { Period(i + 1L, it, it.plusDays(4)) } }
         val data = BackupData(periods = periods, dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
         val regular = todayState(data, today)
-        val optedIn = todayState(data, today, situation = Situation(fertileWindowEnabled = true))
-        assertEquals(regular.days, optedIn.days)
+        val prediction = regular.prediction as PredictionState.Range
+        val expected = prediction.earliest.minusDays(19)..prediction.latest.minusDays(14)
+        assertEquals(expected, regular.fertileWindow)
+        regular.days.forEach { (date, marks) -> assertEquals(date.toString(), date in expected, marks.higherChance) }
+        for (phase in LifePhase.entries) for (method in Method.entries) for (enabled in listOf(false, true)) {
+            val situation = Situation(phase = phase, method = method, fertileWindowEnabled = enabled)
+            val state = todayState(data, today, situation = situation)
+            val allowed = situation.fertileWindowAllowed()
+            assertEquals("$phase/$method/$enabled", if (allowed) expected else null, state.fertileWindow)
+            assertEquals(allowed, state.days.values.any { it.higherChance })
+        }
+        val paused = todayState(data.copy(settings = data.settings.copy(predictionsPaused = true)), today)
+        assertNull(paused.fertileWindow)
+        assertTrue(paused.days.values.none { it.higherChance })
+    }
+
+    @Test fun variesDoesNotShowAWindow() {
+        val starts = listOf(0L, 20L, 70L, 90L, 140L).map { today.minusDays(140).plusDays(it) }
+        val data = BackupData(periods = starts.mapIndexed { i, start -> Period(i + 1L, start, start) },
+            dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
+        val state = todayState(data, today)
+        assertTrue(state.prediction is PredictionState.Varies)
+        assertNull(state.fertileWindow)
+        assertTrue(state.days.values.none { it.higherChance })
     }
 }

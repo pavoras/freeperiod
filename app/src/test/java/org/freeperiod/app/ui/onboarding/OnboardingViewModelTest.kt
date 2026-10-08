@@ -118,6 +118,7 @@ class OnboardingViewModelTest : DatabaseTest() {
         assertTrue(settings.settings.first().onboardingDone)
         assertTrue(repository.snapshot().periods.isEmpty())
         assertTrue(repository.snapshot().reminders.none { it.enabled })
+        assertTrue(repository.snapshot().situation.fertileWindowEnabled)
     }
     @Test fun backupImportFinishesWithoutOverwritingRestoredSettings() = runTest {
         val vm = model()

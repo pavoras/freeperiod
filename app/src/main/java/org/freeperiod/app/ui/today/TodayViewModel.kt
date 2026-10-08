@@ -16,7 +16,8 @@ import org.freeperiod.app.data.SettingsStore
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 
-data class DayMarks(val period: Boolean, val predicted: Boolean, val logged: Boolean, val today: Boolean)
+data class DayMarks(val period: Boolean, val predicted: Boolean, val logged: Boolean, val today: Boolean,
+    val higherChance: Boolean = false)
 
 data class TodayUiState(
     val today: LocalDate,
@@ -27,6 +28,7 @@ data class TodayUiState(
     val periodDay: Int? = null,
     val timeline: CycleTimeline? = null,
     val situation: Situation = Situation(),
+    val fertileWindow: ClosedRange<LocalDate>? = null,
     val endSaved: PeriodEndReceipt? = null,
     val startedPeriodId: Long? = null,
     val ongoingPeriodId: Long? = null,
@@ -129,6 +131,7 @@ internal fun todayState(data: BackupData, today: LocalDate, month: YearMonth = Y
     val periods = data.periods.filter { it.start <= today }.sortedBy { it.start }
     val prediction = predict(periods, PredictionSettings(data.settings.typicalCycleLength, data.settings.predictionsPaused), situation, today)
     val predicted = predictedDays(prediction)
+    val window = fertileWindow(prediction, situation)
     val logged = data.dayLogs.filterNot { it.isEmpty() }.map { it.date }.toSet()
     val ongoing = periods.lastOrNull { it.end == null }
     val lengths = PeriodRules.cycles(periods).filter { it.eligible }.takeLast(6).map { it.length }
@@ -139,9 +142,10 @@ internal fun todayState(data: BackupData, today: LocalDate, month: YearMonth = Y
         periodDay = ongoing?.let { Math.toIntExact(DAYS.between(it.start, today) + 1) },
         ongoingPeriodId = ongoing?.id,
         timeline = cycleTimeline(periods, prediction, situation.pill, fallback, today), situation = situation,
+        fertileWindow = window,
         days = (1..month.lengthOfMonth()).associate { number ->
             val date = month.atDay(number)
             date to DayMarks(PeriodRules.periodOn(periods, date, today) != null,
-                predicted?.contains(date) == true, date in logged, date == today)
+                predicted?.contains(date) == true, date in logged, date == today, window?.contains(date) == true)
         }, loading = false)
 }

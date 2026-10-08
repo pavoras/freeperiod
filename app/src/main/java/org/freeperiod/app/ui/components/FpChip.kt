@@ -28,9 +28,9 @@ fun FpChip(selected: Boolean, onClick: () -> Unit, label: String, modifier: Modi
         border = BorderStroke(if (selected) 2.dp else 1.dp,
             if (selected) t.accent.selectedChipBorder else t.control)) {
         val target = Modifier.selectable(selected, enabled = enabled, role = Role.Checkbox, onClick = onClick)
-            .heightIn(min = if (stacked) 64.dp else 48.dp).padding(horizontal = 4.dp, vertical = 6.dp)
+            .heightIn(min = if (stacked) 64.dp else 48.dp).padding(horizontal = 6.dp, vertical = 8.dp)
         val text: @Composable () -> Unit = {
-            Text(label, style = MaterialTheme.typography.labelSmall,
+            Text(label, style = MaterialTheme.typography.labelMedium,
                 fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal, textAlign = TextAlign.Center)
         }
         if (stacked) Column(target, horizontalAlignment = Alignment.CenterHorizontally,

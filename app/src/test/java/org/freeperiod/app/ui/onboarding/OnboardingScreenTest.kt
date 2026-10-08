@@ -18,6 +18,12 @@ import org.robolectric.annotation.Config
 class OnboardingScreenTest {
     @get:Rule val compose = createComposeRule()
     private val today = LocalDate.of(2026, 4, 12)
+    @Test fun welcomeShowsMedicalDisclaimerWithoutOpeningALink() {
+        compose.setContent { FreePeriodTheme { OnboardingScreen(OnboardingUiState(today = today), OnboardingActions()) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Not a medical device").assertIsDisplayed()
+        compose.onNodeWithText("These calendar estimates", substring = true).assertIsDisplayed()
+    }
     @Test fun dragAcrossMonths() {
         val state = mutableStateOf(OnboardingUiState(page = 3, today = today))
         compose.setContent { FreePeriodTheme {

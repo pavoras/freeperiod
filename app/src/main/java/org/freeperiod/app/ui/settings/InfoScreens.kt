@@ -23,6 +23,7 @@ fun PrivacyScreen(onBack: () -> Unit, onPolicyLink: () -> Unit) {
     Column(Modifier.fillMaxSize().background(LocalDaylight.current.background).verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(20.dp)) {
         SettingsPageHeader(R.string.privacy_policy, onBack)
+        FpCard { MedicalDisclaimer(Modifier.padding(16.dp)) }
         FpCard { Text(stringResource(R.string.privacy_storage), Modifier.padding(16.dp)) }
         Text(stringResource(R.string.privacy_offline))
         Text(stringResource(R.string.privacy_files))
@@ -41,7 +42,7 @@ fun AboutScreen(version: String, onBack: () -> Unit, onSourceLink: () -> Unit) {
         Text(stringResource(R.string.about_version, version))
         FpCard { Text(stringResource(R.string.about_license), Modifier.padding(16.dp)) }
         TextButton(onClick = onSourceLink) { Text(stringResource(R.string.about_source)) }
-        Text(stringResource(R.string.app_estimates))
+        MedicalDisclaimer()
         Text(stringResource(R.string.about_open_source), style = MaterialTheme.typography.titleLarge)
         Text(stringResource(R.string.about_libraries))
     }
