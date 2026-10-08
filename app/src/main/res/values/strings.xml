@@ -246,7 +246,7 @@
     <string name="history_cycle_label">Cycle length</string>
     <string name="history_period_label">Period length</string>
     <string name="history_days_unit">days</string>
-    <string name="app_estimates">FreePeriod. is not a medical device. It is not a method of contraception, not a tool to help you get pregnant, and gives no medical advice, diagnosis or treatment. All dates are calendar estimates from your own entries and can be wrong; they are not reliable. Talk to a doctor or pharmacist about contraception, pregnancy or health questions.</string>
+    <string name="app_estimates">FreePeriod. is not a medical device. It is not a method of contraception, not a tool to help you get pregnant, and gives no medical advice, diagnosis or treatment. All dates are calendar estimates from your own entries and can be wrong; they are not reliable. Every cycle is different: pregnancy is possible on any day, also outside the days with a higher chance. Talk to a doctor or pharmacist about contraception, pregnancy or health questions.</string>
     <string name="medical_disclaimer_title">Not a medical device</string>
     <string name="medical_disclaimer_note">These calendar estimates can be wrong and are not reliable. FreePeriod. is not for contraception, help getting pregnant, or medical advice.</string>
     <string name="pregnancy_chance_label">Higher chance of pregnancy</string>
@@ -255,7 +255,7 @@
     <string name="pregnancy_chance_info">About this calendar estimate</string>
     <string name="calendar_pregnancy_chance">higher chance of pregnancy, calendar estimate</string>
     <string name="show_pregnancy_chance">Show days with a higher chance of pregnancy</string>
-    <string name="pregnancy_chance_detail">A calendar estimate from your own entries; dates can be wrong.</string>
+    <string name="pregnancy_chance_detail">A calendar estimate from your own entries; dates can be wrong. Pregnancy is possible on other days too.</string>
     <string name="reminder_timing">Notifications may arrive later than the time you choose.</string>
     <string name="history_no_value">–</string>
     <string name="symptom_hot_flushes">Hot flushes</string>

@@ -1,5 +1,6 @@
 package org.freeperiod.app.ui.today
 
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import java.time.LocalDate
@@ -36,16 +37,23 @@ class MonthCalendarTest {
     @Test fun usWeekStartsOnSunday() = assertFirstWeekday(Locale.US, "Sunday", "Monday")
     @Test fun germanWeekStartsOnMonday() = assertFirstWeekday(Locale.GERMANY, "Montag", "Dienstag")
 
-    @Test fun arrowsChangeMonth() {
+    @OptIn(ExperimentalTestApi::class)
+    @Test fun scrollingChangesMonth() {
         val month = YearMonth.of(2026, 4)
         val selected = mutableListOf<YearMonth>()
         compose.setContent {
             FreePeriodTheme { MonthCalendar(month, emptyMap(), { selected.add(it) }, {}, locale = Locale.US) }
         }
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("Previous month").performClick()
-        compose.onNodeWithContentDescription("Next month").performClick()
-        assertEquals(listOf(month.minusMonths(1), month.plusMonths(1)), selected)
+        val calendar = compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions))
+        calendar.performCustomAccessibilityActionWithLabel("Previous month")
+        compose.waitForIdle()
+        compose.onNodeWithText("March 2026").assertIsDisplayed()
+        calendar.performCustomAccessibilityActionWithLabel("Next month")
+        compose.waitForIdle()
+        calendar.performTouchInput { swipeUp() }
+        compose.waitForIdle()
+        assertEquals(listOf(month, month.minusMonths(1), month, month.plusMonths(1)), selected)
     }
 
     private fun assertFirstWeekday(locale: Locale, first: String, second: String) {

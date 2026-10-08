@@ -15,6 +15,12 @@ class FertilityTest {
         assertEquals(8L, java.time.temporal.ChronoUnit.DAYS.between(window.start, window.endInclusive) + 1)
     }
 
+    @Test fun wideRangeStaysAtMostEightDaysAroundTheMiddle() {
+        // Owner's phone: next period likely Nov 1–7 gave 12 days; now the middle (Nov 4) decides.
+        val wide = range.copy(earliest = LocalDate.of(2026, 11, 1), latest = LocalDate.of(2026, 11, 7))
+        assertEquals(LocalDate.of(2026, 10, 15)..LocalDate.of(2026, 10, 22), fertileWindow(wide, enabled))
+    }
+
     @Test fun singleDayPredictionSpansSixDays() {
         val window = requireNotNull(fertileWindow(range.copy(earliest = centre, latest = centre), enabled))
         assertEquals(centre.minusDays(19)..centre.minusDays(14), window)

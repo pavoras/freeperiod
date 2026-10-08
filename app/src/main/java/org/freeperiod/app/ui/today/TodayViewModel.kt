@@ -143,8 +143,7 @@ internal fun todayState(data: BackupData, today: LocalDate, month: YearMonth = Y
         ongoingPeriodId = ongoing?.id,
         timeline = cycleTimeline(periods, prediction, situation.pill, fallback, today), situation = situation,
         fertileWindow = window,
-        days = (1..month.lengthOfMonth()).associate { number ->
-            val date = month.atDay(number)
+        days = calendarMonths(YearMonth.from(today)).flatMap { shown -> (1..shown.lengthOfMonth()).map { shown.atDay(it) } }.associate { date ->
             date to DayMarks(PeriodRules.periodOn(periods, date, today) != null,
                 predicted?.contains(date) == true, date in logged, date == today, window?.contains(date) == true)
         }, loading = false)

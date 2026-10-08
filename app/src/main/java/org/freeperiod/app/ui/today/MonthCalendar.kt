@@ -1,7 +1,10 @@
 package org.freeperiod.app.ui.today
 
-import androidx.compose.animation.*
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.pager.VerticalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -29,6 +32,13 @@ import java.util.Locale
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.theme.LocalDaylight
 
+/** Months the Today calendar can scroll through: two years back, one year ahead. */
+internal fun calendarMonths(current: YearMonth): List<YearMonth> = (-24L..12L).map { current.plusMonths(it) }
+
+/**
+ * Swipe up/down to move between months (owner: "scroll instead of click"). Each page has the same
+ * height (always six week rows), so the page under the calendar never jumps.
+ */
 @Composable
 fun MonthCalendar(
     month: YearMonth,
@@ -39,30 +49,45 @@ fun MonthCalendar(
     locale: Locale = LocalConfiguration.current.locales[0],
     scheduledBreak: Boolean = false,
 ) {
-    val t = LocalDaylight.current
-    val monthLabel = month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale))
-    Column(modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(monthLabel, Modifier.weight(1f).padding(start = 8.dp), style = MaterialTheme.typography.titleLarge)
-            IconButton(onClick = { onMonthChange(month.minusMonths(1)) }) {
-                Icon(painterResource(R.drawable.ic_fp_previous), stringResource(R.string.previous_month))
-            }
-            IconButton(onClick = { onMonthChange(month.plusMonths(1)) }) {
-                Icon(painterResource(R.drawable.ic_fp_next), stringResource(R.string.next_month))
-            }
-        }
-        HorizontalDivider(color = t.line)
-        AnimatedContent(targetState = CalendarPage(month, days), contentKey = { it.month }, label = "month", transitionSpec = {
-            val direction = if (targetState.month > initialState.month) 1 else -1
-            (slideInHorizontally(tween(180)) { direction * it / 5 } + fadeIn(tween(180))) togetherWith
-                (slideOutHorizontally(tween(180)) { -direction * it / 5 } + fadeOut(tween(180)))
-        }) { shown ->
-            MonthGrid(shown.month, shown.days, locale, scheduledBreak, onDayClick)
+    val anchor = remember { month }
+    val first = days.keys.minOrNull()
+    val last = days.keys.maxOrNull()
+    val months = remember(first, last) {
+        if (first == null || last == null) calendarMonths(anchor)
+        else generateSequence(YearMonth.from(first)) { it.plusMonths(1) }.takeWhile { it <= YearMonth.from(last) }.toList()
+    }
+    val pager = rememberPagerState(initialPage = months.indexOf(month).coerceAtLeast(0)) { months.size }
+    val latestChange by rememberUpdatedState(onMonthChange)
+    LaunchedEffect(pager, months) {
+        snapshotFlow { pager.settledPage }.collect { page -> months.getOrNull(page)?.let(latestChange) }
+    }
+    LaunchedEffect(month) {
+        val index = months.indexOf(month)
+        if (index >= 0 && index != pager.currentPage) pager.scrollToPage(index)
+    }
+    val scope = rememberCoroutineScope()
+    val previous = stringResource(R.string.previous_month)
+    val next = stringResource(R.string.next_month)
+    val density = LocalDensity.current
+    val title = MaterialTheme.typography.titleLarge
+    val weekday = MaterialTheme.typography.labelSmall
+    val cell = maxOf(48.dp, 40.dp * density.fontScale)
+    val pageHeight = with(density) { maxOf(48.dp, title.lineHeight.toDp() + 16.dp) + 1.dp + weekday.lineHeight.toDp() + 8.dp } + cell * 6
+    VerticalPager(pager, modifier.fillMaxWidth().height(pageHeight).semantics {
+        customActions = listOf(
+            CustomAccessibilityAction(previous) { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) }; true },
+            CustomAccessibilityAction(next) { scope.launch { pager.animateScrollToPage(pager.currentPage + 1) }; true })
+    }, key = { months[it].toString() }) { page ->
+        val shown = months[page]
+        Column(Modifier.fillMaxSize()) {
+            Text(shown.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)),
+                Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
+                    .semantics { heading() }, style = title)
+            HorizontalDivider(color = LocalDaylight.current.line)
+            MonthGrid(shown, days, locale, scheduledBreak, onDayClick)
         }
     }
 }
-
-private data class CalendarPage(val month: YearMonth, val days: Map<LocalDate, DayMarks>)
 
 @Composable
 private fun MonthGrid(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: Locale, scheduledBreak: Boolean,
@@ -80,7 +105,8 @@ private fun MonthGrid(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: 
                     style = MaterialTheme.typography.labelSmall, color = LocalDaylight.current.muted)
             }
         }
-        repeat((offset + month.lengthOfMonth() + 6) / 7) { row ->
+        // Always six week rows, so every month page has the same height.
+        repeat(6) { row ->
             Row(Modifier.fillMaxWidth()) {
                 repeat(7) { column ->
                     val number = row * 7 + column - offset + 1
@@ -88,7 +114,7 @@ private fun MonthGrid(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: 
                         val date = month.atDay(number)
                         CalendarDay(date, days[date] ?: DayMarks(false, false, false, false), locale,
                             { onDayClick(date) }, Modifier.weight(1f), scheduledBreak)
-                    } else Spacer(Modifier.weight(1f).height(48.dp))
+                    } else Spacer(Modifier.weight(1f).height(maxOf(48.dp, 40.dp * LocalDensity.current.fontScale)))
                 }
             }
         }

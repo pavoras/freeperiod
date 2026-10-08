@@ -113,7 +113,8 @@ class TodayViewModelTest : DatabaseTest() {
         val marks = vm.state.value.days[today]!!
         assertTrue(marks.period && marks.logged && marks.today)
         vm.showMonth(YearMonth.of(2026, 3)).join()
-        assertEquals(31, vm.state.value.days.size)
+        assertTrue(vm.state.value.days[java.time.LocalDate.of(2026, 3, 31)] != null)
+        assertTrue(vm.state.value.days[today]!!.period)
         assertEquals(YearMonth.of(2026, 3), vm.state.value.month)
     }
 

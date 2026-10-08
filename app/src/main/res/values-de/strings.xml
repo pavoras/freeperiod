@@ -246,7 +246,7 @@
     <string name="history_cycle_label">Zykluslänge</string>
     <string name="history_period_label">Periodenlänge</string>
     <string name="history_days_unit">Tage</string>
-    <string name="app_estimates">FreePeriod. ist kein Medizinprodukt. Die App ist keine Verhütungsmethode, hilft dir nicht dabei, schwanger zu werden, und gibt keine medizinischen Ratschläge, Diagnosen oder Behandlungen. Alle Datumsangaben sind Kalenderschätzungen aus deinen eigenen Einträgen. Sie können falsch sein und sind nicht verlässlich. Bei Fragen zu Verhütung, Schwangerschaft oder Gesundheit sprich mit deiner Arztpraxis oder Apotheke.</string>
+    <string name="app_estimates">FreePeriod. ist kein Medizinprodukt. Die App ist keine Verhütungsmethode, hilft dir nicht dabei, schwanger zu werden, und gibt keine medizinischen Ratschläge, Diagnosen oder Behandlungen. Alle Datumsangaben sind Kalenderschätzungen aus deinen eigenen Einträgen. Sie können falsch sein und sind nicht verlässlich. Jeder Zyklus ist anders: Eine Schwangerschaft ist an jedem Tag möglich, auch außerhalb der Tage mit erhöhter Chance. Bei Fragen zu Verhütung, Schwangerschaft oder Gesundheit sprich mit deiner Arztpraxis oder Apotheke.</string>
     <string name="medical_disclaimer_title">Kein Medizinprodukt</string>
     <string name="medical_disclaimer_note">Diese Kalenderschätzungen können falsch sein und sind nicht verlässlich. FreePeriod. dient weder zur Verhütung noch dazu, schwanger zu werden, und gibt keine medizinischen Ratschläge.</string>
     <string name="pregnancy_chance_label">Erhöhte Chance auf Schwangerschaft</string>
@@ -255,7 +255,7 @@
     <string name="pregnancy_chance_info">Über diese Kalenderschätzung</string>
     <string name="calendar_pregnancy_chance">erhöhte Chance auf Schwangerschaft, Kalenderschätzung</string>
     <string name="show_pregnancy_chance">Tage mit erhöhter Chance auf Schwangerschaft anzeigen</string>
-    <string name="pregnancy_chance_detail">Eine Kalenderschätzung aus deinen Einträgen; Datumsangaben können falsch sein.</string>
+    <string name="pregnancy_chance_detail">Eine Kalenderschätzung aus deinen Einträgen; Datumsangaben können falsch sein. Auch an anderen Tagen ist eine Schwangerschaft möglich.</string>
     <string name="reminder_timing">Benachrichtigungen können später als zur gewählten Uhrzeit ankommen.</string>
     <string name="history_no_value">–</string>
     <string name="symptom_hot_flushes">Hitzewallungen</string>
