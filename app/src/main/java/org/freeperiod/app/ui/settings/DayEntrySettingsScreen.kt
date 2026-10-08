@@ -1,5 +1,8 @@
 package org.freeperiod.app.ui.settings
 
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
@@ -40,58 +43,80 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     val state = dayEntryState(data, today, today)
     val categories = entryCategories(state, includeHidden = true)
     var expanded by rememberSaveable { mutableStateOf("") }
+    var reorder by rememberSaveable { mutableStateOf(false) }
     var itemCategory by remember { mutableStateOf<EntryCategory?>(null) }
     var categoryEditor by remember { mutableStateOf<CustomCategory?>(null) }
     var categoryDialog by rememberSaveable { mutableStateOf(false) }
     val t = LocalDaylight.current
-    LazyColumn(Modifier.fillMaxSize().background(t.background), contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    LazyColumn(Modifier.fillMaxSize().background(t.background), contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         item { FpTopBar(stringResource(R.string.customize_day_entry), onBack) }
         item { Text(stringResource(R.string.entry_customization_intro), style = MaterialTheme.typography.bodyMedium, color = t.muted) }
+        item {
+            TextButton(onClick = { reorder = !reorder; expanded = "" }) {
+                Text(stringResource(if (reorder) R.string.reorder_done else R.string.reorder_categories))
+            }
+        }
         items(categories.size, key = { categories[it].overrideKey }) { index ->
             val category = categories[index]
-            SettingsPanel {
-                val title = category.category?.name ?: stringResource(category.label)
-                FpSwitchRow(title, !category.hidden, onChange = { onOverride(category.overrideKey, !it, category.order) })
-                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(enabled = index > 0, onClick = {
-                        val keys = categories.map { it.overrideKey }.toMutableList()
-                        keys[index] = keys[index - 1].also { keys[index - 1] = keys[index] }; onReorder(keys)
-                    }) { Icon(painterResource(R.drawable.ic_fp_up), stringResource(R.string.category_move_up, title), Modifier.size(20.dp)) }
-                    IconButton(enabled = index < categories.lastIndex, onClick = {
-                        val keys = categories.map { it.overrideKey }.toMutableList()
-                        keys[index] = keys[index + 1].also { keys[index + 1] = keys[index] }; onReorder(keys)
-                    }) { Icon(painterResource(R.drawable.ic_fp_down), stringResource(R.string.category_move_down, title), Modifier.size(20.dp)) }
-                    Spacer(Modifier.weight(1f))
-                    TextButton(onClick = { expanded = if (expanded == category.key) "" else category.key }) {
-                        Text(stringResource(R.string.entry_items))
-                        Spacer(Modifier.width(4.dp))
-                        Icon(painterResource(if (expanded == category.key) R.drawable.ic_fp_up else R.drawable.ic_fp_down), null, Modifier.size(18.dp))
+            val title = category.category?.name ?: stringResource(category.label)
+            // Hidden items stay listed so visibility is reversible.
+            val id = if (category.key == "symptoms") data.customCategories.find { it.iconKey == "builtin:symptoms" }?.id else category.category?.id
+            val tags = if ((category.key == "symptoms" && id != null) || category.key == "tags" || category.category != null)
+                data.tags.filter { it.categoryId == id && !it.archived } else emptyList()
+            val itemKeys = builtInItems(category.key).map { "item:${category.key}:${it.first}" } + tags.map { "tag:${it.id}" }
+            val canEdit = itemKeys.isNotEmpty() || category.key in listOf("symptoms", "tags") || category.category != null
+            val open = expanded == category.key && !reorder
+            Column {
+                Row(Modifier.fillMaxWidth().clickable(enabled = canEdit && !reorder) { expanded = if (open) "" else category.key }
+                    .heightIn(min = 64.dp).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Column(Modifier.weight(1f)) {
+                        Text(title, style = MaterialTheme.typography.bodyLarge, color = if (category.hidden) t.muted else t.ink)
+                        if (itemKeys.isNotEmpty()) {
+                            val shown = itemKeys.count { key -> data.overrides.find { it.key == key }?.hidden != true }
+                            Text(stringResource(R.string.entry_items_shown, shown, itemKeys.size), style = MaterialTheme.typography.bodySmall, color = t.muted)
+                        }
+                    }
+                    if (reorder) {
+                        IconButton(enabled = index > 0, onClick = {
+                            val keys = categories.map { it.overrideKey }.toMutableList()
+                            keys[index] = keys[index - 1].also { keys[index - 1] = keys[index] }; onReorder(keys)
+                        }) { Icon(painterResource(R.drawable.ic_fp_up), stringResource(R.string.category_move_up, title)) }
+                        IconButton(enabled = index < categories.lastIndex, onClick = {
+                            val keys = categories.map { it.overrideKey }.toMutableList()
+                            keys[index] = keys[index + 1].also { keys[index + 1] = keys[index] }; onReorder(keys)
+                        }) { Icon(painterResource(R.drawable.ic_fp_down), stringResource(R.string.category_move_down, title)) }
+                    } else {
+                        if (canEdit) Icon(painterResource(if (open) R.drawable.ic_fp_up else R.drawable.ic_fp_down), null, Modifier.size(20.dp), tint = t.muted)
+                        Switch(!category.hidden, { onOverride(category.overrideKey, !it, category.order) },
+                            Modifier.semantics { contentDescription = title },
+                            colors = SwitchDefaults.colors(checkedTrackColor = t.accent.accent, checkedThumbColor = t.accent.onAccent,
+                                checkedBorderColor = t.accent.periodBorder, uncheckedTrackColor = t.surface,
+                                uncheckedThumbColor = t.muted, uncheckedBorderColor = t.control))
                     }
                 }
-                if (expanded == category.key) {
-                    HorizontalDivider(color = t.line)
+                if (open) Column(Modifier.padding(start = 16.dp, bottom = 8.dp)) {
                     builtInItems(category.key).forEach { (name, label) ->
                         val key = "item:${category.key}:$name"
                         val override = data.overrides.find { it.key == key }
                         FpSwitchRow(stringResource(label), override?.hidden != true, onChange = { onOverride(key, !it, override?.sortOrder ?: 0) })
                     }
-                    // Include hidden items here so visibility is reversible.
-                    val id = if (category.key == "symptoms") data.customCategories.find { it.iconKey == "builtin:symptoms" }?.id else category.category?.id
-                    if ((category.key == "symptoms" && id != null) || category.key == "tags" || category.category != null) data.tags.filter { it.categoryId == id && !it.archived }.forEach { tag ->
+                    tags.forEach { tag ->
                         val key = "tag:${tag.id}"
                         val override = data.overrides.find { it.key == key }
                         FpSwitchRow(tag.name, override?.hidden != true, onChange = { onOverride(key, !it, override?.sortOrder ?: 0) })
                     }
-                    if (category.key in listOf("symptoms", "tags") || category.category != null) {
-                        TextButton(onClick = { itemCategory = category }) { Text(stringResource(R.string.add_entry_item)) }
-                    }
-                }
-                category.category?.let { custom ->
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = { categoryEditor = custom; categoryDialog = true }) { Text(stringResource(R.string.rename_category)) }
-                        TextButton(onClick = { onArchive(custom) }) { Text(stringResource(R.string.archive_category)) }
+                        if (category.key in listOf("symptoms", "tags") || category.category != null) {
+                            TextButton(onClick = { itemCategory = category }) { Text(stringResource(R.string.add_entry_item)) }
+                        }
+                        category.category?.let { custom ->
+                            TextButton(onClick = { categoryEditor = custom; categoryDialog = true }) { Text(stringResource(R.string.rename_category)) }
+                            TextButton(onClick = { onArchive(custom) }) { Text(stringResource(R.string.archive_category)) }
+                        }
                     }
                 }
+                HorizontalDivider(color = t.line)
             }
         }
         item { FpButton({ categoryEditor = null; categoryDialog = true }, Modifier.fillMaxWidth()) { Text(stringResource(R.string.add_category)) } }

@@ -439,4 +439,9 @@
     <string name="feedback_include_info">Technische Infos anhängen (App- und Android-Version, Gerätemodell, Sprache)</string>
     <string name="feedback_open">E-Mail öffnen</string>
     <string name="feedback_no_app">Keine E-Mail-App gefunden. Du kannst an %1$s schreiben.</string>
+    <string name="today_welcome_hint">Deine Kalenderschätzungen erscheinen nach deiner ersten Periode.</string>
+    <string name="appearance_preview_hint">Ein Beispiel: So sieht deine Farbe in der App aus.</string>
+    <string name="reorder_categories">Reihenfolge ändern</string>
+    <string name="reorder_done">Fertig</string>
+    <string name="entry_items_shown">%1$d von %2$d sichtbar</string>
 </resources>

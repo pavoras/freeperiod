@@ -65,12 +65,12 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
                     1 -> {
                         Text(stringResource(R.string.life_phase), style = MaterialTheme.typography.titleLarge)
                         Text(stringResource(R.string.situation_intro))
-                        LifePhase.entries.forEach { phase -> FpChip(state.phase == phase, { actions.phase(phase) },
+                        LifePhase.entries.forEach { phase -> FpOptionCard(state.phase == phase, { actions.phase(phase) },
                             stringResource(phaseLabel(phase)), Modifier.fillMaxWidth(), enabled = !state.busy) }
                     }
                     2 -> {
                         Text(stringResource(R.string.tracking_method), style = MaterialTheme.typography.titleLarge)
-                        Method.entries.forEach { method -> FpChip(state.method == method, { actions.method(method) },
+                        Method.entries.forEach { method -> FpOptionCard(state.method == method, { actions.method(method) },
                             stringResource(methodLabel(method)), Modifier.fillMaxWidth(), enabled = !state.busy) }
                         if (state.method == Method.PILL_COMBINED) {
                             Text(stringResource(R.string.pill_rhythm), style = MaterialTheme.typography.titleMedium)

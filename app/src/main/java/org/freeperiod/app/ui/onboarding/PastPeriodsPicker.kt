@@ -33,12 +33,13 @@ import org.freeperiod.app.R
 import org.freeperiod.app.ui.components.FpSwitchRow
 import org.freeperiod.app.ui.theme.*
 
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 internal fun PastPeriodsPicker(state: OnboardingUiState, actions: OnboardingActions) {
     val locale = LocalConfiguration.current.locales[0]
     val firstWeekday = WeekFields.of(locale).firstDayOfWeek
     val months = remember(state.today) { (5 downTo 0).map { YearMonth.from(state.today).minusMonths(it.toLong()) } }
-    val list = rememberLazyListState(initialFirstVisibleItemIndex = months.lastIndex)
+    val list = rememberLazyListState(initialFirstVisibleItemIndex = months.lastIndex * 2)
     val boxes = remember { mutableMapOf<LocalDate, Rect>() }
     var origin by remember { mutableStateOf(Offset.Zero) }
     var height by remember { mutableIntStateOf(0) }
@@ -71,10 +72,11 @@ internal fun PastPeriodsPicker(state: OnboardingUiState, actions: OnboardingActi
         Box(Modifier.padding(horizontal = FpSpacing.screen)) {
             FpSwitchRow(stringResource(R.string.onboarding_range_mode), state.rangeMode, enabled, actions.rangeMode)
         }
+        Spacer(Modifier.height(FpSpacing.gap))
         state.rangeStart?.let { Text(stringResource(R.string.onboarding_range_end), Modifier.padding(horizontal = FpSpacing.screen)) }
         if (state.periodsCommitted) Text(stringResource(R.string.onboarding_periods_saved), Modifier.padding(horizontal = FpSpacing.screen))
         // No list scrolling while a drag selects days: the list would claim the vertical move.
-        LazyColumn(state = list, contentPadding = PaddingValues(horizontal = FpSpacing.gap), userScrollEnabled = draggingFrom == null, modifier = Modifier.weight(1f)
+        LazyColumn(state = list, contentPadding = PaddingValues(horizontal = FpSpacing.screen), userScrollEnabled = draggingFrom == null, modifier = Modifier.weight(1f)
             .testTag("past-periods-calendar").onSizeChanged { height = it.height }.onGloballyPositioned { origin = it.positionInRoot() }
             .pointerInput(state.today, enabled) {
                 if (enabled) detectDragGesturesAfterLongPress(
@@ -85,9 +87,12 @@ internal fun PastPeriodsPicker(state: OnboardingUiState, actions: OnboardingActi
                     }, onDragEnd = { draggingFrom = null }, onDragCancel = { draggingFrom = null },
                     onDrag = { change, _ -> if (draggingFrom != null) { change.consume(); pointer = change.position; selectAt(pointer) } })
             }) {
-            items(months.size, key = { months[it].toString() }) { index ->
-                val month = months[index]
-                Text(month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)), Modifier.padding(vertical = FpSpacing.section), style = MaterialTheme.typography.titleMedium)
+            // Sticky month titles: every visible week belongs to a named month.
+            months.forEach { month -> stickyHeader(key = "title-$month") {
+                Text(month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)), Modifier.fillMaxWidth()
+                    .background(LocalDaylight.current.background).padding(vertical = FpSpacing.gap), style = MaterialTheme.typography.titleMedium)
+            }
+            item(key = month.toString()) {
                 Row(Modifier.fillMaxWidth()) {
                     repeat(7) { index -> val day = firstWeekday.plus(index.toLong())
                         Text(day.getDisplayName(TextStyle.SHORT, locale), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall,
@@ -118,7 +123,7 @@ internal fun PastPeriodsPicker(state: OnboardingUiState, actions: OnboardingActi
                         }
                     }
                 }
-            }
+            } }
         }
     }
 }

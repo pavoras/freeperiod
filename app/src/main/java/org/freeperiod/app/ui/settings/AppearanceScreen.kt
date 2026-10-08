@@ -1,6 +1,11 @@
 package org.freeperiod.app.ui.settings
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -56,18 +61,7 @@ fun AppearanceScreen(accent: Accent, onAccent: (Accent) -> Unit, onBack: () -> U
                         }
                     }
                 }
-                Text(stringResource(R.string.appearance_preview), style = MaterialTheme.typography.titleMedium)
-                SettingsPanel {
-                    Text(stringResource(R.string.day_entry), style = MaterialTheme.typography.headlineSmall)
-                    Text(stringResource(R.string.entry_mood), style = MaterialTheme.typography.bodyMedium)
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FpChip(false, {}, stringResource(R.string.mood_okay), Modifier.weight(1f))
-                        FpChip(true, {}, stringResource(R.string.mood_good), Modifier.weight(1f))
-                        FpChip(false, {}, stringResource(R.string.mood_great), Modifier.weight(1f))
-                    }
-                    Spacer(Modifier.height(4.dp))
-                    FpButton({}, Modifier.fillMaxWidth()) { Text(stringResource(R.string.log_today)) }
-                }
+                AccentPreview()
             }
         }
     }
@@ -80,4 +74,44 @@ internal fun accentLabel(accent: Accent): Int = when (accent) {
     Accent.OCEAN -> R.string.accent_ocean
     Accent.OCHRE -> R.string.accent_ochre
     Accent.INK -> R.string.accent_ink
+}
+
+/** A small, clearly labelled sample (not a working screen): it ignores touches and shows the accent at a glance. */
+@Composable
+private fun AccentPreview() {
+    val t = LocalDaylight.current
+    Box(Modifier.fillMaxWidth().padding(top = 14.dp)) {
+        Surface(Modifier.fillMaxWidth()
+            .pointerInput(Unit) { awaitPointerEventScope { while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() } } }
+            .clearAndSetSemantics {}, shape = FpShapes.card, color = t.background, border = BorderStroke(1.dp, t.line)) {
+            Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text("12", Modifier.alignByBaseline(), style = MaterialTheme.typography.displayMedium)
+                        Text(stringResource(R.string.wordmark_stop), Modifier.alignByBaseline(),
+                            style = MaterialTheme.typography.displayMedium.copy(fontFamily = DmSans), color = t.accent.accent)
+                    }
+                    Row(Modifier.padding(bottom = 8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        listOf(true, true, false, false).forEachIndexed { index, period ->
+                            Box(Modifier.size(26.dp).then(
+                                if (period) Modifier.background(t.accent.periodFill, CircleShape).border(1.dp, t.accent.periodBorder, CircleShape)
+                                else if (index == 2) Modifier.border(2.dp, t.accent.todayRing, CircleShape)
+                                else Modifier.border(1.dp, t.predicted, CircleShape)))
+                        }
+                    }
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    FpChip(false, {}, stringResource(R.string.mood_okay), Modifier.weight(1f))
+                    FpChip(true, {}, stringResource(R.string.mood_good), Modifier.weight(1f))
+                }
+                FpButton({}, Modifier.fillMaxWidth()) { Text(stringResource(R.string.log_today)) }
+            }
+        }
+        Surface(Modifier.padding(start = 16.dp), shape = CircleShape, color = t.accent.accent, contentColor = t.accent.onAccent) {
+            Text(stringResource(R.string.appearance_preview), Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                style = MaterialTheme.typography.labelMedium)
+        }
+    }
+    Text(stringResource(R.string.appearance_preview_hint), Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodySmall,
+        color = t.muted, textAlign = TextAlign.Center)
 }

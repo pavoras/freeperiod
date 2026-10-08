@@ -1,5 +1,6 @@
 package org.freeperiod.app.ui.today
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -58,6 +59,7 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
     }
     FpCard(modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (number == null && prediction is PredictionState.NoData) EmptyCycleHeader(label)
             if (number != null) {
                 if (stackTimeline) {
                     numeral()
@@ -77,6 +79,9 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
                         Basis.HISTORY -> stringResource(R.string.basis_history, prediction.cyclesUsed)
                     }
                     Text(basis, style = MaterialTheme.typography.bodySmall, color = t.muted)
+                }
+                if (prediction is PredictionState.NoData) {
+                    Text(stringResource(R.string.today_welcome_hint), style = MaterialTheme.typography.bodySmall, color = t.muted)
                 }
                 if (state.situation.phase == LifePhase.PERIMENOPAUSE) {
                     Text(stringResource(R.string.today_perimenopause), style = MaterialTheme.typography.bodySmall, color = t.muted)
@@ -157,4 +162,27 @@ internal fun predictionText(prediction: PredictionState, today: LocalDate, local
     is PredictionState.Menopause -> prediction.fullMonthsSinceLastEnd?.let { pluralStringResource(R.plurals.today_menopause_months, it, it) }
         ?: prediction.lastEnd?.let { stringResource(R.string.today_last_period_end, formatSpokenDate(it, today, locale)) }
         ?: stringResource(R.string.today_menopause_no_period)
+}
+
+/** Same shape as the cycle header before the first period, so the calendar does not jump after the first entry. */
+@Composable
+private fun EmptyCycleHeader(label: String) {
+    val t = LocalDaylight.current
+    Row(Modifier.fillMaxWidth().heightIn(min = 110.dp), verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(Modifier.widthIn(min = 100.dp)) {
+            Text(label, style = MaterialTheme.typography.bodyMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.Bottom) {
+                Text(stringResource(R.string.wordmark_stop), Modifier.alignByBaseline().clearAndSetSemantics {},
+                    style = MaterialTheme.typography.displayLarge.copy(fontFamily = DmSans), color = t.accent.accent)
+            }
+        }
+        Canvas(Modifier.weight(1f).height(16.dp).clearAndSetSemantics {}) {
+            val y = size.height / 2
+            drawLine(t.line, androidx.compose.ui.geometry.Offset(0f, y), androidx.compose.ui.geometry.Offset(size.width - 8.dp.toPx(), y),
+                strokeWidth = 2.dp.toPx(), pathEffect = androidx.compose.ui.graphics.PathEffect.dashPathEffect(floatArrayOf(6.dp.toPx(), 6.dp.toPx())))
+            drawCircle(t.line, radius = 6.dp.toPx(), center = androidx.compose.ui.geometry.Offset(size.width - 6.dp.toPx(), y),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(2.dp.toPx()))
+        }
+    }
 }

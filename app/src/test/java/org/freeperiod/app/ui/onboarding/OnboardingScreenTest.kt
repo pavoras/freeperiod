@@ -35,7 +35,7 @@ class OnboardingScreenTest {
         } }
         compose.waitForIdle()
         val calendar = compose.onNodeWithTag("past-periods-calendar")
-        calendar.performScrollToIndex(4)
+        calendar.performScrollToIndex(8)
         compose.waitForIdle()
         // Keep the last March week and first April week inside the viewport together.
         val shift = calendar.fetchSemanticsNode().boundsInRoot.height / 4
