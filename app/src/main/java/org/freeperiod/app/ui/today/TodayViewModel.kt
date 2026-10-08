@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit.DAYS
+import kotlin.math.roundToInt
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -21,7 +23,12 @@ data class TodayUiState(
     val month: YearMonth = YearMonth.from(today),
     val prediction: PredictionState = PredictionState.NoData,
     val cycleDay: Int? = null,
-    val endQuestion: LocalDate? = null,
+    val periodEndForToday: LocalDate? = null,
+    val periodDay: Int? = null,
+    val timeline: CycleTimeline? = null,
+    val situation: Situation = Situation(),
+    val endSaved: PeriodEndReceipt? = null,
+    val startedPeriodId: Long? = null,
     val ongoingPeriodId: Long? = null,
     val days: Map<LocalDate, DayMarks> = emptyMap(),
     val loading: Boolean = true,
@@ -29,12 +36,15 @@ data class TodayUiState(
     val error: TodayError? = null,
 )
 
+data class PeriodEndReceipt(val before: Period, val after: Period)
+
 data class TodayError(val periodError: PeriodError? = null)
 
 class TodayViewModel(
     private val repository: Repository,
     settings: SettingsStore,
     private val clock: () -> LocalDate = { LocalDate.now() },
+    private val situation: () -> Situation = { Situation() },
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TodayUiState(clock()))
     val state: StateFlow<TodayUiState> = mutableState.asStateFlow()
@@ -64,14 +74,24 @@ class TodayViewModel(
         return refresh()
     }
 
-    fun startPeriodToday(): Job = mutate { repository.addPeriod(clock(), null).getOrThrow() }
+    fun startPeriodToday(): Job = mutate {
+        val period = repository.addPeriod(clock(), null).getOrThrow()
+        mutableState.update { it.copy(startedPeriodId = period.id, endSaved = null) }
+    }
 
     fun confirmEnd(date: LocalDate): Job = mutate {
-        // Read the current ongoing period inside the repository snapshot, rather than
-        // relying on a potentially stale card after another mutation.
-        val ongoing = repository.snapshot().periods.lastOrNull { it.end == null }
-        requireNotNull(ongoing)
-        repository.endPeriod(ongoing.id, date).getOrThrow()
+        val ongoing = requireNotNull(repository.snapshot().periods.lastOrNull { it.end == null && it.start <= clock() })
+        // Reject a stale card after midnight instead of saving the wrong bleeding day.
+        require(date == periodEndForTapToday(ongoing, clock()))
+        val saved = repository.endPeriod(ongoing.id, date).getOrThrow()
+        mutableState.update { it.copy(endSaved = PeriodEndReceipt(ongoing, saved)) }
+    }
+
+    fun undoPeriodEnd(receipt: PeriodEndReceipt): Job = mutate {
+        val current = repository.snapshot().periods.find { it.id == receipt.after.id }
+        require(current == receipt.after)
+        repository.updatePeriod(receipt.before).getOrThrow()
+        mutableState.update { it.copy(endSaved = null) }
     }
 
     fun pausePredictions(): Job = mutate {
@@ -96,23 +116,32 @@ class TodayViewModel(
     }
 
     private fun recompute(data: BackupData) {
-        val today = clock()
-        val prediction = predict(data.periods,
-            PredictionSettings(data.settings.typicalCycleLength, data.settings.predictionsPaused), today)
-        val predicted = predictedDays(prediction)
-        val logged = data.dayLogs.map { it.date }.toSet()
         mutableState.update { previous ->
-            val month = previous.month
-            val days = (1..month.lengthOfMonth()).associate { number ->
-                val date = month.atDay(number)
-                date to DayMarks(PeriodRules.periodOn(data.periods, date, today) != null,
-                    predicted?.contains(date) == true, date in logged, date == today)
-            }
-            previous.copy(today = today, prediction = prediction,
-                cycleDay = PeriodRules.cycleDay(data.periods, today),
-                endQuestion = PeriodRules.endQuestion(data.periods, today),
-                ongoingPeriodId = data.periods.lastOrNull { it.end == null && it.start <= today }?.id,
-                days = days, loading = false)
+            todayState(data, clock(), previous.month, situation()).copy(writing = previous.writing,
+                error = previous.error, endSaved = previous.endSaved, startedPeriodId = previous.startedPeriodId)
         }
     }
+}
+
+/** The card, timeline and calendar share one snapshot and one injected calendar date. */
+internal fun todayState(data: BackupData, today: LocalDate, month: YearMonth = YearMonth.from(today),
+    situation: Situation = Situation()): TodayUiState {
+    val periods = data.periods.filter { it.start <= today }.sortedBy { it.start }
+    val prediction = predict(periods, PredictionSettings(data.settings.typicalCycleLength, data.settings.predictionsPaused), situation, today)
+    val predicted = predictedDays(prediction)
+    val logged = data.dayLogs.filterNot { it.isEmpty() }.map { it.date }.toSet()
+    val ongoing = periods.lastOrNull { it.end == null }
+    val lengths = PeriodRules.cycles(periods).filter { it.eligible }.takeLast(6).map { it.length }
+    val fallback = data.settings.typicalCycleLength ?: lengths.takeIf { it.isNotEmpty() }?.let { Stats.median(it).roundToInt() } ?: 28
+    return TodayUiState(today = today, month = month, prediction = prediction,
+        cycleDay = PeriodRules.cycleDay(periods, today),
+        periodEndForToday = ongoing?.let { periodEndForTapToday(it, today) },
+        periodDay = ongoing?.let { Math.toIntExact(DAYS.between(it.start, today) + 1) },
+        ongoingPeriodId = ongoing?.id,
+        timeline = cycleTimeline(periods, prediction, situation.pill, fallback, today), situation = situation,
+        days = (1..month.lengthOfMonth()).associate { number ->
+            val date = month.atDay(number)
+            date to DayMarks(PeriodRules.periodOn(periods, date, today) != null,
+                predicted?.contains(date) == true, date in logged, date == today)
+        }, loading = false)
 }

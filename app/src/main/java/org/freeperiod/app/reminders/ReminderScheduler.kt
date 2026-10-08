@@ -9,7 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.freeperiod.app.data.AppSettings
+import org.freeperiod.engine.*
+import org.freeperiod.engine.backup.BackupData
+
+internal fun BackupData.periodRemindersPaused(): Boolean = settings.predictionsPaused || situation.predictionMode() != PredictionMode.STATISTICAL
 
 internal fun nextDailyTime(now: ZonedDateTime, time: LocalTime): ZonedDateTime {
     val candidate = now.toLocalDate().atTime(time).atZone(now.zone)
@@ -18,24 +21,26 @@ internal fun nextDailyTime(now: ZonedDateTime, time: LocalTime): ZonedDateTime {
 
 class ReminderScheduler(private val work: WorkManager, private val now: () -> ZonedDateTime = { ZonedDateTime.now() }) {
     private val scheduling = Mutex()
-    suspend fun sync(settings: AppSettings, paused: Boolean, rescheduleDaily: Boolean = true) = scheduling.withLock {
+    suspend fun sync(reminders: List<Reminder>, paused: Boolean, rescheduleDaily: Boolean = true) = scheduling.withLock {
         withContext(Dispatchers.IO) {
-            if (settings.periodReminder && !paused) {
+            if (reminders.any { it.kind == ReminderKind.PERIOD_DUE && it.enabled } && !paused) {
                 work.enqueueUniquePeriodicWork(PERIOD_WORK, ExistingPeriodicWorkPolicy.UPDATE,
                     PeriodicWorkRequestBuilder<ReminderWorker>(24, TimeUnit.HOURS).build()).result.get()
             } else work.cancelUniqueWork(PERIOD_WORK).result.get()
-            if (settings.dailyReminder) {
-                enqueueDaily(settings.dailyReminderTime, if (rescheduleDaily) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP)
+            val daily = reminders.firstOrNull { it.kind == ReminderKind.DAILY_LOG && it.enabled }
+            if (daily != null) {
+                enqueueDaily(daily.time, if (rescheduleDaily) ExistingWorkPolicy.REPLACE else ExistingWorkPolicy.KEEP)
             } else work.cancelUniqueWork(DAILY_WORK).result.get()
         }
     }
 
-    suspend fun afterDaily(settings: AppSettings) = scheduling.withLock {
+    suspend fun afterDaily(reminders: List<Reminder>) = scheduling.withLock {
         withContext(Dispatchers.IO) {
-            if (settings.dailyReminder) {
+            val daily = reminders.firstOrNull { it.kind == ReminderKind.DAILY_LOG && it.enabled }
+            if (daily != null) {
                 val nextAlreadyQueued = work.getWorkInfosForUniqueWork(DAILY_WORK).get()
                     .any { it.state == WorkInfo.State.ENQUEUED || it.state == WorkInfo.State.BLOCKED }
-                if (!nextAlreadyQueued) enqueueDaily(settings.dailyReminderTime, ExistingWorkPolicy.APPEND_OR_REPLACE)
+                if (!nextAlreadyQueued) enqueueDaily(daily.time, ExistingWorkPolicy.APPEND_OR_REPLACE)
             }
             else work.cancelUniqueWork(DAILY_WORK).result.get()
         }

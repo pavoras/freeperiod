@@ -9,7 +9,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import org.freeperiod.app.data.DatabaseTest
 import org.freeperiod.app.data.SettingsStore
-import org.freeperiod.engine.PeriodRules
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -49,14 +48,37 @@ class TodayViewModelTest : DatabaseTest() {
         assertNull(repository.snapshot().periods.single().end)
     }
 
-    @Test fun endQuestionShownAfterThreshold() = runTest {
-        repository.addPeriod(today.minusDays(10), null).getOrThrow()
+    @Test fun endTodaySavesYesterdayAndUndoReopensTheSamePeriod() = runTest {
+        repository.addPeriod(today.minusDays(2), null).getOrThrow()
         val vm = viewModel()
         vm.refresh().join()
-        assertEquals(PeriodRules.endQuestion(repository.snapshot().periods, today), vm.state.value.endQuestion)
-        assertNotNull(vm.state.value.endQuestion)
-        vm.confirmEnd(vm.state.value.endQuestion!!).join()
-        assertNotNull(repository.snapshot().periods.single().end)
+        assertEquals(today.minusDays(1), vm.state.value.periodEndForToday)
+        vm.confirmEnd(vm.state.value.periodEndForToday!!).join()
+        assertEquals(today.minusDays(1), repository.snapshot().periods.single().end)
+        val receipt = requireNotNull(vm.state.value.endSaved)
+        vm.undoPeriodEnd(receipt).join()
+        assertNull(repository.snapshot().periods.single().end)
+        assertNull(vm.state.value.endSaved)
+    }
+
+    @Test fun sameDayEndKeepsTheStartDate() = runTest {
+        val vm = viewModel()
+        vm.startPeriodToday().join()
+        assertEquals(today, vm.state.value.periodEndForToday)
+        vm.confirmEnd(today).join()
+        assertEquals(today, repository.snapshot().periods.single().end)
+    }
+
+    @Test fun undoDoesNotOverwriteASubsequentEdit() = runTest {
+        repository.addPeriod(today.minusDays(3), null).getOrThrow()
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.confirmEnd(today.minusDays(1)).join()
+        val receipt = requireNotNull(vm.state.value.endSaved)
+        repository.updatePeriod(receipt.after.copy(end = today.minusDays(2))).getOrThrow()
+        vm.undoPeriodEnd(receipt).join()
+        assertEquals(today.minusDays(2), repository.snapshot().periods.single().end)
+        assertNotNull(vm.state.value.error)
     }
 
     @Test fun changingMonthPreservesIndependentMarks() = runTest {

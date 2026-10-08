@@ -41,6 +41,10 @@ android {
         compose = true
     }
 
+    // Room MigrationTestHelper (Robolectric) reads exported schemas from the app's assets;
+    // debug only, never shipped in release.
+    sourceSets["debug"].assets.srcDir("$projectDir/schemas")
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true

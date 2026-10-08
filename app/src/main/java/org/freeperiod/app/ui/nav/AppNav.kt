@@ -84,7 +84,8 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     ResumeAndMidnightEffect(todayViewModel::onResume)
                     TodayScreen(state, { todayViewModel.startPeriodToday() }, { todayViewModel.confirmEnd(it) },
                         { navigation.navigate("day/${it.toEpochDay()}") }, { todayViewModel.pausePredictions() },
-                        { todayViewModel.showMonth(it) }, todayViewModel::dismissError)
+                        { todayViewModel.showMonth(it) }, todayViewModel::dismissError,
+                        onUndoEnd = { todayViewModel.undoPeriodEnd(it) })
                 }
                 composable("history") {
                     val model: HistoryViewModel = viewModel(factory = viewModelFactory {

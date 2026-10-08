@@ -7,6 +7,7 @@ import org.freeperiod.engine.Mood
 import org.freeperiod.engine.Pain
 import org.freeperiod.engine.Sex
 import org.freeperiod.engine.Discharge
+import org.freeperiod.engine.OvulationTest
 
 @Entity(tableName = "periods", indices = [Index("startEpochDay")])
 data class PeriodEntity(
@@ -26,13 +27,17 @@ data class DayLogEntity(
     val sex: Sex? = null,
     val discharge: Discharge? = null,
     val note: String? = null,
+    val ovulationTest: OvulationTest? = null,
 )
 
-@Entity(tableName = "tags", indices = [Index(value = ["name"], unique = true)])
+@Entity(tableName = "tags", indices = [Index("categoryId"), Index(value = ["categoryId", "name"], unique = true)],
+    foreignKeys = [ForeignKey(entity = CustomCategoryEntity::class, parentColumns = ["id"], childColumns = ["categoryId"], onDelete = ForeignKey.RESTRICT)])
 data class TagEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     @ColumnInfo(collate = ColumnInfo.NOCASE) val name: String,
     val archived: Boolean = false,
+    val categoryId: Long? = null,
+    @ColumnInfo(defaultValue = "'tag'") val iconKey: String = "tag",
 )
 
 @Entity(tableName = "day_tags", primaryKeys = ["epochDay", "tagId"],

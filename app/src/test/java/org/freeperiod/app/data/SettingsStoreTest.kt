@@ -51,7 +51,8 @@ class SettingsStoreTest {
         for (accent in Accent.entries) {
             settingsStore.update { it.copy(accent = accent) }
             scope.coroutineContext[Job]!!.cancelAndJoin()
-            assertEquals(accent, openStore().settings.first().accent)
+            settingsStore = openStore()
+            assertEquals(accent, settingsStore.settings.first().accent)
         }
     }
 

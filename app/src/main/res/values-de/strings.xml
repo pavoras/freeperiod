@@ -245,4 +245,37 @@
     <string name="symptom_night_sweats">Nachtschweiß</string>
     <string name="symptom_brain_fog">Konzentrationsprobleme</string>
     <string name="symptom_joint_pain">Gelenkschmerzen</string>
+    <string name="cycle_day_label">Zyklustag</string>
+    <string name="period_day_label">Periode · Tag %1$d</string>
+    <string name="pack_day_label">Packungstag %1$d</string>
+    <string name="period_ended">Periode beendet</string>
+    <string name="today_space">Dein täglicher Begleiter</string>
+    <string name="period_end_saved">Gespeichert: letzter Blutungstag %1$s</string>
+    <string name="edit_period_end">Bearbeiten</string>
+    <string name="today_scheduled_break">Geplante Pause %1$s</string>
+    <string name="today_continuous_pill">Durchgehende Einnahme – keine geplante Pause.</string>
+    <string name="today_needs_pill_rhythm">Trage deinen Packungsrhythmus ein, um geplante Pausen zu sehen.</string>
+    <plurals name="today_menopause_months">
+        <item quantity="one">%1$d voller Monat seit dem Ende deiner letzten erfassten Periode</item>
+        <item quantity="other">%1$d volle Monate seit dem Ende deiner letzten erfassten Periode</item>
+    </plurals>
+    <string name="today_menopause_no_period">Dein Platz für tägliche Einträge.</string>
+    <string name="today_last_period_end">Letzte erfasste Periode endete am %1$s</string>
+    <string name="today_perimenopause">Zyklen können in dieser Phase stärker schwanken.</string>
+    <string name="today_irregular_method">Zyklen können bei dieser Methode unregelmäßig sein.</string>
+    <string name="timeline_start">Beginn</string>
+    <string name="timeline_likely">Geschätzt</string>
+    <string name="timeline_scheduled_break">Geplante Pause</string>
+    <string name="timeline_cycle_from">Zyklus ab %1$s.</string>
+    <string name="timeline_pack_from">Packung ab %1$s.</string>
+    <string name="timeline_recorded">Periode vom %1$s erfasst.</string>
+    <string name="timeline_expected">Erwartet bis %1$s.</string>
+    <string name="timeline_today">Heute ist der %1$s.</string>
+    <string name="timeline_next_period">Nächste Periode voraussichtlich vom %1$s.</string>
+    <string name="timeline_break">Geplante Pause vom %1$s.</string>
+    <string name="timeline_range_same_month">%1$s bis %2$s</string>
+    <string name="timeline_range_across_months">%1$s bis %2$s</string>
+    <string name="calendar_scheduled_break">geplante Pause</string>
+    <string name="wordmark_name">FreePeriod</string>
+    <string name="wordmark_stop">.</string>
 </resources>

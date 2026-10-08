@@ -3,82 +3,113 @@ package org.freeperiod.app.ui.today
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.util.Locale
 import org.freeperiod.app.R
-import org.freeperiod.engine.Basis
-import org.freeperiod.engine.PredictionState
+import org.freeperiod.app.ui.components.FpButton
+import org.freeperiod.app.ui.components.FpCard
+import org.freeperiod.app.ui.theme.DmSans
+import org.freeperiod.app.ui.theme.LocalDaylight
+import org.freeperiod.engine.*
 
 @Composable
-fun TodayCard(
-    state: TodayUiState,
-    onStartPeriod: () -> Unit,
-    onConfirmEnd: (LocalDate) -> Unit,
-    onLogToday: () -> Unit,
-    onPausePredictions: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
+    onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier) {
     val locale = LocalConfiguration.current.locales[0]
     val prediction = state.prediction
-    val primaryIsPeriod = state.ongoingPeriodId == null || state.endQuestion != null
-    Card(modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            state.cycleDay?.let {
-                Text(stringResource(R.string.cycle_day, it), style = MaterialTheme.typography.headlineLarge)
+    val t = LocalDaylight.current
+    val large = LocalDensity.current.fontScale >= 1.3f
+    val packDay = when (prediction) {
+        is PredictionState.ScheduledBreak -> prediction.packDay
+        is PredictionState.ContinuousPill -> prediction.packDay
+        else -> null
+    }
+    val number = if (prediction is PredictionState.Menopause) null else packDay ?: state.periodDay ?: state.cycleDay
+    val stackTimeline = large || (number ?: 0) >= 100
+    val label = when {
+        packDay != null -> stringResource(R.string.pack_day_label, packDay)
+        state.periodDay != null -> stringResource(R.string.period_day_label, state.periodDay)
+        else -> stringResource(R.string.cycle_day_label)
+    }
+    val numeral: @Composable () -> Unit = {
+        if (number != null) Column {
+            Text(label, style = MaterialTheme.typography.bodyMedium)
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
+                Text(number.toString(), Modifier.alignByBaseline(), style = MaterialTheme.typography.displayLarge)
+                Text(stringResource(R.string.wordmark_stop), Modifier.alignByBaseline().clearAndSetSemantics {},
+                    style = MaterialTheme.typography.displayLarge.copy(fontFamily = DmSans), color = t.accent.accent)
             }
-            Text(predictionText(prediction, state.today, locale), style = MaterialTheme.typography.bodyLarge)
-            if (prediction is PredictionState.Range) {
-                val basis = when (prediction.basis) {
-                    Basis.USER_ENTERED -> stringResource(R.string.basis_entered)
-                    Basis.EARLY_ESTIMATE -> stringResource(R.string.basis_early)
-                    Basis.HISTORY -> stringResource(R.string.basis_history, prediction.cyclesUsed)
+        }
+    }
+    FpCard(modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            if (number != null) {
+                if (stackTimeline) {
+                    numeral()
+                    state.timeline?.let { CycleTimelineView(it, Modifier.fillMaxWidth(), pack = packDay != null) }
+                } else Row(Modifier.fillMaxWidth().heightIn(min = 110.dp), verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Box(Modifier.widthIn(min = 100.dp)) { numeral() }
+                    state.timeline?.let { CycleTimelineView(it, Modifier.weight(1f), pack = packDay != null) }
                 }
-                Text(basis, style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Button(
-                modifier = Modifier.fillMaxWidth(), enabled = !state.writing,
-                onClick = {
-                    when {
-                        state.ongoingPeriodId == null -> onStartPeriod()
-                        state.endQuestion != null -> onConfirmEnd(state.endQuestion)
-                        else -> onLogToday()
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(predictionText(prediction, state.today, locale), style = MaterialTheme.typography.bodyLarge)
+                if (prediction is PredictionState.Range) {
+                    val basis = when (prediction.basis) {
+                        Basis.USER_ENTERED -> stringResource(R.string.basis_entered)
+                        Basis.EARLY_ESTIMATE -> stringResource(R.string.basis_early)
+                        Basis.HISTORY -> stringResource(R.string.basis_history, prediction.cyclesUsed)
                     }
-                },
-            ) {
-                Text(stringResource(when {
-                    state.ongoingPeriodId == null -> R.string.period_started
-                    state.endQuestion != null -> R.string.period_ended_question
-                    else -> R.string.log_today
-                }))
-            }
-            if (primaryIsPeriod) {
-                TextButton(onClick = onLogToday, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.log_today))
+                    Text(basis, style = MaterialTheme.typography.bodySmall, color = t.muted)
+                }
+                if (state.situation.phase == LifePhase.PERIMENOPAUSE) {
+                    Text(stringResource(R.string.today_perimenopause), style = MaterialTheme.typography.bodySmall, color = t.muted)
+                }
+                if (state.situation.method == Method.PILL_PROGESTIN && prediction is PredictionState.Range) {
+                    Text(stringResource(R.string.today_irregular_method), style = MaterialTheme.typography.bodySmall, color = t.muted)
                 }
             }
-            if (prediction is PredictionState.RangePassed) {
-                TextButton(onClick = onPausePredictions, enabled = !state.writing,
-                    modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(R.string.pause_predictions))
+            val primary: @Composable (Modifier) -> Unit = { buttonModifier ->
+                FpButton(onClick = { state.periodEndForToday?.let(onConfirmEnd) ?: onStartPeriod() },
+                    modifier = buttonModifier, enabled = !state.writing) {
+                    Text(stringResource(if (state.ongoingPeriodId == null) R.string.period_started else R.string.period_ended))
                 }
+            }
+            if (large) {
+                primary(Modifier.fillMaxWidth())
+                TextButton(onClick = onLogToday, modifier = Modifier.fillMaxWidth()) { Text(stringResource(R.string.log_today)) }
+            } else Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                primary(Modifier.weight(1f))
+                TextButton(onClick = onLogToday, modifier = Modifier.heightIn(min = 48.dp)) { Text(stringResource(R.string.log_today)) }
+            }
+            if (prediction is PredictionState.RangePassed) TextButton(onClick = onPausePredictions, enabled = !state.writing) {
+                Text(stringResource(R.string.pause_predictions))
             }
         }
     }
 }
 
 @Composable
-private fun predictionText(prediction: PredictionState, today: LocalDate, locale: Locale): String = when (prediction) {
+internal fun predictionText(prediction: PredictionState, today: LocalDate, locale: Locale): String = when (prediction) {
     PredictionState.NoData -> stringResource(R.string.today_welcome)
     is PredictionState.NeedMoreData -> stringResource(R.string.today_need_more)
     is PredictionState.Range -> stringResource(R.string.today_range, formatPredictionRange(prediction.earliest, prediction.latest, today, locale))
     is PredictionState.Varies -> stringResource(R.string.today_varies, prediction.minLength, prediction.maxLength)
     is PredictionState.RangePassed -> stringResource(R.string.today_range_passed, prediction.daysPassed)
     PredictionState.Paused -> stringResource(R.string.today_paused)
-    is PredictionState.ScheduledBreak -> formatPredictionRange(prediction.range.start, prediction.range.endInclusive, today, locale)
-    is PredictionState.ContinuousPill, PredictionState.NeedsPillRhythm, is PredictionState.Menopause -> stringResource(R.string.today_paused)
+    is PredictionState.ScheduledBreak -> stringResource(R.string.today_scheduled_break, formatPredictionRange(prediction.range.start, prediction.range.endInclusive, today, locale))
+    is PredictionState.ContinuousPill -> stringResource(R.string.today_continuous_pill)
+    PredictionState.NeedsPillRhythm -> stringResource(R.string.today_needs_pill_rhythm)
+    is PredictionState.Menopause -> prediction.fullMonthsSinceLastEnd?.let { pluralStringResource(R.plurals.today_menopause_months, it, it) }
+        ?: prediction.lastEnd?.let { stringResource(R.string.today_last_period_end, formatSpokenDate(it, today, locale)) }
+        ?: stringResource(R.string.today_menopause_no_period)
 }

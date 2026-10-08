@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.first
 import org.freeperiod.app.data.DatabaseTest
 import org.freeperiod.app.FreePeriodApp
 import org.freeperiod.app.data.SettingsStore
+import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupSettings
 import org.junit.*
 import org.junit.Assert.*
@@ -60,6 +61,10 @@ class ReminderWorkerTest : DatabaseTest() {
             override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker =
                 ReminderWorker(appContext, workerParameters, delivery)
         }).build()
+    private fun org.freeperiod.app.data.AppSettings.reminders() = listOf(
+        Reminder(1, ReminderKind.PERIOD_DUE, null, Recurrence.Daily, LocalTime.of(20, 0), periodReminder, periodReminderDaysBefore),
+        Reminder(2, ReminderKind.DAILY_LOG, null, Recurrence.Daily, dailyReminderTime, dailyReminder),
+    )
     private suspend fun seed() {
         repository.addPeriod(today.minusDays(23), today.minusDays(19)).getOrThrow()
         repository.updateDomainSettings(BackupSettings(28, false))
@@ -81,6 +86,29 @@ class ReminderWorkerTest : DatabaseTest() {
         seed(); repository.updateDomainSettings(BackupSettings(28, true)); worker().doWork()
         assertTrue(posted.isEmpty())
     }
+    @Test fun tableEnabledFlagControlsDelivery() = runBlocking {
+        seed()
+        settings.migrateReminders(repository)
+        val reminder = repository.snapshot().reminders.single { it.kind == ReminderKind.PERIOD_DUE }
+        repository.saveReminder(reminder.copy(enabled = false))
+        worker().doWork()
+        assertTrue(posted.isEmpty())
+        settings.update { it.copy(periodReminder = false) }
+        repository.saveReminder(reminder.copy(enabled = true))
+        worker().doWork()
+        assertEquals(1, posted.size)
+        assertEquals(repository.snapshot().periods.single().id, settings.settings.first().lastNotifiedPeriodId)
+    }
+
+    @Test fun situationPausesPeriodDelivery() = runBlocking {
+        seed()
+        repository.updateSituation(Situation(phase = LifePhase.PREGNANT))
+        worker().doWork()
+        assertTrue(posted.isEmpty())
+        repository.updateSituation(Situation())
+        worker().doWork()
+        assertEquals(1, posted.size)
+    }
     @Test fun disabledNotificationsDoNotMarkDelivered() = runBlocking {
         seed(); notificationsEnabled = false; worker().doWork()
         assertNull(settings.settings.first().lastNotifiedPeriodId)
@@ -88,19 +116,19 @@ class ReminderWorkerTest : DatabaseTest() {
         assertEquals(1, posted.size)
     }
     @Test fun scheduleCancelledWhenDisabled() = runBlocking {
-        scheduler.sync(org.freeperiod.app.data.AppSettings(periodReminder = true, dailyReminder = true), paused = false)
-        scheduler.sync(org.freeperiod.app.data.AppSettings(), paused = false)
+        scheduler.sync(org.freeperiod.app.data.AppSettings(periodReminder = true, dailyReminder = true).reminders(), paused = false)
+        scheduler.sync(org.freeperiod.app.data.AppSettings().reminders(), paused = false)
         assertTrue(work.getWorkInfosForUniqueWork(ReminderScheduler.PERIOD_WORK).get().all { it.state == WorkInfo.State.CANCELLED })
         assertTrue(work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().all { it.state == WorkInfo.State.CANCELLED })
     }
     @Test fun pauseCancelsOnlyPeriodWork() = runBlocking {
-        scheduler.sync(org.freeperiod.app.data.AppSettings(periodReminder = true, dailyReminder = true), paused = true)
+        scheduler.sync(org.freeperiod.app.data.AppSettings(periodReminder = true, dailyReminder = true).reminders(), paused = true)
         assertTrue(work.getWorkInfosForUniqueWork(ReminderScheduler.PERIOD_WORK).get().isEmpty())
         assertEquals(WorkInfo.State.ENQUEUED, work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().state)
     }
     @Test fun dailyReminderRescheduledAfterTimeChange() = runBlocking {
         val preferences = org.freeperiod.app.data.AppSettings(dailyReminder = true, dailyReminderTime = LocalTime.of(20, 0))
-        scheduler.sync(preferences, paused = false)
+        scheduler.sync(preferences.reminders(), paused = false)
         val first = work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id
         now = now.withZoneSameInstant(ZoneId.of("America/New_York"))
         settings.update { preferences }
@@ -125,7 +153,7 @@ class ReminderWorkerTest : DatabaseTest() {
         val worker = TestListenableWorkerBuilder<DailyReminderWorker>(context)
             .setWorkerFactory(object : WorkerFactory() {
                 override fun createWorker(appContext: Context, workerClassName: String, workerParameters: WorkerParameters): ListenableWorker =
-                    DailyReminderWorker(appContext, workerParameters, delivery, settings, scheduler)
+                    DailyReminderWorker(appContext, workerParameters, delivery, repository, scheduler)
             }).build()
         assertEquals(ListenableWorker.Result.success(), worker.doWork())
         assertEquals(1, dailyPosted)
@@ -133,16 +161,16 @@ class ReminderWorkerTest : DatabaseTest() {
     }
     @Test fun initialSyncKeepsDueDailyWork() = runBlocking {
         val preferences = org.freeperiod.app.data.AppSettings(dailyReminder = true)
-        scheduler.sync(preferences, paused = false)
+        scheduler.sync(preferences.reminders(), paused = false)
         val first = work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id
-        scheduler.sync(preferences, paused = false, rescheduleDaily = false)
+        scheduler.sync(preferences.reminders(), paused = false, rescheduleDaily = false)
         assertEquals(first, work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id)
     }
     @Test fun periodChangesKeepPendingDailyRun() = runBlocking {
         val preferences = org.freeperiod.app.data.AppSettings(dailyReminder = true, periodReminder = true)
-        scheduler.sync(preferences, paused = false)
+        scheduler.sync(preferences.reminders(), paused = false)
         val first = work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id
-        scheduler.sync(preferences, paused = true, rescheduleDaily = false)
+        scheduler.sync(preferences.reminders(), paused = true, rescheduleDaily = false)
         assertEquals(first, work.getWorkInfosForUniqueWork(ReminderScheduler.DAILY_WORK).get().single().id)
     }
 }

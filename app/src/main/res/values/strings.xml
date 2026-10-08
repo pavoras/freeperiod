@@ -245,4 +245,37 @@
     <string name="symptom_night_sweats">Night sweats</string>
     <string name="symptom_brain_fog">Brain fog</string>
     <string name="symptom_joint_pain">Joint pain</string>
+    <string name="cycle_day_label">Cycle day</string>
+    <string name="period_day_label">Period · day %1$d</string>
+    <string name="pack_day_label">Pack day %1$d</string>
+    <string name="period_ended">Period ended</string>
+    <string name="today_space">Your daily space</string>
+    <string name="period_end_saved">Saved: last bleeding day %1$s</string>
+    <string name="edit_period_end">Edit</string>
+    <string name="today_scheduled_break">Scheduled break %1$s</string>
+    <string name="today_continuous_pill">Continuous use – no scheduled break.</string>
+    <string name="today_needs_pill_rhythm">Add your pack rhythm to see scheduled breaks.</string>
+    <plurals name="today_menopause_months">
+        <item quantity="one">%1$d full month since your last recorded period ended</item>
+        <item quantity="other">%1$d full months since your last recorded period ended</item>
+    </plurals>
+    <string name="today_menopause_no_period">Your space for daily entries.</string>
+    <string name="today_last_period_end">Last recorded period ended %1$s</string>
+    <string name="today_perimenopause">Cycles may vary more in this phase.</string>
+    <string name="today_irregular_method">Cycles may be irregular with this method.</string>
+    <string name="timeline_start">Start</string>
+    <string name="timeline_likely">Likely</string>
+    <string name="timeline_scheduled_break">Scheduled break</string>
+    <string name="timeline_cycle_from">Cycle from %1$s.</string>
+    <string name="timeline_pack_from">Pack from %1$s.</string>
+    <string name="timeline_recorded">Period recorded %1$s.</string>
+    <string name="timeline_expected">Expected until %1$s.</string>
+    <string name="timeline_today">Today %1$s.</string>
+    <string name="timeline_next_period">Next period likely %1$s.</string>
+    <string name="timeline_break">Scheduled break %1$s.</string>
+    <string name="timeline_range_same_month">%1$s to %2$s</string>
+    <string name="timeline_range_across_months">%1$s to %2$s</string>
+    <string name="calendar_scheduled_break">scheduled break</string>
+    <string name="wordmark_name">FreePeriod</string>
+    <string name="wordmark_stop">.</string>
 </resources>

@@ -5,7 +5,7 @@ import java.util.Locale
 import org.freeperiod.engine.*
 
 /** Validates an entire schema-2 snapshot before any restore can mutate storage. */
-internal fun validBackup(data: BackupData, today: LocalDate): Boolean {
+fun validBackup(data: BackupData, today: LocalDate): Boolean {
     if (data.schemaVersion != 2 || data.settings.typicalCycleLength?.let { it !in 15..90 } == true) return false
     if (!uniquePositiveIds(data.periods.map { it.id }) || !uniquePositiveIds(data.tags.map { it.id }) ||
         !uniquePositiveIds(data.customCategories.map { it.id }) || !uniquePositiveIds(data.reminders.map { it.id })) return false

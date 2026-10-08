@@ -9,6 +9,7 @@ import org.freeperiod.engine.Pain
 import org.freeperiod.engine.Sex
 import org.freeperiod.engine.Discharge
 import org.freeperiod.engine.Symptom
+import org.freeperiod.engine.OvulationTest
 
 class Converters {
     @TypeConverter fun dateToEpochDay(value: LocalDate?): Long? = value?.toEpochDay()
@@ -25,6 +26,8 @@ class Converters {
     @TypeConverter fun nameToSex(value: String?): Sex? = value?.let(Sex::valueOf)
     @TypeConverter fun dischargeToName(value: Discharge?): String? = value?.name
     @TypeConverter fun nameToDischarge(value: String?): Discharge? = value?.let(Discharge::valueOf)
+    @TypeConverter fun ovulationTestToName(value: OvulationTest?): String? = value?.name
+    @TypeConverter fun nameToOvulationTest(value: String?): OvulationTest? = value?.let(OvulationTest::valueOf)
 
     @TypeConverter fun symptomsToNames(value: Set<Symptom>): String = value.map { it.name }.sorted().joinToString(";")
     @TypeConverter fun namesToSymptoms(value: String): Set<Symptom> = if (value.isEmpty()) emptySet()

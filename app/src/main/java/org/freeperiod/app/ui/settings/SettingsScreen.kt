@@ -12,6 +12,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.R
@@ -74,13 +75,14 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item {
             SettingsRow(R.string.language, enabled, actions.language)
         }
-        item { HorizontalDivider(Modifier.padding(vertical = 12.dp)) }
         item { SettingsRow(R.string.backup_restore, enabled, actions.backup) }
         item { SettingsRow(R.string.export_csv, enabled, { csvDialog = true }) }
         item { SettingsRow(R.string.privacy_policy, enabled, actions.privacy) }
         item { SettingsRow(R.string.about, enabled, actions.about) }
         item {
             TextButton(onClick = { deleteDialog = true }, enabled = enabled, modifier = Modifier.heightIn(min = 48.dp)) {
+                Icon(painterResource(R.drawable.ic_fp_delete), null, tint = MaterialTheme.colorScheme.error)
+                Spacer(Modifier.width(8.dp))
                 Text(stringResource(R.string.delete_all_data), color = MaterialTheme.colorScheme.error)
             }
         }
@@ -110,7 +112,19 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
 
 @Composable
 internal fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, detail: String? = null) {
-    FpSectionRow(R.drawable.ic_fp_settings, stringResource(label), detail.orEmpty(), enabled = enabled, onClick = onClick)
+    val icon = when (label) {
+        R.string.appearance -> R.drawable.ic_fp_appearance
+        R.string.typical_cycle_length -> R.drawable.ic_fp_cycle
+        R.string.language -> R.drawable.ic_fp_language
+        R.string.backup_restore -> R.drawable.ic_fp_backup
+        R.string.export_csv -> R.drawable.ic_fp_export
+        R.string.privacy_policy -> R.drawable.ic_fp_privacy
+        R.string.about -> R.drawable.ic_fp_about
+        R.string.lock_timeout, R.string.daily_reminder_time -> R.drawable.ic_fp_clock
+        R.string.reminder_days_before -> R.drawable.ic_fp_reminder
+        else -> R.drawable.ic_fp_settings
+    }
+    FpSectionRow(icon, stringResource(label), detail.orEmpty(), enabled = enabled, onClick = onClick)
 }
 
 @Composable

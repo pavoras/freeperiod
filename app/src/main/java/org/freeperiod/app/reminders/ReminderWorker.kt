@@ -18,13 +18,14 @@ class ReminderDelivery(private val repository: Repository, private val settings:
     private val notifications: NotificationDelivery, private val clock: () -> LocalDate) {
     private val periodDelivery = Mutex()
     suspend fun period() = periodDelivery.withLock {
+        settings.migrateReminders(repository)
         val device = settings.settings.first()
-        if (!device.periodReminder) return@withLock
         val data = repository.snapshot()
+        val reminder = data.reminders.firstOrNull { it.kind == ReminderKind.PERIOD_DUE && it.enabled } ?: return@withLock
         val today = clock()
-        val state = predict(data.periods, PredictionSettings(data.settings.typicalCycleLength, data.settings.predictionsPaused), today)
+        val state = predict(data.periods, PredictionSettings(data.settings.typicalCycleLength, data.settings.predictionsPaused), data.situation, today)
         val periodId = data.periods.filter { it.start <= today }.maxByOrNull { it.start }?.id
-        if (periodReminderDue(state, periodId, device.periodReminderDaysBefore, today, device.lastNotifiedPeriodId)) {
+        if (periodReminderDue(state, periodId, requireNotNull(reminder.daysBefore), today, device.lastNotifiedPeriodId)) {
             val days = ChronoUnit.DAYS.between(today, (state as PredictionState.Range).earliest).toInt()
             if (notifications.period(days, device.explicitNotifications)) {
                 settings.update { it.copy(lastNotifiedPeriodId = periodId) }
@@ -33,8 +34,10 @@ class ReminderDelivery(private val repository: Repository, private val settings:
     }
 
     suspend fun daily() {
+        settings.migrateReminders(repository)
         val device = settings.settings.first()
-        if (device.dailyReminder) notifications.daily(device.explicitNotifications)
+        if (repository.snapshot().reminders.none { it.kind == ReminderKind.DAILY_LOG && it.enabled }) return
+        notifications.daily(device.explicitNotifications)
     }
 }
 
@@ -50,15 +53,15 @@ class ReminderWorker internal constructor(context: Context, params: WorkerParame
 }
 
 class DailyReminderWorker internal constructor(context: Context, params: WorkerParameters,
-    private val delivery: ReminderDelivery, private val settings: SettingsStore,
+    private val delivery: ReminderDelivery, private val repository: Repository,
     private val scheduler: ReminderScheduler) : CoroutineWorker(context, params) {
     constructor(context: Context, params: WorkerParameters) : this(context, params,
         (context.applicationContext as FreePeriodApp).container.reminderDelivery,
-        (context.applicationContext as FreePeriodApp).container.settings,
+        (context.applicationContext as FreePeriodApp).container.repository,
         (context.applicationContext as FreePeriodApp).container.reminderScheduler)
     override suspend fun doWork(): Result = try {
         delivery.daily()
-        scheduler.afterDaily(settings.settings.first())
+        scheduler.afterDaily(repository.snapshot().reminders)
         Result.success()
     } catch (cancelled: CancellationException) { throw cancelled }
     catch (_: Exception) { Result.retry() }

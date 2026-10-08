@@ -18,11 +18,12 @@ class RepositoryTest : DatabaseTest() {
         repository.addPeriod(today.minusDays(10), today.minusDays(6)).getOrThrow()
         repository.updateDomainSettings(BackupSettings(29, true))
         val before = repository.snapshot()
-        // Both names validate individually; the NOCASE constraint fails during insertion,
-        // after old rows have been cleared and replacement periods inserted.
+        // Force a database failure after deletion and insertion to verify transaction rollback.
+        db.openHelper.writableDatabase.execSQL("CREATE TRIGGER reject_reminder BEFORE INSERT ON reminders BEGIN SELECT RAISE(ABORT, 'test'); END")
         val invalid = BackupData(periods = listOf(Period(10, today.minusDays(2), today)),
-            dayLogs = emptyList(), tags = listOf(Tag(1, "Travel"), Tag(2, "travel")),
-            settings = BackupSettings(30, false))
+            dayLogs = emptyList(), tags = listOf(Tag(1, "Travel")),
+            settings = BackupSettings(30, false), reminders = listOf(
+                Reminder(1, ReminderKind.CUSTOM, null, Recurrence.Daily, java.time.LocalTime.NOON, true)))
         assertTrue(runCatching { repository.replaceAll(invalid) }.isFailure)
         assertEquals(before, repository.snapshot())
     }

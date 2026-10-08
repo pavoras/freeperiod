@@ -136,7 +136,7 @@ fun DayEntrySheet(
                     HorizontalDivider(color = tones.line)
                 }
                 item {
-                    Text(stringResource(R.string.entry_mood), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.entry_mood), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium)
                     ChoiceGrid(listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT), if (largeText) 3 else 5) { mood ->
                         FpFaceChip(state.log.mood == mood,
                             { actions.mood(if (state.log.mood == mood) null else mood) }, stringResource(moodLabel(mood)),
@@ -148,7 +148,7 @@ fun DayEntrySheet(
                 item { Choices(R.string.entry_flow, FlowLevel.entries, state.log.flow, editable, ::flowLabel, actions.flow) }
                 item { Choices(R.string.entry_pain, Pain.entries, state.log.pain, editable, ::painLabel, actions.pain) }
                 item {
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         Text(stringResource(R.string.entry_symptoms), style = MaterialTheme.typography.titleMedium)
                         if (state.log.symptoms.isNotEmpty()) Text(stringResource(R.string.entry_selected_count, state.log.symptoms.size),
                             style = MaterialTheme.typography.bodySmall, color = tones.muted)
@@ -219,7 +219,7 @@ private fun <T> ChoiceGrid(values: List<T>, columns: Int, content: @Composable (
 
 @Composable
 private fun <T> Choices(title: Int?, values: List<T>, selected: T?, enabled: Boolean, label: (T) -> Int, onChange: (T?) -> Unit) {
-    title?.let { Text(stringResource(it), style = MaterialTheme.typography.titleMedium) }
+    title?.let { Text(stringResource(it), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium) }
     val columns = if (LocalDensity.current.fontScale >= 1.3f) 2 else minOf(values.size, 5)
     ChoiceGrid(values, columns) { value ->
         FpChip(selected == value, { onChange(if (selected == value) null else value) },

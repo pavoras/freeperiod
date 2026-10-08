@@ -25,11 +25,12 @@ $gradle = Join-Path $tools 'gradle-8.11.1\bin\gradle.bat'
 if (-not ($Schnell -or $Voll -or $Aufnehmen)) { $Schnell = $true }
 $mode = if ($Aufnehmen) { 'aufnehmen' } elseif ($Voll) { 'voll' } else { 'schnell' }
 
-$tasks = @(':engine:test', ':app:assembleDebug', ':app:compileDebugUnitTestKotlin')
+# Quick mode compiles only: packaging needs the debug key in ~/.android, outside the Codex sandbox.
+$tasks = @(':engine:test', ':app:compileDebugKotlin', ':app:compileDebugUnitTestKotlin')
 $extra = @()
 if ($Voll -or $Aufnehmen) {
     $tasks += ':app:testDebugUnitTest'
-    if ($Voll) { $tasks += @(':app:lintDebug', ':app:assembleRelease') }
+    if ($Voll) { $tasks += @(':app:assembleDebug', ':app:lintDebug', ':app:assembleRelease') }
     $extra += if ($Aufnehmen) { '-Proborazzi.test.record=true' } else { '-Proborazzi.test.compare=true' }
     # A filter applies to the task right before it, so run only the unit tests then.
     if ($Tests) { $tasks = @(':app:testDebugUnitTest', '--tests', $Tests) }

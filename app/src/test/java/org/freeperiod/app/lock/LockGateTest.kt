@@ -21,7 +21,7 @@ import org.robolectric.annotation.Config
 class LockGateTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
     private val settings get() = (compose.activity.application as FreePeriodApp).container.settings
-    @After fun resetSettings() = runBlocking { settings.update { it.copy(lockEnabled = false, onboardingDone = false) } }
+    @After fun resetSettings() { runBlocking { settings.update { it.copy(lockEnabled = false, onboardingDone = false) } } }
 
     @Test fun enabledLockHidesContentAndSecuresWindow() {
         runBlocking { settings.update { it.copy(onboardingDone = true, lockEnabled = true) } }
