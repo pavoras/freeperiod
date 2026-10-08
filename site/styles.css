@@ -1,0 +1,69 @@
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("assets/fonts/bricolage_grotesque.ttf") format("truetype");
+  font-weight: 400 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "DM Sans";
+  src: url("assets/fonts/dm_sans.ttf") format("truetype");
+  font-weight: 100 1000;
+  font-display: swap;
+}
+:root {
+  color-scheme: light;
+  --cream: #fbf7f2;
+  --paper: #fffdf9;
+  --ink: #302923;
+  --muted: #6e6159;
+  --coral: #f3b6a4;
+  --line: #e3d8cf;
+  --link: #614c42;
+  --heading: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --body: "DM Sans", system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html { background: var(--cream); }
+body { margin: 0; color: var(--ink); font: 1rem/1.65 var(--body); }
+a { color: var(--link); text-underline-offset: .22em; }
+a:hover { text-decoration-thickness: 2px; }
+a:focus-visible { outline: 3px solid var(--ink); outline-offset: 5px; border-radius: 2px; }
+h1, h2, h3, .wordmark { font-family: var(--heading); font-weight: 650; line-height: 1.12; }
+h1, h2, h3, p { margin-top: 0; }
+h1 { font-size: clamp(2.1rem, 6vw, 3.5rem); letter-spacing: -.04em; }
+h2 { margin-top: 2rem; font-size: 1.45rem; letter-spacing: -.02em; }
+.stop { color: var(--coral); }
+.shell { width: min(100% - 40px, 960px); margin-inline: auto; }
+.site-header { padding-block: 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.wordmark { font-size: 1.6rem; letter-spacing: -.04em; color: var(--ink); text-decoration: none; }
+.site-header nav, .site-footer nav { display: flex; flex-wrap: wrap; gap: 12px 24px; }
+.site-footer { margin-top: 56px; padding-block: 24px 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
+.site-footer p { margin: 12px 0 0; }
+.hero { margin-top: 32px; padding: clamp(28px, 6vw, 64px); background: var(--paper); border: 1px solid var(--line); border-radius: 4px 64px 4px 64px; }
+.hero h1 { font-size: clamp(2.5rem, 10vw, 5rem); margin-bottom: 20px; }
+.promise { max-width: 32ch; font-size: clamp(1.35rem, 4vw, 2rem); line-height: 1.4; }
+.quiet { color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 20px 28px; align-items: center; margin-block: 28px; }
+.play-badge-placeholder { display: inline-flex; min-height: 52px; align-items: center; padding: 12px 24px; background: var(--ink); color: var(--paper); border-radius: 4px 18px 4px 18px; text-decoration: none; font-weight: 600; }
+.hero .limits { max-width: 66ch; font-size: .9rem; margin-bottom: 0; }
+.policy { max-width: 76ch; margin-inline: auto; padding: 32px 0 8px; overflow-wrap: anywhere; hyphens: auto; }
+.policy h1 { margin-bottom: 12px; }
+.policy .lead { font-size: 1.2rem; }
+.policy .summary { padding: 24px; background: var(--paper); border: 1px solid var(--line); border-radius: 4px 28px 4px 28px; }
+.policy ul { padding-left: 1.3em; }
+.policy li + li { margin-top: .5em; }
+.policy address { font-style: normal; }
+.skip { position: absolute; left: -10000px; }
+.skip:focus { left: 20px; top: 8px; padding: 8px 16px; background: var(--paper); z-index: 2; }
+@media (max-width: 480px) {
+  .site-header { padding-block: 20px; }
+  .hero { margin-top: 12px; }
+  .actions { align-items: flex-start; flex-direction: column; }
+  .policy { padding-top: 16px; }
+}
+@media print {
+  .site-header, .site-footer, .skip { display: none; }
+  html { background: white; }
+  .policy { max-width: none; }
+  h2 { break-after: avoid; }
+}
