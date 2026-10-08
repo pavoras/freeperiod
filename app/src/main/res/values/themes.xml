@@ -6,6 +6,6 @@
         <item name="android:windowBackground">@color/background</item>
     </style>
     <color name="background">#FFFFFBFF</color>
-    <color name="launcher_background">#FFFFF4F1</color>
-    <color name="launcher_foreground">#FFE8735A</color>
+    <color name="launcher_background">#FFFBF7F2</color>
+    <color name="launcher_foreground">#FFF3B6A4</color>
 </resources>

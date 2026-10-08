@@ -107,6 +107,10 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
 internal fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, detail: String? = null) {
     val icon = when (label) {
         R.string.appearance -> R.drawable.ic_fp_appearance
+        R.string.my_situation -> R.drawable.ic_fp_situation
+        R.string.reminders -> R.drawable.ic_fp_reminder
+        R.string.day_entry -> R.drawable.ic_fp_note
+        R.string.pill_rhythm -> R.drawable.ic_fp_cycle
         R.string.typical_cycle_length -> R.drawable.ic_fp_cycle
         R.string.language -> R.drawable.ic_fp_language
         R.string.backup_restore -> R.drawable.ic_fp_backup

@@ -36,7 +36,7 @@ class HistoryViewModelTest : DatabaseTest() {
         assertEquals(29.0, vm.state.value.cycleLength!!, 0.0)
         assertEquals(5.0, vm.state.value.periodLength!!, 0.0)
         assertEquals(2, vm.state.value.eligibleCycles)
-        assertEquals(listOf(30, 14, 28), vm.state.value.cycles.map { it.length })
+        assertEquals(listOf(28, 14, 30), vm.state.value.cycles.map { it.length })
     }
 
     @Test fun toggleExcludeUpdatesPeriod() = runTest {
@@ -65,6 +65,24 @@ class HistoryViewModelTest : DatabaseTest() {
         vm.setCycleIncluded(period.id, true).join()
         assertEquals(CycleUse.INCLUDE, repository.snapshot().periods.first { it.id == period.id }.cycleUse)
         assertTrue(vm.state.value.cycles.first { it.startPeriodId == period.id }.eligible)
+    }
+
+    @Test fun excludedListMatchesVisibleRange() = runTest {
+        val periods = periods()
+        val vm = viewModel()
+        vm.setCycleIncluded(periods.first().id, false).join()
+        val visible = setOf(periods[1].id, periods[2].id)
+        assertEquals(listOf(periods[1].id), excludedCyclesInRange(vm.state.value.cycles, visible).map { it.startPeriodId })
+    }
+    @Test fun longCycleHintDismissPersists() = runTest {
+        val starts = listOf(134L, 106L, 78L, 50L, 5L).map { today.minusDays(it) }
+        val periods = starts.map { repository.addPeriod(it, it.plusDays(4)).getOrThrow() }
+        val vm = viewModel(); vm.refresh().join()
+        assertEquals(setOf(periods[3].id), vm.state.value.longCycleHintIds)
+        vm.dismissLongCycleHint(periods[3].id).join()
+        assertEquals(setOf(periods[3].id), repository.snapshot().hintDismissals)
+        val recreated = viewModel(); recreated.refresh().join()
+        assertTrue(recreated.state.value.longCycleHintIds.isEmpty())
     }
 
     @Test fun symptomWindowUsesLastThreeCompletedCycles() = runTest {

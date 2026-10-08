@@ -25,7 +25,9 @@ class SituationScreenTest {
             SituationScreen(situation.value, LocalDate.of(2026, 4, 12), { situation.value = it }, {}, { draft = it })
         } }
         compose.waitForIdle()
-        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Mini-pill"))
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Method"))
+        compose.onNodeWithText("Method").performClick()
+        compose.waitForIdle()
         compose.onNodeWithText("Mini-pill").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Add a method reminder?").assertExists()

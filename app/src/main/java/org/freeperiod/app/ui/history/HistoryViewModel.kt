@@ -3,6 +3,7 @@ package org.freeperiod.app.ui.history
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import java.time.LocalDate
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
@@ -13,6 +14,11 @@ import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 
 data class HistoryUiState(
+    val today: LocalDate,
+    val phase: LifePhase = LifePhase.REGULAR,
+    val fullMonthsSinceLastEnd: Int? = null,
+    val monthlySymptoms: Map<YearMonth, Map<Symptom, Int>> = emptyMap(),
+    val longCycleHintIds: Set<Long> = emptySet(),
     val cycles: List<Cycle> = emptyList(),
     val cycleLength: Double? = null,
     val periodLength: Double? = null,
@@ -33,7 +39,11 @@ internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
         period.end?.let { Math.toIntExact(ChronoUnit.DAYS.between(period.start, it) + 1) }
     }
     val window = cycles.takeLast(3)
-    return HistoryUiState(cycles = cycles.asReversed(),
+    return HistoryUiState(today = today, phase = data.situation.phase,
+        fullMonthsSinceLastEnd = fullMonthsSinceLastPeriodEnded(periods, today),
+        monthlySymptoms = data.dayLogs.filter { it.date <= today }.groupBy { YearMonth.from(it.date) }.mapValues { (_, logs) ->
+            logs.flatMap { it.symptoms }.groupingBy { it }.eachCount()
+        }, longCycleHintIds = longCycleHints(cycles) - data.hintDismissals, cycles = cycles,
         cycleLength = eligible.takeIf { it.isNotEmpty() }?.let { Stats.median(it.map { cycle -> cycle.length }) },
         periodLength = lengths.takeIf { it.isNotEmpty() }?.let(Stats::median),
         eligibleCycles = eligible.size, completedPeriods = lengths.size,
@@ -42,13 +52,13 @@ internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
 }
 
 class HistoryViewModel(private val repository: Repository, private val clock: () -> LocalDate = { LocalDate.now() }) : ViewModel() {
-    private val mutableState = MutableStateFlow(HistoryUiState())
+    private val mutableState = MutableStateFlow(HistoryUiState(today = clock()))
     val state = mutableState.asStateFlow()
     private var pending: Job? = null
 
     init {
         viewModelScope.launch {
-            combine(repository.periods, repository.dayLogs) { _, _ -> Unit }.collect { refresh().join() }
+            merge(repository.periods.map { Unit }, repository.dayLogs.map { Unit }, repository.situation.map { Unit }, repository.hintDismissals.map { Unit }).collect { refresh().join() }
         }
     }
 
@@ -61,6 +71,8 @@ class HistoryViewModel(private val repository: Repository, private val clock: ()
         repository.updatePeriod(period.copy(cycleUse = if (included) CycleUse.INCLUDE else CycleUse.EXCLUDE)).getOrThrow()
         reload()
     }
+
+    fun dismissLongCycleHint(id: Long): Job = enqueue { repository.dismissLongCycleHint(id); reload() }
 
     private suspend fun reload() { mutableState.value = historyState(repository.snapshot(), clock()) }
 
@@ -80,3 +92,6 @@ class HistoryViewModel(private val repository: Repository, private val clock: ()
         }.also { pending = it }
     }
 }
+
+internal fun excludedCyclesInRange(cycles: List<Cycle>, visibleIds: Set<Long>): List<Cycle> =
+    cycles.filter { !it.eligible && it.startPeriodId in visibleIds }

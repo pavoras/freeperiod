@@ -6,6 +6,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,7 +61,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                 modifier = Modifier.padding(padding)) {
                 composable("onboarding") {
                     val model: OnboardingViewModel = viewModel(factory = viewModelFactory {
-                        initializer { OnboardingViewModel(container.repository, container.settings, container.clock) }
+                        initializer { OnboardingViewModel(container.repository, container.settings, container.clock, createSavedStateHandle()) }
                     })
                     val state by model.state.collectAsStateWithLifecycle()
                     ResumeAndMidnightEffect(model::onResume)
@@ -69,10 +70,12 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     androidx.activity.compose.BackHandler(state.page > 0, onBack = model::back)
                     OnboardingScreen(state, OnboardingActions(
                         next = model::next, back = model::back, skip = { model.skip() }, finish = { model.finish() },
-                        start = model::setStart, ended = model::setHasEnded, end = model::setEnd,
+                        phase = model::setPhase, method = model::setMethod, pillRhythm = model::setPillRhythm, packStart = model::setPackStart,
+                        day = model::toggleDay, range = model::markRange, rangeMode = model::setRangeMode, ongoing = model::setOngoing, dismissOngoing = model::dismissOngoingQuestion,
                         length = model::setTypicalLength, unknown = model::setUnknown,
                         periodReminder = { model.setPeriodReminder(it); if (it) access.requestPermission() },
                         dailyReminder = { model.setDailyReminder(it); if (it) access.requestPermission() },
+                        methodReminder = { model.setMethodReminder(it); if (it?.enabled == true) access.requestPermission() },
                         systemSettings = {
                             try { context.startActivity(access.settingsIntent) }
                             catch (_: ActivityNotFoundException) { model.systemSettingsUnavailable() }
@@ -93,7 +96,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     })
                     val state by model.state.collectAsStateWithLifecycle()
                     ResumeAndMidnightEffect(model::onResume)
-                    HistoryScreen(state, onInclude = { id, included -> model.setCycleIncluded(id, included) })
+                    HistoryScreen(state, onInclude = { id, included -> model.setCycleIncluded(id, included) }, onDismissHint = { model.dismissLongCycleHint(it) })
                 }
                 composable("settings") { SettingsRoute(container) }
                 composable("day/{epochDay}", arguments = listOf(navArgument("epochDay") { type = NavType.LongType })) { day ->

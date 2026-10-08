@@ -1,7 +1,13 @@
 package org.freeperiod.app.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
+import org.freeperiod.app.ui.theme.LocalDaylight
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -27,6 +33,7 @@ internal fun builtInItems(key: String): List<Pair<String, Int>> = when (key) {
     else -> emptyList()
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Unit,
     onOverride: (String, Boolean, Int) -> Unit, onReorder: (List<String>) -> Unit,
@@ -38,26 +45,33 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     var itemCategory by remember { mutableStateOf<EntryCategory?>(null) }
     var categoryEditor by remember { mutableStateOf<CustomCategory?>(null) }
     var categoryDialog by rememberSaveable { mutableStateOf(false) }
-    LazyColumn(contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+    val t = LocalDaylight.current
+    LazyColumn(Modifier.fillMaxSize().background(t.background), contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { FpTopBar(stringResource(R.string.day_entry), onBack) }
-        item { Text(stringResource(R.string.entry_customization_intro)) }
+        item { Text(stringResource(R.string.entry_customization_intro), style = MaterialTheme.typography.bodyMedium, color = t.muted) }
         items(categories.size, key = { categories[it].overrideKey }) { index ->
             val category = categories[index]
-            FpCard {
+            SettingsPanel {
                 val title = category.category?.name ?: stringResource(category.label)
                 FpSwitchRow(title, !category.hidden, onChange = { onOverride(category.overrideKey, !it, category.order) })
-                Row {
-                    TextButton(enabled = index > 0, onClick = {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(enabled = index > 0, onClick = {
                         val keys = categories.map { it.overrideKey }.toMutableList()
                         keys[index] = keys[index - 1].also { keys[index - 1] = keys[index] }; onReorder(keys)
-                    }) { Text(stringResource(R.string.move_up)) }
-                    TextButton(enabled = index < categories.lastIndex, onClick = {
+                    }) { Icon(painterResource(R.drawable.ic_fp_up), stringResource(R.string.category_move_up, title), Modifier.size(20.dp)) }
+                    IconButton(enabled = index < categories.lastIndex, onClick = {
                         val keys = categories.map { it.overrideKey }.toMutableList()
                         keys[index] = keys[index + 1].also { keys[index + 1] = keys[index] }; onReorder(keys)
-                    }) { Text(stringResource(R.string.move_down)) }
-                    TextButton(onClick = { expanded = if (expanded == category.key) "" else category.key }) { Text(stringResource(R.string.entry_items)) }
+                    }) { Icon(painterResource(R.drawable.ic_fp_down), stringResource(R.string.category_move_down, title), Modifier.size(20.dp)) }
+                    Spacer(Modifier.weight(1f))
+                    TextButton(onClick = { expanded = if (expanded == category.key) "" else category.key }) {
+                        Text(stringResource(R.string.entry_items))
+                        Spacer(Modifier.width(4.dp))
+                        Icon(painterResource(if (expanded == category.key) R.drawable.ic_fp_up else R.drawable.ic_fp_down), null, Modifier.size(18.dp))
+                    }
                 }
                 if (expanded == category.key) {
+                    HorizontalDivider(color = t.line)
                     builtInItems(category.key).forEach { (name, label) ->
                         val key = "item:${category.key}:$name"
                         val override = data.overrides.find { it.key == key }
@@ -75,7 +89,7 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
                     }
                 }
                 category.category?.let { custom ->
-                    Row {
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(onClick = { categoryEditor = custom; categoryDialog = true }) { Text(stringResource(R.string.rename_category)) }
                         TextButton(onClick = { onArchive(custom) }) { Text(stringResource(R.string.archive_category)) }
                     }
@@ -89,8 +103,8 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     } }
     if (categoryDialog) {
         var name by rememberSaveable(categoryEditor?.id) { mutableStateOf(categoryEditor?.name.orEmpty()) }
-        AlertDialog(onDismissRequest = { categoryDialog = false }, title = { Text(stringResource(if (categoryEditor == null) R.string.add_category else R.string.rename_category)) },
-            text = { OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.category_name)) }, singleLine = true) },
+        AlertDialog(containerColor = LocalDaylight.current.surface, onDismissRequest = { categoryDialog = false }, title = { Text(stringResource(if (categoryEditor == null) R.string.add_category else R.string.rename_category)) },
+            text = { SettingsTextField(name, { name = it }, stringResource(R.string.category_name)) },
             confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onCategory(name, categoryEditor); categoryDialog = false }) { Text(stringResource(R.string.settings_save)) } },
             dismissButton = { TextButton(onClick = { categoryDialog = false }) { Text(stringResource(R.string.cancel)) } })
     }
@@ -101,10 +115,10 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
 internal fun AddItemDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
     var icon by rememberSaveable { mutableStateOf("tag") }
-    AlertDialog(onDismissRequest = onDismiss, title = { Text(stringResource(R.string.add_entry_item)) }, text = {
-        Column(verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
-            OutlinedTextField(name, { name = it }, label = { Text(stringResource(R.string.item_name)) }, singleLine = true)
-            Text(stringResource(R.string.item_icon))
+    AlertDialog(containerColor = LocalDaylight.current.surface, onDismissRequest = onDismiss, title = { Text(stringResource(R.string.add_entry_item)) }, text = {
+        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            SettingsTextField(name, { name = it }, stringResource(R.string.item_name))
+            Text(stringResource(R.string.item_icon), style = MaterialTheme.typography.titleMedium)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(FpSpacing.compact), verticalArrangement = Arrangement.spacedBy(FpSpacing.compact)) {
                 FpIcons.itemKeys.forEachIndexed { index, key ->
                     FpChip(icon == key, { icon = key }, "", Modifier.size(FpSpacing.touch),

@@ -4,7 +4,10 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.Surface
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.isDialog
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.*
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.theme.FreePeriodTheme
@@ -34,8 +37,22 @@ class DayEntrySettingsScreenshotTest {
         compose.waitForIdle()
         compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/main_enLight.png")
     }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun main_deLargeDark() {
+        Locale.setDefault(Locale.GERMANY)
+        val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
+        compose.setContent {
+            CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, 1.5f)) {
+                FreePeriodTheme(darkTheme = true) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _ -> }, {}, { _, _, _, _ -> }) } }
+            }
+        }
+        compose.waitForIdle()
+        compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/main_deLargeDark.png")
+    }
     @Test fun addItem_enLight() {
+        compose.mainClock.autoAdvance = false
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { AddItemDialog({}, { _, _ -> }) } } }
+        compose.mainClock.advanceTimeBy(400)
         compose.waitForIdle()
         compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/day-settings/addItem_enLight.png")
     }

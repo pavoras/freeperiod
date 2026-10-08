@@ -353,4 +353,51 @@
     <string name="item_name">Name des Eintrags</string>
     <string name="item_icon">Symbol</string>
     <string name="item_icon_number">Symbol %1$d</string>
+    <string name="phase_regular_detail">Schätzungen aus deinem Zyklusverlauf.</string>
+    <string name="phase_ttc_detail">Zyklus und Tagebuch für Ovulationstests.</string>
+    <string name="phase_paused_detail">Prognosen pausieren, das Tagebuch bleibt.</string>
+    <string name="phase_perimenopause_detail">Zyklus und Beschwerden im Wandel.</string>
+    <string name="phase_menopause_detail">Dein Tagebuch ohne Zyklusprognosen.</string>
+    <string name="notification_content">Inhalt der Benachrichtigungen</string>
+    <string name="reminder_repeat">Wiederholung</string>
+    <string name="reminder_weekday">Wochentag</string>
+    <string name="accent_colour_intro">Ein wenig Farbe für dein Tagebuch.</string>
+    <string name="category_move_up">%1$s nach oben verschieben</string>
+    <string name="category_move_down">%1$s nach unten verschieben</string>
+    <string name="onboarding_step_of">Schritt %1$d von %2$d</string>
+    <string name="onboarding_past_periods">Bisherige Perioden</string>
+    <string name="onboarding_picker_help">Tippe auf Tage, um sie zu markieren oder abzuwählen. Halte und ziehe, um einen Zeitraum zu markieren. Scrolle zu früheren Monaten.</string>
+    <string name="onboarding_range_mode">Start- und Endtag wählen</string>
+    <string name="onboarding_range_end">Wähle jetzt den Endtag.</string>
+    <string name="onboarding_periods_saved">Deine Perioden sind gespeichert.</string>
+    <string name="onboarding_still_ongoing">Noch nicht beendet?</string>
+    <string name="onboarding_still_ongoing_body">Deine Auswahl enthält heute. Ist diese Periode noch nicht beendet?</string>
+    <string name="onboarding_ongoing_yes">Ja, noch nicht beendet</string>
+    <string name="onboarding_ongoing_no">Nein, heute beendet</string>
+    <plurals name="onboarding_skipped_periods">
+        <item quantity="one">%1$d überlappende Periode wurde übersprungen. Deine bisherigen Einträge bleiben erhalten. Fahre fort, um abzuschließen.</item>
+        <item quantity="other">%1$d überlappende Perioden wurden übersprungen. Deine bisherigen Einträge bleiben erhalten. Fahre fort, um abzuschließen.</item>
+    </plurals>
+    <string name="pill_pattern">%1$d + %2$d</string>
+    <string name="history_included">Für Schätzungen verwendet</string>
+    <string name="history_bar_description">Zyklus vom %1$s bis %2$s. %3$d Tage. %4$s. %5$s. Zyklusdetails öffnen.</string>
+    <string name="history_visible_excluded">Sichtbare ausgeschlossene Zyklen</string>
+    <string name="history_excluded_row">%1$s · %2$d Tage</string>
+    <string name="history_long_cycle_hint">Dieser Zyklus war länger als deine letzten Zyklen. Sieh dir deine Einträge an, wenn du möchtest.</string>
+    <string name="history_dismiss_hint">Ausblenden</string>
+    <plurals name="history_full_months">
+        <item quantity="one">%1$d voller Monat seit dem Ende deiner letzten erfassten Periode</item>
+        <item quantity="other">%1$d volle Monate seit dem Ende deiner letzten erfassten Periode</item>
+    </plurals>
+    <string name="history_cycle_details">Zyklusdetails</string>
+    <string name="history_cycle_dates">Zyklus: %1$s bis %2$s</string>
+    <string name="history_period_dates">Periode: %1$s bis %2$s</string>
+    <string name="history_previous_month">Vorheriger Monat</string>
+    <string name="history_next_month">Nächster Monat</string>
+    <string name="history_monthly_symptoms">Tage mit Symptomen in diesem Monat</string>
+    <string name="reminder_summary_time">%1$s · %2$s</string>
+    <plurals name="reminder_before_period">
+        <item quantity="one">%1$d Tag vor deiner Periode</item>
+        <item quantity="other">%1$d Tage vor deiner Periode</item>
+    </plurals>
 </resources>

@@ -4,7 +4,13 @@ import androidx.activity.ComponentActivity
 import androidx.compose.material3.Surface
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.isDialog
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.*
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.Role
 import com.github.takahirom.roborazzi.captureRoboImage
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.theme.FreePeriodTheme
@@ -31,12 +37,35 @@ class SituationScreenshotTest {
     @Test fun situation_enLight() {
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { SituationScreen(Situation(), today, {}, {}, {}) } } }
         compose.waitForIdle()
+        compose.onNodeWithText("Regular tracking").assertIsSelected().assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.RadioButton))
         compose.onRoot().captureRoboImage("src/test/screenshots/situation/situation_enLight.png")
+    }
+    @Test fun methodPicker_enLight() {
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { SituationScreen(Situation(), today, {}, {}, {}) } } }
+        compose.waitForIdle()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Method"))
+        compose.onNodeWithText("Method").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("None").assertIsSelected()
+        compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/situation/methodPicker_enLight.png")
+    }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun situation_deLargeDark() {
+        Locale.setDefault(Locale.GERMANY)
+        compose.setContent {
+            CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, 1.5f)) {
+                FreePeriodTheme(darkTheme = true) { Surface { SituationScreen(Situation(), today, {}, {}, {}) } }
+            }
+        }
+        compose.waitForIdle()
+        compose.onRoot().captureRoboImage("src/test/screenshots/situation/situation_deLargeDark.png")
     }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun pillRhythm_deLight() {
         Locale.setDefault(Locale.GERMANY)
+        compose.mainClock.autoAdvance = false
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { PillRhythmDialog(PillSchedule(today, 21, 7), today, {}, {}) } } }
+        compose.mainClock.advanceTimeBy(400)
         compose.waitForIdle()
         compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/situation/pillRhythm_deLight.png")
     }

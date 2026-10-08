@@ -353,4 +353,51 @@
     <string name="item_name">Item name</string>
     <string name="item_icon">Icon</string>
     <string name="item_icon_number">Icon %1$d</string>
+    <string name="phase_regular_detail">Estimates from your cycle history.</string>
+    <string name="phase_ttc_detail">Your cycle and an ovulation-test diary.</string>
+    <string name="phase_paused_detail">Predictions pause; your diary continues.</string>
+    <string name="phase_perimenopause_detail">Track changes in your cycle and symptoms.</string>
+    <string name="phase_menopause_detail">A diary, without cycle predictions.</string>
+    <string name="notification_content">Notification content</string>
+    <string name="reminder_repeat">Repeat</string>
+    <string name="reminder_weekday">Day of the week</string>
+    <string name="accent_colour_intro">A little colour, throughout your diary.</string>
+    <string name="category_move_up">Move %1$s up</string>
+    <string name="category_move_down">Move %1$s down</string>
+    <string name="onboarding_step_of">Step %1$d of %2$d</string>
+    <string name="onboarding_past_periods">Past periods</string>
+    <string name="onboarding_picker_help">Tap days to mark or unmark them. Hold and drag to mark a range. Scroll to see earlier months.</string>
+    <string name="onboarding_range_mode">Choose a start and end day</string>
+    <string name="onboarding_range_end">Now choose the end day.</string>
+    <string name="onboarding_periods_saved">Your periods are saved.</string>
+    <string name="onboarding_still_ongoing">Still ongoing?</string>
+    <string name="onboarding_still_ongoing_body">Your selection includes today. Is this period still ongoing?</string>
+    <string name="onboarding_ongoing_yes">Yes, still ongoing</string>
+    <string name="onboarding_ongoing_no">No, ended today</string>
+    <plurals name="onboarding_skipped_periods">
+        <item quantity="one">%1$d overlapping period was skipped. Your existing entries are kept. Continue to finish.</item>
+        <item quantity="other">%1$d overlapping periods were skipped. Your existing entries are kept. Continue to finish.</item>
+    </plurals>
+    <string name="pill_pattern">%1$d + %2$d</string>
+    <string name="history_included">Included for predictions</string>
+    <string name="history_bar_description">Cycle from %1$s to %2$s. %3$d days. %4$s. %5$s. Open cycle details.</string>
+    <string name="history_visible_excluded">Excluded cycles in view</string>
+    <string name="history_excluded_row">%1$s · %2$d days</string>
+    <string name="history_long_cycle_hint">This cycle was longer than your recent cycles. Review your entries if you\'d like.</string>
+    <string name="history_dismiss_hint">Dismiss</string>
+    <plurals name="history_full_months">
+        <item quantity="one">%1$d full month since your last recorded period ended</item>
+        <item quantity="other">%1$d full months since your last recorded period ended</item>
+    </plurals>
+    <string name="history_cycle_details">Cycle details</string>
+    <string name="history_cycle_dates">Cycle: %1$s to %2$s</string>
+    <string name="history_period_dates">Period: %1$s to %2$s</string>
+    <string name="history_previous_month">Previous month</string>
+    <string name="history_next_month">Next month</string>
+    <string name="history_monthly_symptoms">Days with symptoms this month</string>
+    <string name="reminder_summary_time">%1$s · %2$s</string>
+    <plurals name="reminder_before_period">
+        <item quantity="one">%1$d day before your period</item>
+        <item quantity="other">%1$d days before your period</item>
+    </plurals>
 </resources>

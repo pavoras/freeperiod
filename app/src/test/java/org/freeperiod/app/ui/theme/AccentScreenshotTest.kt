@@ -2,6 +2,9 @@ package org.freeperiod.app.ui.theme
 
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -37,6 +40,19 @@ class AccentScreenshotTest {
         compose.waitForIdle()
         compose.onNodeWithText("Accent colour").assertExists()
         compose.onRoot().captureRoboImage("src/test/screenshots/settings/settingsAppearance_enLight.png")
+    }
+
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-night-xxhdpi")
+    fun settingsAppearance_deLargeDark() {
+        Locale.setDefault(Locale.GERMANY)
+        compose.setContent {
+            CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, 1.5f)) {
+                FreePeriodTheme(darkTheme = true) { AppearanceScreen(Accent.CORAL, {}, {}) }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Koralle").assertIsSelected()
+        compose.onRoot().captureRoboImage("src/test/screenshots/settings/settingsAppearance_deLargeDark.png")
     }
 
     @Test fun dayEntry_coral_enLight() = day(Accent.CORAL)

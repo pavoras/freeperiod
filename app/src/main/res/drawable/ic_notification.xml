@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Original FreePeriod geometry. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp"
     android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="#FFFFFFFF" android:pathData="M12,3a9,9 0,1 0,0 18a9,9 0,1 0,0 -18M12,6a6,6 0,1 1,0 12a6,6 0,1 1,0 -12" android:fillType="evenOdd" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M6,3 H16 Q18,3 18,5 V6 Q18,8 16,8 H9 V11 H14 Q16,11 16,13 Q16,15 14,15 H9 V19 Q9,21 7,21 H6 Q4,21 4,19 V5 Q4,3 6,3 Z M23,18.5 A2.5,2.5 0,1 1,18,18.5 A2.5,2.5 0,1 1,23,18.5 Z" />
 </vector>

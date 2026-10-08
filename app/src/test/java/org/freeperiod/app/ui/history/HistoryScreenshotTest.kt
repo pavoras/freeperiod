@@ -1,18 +1,17 @@
 package org.freeperiod.app.ui.history
 
+import androidx.activity.ComponentActivity
 import androidx.compose.material3.Surface
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.*
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.captureRoboImage
 import java.time.LocalDate
 import java.util.Locale
+import org.freeperiod.app.R
 import org.freeperiod.app.ui.theme.FreePeriodTheme
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.*
-import org.junit.After
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -22,33 +21,38 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
 class HistoryScreenshotTest {
-    @get:Rule val compose = createComposeRule()
+    @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
     private val originalLocale = Locale.getDefault()
     private val clock: () -> LocalDate = { LocalDate.of(2026, 4, 12) }
+    @Before fun theme() { compose.activity.setTheme(R.style.Theme_FreePeriod) }
     @After fun restoreLocale() { Locale.setDefault(originalLocale) }
-
-    @Test fun withCycles_enLight() = capture("withCycles_enLight", Locale.US)
+    @Test fun chart_enLight() = capture("chart_enLight", Locale.US)
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
-    fun withCycles_deDark() = capture("withCycles_deDark", Locale.GERMANY, dark = true)
+    fun chart_deDark() = capture("chart_deDark", Locale.GERMANY, dark = true)
+    @Test fun sheet_enLight() = capture("sheet_enLight", Locale.US, sheet = true)
     @Test fun empty_enLight() = capture("empty_enLight", Locale.US, empty = true)
-
-    private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false) {
+    @Test fun menopause_enLight() = capture("menopause_enLight", Locale.US, menopause = true)
+    private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false, sheet: Boolean = false, menopause: Boolean = false) {
         Locale.setDefault(locale)
-        val starts = listOf("2026-01-03", "2026-01-31", "2026-02-28", "2026-03-14")
+        val starts = listOf("2025-11-10", "2025-12-08", "2026-01-05", "2026-02-02", "2026-02-16", "2026-03-16")
         val periods = if (empty) emptyList() else starts.mapIndexed { index, start ->
-            val date = LocalDate.parse(start)
-            Period(index + 1L, date, date.plusDays(4))
+            val date = LocalDate.parse(start); Period(index + 1L, date, date.plusDays(4))
         }
         val logs = if (empty) emptyList() else listOf(
-            DayLog(LocalDate.of(2026, 2, 2), symptoms = setOf(Symptom.CRAMPS, Symptom.HEADACHE)),
-            DayLog(LocalDate.of(2026, 3, 1), symptoms = setOf(Symptom.CRAMPS)))
-        val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = emptyList(),
-            settings = BackupSettings(null, false)), clock())
-        compose.setContent {
-            FreePeriodTheme(darkTheme = dark) { Surface { HistoryScreen(state, { _, _ -> }) } }
-        }
+            DayLog(LocalDate.of(2026, 2, 3), symptoms = setOf(Symptom.CRAMPS, Symptom.HEADACHE)),
+            DayLog(LocalDate.of(2026, 3, 17), symptoms = setOf(Symptom.CRAMPS)),
+            DayLog(clock().minusDays(2), symptoms = setOf(Symptom.HOT_FLUSHES, Symptom.NIGHT_SWEATS)),
+            DayLog(clock().minusDays(1), symptoms = setOf(Symptom.HOT_FLUSHES, Symptom.BRAIN_FOG)))
+        val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = emptyList(), settings = BackupSettings(null, false),
+            situation = Situation(phase = if (menopause) LifePhase.MENOPAUSE else LifePhase.REGULAR)), clock())
+        if (sheet) compose.mainClock.autoAdvance = false
+        compose.setContent { FreePeriodTheme(darkTheme = dark) { Surface { HistoryScreen(state, { _, _ -> }) } } }
         compose.waitForIdle()
-        compose.onNodeWithText(if (locale.language == "de") "Verlauf" else "History").assertExists()
-        compose.onRoot().captureRoboImage("src/test/screenshots/history/$name.png")
+        if (sheet) {
+            compose.onNodeWithTag("history-bar-4").performClick()
+            compose.mainClock.advanceTimeBy(500)
+            compose.waitForIdle()
+            compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/history/$name.png")
+        } else compose.onRoot().captureRoboImage("src/test/screenshots/history/$name.png")
     }
 }

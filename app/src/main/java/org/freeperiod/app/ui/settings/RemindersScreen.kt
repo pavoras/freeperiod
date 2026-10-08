@@ -1,13 +1,21 @@
 package org.freeperiod.app.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import org.freeperiod.app.ui.theme.LocalDaylight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import java.time.*
 import java.time.format.TextStyle
 import org.freeperiod.app.R
@@ -22,6 +30,7 @@ internal fun reminderLabel(kind: ReminderKind): Int = when (kind) {
     ReminderKind.METHOD -> R.string.method_reminder
     ReminderKind.CUSTOM -> R.string.custom_reminder
 }
+private enum class ReminderPicker { KIND, RHYTHM, WEEKDAY }
 private enum class Rhythm { DAILY, DAYS, WEEKLY, MONTHLY, MONTHS, ONCE }
 private fun Rhythm.label(): Int = when (this) {
     Rhythm.DAILY -> R.string.recurrence_daily
@@ -46,26 +55,41 @@ fun RemindersScreen(reminders: List<Reminder>, onSave: (Reminder) -> Unit, onEdi
     explicit: Boolean = false, onExplicit: (Boolean) -> Unit = {}, notificationsAvailable: Boolean = true,
     onSystemSettings: () -> Unit = {}) {
     var deleting by remember { mutableStateOf<Reminder?>(null) }
-    LazyColumn(contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+    val t = LocalDaylight.current
+    LazyColumn(Modifier.fillMaxSize().background(t.background), contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         item { FpTopBar(stringResource(R.string.reminders), onBack) }
-        item { Text(stringResource(R.string.reminder_disclosure), style = MaterialTheme.typography.bodySmall) }
-        if (reminders.isEmpty()) item { Text(stringResource(R.string.reminders_empty)) }
-        items(reminders.size) { index ->
+        item { Text(stringResource(R.string.reminder_disclosure), style = MaterialTheme.typography.bodySmall, color = t.muted) }
+        if (reminders.isEmpty()) item { SettingsPanel { Text(stringResource(R.string.reminders_empty), color = t.muted) } }
+        items(reminders.size, key = { reminders[it].id }) { index ->
             val reminder = reminders[index]
-            FpCard {
-                FpSwitchRow(reminder.title ?: stringResource(reminderLabel(reminder.kind)), reminder.enabled, onChange = { onSave(reminder.copy(enabled = it)) })
-                Text("${stringResource(reminder.recurrence.rhythm().label())} · ${reminder.time}", style = MaterialTheme.typography.bodySmall)
-                Row {
-                    TextButton(onClick = { onEdit(reminder) }) { Text(stringResource(R.string.edit_reminder)) }
-                    TextButton(onClick = { deleting = reminder }) { Text(stringResource(R.string.delete_reminder)) }
+            SettingsPanel(Modifier.testTag("reminder_${reminder.id}")) {
+                FpSwitchRow(reminder.title ?: stringResource(reminderLabel(reminder.kind)), reminder.enabled,
+                    onChange = { onSave(reminder.copy(enabled = it)) })
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Text(reminderSummary(reminder, LocalContext.current.resources), Modifier.weight(1f),
+                        style = MaterialTheme.typography.bodySmall, color = t.muted)
+                    IconButton(onClick = { onEdit(reminder) }) {
+                        Icon(painterResource(R.drawable.ic_fp_note), stringResource(R.string.edit_reminder), Modifier.size(20.dp))
+                    }
+                    IconButton(onClick = { deleting = reminder }) {
+                        Icon(painterResource(R.drawable.ic_fp_delete), stringResource(R.string.delete_reminder), Modifier.size(20.dp), tint = t.muted)
+                    }
                 }
             }
         }
         item { FpButton(onAdd, Modifier.fillMaxWidth()) { Text(stringResource(R.string.add_reminder)) } }
-        item { FpSwitchRow(stringResource(R.string.explicit_notifications), explicit, onChange = onExplicit) }
+        item {
+            Spacer(Modifier.height(8.dp))
+            SettingsPanel {
+                Text(stringResource(R.string.notification_content), style = MaterialTheme.typography.titleMedium)
+                FpSwitchRow(stringResource(R.string.explicit_notifications), explicit, onChange = onExplicit)
+            }
+        }
         if (!notificationsAvailable && reminders.any { it.enabled }) item {
-            Text(stringResource(R.string.notifications_off))
-            TextButton(onClick = onSystemSettings) { Text(stringResource(R.string.notification_settings)) }
+            SettingsPanel {
+                Text(stringResource(R.string.notifications_off), style = MaterialTheme.typography.bodyMedium)
+                TextButton(onClick = onSystemSettings) { Text(stringResource(R.string.notification_settings)) }
+            }
         }
     }
     deleting?.let { reminder -> ConfirmationDialog(R.string.delete_reminder, R.string.delete_reminder_body,
@@ -99,37 +123,54 @@ fun ReminderEditor(reminder: Reminder, today: LocalDate, onSave: (Reminder) -> U
     val valid = recurrence != null && parsedTime != null && (kind != ReminderKind.CUSTOM || title.isNotBlank()) &&
         (kind != ReminderKind.PERIOD_DUE || before.toIntOrNull() in 0..365)
     val locale = LocalConfiguration.current.locales[0]
-    LazyColumn(contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+    var picker by rememberSaveable { mutableStateOf<ReminderPicker?>(null) }
+    val t = LocalDaylight.current
+    LazyColumn(Modifier.fillMaxSize().background(t.background), contentPadding = PaddingValues(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { FpTopBar(stringResource(if (reminder.id == 0L) R.string.add_reminder else R.string.edit_reminder), onBack) }
-        item { Text(stringResource(R.string.reminder_kind), style = MaterialTheme.typography.titleMedium) }
-        items(ReminderKind.entries.size) { index -> val value = ReminderKind.entries[index]
-            FpChip(kind == value, { kind = value }, stringResource(reminderLabel(value)), Modifier.fillMaxWidth()) }
-        if (kind == ReminderKind.CUSTOM) item { OutlinedTextField(title, { title = it }, label = { Text(stringResource(R.string.reminder_custom_title)) }, singleLine = true, modifier = Modifier.fillMaxWidth()) }
-        if (kind == ReminderKind.PERIOD_DUE) item { OutlinedTextField(before, { before = it }, label = { Text(stringResource(R.string.reminder_days_before)) }, singleLine = true) }
-        item { Text(stringResource(R.string.reminder_recurrence), style = MaterialTheme.typography.titleMedium) }
-        // Period due uses the prediction date; daily recurrence is retained in its stored row.
-        if (kind != ReminderKind.PERIOD_DUE) {
-            items(Rhythm.entries.size) { index -> val value = Rhythm.entries[index]
-                FpChip(rhythm == value, { rhythm = value }, stringResource(value.label()), Modifier.fillMaxWidth()) }
-            if (rhythm == Rhythm.DAYS || rhythm == Rhythm.MONTHS) item {
-                OutlinedTextField(n, { n = it }, label = { Text(stringResource(R.string.reminder_interval)) }, singleLine = true)
-                OutlinedTextField(anchor, { anchor = it }, label = { Text(stringResource(R.string.reminder_anchor)) }, singleLine = true)
-                Text(stringResource(R.string.date_format_hint))
+        item {
+            SettingsPanel {
+                SettingsPickerRow(stringResource(R.string.reminder_kind), stringResource(reminderLabel(kind)), { picker = ReminderPicker.KIND })
+                if (kind == ReminderKind.CUSTOM) SettingsTextField(title, { title = it }, stringResource(R.string.reminder_custom_title))
             }
-            if (rhythm == Rhythm.MONTHLY) item { OutlinedTextField(day, { day = it }, label = { Text(stringResource(R.string.reminder_month_day)) }, singleLine = true) }
-            if (rhythm == Rhythm.ONCE) item {
-                OutlinedTextField(dateText, { dateText = it }, label = { Text(stringResource(R.string.reminder_once_date)) }, singleLine = true)
-                Text(stringResource(R.string.date_format_hint))
-            }
-            if (rhythm == Rhythm.WEEKLY) items(DayOfWeek.entries.size) { index -> val value = DayOfWeek.entries[index]
-                FpChip(weekday == value, { weekday = value }, value.getDisplayName(TextStyle.FULL, locale), Modifier.fillMaxWidth()) }
         }
-        item { OutlinedTextField(time, { time = it }, label = { Text(stringResource(R.string.reminder_time_format)) }, singleLine = true) }
-        item { FpSwitchRow(stringResource(R.string.reminder_enabled), enabled, onChange = { enabled = it }) }
-        item { Text(stringResource(R.string.reminder_disclosure), style = MaterialTheme.typography.bodySmall) }
+        item {
+            SettingsPanel {
+                Text(stringResource(R.string.reminder_recurrence), style = MaterialTheme.typography.titleMedium)
+                // Period due uses the prediction date; daily recurrence is retained in its stored row.
+                if (kind == ReminderKind.PERIOD_DUE) {
+                    SettingsTextField(before, { before = it }, stringResource(R.string.reminder_days_before), KeyboardType.Number)
+                } else {
+                    SettingsPickerRow(stringResource(R.string.reminder_repeat), stringResource(rhythm.label()), { picker = ReminderPicker.RHYTHM })
+                    if (rhythm == Rhythm.DAYS || rhythm == Rhythm.MONTHS) {
+                        SettingsTextField(n, { n = it }, stringResource(R.string.reminder_interval), KeyboardType.Number)
+                        SettingsTextField(anchor, { anchor = it }, stringResource(R.string.reminder_anchor), KeyboardType.Ascii)
+                        Text(stringResource(R.string.date_format_hint), style = MaterialTheme.typography.bodySmall, color = t.muted)
+                    }
+                    if (rhythm == Rhythm.MONTHLY) SettingsTextField(day, { day = it }, stringResource(R.string.reminder_month_day), KeyboardType.Number)
+                    if (rhythm == Rhythm.ONCE) {
+                        SettingsTextField(dateText, { dateText = it }, stringResource(R.string.reminder_once_date), KeyboardType.Ascii)
+                        Text(stringResource(R.string.date_format_hint), style = MaterialTheme.typography.bodySmall, color = t.muted)
+                    }
+                    if (rhythm == Rhythm.WEEKLY) SettingsPickerRow(stringResource(R.string.reminder_weekday),
+                        weekday.getDisplayName(TextStyle.FULL, locale), { picker = ReminderPicker.WEEKDAY })
+                }
+                SettingsTextField(time, { time = it }, stringResource(R.string.reminder_time_format), KeyboardType.Ascii)
+            }
+        }
+        item { SettingsPanel { FpSwitchRow(stringResource(R.string.reminder_enabled), enabled, onChange = { enabled = it }) } }
+        item { Text(stringResource(R.string.reminder_disclosure), style = MaterialTheme.typography.bodySmall, color = t.muted) }
         item { FpButton({ onSave(reminder.copy(kind = kind, title = title.trim().takeIf { kind == ReminderKind.CUSTOM },
             recurrence = if (kind == ReminderKind.PERIOD_DUE) Recurrence.Daily else requireNotNull(recurrence),
             time = requireNotNull(parsedTime), enabled = enabled, daysBefore = before.toIntOrNull().takeIf { kind == ReminderKind.PERIOD_DUE })) },
             Modifier.fillMaxWidth(), enabled = valid) { Text(stringResource(R.string.settings_save)) } }
+    }
+    when (picker) {
+        ReminderPicker.KIND -> SettingsChoiceSheet(stringResource(R.string.reminder_kind), ReminderKind.entries, kind,
+            { stringResource(reminderLabel(it)) }, { picker = null }) { kind = it; picker = null }
+        ReminderPicker.RHYTHM -> SettingsChoiceSheet(stringResource(R.string.reminder_recurrence), Rhythm.entries, rhythm,
+            { stringResource(it.label()) }, { picker = null }) { rhythm = it; picker = null }
+        ReminderPicker.WEEKDAY -> SettingsChoiceSheet(stringResource(R.string.reminder_weekday), DayOfWeek.entries, weekday,
+            { it.getDisplayName(TextStyle.FULL, locale) }, { picker = null }) { weekday = it; picker = null }
+        null -> Unit
     }
 }
