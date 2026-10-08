@@ -2,8 +2,10 @@ package org.freeperiod.app.ui.today
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.pager.VerticalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
@@ -35,9 +37,21 @@ import org.freeperiod.app.ui.theme.LocalDaylight
 /** Months the Today calendar can scroll through: two years back, one year ahead. */
 internal fun calendarMonths(current: YearMonth): List<YearMonth> = (-24L..12L).map { current.plusMonths(it) }
 
+/** One scrollable row: a month title or one week of that month (days of other months stay empty). */
+private sealed interface CalendarRow {
+    val month: YearMonth
+    data class Title(override val month: YearMonth) : CalendarRow
+    data class Week(override val month: YearMonth, val index: Int) : CalendarRow
+}
+
+private fun calendarRows(months: List<YearMonth>, locale: Locale): List<CalendarRow> = months.flatMap { month ->
+    val offset = (month.atDay(1).dayOfWeek.value - WeekFields.of(locale).firstDayOfWeek.value + 7) % 7
+    listOf(CalendarRow.Title(month)) + (0 until (offset + month.lengthOfMonth() + 6) / 7).map { CalendarRow.Week(month, it) }
+}
+
 /**
- * Swipe up/down to move between months (owner: "scroll instead of click"). Each page has the same
- * height (always six week rows), so the page under the calendar never jumps.
+ * Free vertical scrolling through months (owner: "scroll instead of click, no snapping to whole
+ * months"). A fling settles so that a row (week or month title) sits at the top edge. Opens on [month].
  */
 @Composable
 fun MonthCalendar(
@@ -49,6 +63,7 @@ fun MonthCalendar(
     locale: Locale = LocalConfiguration.current.locales[0],
     scheduledBreak: Boolean = false,
 ) {
+    val t = LocalDaylight.current
     val anchor = remember { month }
     val first = days.keys.minOrNull()
     val last = days.keys.maxOrNull()
@@ -56,45 +71,21 @@ fun MonthCalendar(
         if (first == null || last == null) calendarMonths(anchor)
         else generateSequence(YearMonth.from(first)) { it.plusMonths(1) }.takeWhile { it <= YearMonth.from(last) }.toList()
     }
-    val pager = rememberPagerState(initialPage = months.indexOf(month).coerceAtLeast(0)) { months.size }
+    val rows = remember(months, locale) { calendarRows(months, locale) }
+    val titleIndex = { shown: YearMonth -> rows.indexOfFirst { it is CalendarRow.Title && it.month == shown } }
+    val list = rememberLazyListState(initialFirstVisibleItemIndex = titleIndex(anchor).coerceAtLeast(0))
     val latestChange by rememberUpdatedState(onMonthChange)
-    LaunchedEffect(pager, months) {
-        snapshotFlow { pager.settledPage }.collect { page -> months.getOrNull(page)?.let(latestChange) }
-    }
-    LaunchedEffect(month) {
-        val index = months.indexOf(month)
-        if (index >= 0 && index != pager.currentPage) pager.scrollToPage(index)
+    LaunchedEffect(list, rows) {
+        snapshotFlow { rows.getOrNull(list.firstVisibleItemIndex)?.month }.distinctUntilChanged().collect { it?.let(latestChange) }
     }
     val scope = rememberCoroutineScope()
     val previous = stringResource(R.string.previous_month)
     val next = stringResource(R.string.next_month)
     val density = LocalDensity.current
-    val title = MaterialTheme.typography.titleLarge
-    val weekday = MaterialTheme.typography.labelSmall
     val cell = maxOf(48.dp, 40.dp * density.fontScale)
-    val pageHeight = with(density) { maxOf(48.dp, title.lineHeight.toDp() + 16.dp) + 1.dp + weekday.lineHeight.toDp() + 8.dp } + cell * 6
-    VerticalPager(pager, modifier.fillMaxWidth().height(pageHeight).semantics {
-        customActions = listOf(
-            CustomAccessibilityAction(previous) { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) }; true },
-            CustomAccessibilityAction(next) { scope.launch { pager.animateScrollToPage(pager.currentPage + 1) }; true })
-    }, key = { months[it].toString() }) { page ->
-        val shown = months[page]
-        Column(Modifier.fillMaxSize()) {
-            Text(shown.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)),
-                Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(start = 8.dp, top = 8.dp, bottom = 8.dp)
-                    .semantics { heading() }, style = title)
-            HorizontalDivider(color = LocalDaylight.current.line)
-            MonthGrid(shown, days, locale, scheduledBreak, onDayClick)
-        }
-    }
-}
-
-@Composable
-private fun MonthGrid(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: Locale, scheduledBreak: Boolean,
-    onDayClick: (LocalDate) -> Unit) {
+    val titleHeight = with(density) { maxOf(48.dp, MaterialTheme.typography.titleLarge.lineHeight.toDp() + 16.dp) }
     val firstDay = WeekFields.of(locale).firstDayOfWeek
-    val offset = (month.atDay(1).dayOfWeek.value - firstDay.value + 7) % 7
-    Column {
+    Column(modifier.fillMaxWidth().padding(top = 12.dp)) {
         Row(Modifier.fillMaxWidth()) {
             repeat(7) { index ->
                 val day = firstDay.plus(index.toLong())
@@ -102,21 +93,46 @@ private fun MonthGrid(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: 
                     Modifier.weight(1f).padding(vertical = 4.dp).clearAndSetSemantics {
                         contentDescription = day.getDisplayName(TextStyle.FULL, locale)
                     }, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    style = MaterialTheme.typography.labelSmall, color = LocalDaylight.current.muted)
+                    style = MaterialTheme.typography.labelSmall, color = t.muted)
             }
         }
-        // Always six week rows, so every month page has the same height.
-        repeat(6) { row ->
-            Row(Modifier.fillMaxWidth()) {
-                repeat(7) { column ->
-                    val number = row * 7 + column - offset + 1
-                    if (number in 1..month.lengthOfMonth()) {
-                        val date = month.atDay(number)
-                        CalendarDay(date, days[date] ?: DayMarks(false, false, false, false), locale,
-                            { onDayClick(date) }, Modifier.weight(1f), scheduledBreak)
-                    } else Spacer(Modifier.weight(1f).height(maxOf(48.dp, 40.dp * LocalDensity.current.fontScale)))
+        HorizontalDivider(color = t.line)
+        LazyColumn(Modifier.fillMaxWidth().height(titleHeight + cell * 6).semantics {
+            customActions = listOf(
+                CustomAccessibilityAction(previous) {
+                    val shown = rows.getOrNull(list.firstVisibleItemIndex)?.month ?: anchor
+                    scope.launch { list.animateScrollToItem(titleIndex(shown.minusMonths(1)).coerceAtLeast(0)) }; true
+                },
+                CustomAccessibilityAction(next) {
+                    val shown = rows.getOrNull(list.firstVisibleItemIndex)?.month ?: anchor
+                    scope.launch { titleIndex(shown.plusMonths(1)).takeIf { it >= 0 }?.let { list.animateScrollToItem(it) } }; true
+                })
+        }, state = list, flingBehavior = rememberSnapFlingBehavior(list)) {
+            items(rows.size, key = { rows[it].toString() }) { index ->
+                when (val row = rows[index]) {
+                    is CalendarRow.Title -> Text(row.month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)),
+                        Modifier.fillMaxWidth().height(titleHeight).wrapContentHeight(Alignment.Bottom)
+                            .padding(start = 8.dp, bottom = 6.dp).semantics { heading() }, style = MaterialTheme.typography.titleLarge)
+                    is CalendarRow.Week -> WeekRow(row, days, locale, scheduledBreak, onDayClick, cell)
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun WeekRow(row: CalendarRow.Week, days: Map<LocalDate, DayMarks>, locale: Locale, scheduledBreak: Boolean,
+    onDayClick: (LocalDate) -> Unit, cell: androidx.compose.ui.unit.Dp) {
+    val month = row.month
+    val offset = (month.atDay(1).dayOfWeek.value - WeekFields.of(locale).firstDayOfWeek.value + 7) % 7
+    Row(Modifier.fillMaxWidth()) {
+        repeat(7) { column ->
+            val number = row.index * 7 + column - offset + 1
+            if (number in 1..month.lengthOfMonth()) {
+                val date = month.atDay(number)
+                CalendarDay(date, days[date] ?: DayMarks(false, false, false, false), locale,
+                    { onDayClick(date) }, Modifier.weight(1f), scheduledBreak)
+            } else Spacer(Modifier.weight(1f).height(cell))
         }
     }
 }

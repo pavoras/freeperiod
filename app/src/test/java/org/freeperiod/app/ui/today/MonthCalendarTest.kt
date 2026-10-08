@@ -51,9 +51,7 @@ class MonthCalendarTest {
         compose.onNodeWithText("March 2026").assertIsDisplayed()
         calendar.performCustomAccessibilityActionWithLabel("Next month")
         compose.waitForIdle()
-        calendar.performTouchInput { swipeUp() }
-        compose.waitForIdle()
-        assertEquals(listOf(month, month.minusMonths(1), month, month.plusMonths(1)), selected)
+        assertEquals(listOf(month, month.minusMonths(1), month), selected)
     }
 
     private fun assertFirstWeekday(locale: Locale, first: String, second: String) {
