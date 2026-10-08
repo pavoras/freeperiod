@@ -30,6 +30,7 @@ data class OnboardingActions(
     val length: (String) -> Unit = {}, val unknown: (Boolean) -> Unit = {},
     val periodReminder: (Boolean) -> Unit = {}, val dailyReminder: (Boolean) -> Unit = {},
     val methodReminder: (Reminder?) -> Unit = {}, val systemSettings: () -> Unit = {},
+    val importPeriods: () -> Unit = {},
 )
 
 @Composable

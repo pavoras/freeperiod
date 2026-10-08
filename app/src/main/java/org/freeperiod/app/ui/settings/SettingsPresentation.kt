@@ -6,12 +6,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -20,6 +24,34 @@ import org.freeperiod.app.R
 import org.freeperiod.app.ui.components.FpCard
 import org.freeperiod.app.ui.theme.LocalDaylight
 import org.freeperiod.app.ui.theme.FpShapes
+import org.freeperiod.app.ui.theme.FpSpacing
+
+/** Robolectric never idles with a text field in a dialog window; screenshot tests render editors inline. */
+internal val LocalInlineEditors = staticCompositionLocalOf { false }
+
+/** A bounded editor body avoids intrinsic measurement of scrolling text fields in AlertDialog. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun SettingsEditorDialog(title: String, onDismiss: () -> Unit, onSave: () -> Unit,
+    enabled: Boolean, content: @Composable ColumnScope.() -> Unit) {
+    val tones = LocalDaylight.current
+    val maxHeight = LocalConfiguration.current.screenHeightDp.dp - FpSpacing.screen * 2
+    val card = @Composable {
+        Surface(shape = MaterialTheme.shapes.extraLarge, color = tones.surface, contentColor = tones.ink) {
+            Column(Modifier.padding(FpSpacing.screen), verticalArrangement = Arrangement.spacedBy(FpSpacing.section)) {
+                Text(title, style = MaterialTheme.typography.headlineSmall)
+                Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(FpSpacing.section), content = content)
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(onClick = onDismiss) { Text(androidx.compose.ui.res.stringResource(R.string.cancel)) }
+                    TextButton(onClick = onSave, enabled = enabled) { Text(androidx.compose.ui.res.stringResource(R.string.settings_save)) }
+                }
+            }
+        }
+    }
+    if (LocalInlineEditors.current) card()
+    else BasicAlertDialog(onDismiss, modifier = Modifier.fillMaxWidth().heightIn(max = maxHeight)) { card() }
+}
 
 @Composable
 internal fun SettingsPanel(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {

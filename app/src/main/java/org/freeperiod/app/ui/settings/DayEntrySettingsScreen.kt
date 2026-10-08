@@ -3,8 +3,6 @@ package org.freeperiod.app.ui.settings
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.ui.theme.LocalDaylight
@@ -115,17 +113,15 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
 internal fun AddItemDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
     var icon by rememberSaveable { mutableStateOf("tag") }
-    AlertDialog(containerColor = LocalDaylight.current.surface, onDismissRequest = onDismiss, title = { Text(stringResource(R.string.add_entry_item)) }, text = {
-        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            SettingsTextField(name, { name = it }, stringResource(R.string.item_name))
-            Text(stringResource(R.string.item_icon), style = MaterialTheme.typography.titleMedium)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(FpSpacing.compact), verticalArrangement = Arrangement.spacedBy(FpSpacing.compact)) {
-                FpIcons.itemKeys.forEachIndexed { index, key ->
-                    FpChip(icon == key, { icon = key }, "", Modifier.size(FpSpacing.touch),
-                        icon = { Icon(painterResource(FpIcons.byKey.getValue(key)), stringResource(R.string.item_icon_number, index + 1)) })
-                }
+    SettingsEditorDialog(stringResource(R.string.add_entry_item), onDismiss,
+        { onSave(name.trim(), icon) }, name.isNotBlank()) {
+        SettingsTextField(name, { name = it }, stringResource(R.string.item_name))
+        Text(stringResource(R.string.item_icon), style = MaterialTheme.typography.titleMedium)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(FpSpacing.compact), verticalArrangement = Arrangement.spacedBy(FpSpacing.compact)) {
+            FpIcons.itemKeys.forEachIndexed { index, key ->
+                FpChip(icon == key, { icon = key }, "", Modifier.size(FpSpacing.touch),
+                    icon = { Icon(painterResource(FpIcons.byKey.getValue(key)), stringResource(R.string.item_icon_number, index + 1)) })
             }
         }
-    }, confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onSave(name.trim(), icon) }) { Text(stringResource(R.string.settings_save)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
+    }
 }

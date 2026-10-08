@@ -45,12 +45,11 @@ class HistoryScreenshotTest {
             DayLog(clock().minusDays(1), symptoms = setOf(Symptom.HOT_FLUSHES, Symptom.BRAIN_FOG)))
         val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = emptyList(), settings = BackupSettings(null, false),
             situation = Situation(phase = if (menopause) LifePhase.MENOPAUSE else LifePhase.REGULAR)), clock())
-        if (sheet) compose.mainClock.autoAdvance = false
         compose.setContent { FreePeriodTheme(darkTheme = dark) { Surface { HistoryScreen(state, { _, _ -> }) } } }
         compose.waitForIdle()
         if (sheet) {
-            compose.onNodeWithTag("history-bar-4").performClick()
-            compose.mainClock.advanceTimeBy(500)
+            compose.onNodeWithTag("history-list").performScrollToNode(hasTestTag("cycle-chart"))
+            compose.onNodeWithTag("history-bar-4").performScrollTo().performClick()
             compose.waitForIdle()
             compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/history/$name.png")
         } else compose.onRoot().captureRoboImage("src/test/screenshots/history/$name.png")

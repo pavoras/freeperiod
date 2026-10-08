@@ -12,7 +12,7 @@ import org.robolectric.annotation.GraphicsMode
 @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
 class BackupScreenshotTest : SettingsScreenshotFixture() {
     @Test fun backupForm_enLight() = capture("backup/backupForm_enLight", "Backup & restore") {
-        BackupScreen(BackupUiState(), { _, _ -> }, {}, {}, {}, {}, {})
+        BackupScreen(BackupUiState(), { _, _ -> }, {}, {}, {}, {}, {}, onImport = {})
     }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun restoreSummary_deLight() = capture("backup/restoreSummary_deLight", "3 Perioden, 12 Tage erfasst", Locale.GERMANY) {

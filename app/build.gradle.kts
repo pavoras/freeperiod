@@ -1,3 +1,6 @@
+import java.io.File
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +9,36 @@ plugins {
     alias(libs.plugins.room)
     alias(libs.plugins.roborazzi)
 }
+
+// Tests/lint never open signing files. The gate may assemble an unsigned release APK.
+val requestedTasks = gradle.startParameter.taskNames.map { it.substringAfterLast(':').lowercase() }
+val releaseBundleRequested = requestedTasks.any { it == "bundlerelease" || it == "bundle" }
+val releasePackagingRequested = releaseBundleRequested || requestedTasks.any { it == "assemblerelease" || it == "assemble" }
+val releaseSigning = if (releasePackagingRequested) {
+    val path = providers.gradleProperty("freeperiod.signing").orNull
+        ?: providers.environmentVariable("FREEPERIOD_SIGNING_PROPERTIES").orNull
+    if (path.isNullOrBlank()) {
+        if (releaseBundleRequested) throw GradleException("bundleRelease requires external signing properties: -Pfreeperiod.signing=<path> or FREEPERIOD_SIGNING_PROPERTIES.")
+        null
+    } else {
+        val propertiesFile = file(path).canonicalFile
+        if (propertiesFile.toPath().startsWith(rootDir.canonicalFile.toPath()))
+            throw GradleException("Release signing properties must be outside the repository.")
+        if (!propertiesFile.isFile) throw GradleException("External release signing properties file was not found.")
+        Properties().apply {
+            propertiesFile.inputStream().use { load(it) }
+            listOf("storeFile", "storePassword", "keyAlias", "keyPassword").forEach {
+                if (getProperty(it).isNullOrBlank()) throw GradleException("Release signing properties require $it.")
+            }
+            val keystore = File(getProperty("storeFile")).let {
+                (if (it.isAbsolute) it else File(propertiesFile.parentFile, it.path)).canonicalFile
+            }
+            if (keystore.toPath().startsWith(rootDir.canonicalFile.toPath()))
+                throw GradleException("Release keystore must be outside the repository.")
+            setProperty("storeFile", keystore.path)
+        }
+    }
+} else null
 
 android {
     namespace = "org.freeperiod.app"
@@ -20,11 +53,21 @@ android {
         versionName = "1.0.0"
     }
 
+    signingConfigs {
+        if (releaseSigning != null) create("externalRelease") {
+            storeFile = file(releaseSigning.getProperty("storeFile"))
+            storePassword = releaseSigning.getProperty("storePassword")
+            keyAlias = releaseSigning.getProperty("keyAlias")
+            keyPassword = releaseSigning.getProperty("keyPassword")
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
         }
         release {
+            if (releaseSigning != null) signingConfig = signingConfigs.getByName("externalRelease")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")

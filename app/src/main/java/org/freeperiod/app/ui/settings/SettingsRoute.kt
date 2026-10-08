@@ -28,7 +28,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY }
+private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY, IMPORT }
 
 @Composable
 fun SettingsRoute(container: AppContainer) {
@@ -52,7 +52,7 @@ fun SettingsRoute(container: AppContainer) {
     val reminderAccess = rememberReminderAccess(container.notifications)
     var page by rememberSaveable { mutableStateOf(SettingsPage.MAIN) }
     var externalError by remember { mutableStateOf(false) }
-    val back = { page = if (page == SettingsPage.REMINDER_EDITOR) SettingsPage.REMINDERS else SettingsPage.MAIN; backup.cancelRestore() }
+    val back = { page = when (page) { SettingsPage.REMINDER_EDITOR -> SettingsPage.REMINDERS; SettingsPage.IMPORT -> SettingsPage.BACKUP; else -> SettingsPage.MAIN }; backup.cancelRestore() }
     fun saveReminder(value: org.freeperiod.engine.Reminder) {
         if (value.enabled && trackingState.data.reminders.none { it.enabled }) reminderAccess.requestPermission()
         tracking.reminder(value)
@@ -120,7 +120,8 @@ fun SettingsRoute(container: AppContainer) {
                     { name, icon, category, symptoms -> tracking.item(name, icon, category, symptoms, context.getString(R.string.entry_symptoms)) })
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back)
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
-                    backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back)
+                    backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { page = SettingsPage.IMPORT })
+                SettingsPage.IMPORT -> ImportRoute(container) { page = SettingsPage.BACKUP }
                 SettingsPage.PRIVACY -> PrivacyScreen(back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.PRIVACY_URL))) }
                 SettingsPage.ABOUT -> AboutScreen(version, back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.SOURCE_URL))) }
             }

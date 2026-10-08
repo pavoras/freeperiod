@@ -15,7 +15,9 @@ abstract class DatabaseTest {
 
     @Before fun createDatabase() {
         db = Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext<Context>(),
-            FreePeriodDatabase::class.java).allowMainThreadQueries().build()
+            FreePeriodDatabase::class.java).allowMainThreadQueries()
+            // Run queries on the calling thread: no late resumes onto Dispatchers.Main after a test.
+            .setQueryExecutor(Runnable::run).setTransactionExecutor(Runnable::run).build()
         repository = Repository(db) { today }
     }
 

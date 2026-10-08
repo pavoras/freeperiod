@@ -400,4 +400,19 @@
         <item quantity="one">%1$d day before your period</item>
         <item quantity="other">%1$d days before your period</item>
     </plurals>
+    <string name="import_title">Import</string>
+    <string name="import_from_app">Import from another app</string>
+    <string name="import_intro">Choose a CSV with past periods or restore a FreePeriod. backup.</string>
+    <string name="import_csv">Choose CSV file</string>
+    <string name="import_backup">FreePeriod. backup</string>
+    <string name="import_coming_soon">Clue and Flo exports coming soon.</string>
+    <string name="import_choose_format">Choose the date format used in this file.</string>
+    <string name="import_format_iso">Year/month/day (2026-04-12)</string>
+    <string name="import_format_dmy">Day/month/year (12/04/2026)</string>
+    <string name="import_format_mdy">Month/day/year (04/12/2026)</string>
+    <string name="import_preview">%1$d periods from %2$s to %3$s</string>
+    <string name="import_ongoing">An empty end date is imported as an ongoing period.</string>
+    <string name="import_confirm">Import periods</string>
+    <string name="import_result">%1$d imported. %2$d overlapping periods skipped.</string>
+    <string name="import_invalid">No valid periods found. Check the columns and dates; dates must not be in the future.</string>
 </resources>

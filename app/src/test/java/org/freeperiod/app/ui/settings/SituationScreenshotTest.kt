@@ -46,7 +46,7 @@ class SituationScreenshotTest {
         compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Method"))
         compose.onNodeWithText("Method").performClick()
         compose.waitForIdle()
-        compose.onNodeWithText("None").assertIsSelected()
+        compose.onNode(hasText("None") and hasAnyAncestor(isDialog())).assertIsSelected()
         compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/situation/methodPicker_enLight.png")
     }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
@@ -63,10 +63,8 @@ class SituationScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun pillRhythm_deLight() {
         Locale.setDefault(Locale.GERMANY)
-        compose.mainClock.autoAdvance = false
-        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { PillRhythmDialog(PillSchedule(today, 21, 7), today, {}, {}) } } }
-        compose.mainClock.advanceTimeBy(400)
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { CompositionLocalProvider(LocalInlineEditors provides true) { PillRhythmDialog(PillSchedule(today, 21, 7), today, {}, {}) } } } }
         compose.waitForIdle()
-        compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/situation/pillRhythm_deLight.png")
+        compose.onRoot().captureRoboImage("src/test/screenshots/situation/pillRhythm_deLight.png")
     }
 }

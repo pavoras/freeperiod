@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -36,7 +37,7 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
     val locale = LocalConfiguration.current.locales[0]
     val numberFormat = NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = 1 }
     val dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-    LazyColumn(modifier.fillMaxSize().background(tones.background), contentPadding = PaddingValues(FpSpacing.screen),
+    LazyColumn(modifier.fillMaxSize().background(tones.background).testTag("history-list"), contentPadding = PaddingValues(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(FpSpacing.section)) {
         item { FpTopBar(stringResource(R.string.nav_history)) }
         if (state.loading) item { CircularProgressIndicator() }

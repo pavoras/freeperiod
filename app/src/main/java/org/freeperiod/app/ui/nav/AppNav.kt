@@ -33,6 +33,7 @@ import org.freeperiod.app.ui.history.HistoryViewModel
 import org.freeperiod.app.ui.day.DayEntryActions
 import org.freeperiod.app.ui.day.DayEntrySheet
 import org.freeperiod.app.ui.day.DayEntryViewModel
+import org.freeperiod.app.ui.settings.ImportRoute
 import org.freeperiod.app.ui.settings.SettingsRoute
 import org.freeperiod.app.ui.settings.rememberReminderAccess
 import org.freeperiod.app.ui.onboarding.*
@@ -69,6 +70,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     val context = LocalContext.current
                     androidx.activity.compose.BackHandler(state.page > 0, onBack = model::back)
                     OnboardingScreen(state, OnboardingActions(
+                        importPeriods = { navigation.navigate("import") },
                         next = model::next, back = model::back, skip = { model.skip() }, finish = { model.finish() },
                         phase = model::setPhase, method = model::setMethod, pillRhythm = model::setPillRhythm, packStart = model::setPackStart,
                         day = model::toggleDay, range = model::markRange, rangeMode = model::setRangeMode, ongoing = model::setOngoing, dismissOngoing = model::dismissOngoingQuestion,
@@ -81,6 +83,13 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                             catch (_: ActivityNotFoundException) { model.systemSettingsUnavailable() }
                             catch (_: SecurityException) { model.systemSettingsUnavailable() }
                         }), access.available)
+                }
+                composable("import") {
+                    val onboardingEntry = remember { navigation.getBackStackEntry("onboarding") }
+                    val model: OnboardingViewModel = viewModel(viewModelStoreOwner = onboardingEntry, factory = viewModelFactory {
+                        initializer { OnboardingViewModel(container.repository, container.settings, container.clock, createSavedStateHandle()) }
+                    })
+                    ImportRoute(container, onRestored = { model.finishRestoredBackup() }) { navigation.popBackStack() }
                 }
                 composable("today") {
                     val state by todayViewModel.state.collectAsStateWithLifecycle()

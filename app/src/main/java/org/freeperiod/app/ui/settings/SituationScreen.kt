@@ -4,8 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.ui.theme.LocalDaylight
@@ -128,20 +126,18 @@ internal fun PillRhythmDialog(current: PillSchedule?, today: LocalDate, onDismis
     var start by rememberSaveable { mutableStateOf((current?.packStart ?: today).toString()) }
     val date = runCatching { LocalDate.parse(start) }.getOrNull()
     val valid = active.toIntOrNull() in 1..365 && rest.toIntOrNull() in 0..30 && date != null
-    AlertDialog(containerColor = LocalDaylight.current.surface, onDismissRequest = onDismiss, title = { Text(stringResource(R.string.pill_rhythm)) }, text = {
-        Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf(21 to 7, 24 to 4, 28 to 0).forEach { (a, b) ->
-                    FpChip(active == a.toString() && rest == b.toString(), { active = a.toString(); rest = b.toString() },
-                        if (b == 0) stringResource(R.string.pill_continuous) else "$a+$b", Modifier.widthIn(min = 64.dp))
-                }
+    SettingsEditorDialog(stringResource(R.string.pill_rhythm), onDismiss,
+        { onSave(PillSchedule(requireNotNull(date), active.toInt(), rest.toInt())) }, valid) {
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf(21 to 7, 24 to 4, 28 to 0).forEach { (a, b) ->
+                FpChip(active == a.toString() && rest == b.toString(), { active = a.toString(); rest = b.toString() },
+                    if (b == 0) stringResource(R.string.pill_continuous) else "$a+$b", Modifier.widthIn(min = 64.dp))
             }
-            SettingsTextField(active, { active = it }, stringResource(R.string.pill_active_days), keyboardType = KeyboardType.Number)
-            SettingsTextField(rest, { rest = it }, stringResource(R.string.pill_break_days), keyboardType = KeyboardType.Number)
-            SettingsTextField(start, { start = it }, stringResource(R.string.pack_start_date), keyboardType = KeyboardType.Ascii)
-            Text(stringResource(R.string.date_format_hint), style = MaterialTheme.typography.bodySmall)
-            TextButton(onClick = { onSave(null) }) { Text(stringResource(R.string.pill_clear_rhythm)) }
         }
-    }, confirmButton = { TextButton(onClick = { onSave(PillSchedule(requireNotNull(date), active.toInt(), rest.toInt())) }, enabled = valid) { Text(stringResource(R.string.settings_save)) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } })
+        SettingsTextField(active, { active = it }, stringResource(R.string.pill_active_days), keyboardType = KeyboardType.Number)
+        SettingsTextField(rest, { rest = it }, stringResource(R.string.pill_break_days), keyboardType = KeyboardType.Number)
+        SettingsTextField(start, { start = it }, stringResource(R.string.pack_start_date), keyboardType = KeyboardType.Ascii)
+        Text(stringResource(R.string.date_format_hint), style = MaterialTheme.typography.bodySmall)
+        TextButton(onClick = { onSave(null) }) { Text(stringResource(R.string.pill_clear_rhythm)) }
+    }
 }

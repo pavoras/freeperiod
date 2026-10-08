@@ -84,6 +84,12 @@ class OnboardingViewModel(private val repository: Repository, private val settin
         mutableState.update(transform)
         savedState["draft"] = state.value.savedDraft()
     }
+    /** A full restore already contains situation, cycle settings and reminders. */
+    fun finishRestoredBackup(): Job = viewModelScope.launch {
+        try { settings.update { it.copy(onboardingDone = true) } }
+        catch (cancelled: CancellationException) { throw cancelled }
+        catch (_: Exception) { change { it.copy(message = R.string.onboarding_save_error) } }
+    }
     fun setPhase(value: LifePhase) = change { it.copy(phase = value) }
     fun setMethod(value: Method) = change { it.copy(method = value, methodReminder = if (it.method == value) it.methodReminder else null) }
     fun setPillRhythm(active: String, rest: String) = change { it.copy(pillActive = active, pillBreak = rest) }

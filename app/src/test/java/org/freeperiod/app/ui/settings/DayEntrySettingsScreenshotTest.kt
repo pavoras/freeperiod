@@ -50,10 +50,8 @@ class DayEntrySettingsScreenshotTest {
         compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/main_deLargeDark.png")
     }
     @Test fun addItem_enLight() {
-        compose.mainClock.autoAdvance = false
-        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { AddItemDialog({}, { _, _ -> }) } } }
-        compose.mainClock.advanceTimeBy(400)
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { CompositionLocalProvider(LocalInlineEditors provides true) { AddItemDialog({}, { _, _ -> }) } } } }
         compose.waitForIdle()
-        compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/day-settings/addItem_enLight.png")
+        compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/addItem_enLight.png")
     }
 }

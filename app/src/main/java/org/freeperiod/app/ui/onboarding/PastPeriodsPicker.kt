@@ -65,10 +65,16 @@ internal fun PastPeriodsPicker(state: OnboardingUiState, actions: OnboardingActi
     Column(Modifier.fillMaxSize()) {
         Text(stringResource(R.string.onboarding_past_periods), Modifier.padding(horizontal = FpSpacing.screen), style = MaterialTheme.typography.titleLarge)
         Text(stringResource(R.string.onboarding_picker_help), Modifier.padding(horizontal = FpSpacing.screen), style = MaterialTheme.typography.bodySmall)
-        FpSwitchRow(stringResource(R.string.onboarding_range_mode), state.rangeMode, enabled, actions.rangeMode)
+        TextButton(onClick = actions.importPeriods, enabled = !state.busy, modifier = Modifier.padding(horizontal = FpSpacing.screen)) {
+            Text(stringResource(R.string.import_from_app))
+        }
+        Box(Modifier.padding(horizontal = FpSpacing.screen)) {
+            FpSwitchRow(stringResource(R.string.onboarding_range_mode), state.rangeMode, enabled, actions.rangeMode)
+        }
         state.rangeStart?.let { Text(stringResource(R.string.onboarding_range_end), Modifier.padding(horizontal = FpSpacing.screen)) }
         if (state.periodsCommitted) Text(stringResource(R.string.onboarding_periods_saved), Modifier.padding(horizontal = FpSpacing.screen))
-        LazyColumn(state = list, contentPadding = PaddingValues(horizontal = FpSpacing.gap), modifier = Modifier.weight(1f)
+        // No list scrolling while a drag selects days: the list would claim the vertical move.
+        LazyColumn(state = list, contentPadding = PaddingValues(horizontal = FpSpacing.gap), userScrollEnabled = draggingFrom == null, modifier = Modifier.weight(1f)
             .testTag("past-periods-calendar").onSizeChanged { height = it.height }.onGloballyPositioned { origin = it.positionInRoot() }
             .pointerInput(state.today, enabled) {
                 if (enabled) detectDragGesturesAfterLongPress(

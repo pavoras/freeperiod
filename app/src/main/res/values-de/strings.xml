@@ -400,4 +400,19 @@
         <item quantity="one">%1$d Tag vor deiner Periode</item>
         <item quantity="other">%1$d Tage vor deiner Periode</item>
     </plurals>
+    <string name="import_title">Importieren</string>
+    <string name="import_from_app">Aus einer anderen App importieren</string>
+    <string name="import_intro">Wähle eine CSV mit bisherigen Perioden oder stelle ein FreePeriod.-Backup wieder her.</string>
+    <string name="import_csv">CSV-Datei wählen</string>
+    <string name="import_backup">FreePeriod.-Backup</string>
+    <string name="import_coming_soon">Clue- und Flo-Exporte kommen bald.</string>
+    <string name="import_choose_format">Wähle das Datumsformat dieser Datei.</string>
+    <string name="import_format_iso">Jahr/Monat/Tag (2026-04-12)</string>
+    <string name="import_format_dmy">Tag/Monat/Jahr (12/04/2026)</string>
+    <string name="import_format_mdy">Monat/Tag/Jahr (04/12/2026)</string>
+    <string name="import_preview">%1$d Perioden vom %2$s bis %3$s</string>
+    <string name="import_ongoing">Ein leeres Enddatum wird als laufende Periode importiert.</string>
+    <string name="import_confirm">Perioden importieren</string>
+    <string name="import_result">%1$d importiert. %2$d überlappende Perioden übersprungen.</string>
+    <string name="import_invalid">Keine gültigen Perioden gefunden. Prüfe Spalten und Daten; Daten dürfen nicht in der Zukunft liegen.</string>
 </resources>

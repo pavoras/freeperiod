@@ -119,4 +119,14 @@ class OnboardingViewModelTest : DatabaseTest() {
         assertTrue(repository.snapshot().periods.isEmpty())
         assertTrue(repository.snapshot().reminders.none { it.enabled })
     }
+    @Test fun backupImportFinishesWithoutOverwritingRestoredSettings() = runTest {
+        val vm = model()
+        vm.setPhase(LifePhase.REGULAR)
+        repository.updateSituation(Situation(LifePhase.MENOPAUSE))
+        repository.updateDomainSettings(org.freeperiod.engine.backup.BackupSettings(31, true))
+        val restored = repository.snapshot()
+        vm.finishRestoredBackup().join()
+        assertEquals(restored, repository.snapshot())
+        assertTrue(settings.settings.first().onboardingDone)
+    }
 }

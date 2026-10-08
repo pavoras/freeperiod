@@ -26,6 +26,8 @@ fun BackupScreen(
     onRestore: () -> Unit,
     onCancelRestore: () -> Unit,
     onBack: () -> Unit,
+    onImport: (() -> Unit)? = null,
+    restoreOnly: Boolean = false,
 ) {
     // Passwords deliberately do not enter saved instance state.
     var password by remember { mutableStateOf("") }
@@ -36,15 +38,20 @@ fun BackupScreen(
     Column(Modifier.fillMaxSize().background(LocalDaylight.current.background).verticalScroll(rememberScrollState()).imePadding().padding(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SettingsPageHeader(R.string.backup_restore, onBack)
+        onImport?.let { action ->
+            FpButton(action, primary = false, enabled = enabled) { Text(stringResource(R.string.import_title)) }
+        }
         if (state.summary == null) {
-            Text(stringResource(R.string.create_backup), style = MaterialTheme.typography.titleLarge)
-            Text(stringResource(R.string.backup_forgotten_warning), style = MaterialTheme.typography.bodyMedium)
-            PasswordField(password, { password = it }, R.string.backup_password, enabled)
-            PasswordField(confirm, { confirm = it }, R.string.backup_confirm_password, enabled)
-            FpButton(onClick = { onBackup(password, confirm); password = ""; confirm = "" }, enabled = enabled) {
-                Text(stringResource(R.string.create_backup))
+            if (!restoreOnly) {
+                Text(stringResource(R.string.create_backup), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.backup_forgotten_warning), style = MaterialTheme.typography.bodyMedium)
+                PasswordField(password, { password = it }, R.string.backup_password, enabled)
+                PasswordField(confirm, { confirm = it }, R.string.backup_confirm_password, enabled)
+                FpButton(onClick = { onBackup(password, confirm); password = ""; confirm = "" }, enabled = enabled) {
+                    Text(stringResource(R.string.create_backup))
+                }
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
             }
-            HorizontalDivider(Modifier.padding(vertical = 8.dp))
             Text(stringResource(R.string.restore_backup), style = MaterialTheme.typography.titleLarge)
             FpButton(primary = false, onClick = { restorePassword = ""; onOpen() }, enabled = enabled) {
                 Text(stringResource(R.string.restore_choose_file))

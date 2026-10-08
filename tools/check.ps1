@@ -43,8 +43,11 @@ if (-not $Online) { $gargs = @('--offline') + $gargs }
 New-Item -ItemType Directory -Force (Join-Path $repo '.tools') | Out-Null
 # One log per run, so parallel rounds never overwrite each other's output.
 $log = Join-Path $repo ".tools\check-$mode-$PID.log"
-$proc = Start-Process -FilePath $gradle -ArgumentList $gargs -WorkingDirectory $repo -NoNewWindow -Wait -PassThru `
+# No -Wait: it also waits for the Gradle daemon the build leaves running, so it never returns.
+$proc = Start-Process -FilePath $gradle -ArgumentList $gargs -WorkingDirectory $repo -NoNewWindow -PassThru `
     -RedirectStandardOutput $log -RedirectStandardError "$log.err"
+$null = $proc.Handle  # keep the handle so ExitCode is available after exit
+$proc.WaitForExit()
 $code = $proc.ExitCode
 Add-Content -Path $log -Value (Get-Content "$log.err" -Raw -ErrorAction SilentlyContinue)
 Remove-Item "$log.err" -ErrorAction SilentlyContinue

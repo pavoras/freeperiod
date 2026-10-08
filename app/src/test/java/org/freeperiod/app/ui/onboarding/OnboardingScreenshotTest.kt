@@ -29,6 +29,9 @@ class OnboardingScreenshotTest : SettingsScreenshotFixture() {
     @Test fun reminders_enLight() = capture("onboarding/reminders_enLight", "Reminders") {
         OnboardingScreen(OnboardingUiState(page = 5, today = clock()), OnboardingActions())
     }
+    @Test fun import_enLight() = capture("onboarding/import_enLight", "Import from another app") {
+        OnboardingScreen(OnboardingUiState(page = 3, today = clock()), OnboardingActions())
+    }
     private fun pastPeriods(): OnboardingUiState {
         val first = LocalDate.of(2026, 3, 29)
         return OnboardingUiState(page = 3, today = clock(), selectedDays = generateSequence(first) { it.plusDays(1) }.take(6).toSet())
