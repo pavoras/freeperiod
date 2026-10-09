@@ -60,8 +60,10 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                             AverageValue(period, R.string.history_period_label, Modifier.weight(1f).padding(horizontal = FpSpacing.section))
                         }
                     }
-                    if (state.eligibleCycles > 0) Text(stringResource(R.string.basis_history, state.eligibleCycles), style = MaterialTheme.typography.bodySmall)
-                    if (state.completedPeriods > 0) Text(stringResource(R.string.history_period_basis, state.completedPeriods), style = MaterialTheme.typography.bodySmall)
+                    Column(Modifier.padding(top = 8.dp)) {
+                        if (state.eligibleCycles > 0) Text(stringResource(R.string.basis_history, state.eligibleCycles), style = MaterialTheme.typography.bodySmall)
+                        if (state.completedPeriods > 0) Text(stringResource(R.string.history_period_basis, state.completedPeriods), style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
             if (state.cycles.isEmpty()) item { Text(stringResource(R.string.history_empty), style = MaterialTheme.typography.bodyLarge) }

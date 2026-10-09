@@ -11,6 +11,8 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
@@ -51,21 +53,24 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         item {
             FpTopBar(stringResource(R.string.nav_settings))
         }
-        item { SettingsRow(R.string.appearance, enabled, actions.appearance, stringResource(accentLabel(state.accent))) }
+        // Personal settings first, then the two switches, then files, privacy and support.
+        item { AppearanceTile(stringResource(accentLabel(state.accent)), enabled, actions.appearance) }
         if (state.loading) item { CircularProgressIndicator() }
-        item {
-            // Once cycles are logged the typed length is no longer used, so show what the entries say.
-            SettingsRow(R.string.typical_cycle_length, enabled, { lengthDialog = true },
-                state.measuredCycleLength?.let { stringResource(R.string.settings_cycle_measured, it) }
-                    ?: state.typicalCycleLength?.let { stringResource(R.string.settings_cycle_days, it) }
-                    ?: stringResource(R.string.cycle_unknown))
-        }
-        item { SettingsSwitch(R.string.pause_predictions, state.predictionsPaused, enabled, actions.paused) }
-        item { SettingsRow(R.string.my_situation, enabled, actions.situation) }
-        item { SettingsRow(R.string.reminders, enabled, actions.reminders) }
         item { SettingsRow(R.string.customize_day_entry, enabled, actions.dayEntry) }
         item {
-            HorizontalDivider(Modifier.padding(vertical = 12.dp))
+            // Once cycles are logged the typed length is no longer used: the row shows the measured one.
+            SettingsRow(R.string.typical_cycle_length, enabled, { lengthDialog = true },
+                (state.measuredCycleLength ?: state.typicalCycleLength)?.let { stringResource(R.string.settings_cycle_days, it) }
+                    ?: stringResource(R.string.cycle_unknown))
+        }
+        item { SettingsRow(R.string.my_situation, enabled, actions.situation) }
+        item { SettingsRow(R.string.reminders, enabled, actions.reminders) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item {
+            SettingsRow(R.string.language, enabled, actions.language)
+        }
+        item {
+            HorizontalDivider(Modifier.padding(top = 12.dp, bottom = 4.dp))
+            SettingsSwitch(R.string.pause_predictions, state.predictionsPaused, enabled, actions.paused)
             SettingsSwitch(R.string.app_lock, state.device.lockEnabled, enabled && (state.device.lockEnabled || state.lockCanEnable)) {
                 if (it) lockIntro = true else actions.lockEnabled(false)
             }
@@ -73,9 +78,7 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
                 style = MaterialTheme.typography.bodySmall, color = LocalDaylight.current.muted)
             if (!state.lockCanEnable && !state.device.lockEnabled) Text(stringResource(R.string.lock_unavailable), style = MaterialTheme.typography.bodySmall)
             if (state.device.lockEnabled) SettingsRow(R.string.lock_timeout, enabled, { timeoutDialog = true }, stringResource(timeoutLabel(state.device.lockTimeout)))
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) item {
-            SettingsRow(R.string.language, enabled, actions.language)
+            Spacer(Modifier.height(12.dp))
         }
         item { SettingsRow(R.string.backup_restore, enabled, actions.backup) }
         item { SettingsRow(R.string.export_csv, enabled, { csvDialog = true }) }
@@ -154,6 +157,26 @@ private fun timeoutLabel(timeout: LockTimeout): Int = when (timeout) {
     LockTimeout.FIVE_MINUTES -> R.string.lock_five_minutes
     LockTimeout.TEN_MINUTES -> R.string.lock_ten_minutes
     LockTimeout.FIFTEEN_MINUTES -> R.string.lock_fifteen_minutes
+}
+
+/** The entry to colours and theme, shown as a tile in the chosen accent so it is easy to find. */
+@Composable
+private fun AppearanceTile(accent: String, enabled: Boolean, onClick: () -> Unit) {
+    val t = LocalDaylight.current
+    Surface(onClick = onClick, enabled = enabled, modifier = Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 12.dp),
+        shape = MaterialTheme.shapes.large, color = t.accent.container, contentColor = t.accent.onContainer) {
+        Row(Modifier.heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Box(Modifier.size(40.dp).clip(CircleShape).background(t.accent.accent), contentAlignment = Alignment.Center) {
+                Icon(painterResource(R.drawable.ic_fp_appearance), null, Modifier.size(22.dp), tint = t.accent.onAccent)
+            }
+            Column(Modifier.weight(1f)) {
+                Text(stringResource(R.string.appearance), style = MaterialTheme.typography.bodyLarge)
+                Text(accent, style = MaterialTheme.typography.bodySmall)
+            }
+            Icon(painterResource(R.drawable.ic_fp_next), null, Modifier.size(18.dp))
+        }
+    }
 }
 
 @Composable

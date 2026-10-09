@@ -43,8 +43,16 @@ class TodayScreenTest {
         compose.setContent { FreePeriodTheme { TodayScreen(state, {}, {}, {}, {}, {}, {}) } }
         compose.waitForIdle()
         compose.onNodeWithText("Higher chance of pregnancy: ", substring = true).assertDoesNotExist()
-        compose.onNodeWithText("Higher chance of pregnancy · calendar estimate").assertIsDisplayed()
+        compose.onNodeWithText("Higher chance of pregnancy").assertIsDisplayed()
         compose.onNodeWithContentDescription("About this calendar estimate").assertIsDisplayed()
+    }
+
+    @Test fun cardLeavesTheRangeToTheTimelineAndTheBasisToHistory() {
+        compose.setContent { FreePeriodTheme { TodayScreen(todayFixture("regular"), {}, {}, {}, {}, {}, {}) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Next period likely", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("based on your last", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Likely").assertIsDisplayed()
     }
 
     @Test fun endingSavesImmediatelyThenUndoUsesTheSavedReceipt() {

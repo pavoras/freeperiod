@@ -94,6 +94,7 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                 scheduledBreak = state.prediction is PredictionState.ScheduledBreak)
         }, bottom = {
             if (!state.loading) {
+                HorizontalDivider(Modifier.padding(horizontal = 12.dp), color = t.line)
                 TodayLegend(Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     scheduledBreak = state.prediction is PredictionState.ScheduledBreak,
                     higherChance = state.fertileWindow != null,

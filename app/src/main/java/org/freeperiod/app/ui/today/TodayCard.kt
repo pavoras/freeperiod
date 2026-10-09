@@ -69,25 +69,14 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
                     state.timeline?.let { CycleTimelineView(it, Modifier.weight(1f), pack = packDay != null) }
                 }
             }
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(predictionText(prediction, state.today, locale), style = MaterialTheme.typography.bodyLarge)
-                if (prediction is PredictionState.Range) {
-                    val basis = when (prediction.basis) {
-                        Basis.USER_ENTERED -> stringResource(R.string.basis_entered)
-                        Basis.EARLY_ESTIMATE -> stringResource(R.string.basis_early)
-                        Basis.HISTORY -> stringResource(R.string.basis_history, prediction.cyclesUsed)
-                    }
-                    Text(basis, style = MaterialTheme.typography.bodySmall, color = t.muted)
-                }
-                if (prediction is PredictionState.NoData) {
-                    Text(stringResource(R.string.today_welcome_hint), style = MaterialTheme.typography.bodySmall, color = t.muted)
-                }
-                if (state.situation.phase == LifePhase.PERIMENOPAUSE) {
-                    Text(stringResource(R.string.today_perimenopause), style = MaterialTheme.typography.bodySmall, color = t.muted)
-                }
-                if (state.situation.method == Method.PILL_PROGESTIN && prediction is PredictionState.Range) {
-                    Text(stringResource(R.string.today_irregular_method), style = MaterialTheme.typography.bodySmall, color = t.muted)
-                }
+            // A predicted range is already on the timeline (and in the calendar), so the card shows no text for it.
+            val rangeOnTimeline = prediction is PredictionState.Range && state.timeline != null
+            val hints = listOfNotNull(R.string.today_welcome_hint.takeIf { prediction is PredictionState.NoData },
+                R.string.today_perimenopause.takeIf { state.situation.phase == LifePhase.PERIMENOPAUSE },
+                R.string.today_irregular_method.takeIf { state.situation.method == Method.PILL_PROGESTIN && prediction is PredictionState.Range })
+            if (!rangeOnTimeline || hints.isNotEmpty()) Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                if (!rangeOnTimeline) Text(predictionText(prediction, state.today, locale), style = MaterialTheme.typography.bodyLarge)
+                hints.forEach { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = t.muted) }
             }
             TodayActions(stringResource(if (state.ongoingPeriodId == null) R.string.period_started else R.string.period_ended),
                 stringResource(R.string.log_today), !state.writing,

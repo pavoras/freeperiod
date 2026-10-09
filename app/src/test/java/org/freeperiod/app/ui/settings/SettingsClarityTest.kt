@@ -35,7 +35,7 @@ class SettingsClarityTest {
 
     @Test fun loggedCyclesShowTheMeasuredLengthAndExplainIt() {
         show(SettingsUiState(30, loading = false, measuredCycleLength = 29, measuredCycles = 5))
-        compose.onNodeWithText("29 days · from your entries").performClick()
+        compose.onNodeWithText("29 days").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("the middle value of your last 5 cycles", substring = true).assertExists()
         compose.onNodeWithText("Days (15–90)").assertDoesNotExist()

@@ -14,8 +14,6 @@
     <string name="today_varies">Your cycles vary a lot (%1$d–%2$d days)</string>
     <string name="today_range_passed">Your expected range has passed (%1$d days ago)</string>
     <string name="today_paused">Predictions paused</string>
-    <string name="basis_entered">based on what you entered</string>
-    <string name="basis_early">early estimate</string>
     <string name="basis_history">based on your last %1$d cycles</string>
     <string name="period_started">Period started</string>
     <string name="period_ended_question">Has your period ended?</string>
@@ -241,6 +239,7 @@
     <string name="entry_note_placeholder">Anything else about today?</string>
     <string name="legend_period">Period</string>
     <string name="legend_predicted">Likely</string>
+    <string name="legend_pregnancy_chance">Higher chance of pregnancy</string>
     <string name="legend_possible">Possible</string>
     <string name="legend_today">Today</string>
     <string name="legend_entry">Entry</string>
@@ -251,7 +250,6 @@
     <string name="medical_disclaimer_title">Not a medical device</string>
     <string name="medical_disclaimer_note">These calendar estimates can be wrong and are not reliable. FreePeriod. is not for contraception, help getting pregnant, or medical advice.</string>
     <string name="pregnancy_chance_label">Higher chance of pregnancy</string>
-    <string name="pregnancy_chance_estimate">%1$s · calendar estimate</string>
     <string name="pregnancy_chance_info">About this calendar estimate</string>
     <string name="calendar_pregnancy_chance">higher chance of pregnancy, calendar estimate</string>
     <string name="show_pregnancy_chance">Show days with a higher chance of pregnancy</string>
@@ -542,15 +540,14 @@
     <!-- Settings clarity: measured cycle, lock intro, archived categories -->
     <string name="lock_ten_minutes">10 minutes</string>
     <string name="lock_fifteen_minutes">15 minutes</string>
-    <string name="lock_summary">Asks for your phone\'s screen lock when you open FreePeriod.</string>
+    <string name="lock_summary">Asks for your phone\'s screen lock when you open FreePeriod</string>
     <string name="lock_intro_title">Turn on app lock?</string>
-    <string name="lock_intro_body">When you open FreePeriod., it asks for your phone\'s screen lock – fingerprint, face, PIN, pattern or password – and again after the time you choose. Your phone checks it; FreePeriod. never sees it. While the lock is on, the app is hidden in recent apps and screenshots are blocked.</string>
+    <string name="lock_intro_body">When you open FreePeriod, it asks for your phone\'s screen lock – fingerprint, face, PIN, pattern or password – and again after the time you choose. Your phone checks it; FreePeriod never sees it. While the lock is on, the app is hidden in recent apps and screenshots are blocked.</string>
     <string name="lock_turn_on">Turn on</string>
     <string name="typical_length_fallback">Only used until your first full cycle is logged. After that, FreePeriod. uses your own entries.</string>
     <string name="archived_categories">Archived</string>
     <string name="archived_categories_hint">Archived categories no longer appear in the day entry. Your past entries keep them.</string>
     <string name="restore_category">Restore</string>
-    <string name="settings_cycle_measured">%1$d days · from your entries</string>
     <plurals name="cycle_measured_explained">
         <item quantity="one">FreePeriod. works this out from your logged periods – so far from your last cycle – so there is nothing to set here. To leave out an unusual cycle, open it in History.</item>
         <item quantity="other">FreePeriod. works this out from your logged periods – the middle value of your last %1$d cycles – so there is nothing to set here. To leave out an unusual cycle, open it in History.</item>

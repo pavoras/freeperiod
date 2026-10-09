@@ -23,7 +23,7 @@ internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean 
     possible: Boolean = false, onEstimateInfo: () -> Unit = {}) {
     val t = LocalDaylight.current
     val colors = todayFillColors(t)
-    FlowRow(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp),
+    FlowRow(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
         listOfNotNull(R.string.legend_period, if (scheduledBreak) R.string.timeline_scheduled_break else R.string.legend_predicted,
             R.string.legend_possible.takeIf { possible }, R.string.legend_today, R.string.legend_entry)
@@ -49,7 +49,7 @@ internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean 
                 drawLine(t.muted, Offset(3.dp.toPx(), center.y), Offset(9.dp.toPx(), center.y),
                     strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             }
-            Text(stringResource(R.string.pregnancy_chance_estimate, stringResource(R.string.pregnancy_chance_label)),
+            Text(stringResource(R.string.legend_pregnancy_chance), Modifier.weight(1f, fill = false),
                 style = MaterialTheme.typography.labelSmall, color = t.muted)
             Icon(painterResource(R.drawable.ic_fp_about), stringResource(R.string.pregnancy_chance_info),
                 Modifier.size(18.dp), tint = t.muted)

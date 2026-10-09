@@ -2,6 +2,7 @@ package org.freeperiod.app.ui.today
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -117,7 +118,7 @@ fun MonthCalendar(
                     val shown = rows.getOrNull(list.firstVisibleItemIndex)?.month ?: anchor
                     scope.launch { titleIndex(shown.plusMonths(1)).takeIf { it >= 0 }?.let { list.animateScrollToItem(it) } }; true
                 })
-        }, state = list, flingBehavior = rememberSnapFlingBehavior(list)) {
+        }, state = list, flingBehavior = rememberSnapFlingBehavior(list, SnapPosition.Start)) {
             items(rows.size, key = { rows[it].toString() }) { index ->
                 when (val row = rows[index]) {
                     is CalendarRow.Title -> Text(row.month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)),
