@@ -15,7 +15,7 @@ import org.freeperiod.app.ui.theme.*
 
 object AppLinks {
     const val PRIVACY_URL = "https://freeperiod.org/privacy"
-    const val SOURCE_URL = "https://github.com/freeperiod/freeperiod"
+    const val SOURCE_URL = "https://github.com/pavoras/freeperiod"
 }
 
 @Composable
