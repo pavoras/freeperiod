@@ -116,7 +116,7 @@ fun SettingsRoute(container: AppContainer) {
                 } ?: RemindersScreen(trackingState.data.reminders, ::saveReminder, {}, {}, {}, back)
                 SettingsPage.DAY_ENTRY -> DayEntrySettingsScreen(trackingState.data, container.clock(), back,
                     { key, hidden, order -> tracking.override(key, hidden, order) }, { tracking.reorder(it) },
-                    { name, category -> tracking.category(name, category) }, { tracking.archive(it) },
+                    { name, icon, category -> tracking.category(name, icon, category) }, { tracking.archive(it) },
                     { name, icon, category, symptoms -> tracking.item(name, icon, category, symptoms, context.getString(R.string.entry_symptoms)) })
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back)
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },

@@ -53,9 +53,9 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
         keys.forEachIndexed { index, key -> repository.setUiOverride(UiOverride(key,
             mutable.value.data.overrides.find { it.key == key }?.hidden ?: false, index)) }
     }
-    fun category(name: String, existing: CustomCategory? = null) = write {
-        if (existing == null) repository.addCustomCategory(name, sortOrder = 100 + mutable.value.data.customCategories.size)
-        else repository.updateCustomCategory(existing.copy(name = name))
+    fun category(name: String, icon: String, existing: CustomCategory? = null) = write {
+        if (existing == null) repository.addCustomCategory(name, icon, sortOrder = 100 + mutable.value.data.customCategories.size)
+        else repository.updateCustomCategory(existing.copy(name = name, iconKey = icon))
     }
     fun archive(category: CustomCategory) = write { repository.updateCustomCategory(category.copy(archived = true)) }
     fun item(name: String, icon: String, categoryId: Long?, symptoms: Boolean, categoryName: String) = write {

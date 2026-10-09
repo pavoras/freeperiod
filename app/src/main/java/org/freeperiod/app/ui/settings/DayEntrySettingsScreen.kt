@@ -38,7 +38,7 @@ internal fun builtInItems(key: String): List<Pair<String, Int>> = when (key) {
 @Composable
 fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Unit,
     onOverride: (String, Boolean, Int) -> Unit, onReorder: (List<String>) -> Unit,
-    onCategory: (String, CustomCategory?) -> Unit, onArchive: (CustomCategory) -> Unit,
+    onCategory: (String, String, CustomCategory?) -> Unit, onArchive: (CustomCategory) -> Unit,
     onItem: (String, String, Long?, Boolean) -> Unit) {
     val state = dayEntryState(data, today, today)
     val categories = entryCategories(state, includeHidden = true)
@@ -69,7 +69,8 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
             Column {
                 Row(Modifier.fillMaxWidth().clickable(enabled = canEdit && !reorder) { expanded = if (open) "" else category.key }
                     .heightIn(min = 64.dp).padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(painterResource(category.icon), null, Modifier.size(24.dp), tint = if (category.hidden) t.muted else t.ink)
                     Column(Modifier.weight(1f)) {
                         Text(title, style = MaterialTheme.typography.bodyLarge, color = if (category.hidden) t.muted else t.ink)
                         if (itemKeys.isNotEmpty()) {
@@ -126,14 +127,15 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     } }
     if (categoryDialog) {
         var name by rememberSaveable(categoryEditor?.id) { mutableStateOf(categoryEditor?.name.orEmpty()) }
-        AlertDialog(containerColor = LocalDaylight.current.surface, onDismissRequest = { categoryDialog = false }, title = { Text(stringResource(if (categoryEditor == null) R.string.add_category else R.string.rename_category)) },
-            text = { SettingsTextField(name, { name = it }, stringResource(R.string.category_name)) },
-            confirmButton = { TextButton(enabled = name.isNotBlank(), onClick = { onCategory(name, categoryEditor); categoryDialog = false }) { Text(stringResource(R.string.settings_save)) } },
-            dismissButton = { TextButton(onClick = { categoryDialog = false }) { Text(stringResource(R.string.cancel)) } })
+        var icon by rememberSaveable(categoryEditor?.id) { mutableStateOf(categoryEditor?.iconKey ?: "tag") }
+        SettingsEditorDialog(stringResource(if (categoryEditor == null) R.string.add_category else R.string.edit_category),
+            { categoryDialog = false }, { onCategory(name.trim(), icon, categoryEditor); categoryDialog = false }, name.isNotBlank()) {
+            SettingsTextField(name, { name = it }, stringResource(R.string.category_name))
+            IconPicker(icon, { icon = it })
+        }
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun AddItemDialog(onDismiss: () -> Unit, onSave: (String, String) -> Unit) {
     var name by rememberSaveable { mutableStateOf("") }
@@ -141,12 +143,6 @@ internal fun AddItemDialog(onDismiss: () -> Unit, onSave: (String, String) -> Un
     SettingsEditorDialog(stringResource(R.string.add_entry_item), onDismiss,
         { onSave(name.trim(), icon) }, name.isNotBlank()) {
         SettingsTextField(name, { name = it }, stringResource(R.string.item_name))
-        Text(stringResource(R.string.item_icon), style = MaterialTheme.typography.titleMedium)
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(FpSpacing.compact), verticalArrangement = Arrangement.spacedBy(FpSpacing.compact)) {
-            FpIcons.itemKeys.forEachIndexed { index, key ->
-                FpChip(icon == key, { icon = key }, "", Modifier.size(FpSpacing.touch),
-                    icon = { Icon(painterResource(FpIcons.byKey.getValue(key)), stringResource(R.string.item_icon_number, index + 1)) })
-            }
-        }
+        IconPicker(icon, { icon = it })
     }
 }
