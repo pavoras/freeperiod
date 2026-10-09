@@ -11,7 +11,7 @@ body.artwork { margin: 0; padding: 48px; width: max-content; }
 }
 .feature-copy { position: absolute; left: 56px; top: 40px; width: 580px; }
 .feature .wordmark { font-size: 38px; }
-.feature h1 { font-size: 66px; line-height: 1.02; letter-spacing: -2.5px; margin: 42px 0 20px; }
+.feature h1 { font-size: 66px; line-height: 1.06; letter-spacing: -0.6px; margin: 42px 0 20px; }
 .feature p { font-size: 20px; line-height: 1.45; max-width: 440px; }
 .feature .feature-foot { position: absolute; bottom: 28px; left: 56px; margin: 0; font-size: 17px; }
 .feature-phone {
@@ -26,7 +26,7 @@ body.artwork { margin: 0; padding: 48px; width: max-content; }
 .shot::before { content: ""; position: absolute; inset: 370px 56px 26px; background: #f9ded3; border-radius: 4px 96px 4px 96px; }
 .shot header { position: absolute; top: 56px; left: 72px; right: 72px; }
 .shot .wordmark { font-size: 32px; }
-.shot h2 { font-size: 64px; line-height: 1.03; letter-spacing: -2px; margin: 24px 0 14px; }
+.shot h2 { font-size: 64px; line-height: 1.06; letter-spacing: -0.6px; margin: 24px 0 14px; }
 .shot .caption { font-size: 28px; line-height: 1.35; max-width: 860px; margin: 0; }
 .phone-frame {
   position: absolute; top: 406px; left: 50%; transform: translateX(-50%);
