@@ -14,7 +14,8 @@ Website: https://pavoras.github.io/freeperiod/ · Privacy: https://pavoras.githu
 
 ## Development
 
-- Spec: `docs/superpowers/specs/2026-10-07-freeperiod-design.md`
+- Project state and handover: `docs/handover.md`
+- Spec: `docs/superpowers/specs/2026-10-07-freeperiod-design.md` (+ rev 2 `2026-10-08-freeperiod-v1-scope-2.md`)
 - Plan: `docs/superpowers/plans/2026-10-07-freeperiod-v1.md`
 - Build/check: `powershell -File tools\check.ps1 -Schnell` (or `-Voll`)
 - Store artwork: `python tools/render-store.py` (renders `store/*.html` to `store/png/`)
