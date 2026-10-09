@@ -38,22 +38,13 @@ class TodayScreenTest {
         compose.onNodeWithText("Not a medical device").assertDoesNotExist()
     }
 
-    @Test fun pastWindowHasCalendarMarksButNoCardLineOrInfoButton() {
-        val state = todayFixture("fertile", LocalDate.of(2026, 4, 20))
-        assertTrue(requireNotNull(state.fertileWindow).endInclusive < state.today)
-        compose.setContent { FreePeriodTheme { TodayScreen(state, {}, {}, {}, {}, {}, {}) } }
-        compose.waitForIdle()
-        compose.onNodeWithContentDescription("About this calendar estimate").assertDoesNotExist()
-        compose.onNodeWithText("Higher chance of pregnancy: ", substring = true).assertDoesNotExist()
-    }
-
-    @Test fun upcomingWindowShowsDatesAndCalendarEstimate() {
+    @Test fun windowIsExplainedInTheLegendNotInTheCard() {
         val state = todayFixture("fertile", LocalDate.of(2026, 4, 6))
-        assertTrue(state.today < requireNotNull(state.fertileWindow).start)
         compose.setContent { FreePeriodTheme { TodayScreen(state, {}, {}, {}, {}, {}, {}) } }
         compose.waitForIdle()
-        compose.onNodeWithText("Higher chance of pregnancy: Apr 9–16 · calendar estimate").assertIsDisplayed()
-        compose.onNodeWithContentDescription("About this calendar estimate").assertExists()
+        compose.onNodeWithText("Higher chance of pregnancy: ", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Higher chance of pregnancy · calendar estimate").assertIsDisplayed()
+        compose.onNodeWithContentDescription("About this calendar estimate").assertIsDisplayed()
     }
 
     @Test fun endingSavesImmediatelyThenUndoUsesTheSavedReceipt() {

@@ -1,5 +1,7 @@
 package org.freeperiod.app.ui.today
 
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -17,7 +19,8 @@ import org.freeperiod.app.ui.theme.LocalDaylight
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean = false, higherChance: Boolean = false) {
+internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean = false, higherChance: Boolean = false,
+    onEstimateInfo: () -> Unit = {}) {
     val t = LocalDaylight.current
     val colors = todayFillColors(t)
     FlowRow(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -36,13 +39,17 @@ internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean 
                     Text(stringResource(label), style = MaterialTheme.typography.labelSmall, color = t.muted)
                 }
             }
-        if (higherChance) Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        // The only place this estimate is described; the info opens the "not a medical device" note.
+        if (higherChance) Row(Modifier.clickable(onClickLabel = stringResource(R.string.pregnancy_chance_info), onClick = onEstimateInfo),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
             Canvas(Modifier.size(12.dp)) {
                 drawLine(t.muted, Offset(3.dp.toPx(), center.y), Offset(9.dp.toPx(), center.y),
                     strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
             }
             Text(stringResource(R.string.pregnancy_chance_estimate, stringResource(R.string.pregnancy_chance_label)),
                 style = MaterialTheme.typography.labelSmall, color = t.muted)
+            Icon(painterResource(R.drawable.ic_fp_about), stringResource(R.string.pregnancy_chance_info),
+                Modifier.size(18.dp), tint = t.muted)
         }
     }
 }

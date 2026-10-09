@@ -251,7 +251,6 @@
     <string name="medical_disclaimer_note">Diese Kalenderschätzungen können falsch sein und sind nicht verlässlich. FreePeriod. dient weder zur Verhütung noch dazu, schwanger zu werden, und gibt keine medizinischen Ratschläge.</string>
     <string name="pregnancy_chance_label">Erhöhte Chance auf Schwangerschaft</string>
     <string name="pregnancy_chance_estimate">%1$s · Kalenderschätzung</string>
-    <string name="pregnancy_chance_dates">%1$s: %2$s · Kalenderschätzung</string>
     <string name="pregnancy_chance_info">Über diese Kalenderschätzung</string>
     <string name="calendar_pregnancy_chance">erhöhte Chance auf Schwangerschaft, Kalenderschätzung</string>
     <string name="show_pregnancy_chance">Tage mit erhöhter Chance auf Schwangerschaft anzeigen</string>

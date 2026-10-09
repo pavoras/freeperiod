@@ -72,7 +72,8 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                 }
             }
         }) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(bottom = 12.dp)) {
+        // One screen: only the calendar scrolls and the legend always stays visible (see OneScreenColumn).
+        OneScreenColumn(calendarMinHeight(), modifier = Modifier.fillMaxSize().padding(padding).padding(bottom = 8.dp), top = {
             Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
                 Row(Modifier.weight(1f)) {
@@ -86,12 +87,16 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
             if (state.loading) CircularProgressIndicator(Modifier.padding(24.dp))
             else {
                 TodayCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,
-                    Modifier.padding(horizontal = 12.dp), onEstimateInfo = { disclaimer = true })
-                MonthCalendar(state.month, state.days, onMonthChange, onDayClick, Modifier.padding(horizontal = 12.dp),
-                    scheduledBreak = state.prediction is PredictionState.ScheduledBreak)
+                    Modifier.padding(horizontal = 12.dp))
+            }
+        }, flex = {
+            if (!state.loading) MonthCalendar(state.month, state.days, onMonthChange, onDayClick, Modifier.padding(horizontal = 12.dp),
+                scheduledBreak = state.prediction is PredictionState.ScheduledBreak)
+        }, bottom = {
+            if (!state.loading) {
                 TodayLegend(Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     scheduledBreak = state.prediction is PredictionState.ScheduledBreak,
-                    higherChance = state.days.values.any { it.higherChance })
+                    higherChance = state.fertileWindow != null, onEstimateInfo = { disclaimer = true })
             }
             state.error?.let { error ->
                 val message = when (error.periodError) {
@@ -104,7 +109,7 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                 Text(stringResource(message), Modifier.padding(horizontal = 20.dp), color = MaterialTheme.colorScheme.error)
                 TextButton(onClick = onDismissError, modifier = Modifier.padding(horizontal = 12.dp)) { Text(stringResource(R.string.dismiss)) }
             }
-        }
+        })
     }
     if (disclaimer) AlertDialog(onDismissRequest = { disclaimer = false }, containerColor = t.surface, textContentColor = t.ink,
         text = { MedicalDisclaimer(Modifier.verticalScroll(rememberScrollState())) },

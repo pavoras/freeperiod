@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.semantics.*
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.YearMonth
@@ -53,6 +54,15 @@ private fun calendarRows(months: List<YearMonth>, locale: Locale): List<Calendar
  * Free vertical scrolling through months (owner: "scroll instead of click, no snapping to whole
  * months"). A fling settles so that a row (week or month title) sits at the top edge. Opens on [month].
  */
+/** Weekday header, a month title and three week rows: below this the Today screen scrolls instead. */
+@Composable
+internal fun calendarMinHeight(): Dp {
+    val density = LocalDensity.current
+    val cell = maxOf(48.dp, 40.dp * density.fontScale)
+    val titleHeight = with(density) { maxOf(48.dp, MaterialTheme.typography.titleLarge.lineHeight.toDp() + 16.dp) }
+    return 12.dp + cell + titleHeight + cell * 3
+}
+
 @Composable
 fun MonthCalendar(
     month: YearMonth,
@@ -97,7 +107,7 @@ fun MonthCalendar(
             }
         }
         HorizontalDivider(color = t.line)
-        LazyColumn(Modifier.fillMaxWidth().height(titleHeight + cell * 6).semantics {
+        LazyColumn(Modifier.fillMaxWidth().weight(1f).semantics {
             customActions = listOf(
                 CustomAccessibilityAction(previous) {
                     val shown = rows.getOrNull(list.firstVisibleItemIndex)?.month ?: anchor

@@ -29,8 +29,7 @@ import org.freeperiod.engine.*
 
 @Composable
 fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
-    onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier,
-    onEstimateInfo: () -> Unit = {}) {
+    onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier) {
     val locale = LocalConfiguration.current.locales[0]
     val prediction = state.prediction
     val t = LocalDaylight.current
@@ -88,17 +87,6 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
                 }
                 if (state.situation.method == Method.PILL_PROGESTIN && prediction is PredictionState.Range) {
                     Text(stringResource(R.string.today_irregular_method), style = MaterialTheme.typography.bodySmall, color = t.muted)
-                }
-            }
-            state.fertileWindow?.takeIf { it.endInclusive >= state.today }?.let { window ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(R.string.pregnancy_chance_dates, stringResource(R.string.pregnancy_chance_label),
-                        formatPredictionRange(window.start, window.endInclusive, state.today, locale)),
-                        Modifier.weight(1f), style = MaterialTheme.typography.bodySmall, color = t.muted)
-                    IconButton(onClick = onEstimateInfo) {
-                        Icon(painterResource(R.drawable.ic_fp_about), stringResource(R.string.pregnancy_chance_info),
-                            Modifier.size(20.dp), tint = t.muted)
-                    }
                 }
             }
             TodayActions(stringResource(if (state.ongoingPeriodId == null) R.string.period_started else R.string.period_ended),

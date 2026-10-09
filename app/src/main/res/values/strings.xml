@@ -251,7 +251,6 @@
     <string name="medical_disclaimer_note">These calendar estimates can be wrong and are not reliable. FreePeriod. is not for contraception, help getting pregnant, or medical advice.</string>
     <string name="pregnancy_chance_label">Higher chance of pregnancy</string>
     <string name="pregnancy_chance_estimate">%1$s · calendar estimate</string>
-    <string name="pregnancy_chance_dates">%1$s: %2$s · calendar estimate</string>
     <string name="pregnancy_chance_info">About this calendar estimate</string>
     <string name="calendar_pregnancy_chance">higher chance of pregnancy, calendar estimate</string>
     <string name="show_pregnancy_chance">Show days with a higher chance of pregnancy</string>
