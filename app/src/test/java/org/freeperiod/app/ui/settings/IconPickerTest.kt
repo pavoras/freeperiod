@@ -2,6 +2,7 @@ package org.freeperiod.app.ui.settings
 
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
@@ -10,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -83,7 +85,7 @@ class IconPickerTest {
 
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun picker_deDark() {
-        compose.setContent { FreePeriodTheme(darkTheme = true) { Surface { IconPicker("hot_water_bottle", {}) } } }
+        compose.setContent { FreePeriodTheme(darkTheme = true) { Surface { Column(Modifier.padding(24.dp)) { IconPicker("hot_water_bottle", {}) } } } }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/iconPicker_deDark.png")
     }
