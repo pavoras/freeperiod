@@ -171,6 +171,7 @@ private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClic
             val center = Offset(size.width / 2, size.height / 2 - 2.dp.toPx())
             val r = radius.toPx()
             drawCircle(fill, r, center)
+            if (marks.period) colors.edge?.let { drawCircle(it, r, center, style = Stroke(1.dp.toPx())) }
             if (marks.predicted) drawCircle(t.predicted, r + if (marks.period) 3.dp.toPx() else 0f, center,
                 style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))))
             // 30-60 % chance of a period day: same ring, fainter and sparser.

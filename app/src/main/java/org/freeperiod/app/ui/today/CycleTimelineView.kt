@@ -63,7 +63,9 @@ fun CycleTimelineView(timeline: CycleTimeline, modifier: Modifier = Modifier, pa
                 val top = Offset(left, y - 4.dp.toPx())
                 val dimensions = Size(right - left, 8.dp.toPx())
                 drawRoundRect(if (expected) t.accent.container else colors.fill, top, dimensions, CornerRadius(4.dp.toPx()))
-                if (expected) drawRoundRect(t.accent.periodBorder, top, dimensions, CornerRadius(4.dp.toPx()), style = Stroke(1.dp.toPx()))
+                (if (expected) t.accent.periodBorder else colors.edge)?.let {
+                    drawRoundRect(it, top, dimensions, CornerRadius(4.dp.toPx()), style = Stroke(1.dp.toPx()))
+                }
             }
             timeline.expectedPeriodRest?.let { segment(it, true) }
             timeline.recordedPeriod?.let { segment(it, false) }

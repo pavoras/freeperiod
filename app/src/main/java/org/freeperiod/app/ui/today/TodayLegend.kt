@@ -31,7 +31,7 @@ internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean 
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Canvas(Modifier.size(12.dp)) {
                         when (label) {
-                            R.string.legend_period -> drawCircle(colors.fill)
+                            R.string.legend_period -> { drawCircle(colors.fill); colors.edge?.let { drawCircle(it, style = Stroke(1.dp.toPx())) } }
                             R.string.legend_possible -> drawCircle(t.predicted.copy(alpha = 0.55f), style = Stroke(1.5.dp.toPx(),
                                 pathEffect = PathEffect.dashPathEffect(floatArrayOf(1.dp.toPx(), 2.5.dp.toPx()))))
                             R.string.legend_today -> drawCircle(t.accent.todayRing, style = Stroke(1.5.dp.toPx()))

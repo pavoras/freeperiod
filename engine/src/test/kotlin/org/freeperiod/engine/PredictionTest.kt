@@ -111,7 +111,14 @@ class PredictionTest {
     @Test fun moreSpreadKeepsTheSameDaysButFewerAreLikely() {
         val chances = periodChances(PredictionState.Range(d("05-26"), d("06-01"), Basis.HISTORY, 4, 5, 11, 29, 2.9652))
         assertEquals(listOf(d("05-31")), chances.at(PeriodChance.LIKELY))
-        assertEquals(days("05-28", "06-03") - d("05-31") + days("06-26", "07-02"), chances.at(PeriodChance.POSSIBLE))
+        assertEquals(days("05-28", "06-03") - d("05-31") + days("06-24", "07-04"), chances.at(PeriodChance.POSSIBLE))
+    }
+
+    @Test fun shortPeriodsWithWideSpreadStillShowABroadPeriodAfterNext() {
+        // 3-day periods, cycles varying by a few days: no day of the period after next reaches 30 %.
+        val chances = periodChances(PredictionState.Range(d("11-01"), d("11-07"), Basis.HISTORY, 6, 3, 3, 28, 2.9652))
+        assertEquals(days("11-03", "11-07") + days("11-30", "12-06"), chances.at(PeriodChance.POSSIBLE))
+        assertTrue(chances.at(PeriodChance.LIKELY).isEmpty())
     }
 
     @Test fun typedLengthAloneMarksOnlyTheNextPeriod() {

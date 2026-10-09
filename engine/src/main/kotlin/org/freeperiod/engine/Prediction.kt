@@ -110,7 +110,8 @@ enum class PeriodChance { POSSIBLE, LIKELY }
  * Calendar days of the next period and, when logged cycles back it, the one after: the start is spread
  * normally around the middle of the range, each start covers the typical period length, and a day is
  * LIKELY from a 60 % chance of being a period day, POSSIBLE from 30 %. Two cycles add their variances,
- * so the period after next uses spread × √2. When no day reaches 30 %, the start range stays POSSIBLE.
+ * so the period after next uses spread × √2 and, as the rough one, counts as POSSIBLE from 20 %.
+ * When no day of the next period reaches 30 %, its start range stays POSSIBLE.
  */
 fun periodChances(state: PredictionState): Map<LocalDate, PeriodChance> {
     if (state !is PredictionState.Range) return emptyMap()
@@ -119,11 +120,11 @@ fun periodChances(state: PredictionState): Map<LocalDate, PeriodChance> {
         generateSequence(state.earliest) { it.plusDays(1) }.takeWhile { it <= state.latest }.associateWith { PeriodChance.POSSIBLE }
     }
     val following = if (state.basis == Basis.USER_ENTERED) emptyMap()
-        else periodDayChances(centre.plusDays(state.cycleLength.toLong()), state.spread * sqrt(2.0), state.periodLength)
+        else periodDayChances(centre.plusDays(state.cycleLength.toLong()), state.spread * sqrt(2.0), state.periodLength, possibleFrom = 0.2)
     return following + next
 }
 
-private fun periodDayChances(centre: LocalDate, spread: Double, length: Int): Map<LocalDate, PeriodChance> {
+private fun periodDayChances(centre: LocalDate, spread: Double, length: Int, possibleFrom: Double = 0.3): Map<LocalDate, PeriodChance> {
     val reach = ceil(spread * 4).toInt()
     val weights = (-reach..reach).map { exp(-(it * it) / (2 * spread * spread)) }
     val total = weights.sum()
@@ -132,7 +133,7 @@ private fun periodDayChances(centre: LocalDate, spread: Double, length: Int): Ma
         val chance = (offset - length + 1..offset).sumOf { weights.getOrElse(it + reach) { 0.0 } } / total
         val level = when {
             chance >= 0.6 -> PeriodChance.LIKELY
-            chance >= 0.3 -> PeriodChance.POSSIBLE
+            chance >= possibleFrom -> PeriodChance.POSSIBLE
             else -> null
         }
         level?.let { centre.plusDays(offset.toLong()) to it }

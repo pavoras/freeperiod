@@ -15,16 +15,17 @@ class TodayFillTest {
             assertTrue("$accent dark=$dark period day", contrast(colors.onFill, colors.fill) >= 3.0)
         }
     }
-    @Test fun borderlessFillsAndTheirTextMeetContrastForAllAccentsAndModes() {
+    @Test fun todayUsesTheSameAccentAsEveryScreenAndAnEdgeCarriesTheContrastWhenNeeded() {
         Accent.entries.forEach { accent ->
             listOf(false, true).forEach { dark ->
                 val t = daylightTokens(accent, dark)
                 val colors = todayFillColors(t)
+                assertEquals("$accent dark=$dark same accent", t.accent.periodFill, colors.fill)
                 for (surface in listOf(t.background, t.surface)) {
-                    assertTrue("$accent dark=$dark fill", contrast(colors.fill, surface) >= 3.0)
+                    val visible = contrast(colors.fill, surface) >= 3.0 || colors.edge?.let { contrast(it, surface) >= 3.0 } == true
+                    assertTrue("$accent dark=$dark marker visible", visible)
                 }
                 assertTrue("$accent dark=$dark text", contrast(colors.onFill, colors.fill) >= 4.5)
-                if (dark) assertEquals(t.accent.periodFill, colors.fill)
             }
         }
     }

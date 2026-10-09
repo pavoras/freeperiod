@@ -55,6 +55,14 @@ class AccentScreenshotTest {
         compose.onRoot().captureRoboImage("src/test/screenshots/settings/settingsAppearance_deLargeDark.png")
     }
 
+    @Test @Config(sdk = [35], qualifiers = "w360dp-h800dp-night-xxhdpi")
+    fun settingsAppearance_inkDark() {
+        compose.setContent { FreePeriodTheme(darkTheme = true) { AppearanceScreen(Accent.INK, {}, {}) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Ink").assertIsSelected()
+        compose.onRoot().captureRoboImage("src/test/screenshots/settings/settingsAppearance_inkDark.png")
+    }
+
     @Test fun dayEntry_coral_enLight() = day(Accent.CORAL)
     @Test fun dayEntry_plum_enLight() = day(Accent.PLUM)
     @Test fun dayEntry_sage_enLight() = day(Accent.SAGE)
