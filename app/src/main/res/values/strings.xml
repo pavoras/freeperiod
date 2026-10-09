@@ -7,16 +7,20 @@
     <string name="onboarding_continue">Continue</string>
     <string name="day_entry">Day entry</string>
     <string name="back">Back</string>
-    <string name="cycle_day">Cycle day %1$d</string>
     <string name="today_welcome">Welcome! Tap below when your period starts.</string>
     <string name="today_need_more">Log your next period to see a prediction</string>
     <string name="today_range">Next period likely %1$s</string>
     <string name="today_varies">Your cycles vary a lot (%1$d–%2$d days)</string>
-    <string name="today_range_passed">Your expected range has passed (%1$d days ago)</string>
+    <plurals name="today_range_passed">
+        <item quantity="one">Your expected range has passed (%1$d day ago)</item>
+        <item quantity="other">Your expected range has passed (%1$d days ago)</item>
+    </plurals>
     <string name="today_paused">Predictions paused</string>
-    <string name="basis_history">based on your last %1$d cycles</string>
+    <plurals name="basis_history">
+        <item quantity="one">based on your last cycle</item>
+        <item quantity="other">based on your last %1$d cycles</item>
+    </plurals>
     <string name="period_started">Period started</string>
-    <string name="period_ended_question">Has your period ended?</string>
     <string name="log_today">Log today</string>
     <string name="pause_predictions">Pause predictions</string>
     <string name="previous_month">Previous month</string>
@@ -26,7 +30,6 @@
     <string name="calendar_logged">logged</string>
     <string name="calendar_today">today</string>
     <string name="open_day">Open day entry</string>
-    <string name="confirm_period_end">Mark %1$s as the last day of your period?</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
     <string name="got_it">Got it</string>
@@ -37,11 +40,11 @@
     <string name="error_period_end_future">Choose today or an earlier end date.</string>
     <string name="error_storage">Your data could not be loaded or saved. Please try again.</string>
     <string name="history_averages">Your averages</string>
-    <string name="history_need_cycle">Log another period to see your cycle length.</string>
     <string name="history_need_period">No completed periods yet.</string>
-    <string name="history_cycle_length">Cycle length: %1$s days</string>
-    <string name="history_period_length">Period length: %1$s days</string>
-    <string name="history_period_basis">based on %1$d completed periods</string>
+    <plurals name="history_period_basis">
+        <item quantity="one">based on %1$d completed period</item>
+        <item quantity="other">based on %1$d completed periods</item>
+    </plurals>
     <string name="history_empty">Log your periods to see your cycle history.</string>
     <string name="history_cycles">Your cycles</string>
     <string name="history_cycle_days">%1$d-day cycle</string>
@@ -55,7 +58,10 @@
     <string name="history_use_predictions">Use for predictions</string>
     <string name="history_toggle_label">Use cycle starting %1$s for predictions</string>
     <string name="history_symptoms">Logged symptoms</string>
-    <string name="history_symptom_basis">in your last %1$d completed cycles</string>
+    <plurals name="history_symptom_basis">
+        <item quantity="one">in your last completed cycle</item>
+        <item quantity="other">in your last %1$d completed cycles</item>
+    </plurals>
     <string name="history_no_symptoms">No symptoms logged in these cycles.</string>
     <plurals name="history_symptom_count">
         <item quantity="one">%2$s: %1$d day</item>
@@ -156,7 +162,6 @@
     <string name="restore_choose_file">Choose backup file</string>
     <string name="restore_file_selected">Backup file selected</string>
     <string name="restore_read">Read backup</string>
-    <string name="restore_summary">%1$d periods, %2$d days logged</string>
     <string name="restore_replace">Replace all data</string>
     <string name="restore_replace_warning">Restoring replaces all periods, day entries, tags and cycle settings on this phone. This cannot be undone.</string>
     <string name="restore_not_backup">This is not a FreePeriod. backup file.</string>
@@ -195,7 +200,10 @@
     <string name="reminder_title">Reminder from FreePeriod.</string>
     <string name="reminder_period_neutral">Time for a check-in.</string>
     <string name="reminder_daily">Time for your daily check-in</string>
-    <string name="reminder_period_explicit">Your period may start in %1$d days</string>
+    <plurals name="reminder_period_explicit">
+        <item quantity="one">Your period may start tomorrow</item>
+        <item quantity="other">Your period may start in %1$d days</item>
+    </plurals>
     <string name="app_lock">App lock</string>
     <string name="lock_timeout">Lock after time in the background</string>
     <string name="lock_immediately">Immediately</string>
@@ -206,18 +214,10 @@
     <string name="unlock">Unlock</string>
     <string name="lock_auth_error">Unlocking was cancelled or could not be completed. Try again when you are ready.</string>
     <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_step">Step %1$d of 3</string>
     <string name="onboarding_welcome">Welcome to FreePeriod.</string>
     <string name="onboarding_promise">No account. No ads. No subscription.</string>
     <string name="onboarding_local">Your data stays on your phone. No internet permission.</string>
     <string name="onboarding_optional">Everything here is optional. You can add or change details later.</string>
-    <string name="onboarding_your_cycle">Your cycle</string>
-    <string name="onboarding_choose_start">Choose last period start</string>
-    <string name="onboarding_start_value">Started: %1$s</string>
-    <string name="onboarding_clear_date">Clear date</string>
-    <string name="onboarding_has_ended">Has it ended?</string>
-    <string name="onboarding_choose_end">Choose end date</string>
-    <string name="onboarding_end_value">Ended: %1$s</string>
     <string name="onboarding_reminders_optional">Reminders are off unless you choose them. Notification text is neutral by default.</string>
     <string name="onboarding_finish">Get started</string>
     <string name="onboarding_data_error">Choose a cycle length from 15 to 90 days, or “I don\'t know”. If your period has ended, choose an end date between its start and today.</string>
@@ -233,7 +233,6 @@
     <string name="accent_ink">Ink</string>
     <string name="section_expanded">Expanded</string>
     <string name="section_collapsed">Collapsed</string>
-    <string name="entry_selected_count">%1$d selected</string>
     <string name="entry_more">More</string>
     <string name="entry_less">Less</string>
     <string name="entry_note_placeholder">Anything else about today?</string>
@@ -249,7 +248,6 @@
     <string name="app_estimates">FreePeriod. is not a medical device. It is not a method of contraception, not a tool to help you get pregnant, and gives no medical advice, diagnosis or treatment. All dates are calendar estimates from your own entries and can be wrong; they are not reliable. Every cycle is different: pregnancy is possible on any day, also outside the days with a higher chance. Talk to a doctor or pharmacist about contraception, pregnancy or health questions.</string>
     <string name="medical_disclaimer_title">Not a medical device</string>
     <string name="medical_disclaimer_note">These calendar estimates can be wrong and are not reliable. FreePeriod. is not for contraception, help getting pregnant, or medical advice.</string>
-    <string name="pregnancy_chance_label">Higher chance of pregnancy</string>
     <string name="pregnancy_chance_info">About this calendar estimate</string>
     <string name="calendar_pregnancy_chance">higher chance of pregnancy, calendar estimate</string>
     <string name="show_pregnancy_chance">Show days with a higher chance of pregnancy</string>
@@ -358,9 +356,6 @@
     <string name="ovulation_negative">Negative</string>
     <string name="ovulation_positive">Positive</string>
     <string name="entry_customization_intro">Choose what appears in your day entry. Your previous entries are kept.</string>
-    <string name="move_up">Move up</string>
-    <string name="move_down">Move down</string>
-    <string name="entry_items">Items</string>
     <string name="add_entry_item">Add item</string>
     <string name="rename_category">Edit</string>
     <string name="archive_category">Archive</string>
@@ -426,10 +421,12 @@
     <string name="import_format_iso">Year/month/day (2026-04-12)</string>
     <string name="import_format_dmy">Day/month/year (12/04/2026)</string>
     <string name="import_format_mdy">Month/day/year (04/12/2026)</string>
-    <string name="import_preview">%1$d periods from %2$s to %3$s</string>
+    <plurals name="import_preview">
+        <item quantity="one">%1$d period from %2$s to %3$s</item>
+        <item quantity="other">%1$d periods from %2$s to %3$s</item>
+    </plurals>
     <string name="import_ongoing">An empty end date is imported as an ongoing period.</string>
     <string name="import_confirm">Import periods</string>
-    <string name="import_result">%1$d imported. %2$d overlapping periods skipped.</string>
     <string name="import_invalid">No valid periods found. Check the columns and dates; dates must not be in the future.</string>
     <string name="customize_day_entry">Customize day entry</string>
     <string name="feedback">Send feedback</string>
@@ -551,5 +548,21 @@
     <plurals name="cycle_measured_explained">
         <item quantity="one">FreePeriod. works this out from your logged periods – so far from your last cycle – so there is nothing to set here. To leave out an unusual cycle, open it in History.</item>
         <item quantity="other">FreePeriod. works this out from your logged periods – the middle value of your last %1$d cycles – so there is nothing to set here. To leave out an unusual cycle, open it in History.</item>
+    </plurals>
+    <plurals name="restore_periods">
+        <item quantity="one">%1$d period</item>
+        <item quantity="other">%1$d periods</item>
+    </plurals>
+    <plurals name="restore_days">
+        <item quantity="one">%1$d day logged</item>
+        <item quantity="other">%1$d days logged</item>
+    </plurals>
+    <plurals name="import_imported">
+        <item quantity="one">%1$d period imported.</item>
+        <item quantity="other">%1$d periods imported.</item>
+    </plurals>
+    <plurals name="import_skipped">
+        <item quantity="one">%1$d overlapping period skipped.</item>
+        <item quantity="other">%1$d overlapping periods skipped.</item>
     </plurals>
 </resources>

@@ -131,7 +131,7 @@ internal fun predictionText(prediction: PredictionState, today: LocalDate, local
     is PredictionState.NeedMoreData -> stringResource(R.string.today_need_more)
     is PredictionState.Range -> stringResource(R.string.today_range, formatPredictionRange(prediction.earliest, prediction.latest, today, locale))
     is PredictionState.Varies -> stringResource(R.string.today_varies, prediction.minLength, prediction.maxLength)
-    is PredictionState.RangePassed -> stringResource(R.string.today_range_passed, prediction.daysPassed)
+    is PredictionState.RangePassed -> pluralStringResource(R.plurals.today_range_passed, prediction.daysPassed, prediction.daysPassed)
     PredictionState.Paused -> stringResource(R.string.today_paused)
     is PredictionState.ScheduledBreak -> stringResource(R.string.today_scheduled_break, formatPredictionRange(prediction.range.start, prediction.range.endInclusive, today, locale))
     is PredictionState.ContinuousPill -> stringResource(R.string.today_continuous_pill)

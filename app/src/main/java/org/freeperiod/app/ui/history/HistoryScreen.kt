@@ -61,8 +61,8 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                         }
                     }
                     Column(Modifier.padding(top = 8.dp)) {
-                        if (state.eligibleCycles > 0) Text(stringResource(R.string.basis_history, state.eligibleCycles), style = MaterialTheme.typography.bodySmall)
-                        if (state.completedPeriods > 0) Text(stringResource(R.string.history_period_basis, state.completedPeriods), style = MaterialTheme.typography.bodySmall)
+                        if (state.eligibleCycles > 0) Text(pluralStringResource(R.plurals.basis_history, state.eligibleCycles, state.eligibleCycles), style = MaterialTheme.typography.bodySmall)
+                        if (state.completedPeriods > 0) Text(pluralStringResource(R.plurals.history_period_basis, state.completedPeriods, state.completedPeriods), style = MaterialTheme.typography.bodySmall)
                     }
                 }
             }
@@ -88,7 +88,7 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                 } }
             }
             if (state.phase == LifePhase.MENOPAUSE) item { MonthlySymptoms(state) }
-            else item { SymptomFrequency(state.symptomCounts, stringResource(R.string.history_symptom_basis, state.symptomCycles)) }
+            else item { SymptomFrequency(state.symptomCounts, pluralStringResource(R.plurals.history_symptom_basis, state.symptomCycles, state.symptomCycles)) }
             if (state.error) item { Text(stringResource(R.string.error_storage), color = MaterialTheme.colorScheme.error) }
         }
     }

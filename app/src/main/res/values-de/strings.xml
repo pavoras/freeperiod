@@ -7,16 +7,20 @@
     <string name="onboarding_continue">Weiter</string>
     <string name="day_entry">Tageseintrag</string>
     <string name="back">Zurück</string>
-    <string name="cycle_day">Zyklustag %1$d</string>
     <string name="today_welcome">Willkommen! Tippe unten, wenn deine Periode beginnt.</string>
     <string name="today_need_more">Trage deine nächste Periode ein, um eine Vorhersage zu sehen</string>
     <string name="today_range">Nächste Periode wahrscheinlich %1$s</string>
     <string name="today_varies">Deine Zyklen schwanken stark (%1$d–%2$d Tage)</string>
-    <string name="today_range_passed">Dein erwarteter Zeitraum ist vorbei (vor %1$d Tagen)</string>
+    <plurals name="today_range_passed">
+        <item quantity="one">Dein erwarteter Zeitraum ist vorbei (vor %1$d Tag)</item>
+        <item quantity="other">Dein erwarteter Zeitraum ist vorbei (vor %1$d Tagen)</item>
+    </plurals>
     <string name="today_paused">Vorhersagen pausiert</string>
-    <string name="basis_history">basierend auf deinen letzten %1$d Zyklen</string>
+    <plurals name="basis_history">
+        <item quantity="one">basierend auf deinem letzten Zyklus</item>
+        <item quantity="other">basierend auf deinen letzten %1$d Zyklen</item>
+    </plurals>
     <string name="period_started">Periode begonnen</string>
-    <string name="period_ended_question">Ist deine Periode vorbei?</string>
     <string name="log_today">Heute eintragen</string>
     <string name="pause_predictions">Vorhersagen pausieren</string>
     <string name="previous_month">Vorheriger Monat</string>
@@ -26,7 +30,6 @@
     <string name="calendar_logged">eingetragen</string>
     <string name="calendar_today">heute</string>
     <string name="open_day">Tageseintrag öffnen</string>
-    <string name="confirm_period_end">Den %1$s als letzten Tag deiner Periode markieren?</string>
     <string name="confirm">Bestätigen</string>
     <string name="cancel">Abbrechen</string>
     <string name="got_it">Verstanden</string>
@@ -37,11 +40,11 @@
     <string name="error_period_end_future">Wähle heute oder ein früheres Ende.</string>
     <string name="error_storage">Deine Daten konnten nicht geladen oder gespeichert werden. Versuche es bitte erneut.</string>
     <string name="history_averages">Deine Durchschnittswerte</string>
-    <string name="history_need_cycle">Trage eine weitere Periode ein, um deine Zykluslänge zu sehen.</string>
     <string name="history_need_period">Noch keine abgeschlossenen Perioden.</string>
-    <string name="history_cycle_length">Zykluslänge: %1$s Tage</string>
-    <string name="history_period_length">Periodenlänge: %1$s Tage</string>
-    <string name="history_period_basis">basierend auf %1$d abgeschlossenen Perioden</string>
+    <plurals name="history_period_basis">
+        <item quantity="one">basierend auf %1$d abgeschlossenen Periode</item>
+        <item quantity="other">basierend auf %1$d abgeschlossenen Perioden</item>
+    </plurals>
     <string name="history_empty">Trage deine Perioden ein, um deinen Zyklusverlauf zu sehen.</string>
     <string name="history_cycles">Deine Zyklen</string>
     <string name="history_cycle_days">Zyklus: %1$d Tage</string>
@@ -55,7 +58,10 @@
     <string name="history_use_predictions">Für Vorhersagen nutzen</string>
     <string name="history_toggle_label">Zyklus ab %1$s für Vorhersagen nutzen</string>
     <string name="history_symptoms">Eingetragene Symptome</string>
-    <string name="history_symptom_basis">in deinen letzten %1$d abgeschlossenen Zyklen</string>
+    <plurals name="history_symptom_basis">
+        <item quantity="one">in deinem letzten abgeschlossenen Zyklus</item>
+        <item quantity="other">in deinen letzten %1$d abgeschlossenen Zyklen</item>
+    </plurals>
     <string name="history_no_symptoms">Keine Symptome in diesen Zyklen eingetragen.</string>
     <plurals name="history_symptom_count">
         <item quantity="one">%2$s: %1$d Tag</item>
@@ -156,7 +162,6 @@
     <string name="restore_choose_file">Backup-Datei auswählen</string>
     <string name="restore_file_selected">Backup-Datei ausgewählt</string>
     <string name="restore_read">Backup lesen</string>
-    <string name="restore_summary">%1$d Perioden, %2$d Tage erfasst</string>
     <string name="restore_replace">Alle Daten ersetzen</string>
     <string name="restore_replace_warning">Die Wiederherstellung ersetzt alle Perioden, Tageseinträge, Tags und Zykluseinstellungen auf diesem Handy. Das kann nicht rückgängig gemacht werden.</string>
     <string name="restore_not_backup">Diese Datei ist kein FreePeriod.-Backup.</string>
@@ -195,7 +200,10 @@
     <string name="reminder_title">Erinnerung von FreePeriod.</string>
     <string name="reminder_period_neutral">Zeit zum Eintragen.</string>
     <string name="reminder_daily">Zeit für deinen täglichen Eintrag</string>
-    <string name="reminder_period_explicit">Deine Periode könnte in %1$d Tagen beginnen</string>
+    <plurals name="reminder_period_explicit">
+        <item quantity="one">Deine Periode könnte morgen beginnen</item>
+        <item quantity="other">Deine Periode könnte in %1$d Tagen beginnen</item>
+    </plurals>
     <string name="app_lock">App-Sperre</string>
     <string name="lock_timeout">Nach Zeit im Hintergrund sperren</string>
     <string name="lock_immediately">Sofort</string>
@@ -206,18 +214,10 @@
     <string name="unlock">Entsperren</string>
     <string name="lock_auth_error">Das Entsperren wurde abgebrochen oder konnte nicht abgeschlossen werden. Versuche es erneut, wenn du bereit bist.</string>
     <string name="onboarding_skip">Überspringen</string>
-    <string name="onboarding_step">Schritt %1$d von 3</string>
     <string name="onboarding_welcome">Willkommen bei FreePeriod.</string>
     <string name="onboarding_promise">Kein Konto. Keine Werbung. Kein Abo.</string>
     <string name="onboarding_local">Deine Daten bleiben auf deinem Handy. Keine Internetberechtigung.</string>
     <string name="onboarding_optional">Alles hier ist optional. Du kannst Angaben später ergänzen oder ändern.</string>
-    <string name="onboarding_your_cycle">Dein Zyklus</string>
-    <string name="onboarding_choose_start">Beginn der letzten Periode wählen</string>
-    <string name="onboarding_start_value">Beginn: %1$s</string>
-    <string name="onboarding_clear_date">Datum entfernen</string>
-    <string name="onboarding_has_ended">Ist sie schon beendet?</string>
-    <string name="onboarding_choose_end">Enddatum wählen</string>
-    <string name="onboarding_end_value">Ende: %1$s</string>
     <string name="onboarding_reminders_optional">Erinnerungen bleiben aus, bis du sie aktivierst. Benachrichtigungstexte sind standardmäßig neutral.</string>
     <string name="onboarding_finish">Loslegen</string>
     <string name="onboarding_data_error">Wähle eine Zykluslänge von 15 bis 90 Tagen oder „Ich weiß es nicht“. Wenn deine Periode beendet ist, wähle ein Enddatum zwischen ihrem Beginn und heute.</string>
@@ -233,7 +233,6 @@
     <string name="accent_ink">Tinte</string>
     <string name="section_expanded">Ausgeklappt</string>
     <string name="section_collapsed">Eingeklappt</string>
-    <string name="entry_selected_count">%1$d ausgewählt</string>
     <string name="entry_more">Mehr</string>
     <string name="entry_less">Weniger</string>
     <string name="entry_note_placeholder">Was möchtest du zum heutigen Tag noch festhalten?</string>
@@ -249,7 +248,6 @@
     <string name="app_estimates">FreePeriod. ist kein Medizinprodukt. Die App ist keine Verhütungsmethode, hilft dir nicht dabei, schwanger zu werden, und gibt keine medizinischen Ratschläge, Diagnosen oder Behandlungen. Alle Datumsangaben sind Kalenderschätzungen aus deinen eigenen Einträgen. Sie können falsch sein und sind nicht verlässlich. Jeder Zyklus ist anders: Eine Schwangerschaft ist an jedem Tag möglich, auch außerhalb der Tage mit erhöhter Chance. Bei Fragen zu Verhütung, Schwangerschaft oder Gesundheit sprich mit deiner Arztpraxis oder Apotheke.</string>
     <string name="medical_disclaimer_title">Kein Medizinprodukt</string>
     <string name="medical_disclaimer_note">Diese Kalenderschätzungen können falsch sein und sind nicht verlässlich. FreePeriod. dient weder zur Verhütung noch dazu, schwanger zu werden, und gibt keine medizinischen Ratschläge.</string>
-    <string name="pregnancy_chance_label">Erhöhte Chance auf Schwangerschaft</string>
     <string name="pregnancy_chance_info">Über diese Kalenderschätzung</string>
     <string name="calendar_pregnancy_chance">erhöhte Chance auf Schwangerschaft, Kalenderschätzung</string>
     <string name="show_pregnancy_chance">Tage mit erhöhter Chance auf Schwangerschaft anzeigen</string>
@@ -358,9 +356,6 @@
     <string name="ovulation_negative">Negativ</string>
     <string name="ovulation_positive">Positiv</string>
     <string name="entry_customization_intro">Wähle, was in deinem Tageseintrag erscheint. Bisherige Einträge bleiben erhalten.</string>
-    <string name="move_up">Nach oben</string>
-    <string name="move_down">Nach unten</string>
-    <string name="entry_items">Einträge</string>
     <string name="add_entry_item">Eintrag hinzufügen</string>
     <string name="rename_category">Bearbeiten</string>
     <string name="archive_category">Archivieren</string>
@@ -426,10 +421,12 @@
     <string name="import_format_iso">Jahr/Monat/Tag (2026-04-12)</string>
     <string name="import_format_dmy">Tag/Monat/Jahr (12/04/2026)</string>
     <string name="import_format_mdy">Monat/Tag/Jahr (04/12/2026)</string>
-    <string name="import_preview">%1$d Perioden vom %2$s bis %3$s</string>
+    <plurals name="import_preview">
+        <item quantity="one">%1$d Periode vom %2$s bis %3$s</item>
+        <item quantity="other">%1$d Perioden vom %2$s bis %3$s</item>
+    </plurals>
     <string name="import_ongoing">Ein leeres Enddatum wird als laufende Periode importiert.</string>
     <string name="import_confirm">Perioden importieren</string>
-    <string name="import_result">%1$d importiert. %2$d überlappende Perioden übersprungen.</string>
     <string name="import_invalid">Keine gültigen Perioden gefunden. Prüfe Spalten und Daten; Daten dürfen nicht in der Zukunft liegen.</string>
     <string name="customize_day_entry">Tageseintrag anpassen</string>
     <string name="feedback">Feedback senden</string>
@@ -551,5 +548,21 @@
     <plurals name="cycle_measured_explained">
         <item quantity="one">FreePeriod. berechnet das aus deinen eingetragenen Perioden – bisher aus deinem letzten Zyklus –, du musst hier also nichts einstellen. Einen ungewöhnlichen Zyklus kannst du im Verlauf öffnen und ausschließen.</item>
         <item quantity="other">FreePeriod. berechnet das aus deinen eingetragenen Perioden – dem mittleren Wert deiner letzten %1$d Zyklen –, du musst hier also nichts einstellen. Einen ungewöhnlichen Zyklus kannst du im Verlauf öffnen und ausschließen.</item>
+    </plurals>
+    <plurals name="restore_periods">
+        <item quantity="one">%1$d Periode</item>
+        <item quantity="other">%1$d Perioden</item>
+    </plurals>
+    <plurals name="restore_days">
+        <item quantity="one">%1$d Tag erfasst</item>
+        <item quantity="other">%1$d Tage erfasst</item>
+    </plurals>
+    <plurals name="import_imported">
+        <item quantity="one">%1$d Periode importiert.</item>
+        <item quantity="other">%1$d Perioden importiert.</item>
+    </plurals>
+    <plurals name="import_skipped">
+        <item quantity="one">%1$d überlappende Periode übersprungen.</item>
+        <item quantity="other">%1$d überlappende Perioden übersprungen.</item>
     </plurals>
 </resources>

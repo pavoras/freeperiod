@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -42,10 +43,11 @@ fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
             val first = state.periods.minOf { it.start }
             val last = state.periods.maxOf { it.end ?: it.start }
             SettingsPanel {
-                Text(stringResource(R.string.import_preview, state.periods.size, first.format(dates), last.format(dates)), style = MaterialTheme.typography.titleMedium)
+                Text(pluralStringResource(R.plurals.import_preview, state.periods.size, state.periods.size, first.format(dates), last.format(dates)), style = MaterialTheme.typography.titleMedium)
                 if (state.periods.any { it.end == null }) Text(stringResource(R.string.import_ongoing))
                 if (state.imported == null) FpButton(onConfirm, enabled = !state.busy) { Text(stringResource(R.string.import_confirm)) }
-                else Text(stringResource(R.string.import_result, state.imported, state.skipped))
+                else Text(listOfNotNull(pluralStringResource(R.plurals.import_imported, state.imported, state.imported),
+                    if (state.skipped > 0) pluralStringResource(R.plurals.import_skipped, state.skipped, state.skipped) else null).joinToString(" "))
             }
         }
         if (state.busy) CircularProgressIndicator()

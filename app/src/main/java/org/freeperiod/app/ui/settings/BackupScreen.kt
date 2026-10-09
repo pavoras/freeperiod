@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -67,7 +68,8 @@ fun BackupScreen(
         state.summary?.let { summary ->
             FpCard() {
                 Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(stringResource(R.string.restore_summary, summary.periods, summary.days), style = MaterialTheme.typography.titleMedium)
+                    Text(pluralStringResource(R.plurals.restore_periods, summary.periods, summary.periods) + ", " +
+                        pluralStringResource(R.plurals.restore_days, summary.days, summary.days), style = MaterialTheme.typography.titleMedium)
                     Text(stringResource(R.string.restore_replace_warning))
                     FpButton(onClick = { askRestore = true }, enabled = enabled) { Text(stringResource(R.string.restore_replace)) }
                     TextButton(onClick = onCancelRestore, enabled = enabled) { Text(stringResource(R.string.cancel)) }
