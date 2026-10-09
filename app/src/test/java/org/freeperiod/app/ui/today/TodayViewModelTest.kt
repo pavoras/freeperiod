@@ -52,6 +52,14 @@ class TodayViewModelTest : DatabaseTest() {
     private fun viewModel(clock: () -> java.time.LocalDate = { today }) = TodayViewModel(repository,
         SettingsStore(ApplicationProvider.getApplicationContext<Context>()), clock).also { models.put("today", it) }
 
+    @Test fun calendarMarksLikelyAndPossiblePeriodDaysForTheNextTwoPeriods() {
+        val days = todayFixture("regular").days
+        fun day(month: Int, day: Int) = java.time.LocalDate.of(2026, month, day)
+        assertEquals((29..30).map { day(4, it) } + (1..3).map { day(5, it) } + (27..31).map { day(5, it) },
+            days.filterValues { it.predicted }.keys.sorted())
+        assertEquals(listOf(day(4, 28), day(5, 4), day(5, 26), day(6, 1)), days.filterValues { it.possible }.keys.sorted())
+    }
+
     @Test fun todayRecomputesOnResume() = runTest {
         repository.addPeriod(today.minusDays(10), today.minusDays(6)).getOrThrow()
         var date = today

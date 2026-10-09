@@ -52,6 +52,6 @@ class CustomizationTest : DatabaseTest() {
         val item = repository.addTag("Walk", category.id)
         repository.saveDayLog(DayLog(today, tagIds = setOf(item.id)))
         val data = repository.snapshot()
-        assertTrue(CsvExport.days(data.dayLogs, data.tags, data.customCategories).contains("Movement:Walk"))
+        assertTrue(CsvExport.export(data.periods, data.dayLogs, data.tags, data.customCategories, today).contains("Movement:Walk"))
     }
 }

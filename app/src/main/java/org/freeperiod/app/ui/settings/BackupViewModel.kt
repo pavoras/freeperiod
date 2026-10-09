@@ -139,8 +139,8 @@ class BackupViewModel(
         val data = repository.snapshot()
         val date = clock()
         outputs = withContext(Dispatchers.Default) {
-            listOf(Output("freeperiod-$date-days.csv", "text/csv", CsvExport.days(data.dayLogs, data.tags, data.customCategories).toByteArray()),
-                Output("freeperiod-$date-periods.csv", "text/csv", CsvExport.periods(data.periods).toByteArray()))
+            listOf(Output("freeperiod-$date.csv", "text/csv",
+                CsvExport.export(data.periods, data.dayLogs, data.tags, data.customCategories, date).toByteArray()))
         }
         csv = true
         requestOutput()

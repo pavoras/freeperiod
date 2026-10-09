@@ -65,7 +65,8 @@ class TodayScreenshotTest {
             }
         } }
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("28 April 2026, predicted period day").assertExists()
+        compose.onNodeWithContentDescription("28 April 2026, period possible").assertExists()
+        compose.onNodeWithContentDescription("29 April 2026, period likely").assertExists()
         compose.onNodeWithTag("calendar").captureRoboImage("src/test/screenshots/today/calendarPredicted_enLight.png")
     }
 

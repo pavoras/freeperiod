@@ -17,7 +17,7 @@ import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 
 data class DayMarks(val period: Boolean, val predicted: Boolean, val logged: Boolean, val today: Boolean,
-    val higherChance: Boolean = false)
+    val higherChance: Boolean = false, val possible: Boolean = false)
 
 data class TodayUiState(
     val today: LocalDate,
@@ -130,7 +130,8 @@ internal fun todayState(data: BackupData, today: LocalDate, month: YearMonth = Y
     situation: Situation = data.situation): TodayUiState {
     val periods = data.periods.filter { it.start <= today }.sortedBy { it.start }
     val prediction = predict(periods, PredictionSettings(data.settings.typicalCycleLength, data.settings.predictionsPaused), situation, today)
-    val predicted = predictedDays(prediction)
+    val chances = periodChances(prediction)
+    val breakDays = (prediction as? PredictionState.ScheduledBreak)?.range
     val window = fertileWindow(prediction, situation)
     val logged = data.dayLogs.filterNot { it.isEmpty() }.map { it.date }.toSet()
     val ongoing = periods.lastOrNull { it.end == null }
@@ -145,6 +146,7 @@ internal fun todayState(data: BackupData, today: LocalDate, month: YearMonth = Y
         fertileWindow = window,
         days = calendarMonths(YearMonth.from(today)).flatMap { shown -> (1..shown.lengthOfMonth()).map { shown.atDay(it) } }.associate { date ->
             date to DayMarks(PeriodRules.periodOn(periods, date, today) != null,
-                predicted?.contains(date) == true, date in logged, date == today, window?.contains(date) == true)
+                breakDays?.contains(date) == true || chances[date] == PeriodChance.LIKELY, date in logged, date == today,
+                window?.contains(date) == true, chances[date] == PeriodChance.POSSIBLE)
         }, loading = false)
 }

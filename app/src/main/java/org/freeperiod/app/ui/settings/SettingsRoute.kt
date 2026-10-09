@@ -117,7 +117,8 @@ fun SettingsRoute(container: AppContainer) {
                 SettingsPage.DAY_ENTRY -> DayEntrySettingsScreen(trackingState.data, container.clock(), back,
                     { key, hidden, order -> tracking.override(key, hidden, order) }, { tracking.reorder(it) },
                     { name, icon, category -> tracking.category(name, icon, category) }, { tracking.archive(it) },
-                    { name, icon, category, symptoms -> tracking.item(name, icon, category, symptoms, context.getString(R.string.entry_symptoms)) })
+                    { name, icon, category, symptoms -> tracking.item(name, icon, category, symptoms, context.getString(R.string.entry_symptoms)) },
+                    onRestore = { tracking.restore(it) })
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back)
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
                     backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { page = SettingsPage.IMPORT })

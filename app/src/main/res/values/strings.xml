@@ -24,7 +24,7 @@
     <string name="previous_month">Previous month</string>
     <string name="next_month">Next month</string>
     <string name="calendar_period">period day</string>
-    <string name="calendar_predicted">predicted period day</string>
+    <string name="calendar_predicted">period likely</string>
     <string name="calendar_logged">logged</string>
     <string name="calendar_today">today</string>
     <string name="open_day">Open day entry</string>
@@ -167,7 +167,7 @@
     <string name="restore_invalid">The backup contains invalid or incomplete data. Your data has not changed.</string>
     <string name="restore_too_large">The backup is too large. The file limit is 20 MB.</string>
     <string name="restore_done">Backup restored. Data and cycle settings replaced.</string>
-    <string name="csv_warning">CSV files are not encrypted. Anyone with access to them can read your entries. You will choose a location for two files: days and periods.</string>
+    <string name="csv_warning">CSV files are not encrypted. Anyone with access to them can read your entries. You get one file with a row per day, readable in any spreadsheet app.</string>
     <string name="csv_saved">Both CSV files saved.</string>
     <string name="privacy_storage">Your periods, day entries, symptoms, moods, notes, tags and settings are stored on this phone only. FreePeriod. has no account or server.</string>
     <string name="privacy_offline">FreePeriod. has no internet permission, analytics or ads. The app does not send your tracking data anywhere.</string>
@@ -240,7 +240,8 @@
     <string name="entry_less">Less</string>
     <string name="entry_note_placeholder">Anything else about today?</string>
     <string name="legend_period">Period</string>
-    <string name="legend_predicted">Predicted</string>
+    <string name="legend_predicted">Likely</string>
+    <string name="legend_possible">Possible</string>
     <string name="legend_today">Today</string>
     <string name="legend_entry">Entry</string>
     <string name="history_cycle_label">Cycle length</string>
@@ -291,6 +292,7 @@
     <string name="timeline_break">Scheduled break %1$s.</string>
     <string name="timeline_range_same_month">%1$s to %2$s</string>
     <string name="timeline_range_across_months">%1$s to %2$s</string>
+    <string name="calendar_possible">period possible</string>
     <string name="calendar_scheduled_break">scheduled break</string>
     <string name="wordmark_name">FreePeriod</string>
     <string name="wordmark_stop">.</string>
@@ -537,4 +539,20 @@
     <string name="icon_plus">Plus</string>
     <string name="icon_bookmark">Bookmark</string>
     <string name="icon_pin">Place</string>
+    <!-- Settings clarity: measured cycle, lock intro, archived categories -->
+    <string name="lock_ten_minutes">10 minutes</string>
+    <string name="lock_fifteen_minutes">15 minutes</string>
+    <string name="lock_summary">Asks for your phone\'s screen lock when you open FreePeriod.</string>
+    <string name="lock_intro_title">Turn on app lock?</string>
+    <string name="lock_intro_body">When you open FreePeriod., it asks for your phone\'s screen lock – fingerprint, face, PIN, pattern or password – and again after the time you choose. Your phone checks it; FreePeriod. never sees it. While the lock is on, the app is hidden in recent apps and screenshots are blocked.</string>
+    <string name="lock_turn_on">Turn on</string>
+    <string name="typical_length_fallback">Only used until your first full cycle is logged. After that, FreePeriod. uses your own entries.</string>
+    <string name="archived_categories">Archived</string>
+    <string name="archived_categories_hint">Archived categories no longer appear in the day entry. Your past entries keep them.</string>
+    <string name="restore_category">Restore</string>
+    <string name="settings_cycle_measured">%1$d days · from your entries</string>
+    <plurals name="cycle_measured_explained">
+        <item quantity="one">FreePeriod. works this out from your logged periods – so far from your last cycle – so there is nothing to set here. To leave out an unusual cycle, open it in History.</item>
+        <item quantity="other">FreePeriod. works this out from your logged periods – the middle value of your last %1$d cycles – so there is nothing to set here. To leave out an unusual cycle, open it in History.</item>
+    </plurals>
 </resources>

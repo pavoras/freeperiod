@@ -24,7 +24,7 @@
     <string name="previous_month">Vorheriger Monat</string>
     <string name="next_month">Nächster Monat</string>
     <string name="calendar_period">Periodentag</string>
-    <string name="calendar_predicted">vorhergesagter Periodentag</string>
+    <string name="calendar_predicted">Periode wahrscheinlich</string>
     <string name="calendar_logged">eingetragen</string>
     <string name="calendar_today">heute</string>
     <string name="open_day">Tageseintrag öffnen</string>
@@ -167,7 +167,7 @@
     <string name="restore_invalid">Das Backup enthält ungültige oder unvollständige Daten. Deine Daten wurden nicht geändert.</string>
     <string name="restore_too_large">Das Backup ist zu groß. Die Dateigrenze liegt bei 20 MB.</string>
     <string name="restore_done">Backup wiederhergestellt. Daten und Zykluseinstellungen ersetzt.</string>
-    <string name="csv_warning">CSV-Dateien sind nicht verschlüsselt. Wer Zugriff darauf hat, kann deine Einträge lesen. Du wählst einen Speicherort für zwei Dateien: Tage und Perioden.</string>
+    <string name="csv_warning">CSV-Dateien sind nicht verschlüsselt. Wer Zugriff darauf hat, kann deine Einträge lesen. Du bekommst eine Datei mit einer Zeile pro Tag, lesbar in jeder Tabellen-App.</string>
     <string name="csv_saved">Beide CSV-Dateien gespeichert.</string>
     <string name="privacy_storage">Deine Perioden, Tageseinträge, Symptome, Stimmungen, Notizen, Tags und Einstellungen werden nur auf diesem Handy gespeichert. FreePeriod. hat kein Konto und keinen Server.</string>
     <string name="privacy_offline">FreePeriod. hat keine Internetberechtigung, keine Analysefunktionen und keine Werbung. Die App versendet deine Trackingdaten nicht.</string>
@@ -240,7 +240,8 @@
     <string name="entry_less">Weniger</string>
     <string name="entry_note_placeholder">Was möchtest du zum heutigen Tag noch festhalten?</string>
     <string name="legend_period">Periode</string>
-    <string name="legend_predicted">Geschätzt</string>
+    <string name="legend_predicted">Wahrscheinlich</string>
+    <string name="legend_possible">Möglich</string>
     <string name="legend_today">Heute</string>
     <string name="legend_entry">Eintrag</string>
     <string name="history_cycle_label">Zykluslänge</string>
@@ -291,6 +292,7 @@
     <string name="timeline_break">Geplante Pause vom %1$s.</string>
     <string name="timeline_range_same_month">%1$s bis %2$s</string>
     <string name="timeline_range_across_months">%1$s bis %2$s</string>
+    <string name="calendar_possible">Periode möglich</string>
     <string name="calendar_scheduled_break">geplante Pause</string>
     <string name="wordmark_name">FreePeriod</string>
     <string name="wordmark_stop">.</string>
@@ -537,4 +539,20 @@
     <string name="icon_plus">Plus</string>
     <string name="icon_bookmark">Lesezeichen</string>
     <string name="icon_pin">Ort</string>
+    <!-- Settings clarity: measured cycle, lock intro, archived categories -->
+    <string name="lock_ten_minutes">10 Minuten</string>
+    <string name="lock_fifteen_minutes">15 Minuten</string>
+    <string name="lock_summary">Fragt beim Öffnen von FreePeriod. nach der Displaysperre deines Handys.</string>
+    <string name="lock_intro_title">App-Sperre einschalten?</string>
+    <string name="lock_intro_body">Beim Öffnen fragt FreePeriod. nach der Displaysperre deines Handys – Fingerabdruck, Gesicht, PIN, Muster oder Passwort – und wieder nach der Zeit, die du auswählst. Dein Handy prüft das, FreePeriod. sieht davon nichts. Solange die Sperre an ist, ist die App in der Übersicht verborgen und Screenshots sind blockiert.</string>
+    <string name="lock_turn_on">Einschalten</string>
+    <string name="typical_length_fallback">Wird nur genutzt, bis dein erster vollständiger Zyklus eingetragen ist. Danach rechnet FreePeriod. mit deinen eigenen Einträgen.</string>
+    <string name="archived_categories">Archiviert</string>
+    <string name="archived_categories_hint">Archivierte Kategorien erscheinen nicht mehr im Tageseintrag. Deine früheren Einträge behalten sie.</string>
+    <string name="restore_category">Wiederherstellen</string>
+    <string name="settings_cycle_measured">%1$d Tage · aus deinen Einträgen</string>
+    <plurals name="cycle_measured_explained">
+        <item quantity="one">FreePeriod. berechnet das aus deinen eingetragenen Perioden – bisher aus deinem letzten Zyklus –, du musst hier also nichts einstellen. Einen ungewöhnlichen Zyklus kannst du im Verlauf öffnen und ausschließen.</item>
+        <item quantity="other">FreePeriod. berechnet das aus deinen eingetragenen Perioden – dem mittleren Wert deiner letzten %1$d Zyklen –, du musst hier also nichts einstellen. Einen ungewöhnlichen Zyklus kannst du im Verlauf öffnen und ausschließen.</item>
+    </plurals>
 </resources>

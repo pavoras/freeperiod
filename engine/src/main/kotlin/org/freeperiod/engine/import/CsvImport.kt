@@ -45,7 +45,8 @@ object CsvImport {
     private fun periods(rows: List<List<String>>, header: List<String>, start: Int, end: Int, format: CsvDateFormat): List<Period>? {
         val cycle = header.indexOf("cycleuse")
         val flow = header.indexOf("flow")
-        val bleeding = header.indexOf("bleeding")
+        // A yes/no bleeding column (also FreePeriod.'s own period_day) decides on its own; flow only without it.
+        val bleeding = header.indexOfFirst { it in setOf("bleeding", "periodday") }
         val result = mutableListOf<Period>()
         for (row in rows) {
             val from = date(row[start], format) ?: return null
@@ -55,7 +56,7 @@ object CsvImport {
                 val use = if (cycle < 0) CycleUse.AUTO else runCatching { CycleUse.valueOf(row[cycle].uppercase(Locale.ROOT)) }.getOrNull() ?: return null
                 result += Period(0, from, to, use)
             } else {
-                if (flow >= 0) {
+                if (flow >= 0 && bleeding < 0) {
                     when (row[flow].lowercase(Locale.ROOT)) {
                         "light", "medium", "heavy" -> Unit
                         "", "none", "spotting" -> continue

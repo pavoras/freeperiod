@@ -20,20 +20,23 @@ import org.freeperiod.app.ui.theme.LocalDaylight
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TodayLegend(modifier: Modifier = Modifier, scheduledBreak: Boolean = false, higherChance: Boolean = false,
-    onEstimateInfo: () -> Unit = {}) {
+    possible: Boolean = false, onEstimateInfo: () -> Unit = {}) {
     val t = LocalDaylight.current
     val colors = todayFillColors(t)
     FlowRow(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        listOf(R.string.legend_period, if (scheduledBreak) R.string.timeline_scheduled_break else R.string.legend_predicted, R.string.legend_today, R.string.legend_entry)
-            .forEachIndexed { index, label ->
+        listOfNotNull(R.string.legend_period, if (scheduledBreak) R.string.timeline_scheduled_break else R.string.legend_predicted,
+            R.string.legend_possible.takeIf { possible }, R.string.legend_today, R.string.legend_entry)
+            .forEach { label ->
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Canvas(Modifier.size(12.dp)) {
-                        when (index) {
-                            0 -> drawCircle(colors.fill)
-                            1 -> drawCircle(t.predicted, style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 2.dp.toPx()))))
-                            2 -> drawCircle(t.accent.todayRing, style = Stroke(1.5.dp.toPx()))
-                            else -> drawCircle(t.ink, radius = 2.dp.toPx())
+                        when (label) {
+                            R.string.legend_period -> drawCircle(colors.fill)
+                            R.string.legend_possible -> drawCircle(t.predicted.copy(alpha = 0.55f), style = Stroke(1.5.dp.toPx(),
+                                pathEffect = PathEffect.dashPathEffect(floatArrayOf(1.dp.toPx(), 2.5.dp.toPx()))))
+                            R.string.legend_today -> drawCircle(t.accent.todayRing, style = Stroke(1.5.dp.toPx()))
+                            R.string.legend_entry -> drawCircle(t.ink, radius = 2.dp.toPx())
+                            else -> drawCircle(t.predicted, style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 2.dp.toPx()))))
                         }
                     }
                     Text(stringResource(label), style = MaterialTheme.typography.labelSmall, color = t.muted)

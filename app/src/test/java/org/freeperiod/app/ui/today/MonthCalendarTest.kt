@@ -29,7 +29,7 @@ class MonthCalendarTest {
             }
         }
         compose.waitForIdle()
-        compose.onNodeWithContentDescription("12 April 2026, period day, predicted period day, higher chance of pregnancy, calendar estimate, logged, today")
+        compose.onNodeWithContentDescription("12 April 2026, period day, period likely, higher chance of pregnancy, calendar estimate, logged, today")
             .assertHasClickAction().performClick()
         assertEquals(date, selected)
     }

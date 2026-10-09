@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,6 +45,7 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
     var deleteDialog by rememberSaveable { mutableStateOf(false) }
     var feedbackDialog by rememberSaveable { mutableStateOf(false) }
     var timeoutDialog by rememberSaveable { mutableStateOf(false) }
+    var lockIntro by rememberSaveable { mutableStateOf(false) }
     val enabled = !state.loading && !state.writing && !recoveryBusy
     LazyColumn(Modifier.fillMaxSize().background(LocalDaylight.current.background), contentPadding = PaddingValues(FpSpacing.screen)) {
         item {
@@ -52,8 +54,10 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         item { SettingsRow(R.string.appearance, enabled, actions.appearance, stringResource(accentLabel(state.accent))) }
         if (state.loading) item { CircularProgressIndicator() }
         item {
+            // Once cycles are logged the typed length is no longer used, so show what the entries say.
             SettingsRow(R.string.typical_cycle_length, enabled, { lengthDialog = true },
-                state.typicalCycleLength?.let { stringResource(R.string.settings_cycle_days, it) }
+                state.measuredCycleLength?.let { stringResource(R.string.settings_cycle_measured, it) }
+                    ?: state.typicalCycleLength?.let { stringResource(R.string.settings_cycle_days, it) }
                     ?: stringResource(R.string.cycle_unknown))
         }
         item { SettingsSwitch(R.string.pause_predictions, state.predictionsPaused, enabled, actions.paused) }
@@ -62,7 +66,11 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         item { SettingsRow(R.string.customize_day_entry, enabled, actions.dayEntry) }
         item {
             HorizontalDivider(Modifier.padding(vertical = 12.dp))
-            SettingsSwitch(R.string.app_lock, state.device.lockEnabled, enabled && (state.device.lockEnabled || state.lockCanEnable), actions.lockEnabled)
+            SettingsSwitch(R.string.app_lock, state.device.lockEnabled, enabled && (state.device.lockEnabled || state.lockCanEnable)) {
+                if (it) lockIntro = true else actions.lockEnabled(false)
+            }
+            if (state.lockCanEnable || state.device.lockEnabled) Text(stringResource(R.string.lock_summary), Modifier.padding(bottom = 12.dp),
+                style = MaterialTheme.typography.bodySmall, color = LocalDaylight.current.muted)
             if (!state.lockCanEnable && !state.device.lockEnabled) Text(stringResource(R.string.lock_unavailable), style = MaterialTheme.typography.bodySmall)
             if (state.device.lockEnabled) SettingsRow(R.string.lock_timeout, enabled, { timeoutDialog = true }, stringResource(timeoutLabel(state.device.lockTimeout)))
         }
@@ -83,10 +91,17 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         }
         state.message?.let { label -> item { Text(stringResource(label), Modifier.padding(top = 12.dp)) } }
     }
-    if (lengthDialog) TypicalLengthDialog(state.typicalCycleLength, { lengthDialog = false }) {
+    if (lengthDialog && state.measuredCycleLength != null) AlertDialog(onDismissRequest = { lengthDialog = false },
+        title = { Text(stringResource(R.string.typical_cycle_length)) }, text = { Text(pluralStringResource(R.plurals.cycle_measured_explained, state.measuredCycles, state.measuredCycles)) },
+        confirmButton = { TextButton(onClick = { lengthDialog = false }) { Text(stringResource(R.string.got_it)) } })
+    else if (lengthDialog) TypicalLengthDialog(state.typicalCycleLength, { lengthDialog = false }) {
         lengthDialog = false
         actions.typicalLength(it)
     }
+    if (lockIntro) AlertDialog(onDismissRequest = { lockIntro = false },
+        title = { Text(stringResource(R.string.lock_intro_title)) }, text = { Text(stringResource(R.string.lock_intro_body)) },
+        confirmButton = { TextButton(onClick = { lockIntro = false; actions.lockEnabled(true) }) { Text(stringResource(R.string.lock_turn_on)) } },
+        dismissButton = { TextButton(onClick = { lockIntro = false }) { Text(stringResource(R.string.cancel)) } })
     if (csvDialog) ConfirmationDialog(R.string.export_csv, R.string.csv_warning, R.string.export_csv,
         onDismiss = { csvDialog = false }, onConfirm = { csvDialog = false; actions.csv() })
     if (feedbackDialog) FeedbackDialog { feedbackDialog = false }
@@ -137,6 +152,8 @@ private fun timeoutLabel(timeout: LockTimeout): Int = when (timeout) {
     LockTimeout.IMMEDIATELY -> R.string.lock_immediately
     LockTimeout.ONE_MINUTE -> R.string.lock_one_minute
     LockTimeout.FIVE_MINUTES -> R.string.lock_five_minutes
+    LockTimeout.TEN_MINUTES -> R.string.lock_ten_minutes
+    LockTimeout.FIFTEEN_MINUTES -> R.string.lock_fifteen_minutes
 }
 
 @Composable
@@ -148,6 +165,7 @@ private fun TypicalLengthDialog(current: Int?, onDismiss: () -> Unit, onSave: (I
         title = { Text(stringResource(R.string.typical_cycle_length)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.typical_length_fallback), style = MaterialTheme.typography.bodyMedium)
                 OutlinedTextField(value, { value = it }, singleLine = true,
                     label = { Text(stringResource(R.string.cycle_length_range)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

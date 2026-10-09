@@ -159,6 +159,7 @@ private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClic
         add(date.format(DateTimeFormatter.ofPattern("d MMMM yyyy", locale)))
         if (marks.period) add(stringResource(R.string.calendar_period))
         if (marks.predicted) add(stringResource(if (scheduledBreak) R.string.calendar_scheduled_break else R.string.calendar_predicted))
+        if (marks.possible) add(stringResource(R.string.calendar_possible))
         if (marks.higherChance) add(stringResource(R.string.calendar_pregnancy_chance))
         if (marks.logged) add(stringResource(R.string.calendar_logged))
         if (marks.today) add(stringResource(R.string.calendar_today))
@@ -171,6 +172,9 @@ private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClic
             drawCircle(fill, r, center)
             if (marks.predicted) drawCircle(t.predicted, r + if (marks.period) 3.dp.toPx() else 0f, center,
                 style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 3.dp.toPx()))))
+            // 30-60 % chance of a period day: same ring, fainter and sparser.
+            if (marks.possible) drawCircle(t.predicted.copy(alpha = 0.55f), r, center,
+                style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(1.5.dp.toPx(), 4.dp.toPx()))))
             if (marks.today) {
                 drawCircle(t.accent.todayRing, r + 2.dp.toPx(), center, style = Stroke(2.dp.toPx()))
             }

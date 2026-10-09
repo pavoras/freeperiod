@@ -2,6 +2,7 @@ package org.freeperiod.app.ui.settings
 
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.heading
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
@@ -39,7 +40,7 @@ internal fun builtInItems(key: String): List<Pair<String, Int>> = when (key) {
 fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Unit,
     onOverride: (String, Boolean, Int) -> Unit, onReorder: (List<String>) -> Unit,
     onCategory: (String, String, CustomCategory?) -> Unit, onArchive: (CustomCategory) -> Unit,
-    onItem: (String, String, Long?, Boolean) -> Unit) {
+    onItem: (String, String, Long?, Boolean) -> Unit, onRestore: (CustomCategory) -> Unit = {}) {
     val state = dayEntryState(data, today, today)
     val categories = entryCategories(state, includeHidden = true)
     var expanded by rememberSaveable { mutableStateOf("") }
@@ -121,6 +122,22 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
             }
         }
         item { FpButton({ categoryEditor = null; categoryDialog = true }, Modifier.fillMaxWidth()) { Text(stringResource(R.string.add_category)) } }
+        // Archived categories leave the day entry but keep their past entries; they can come back any time.
+        val archived = data.customCategories.filter { it.archived && it.iconKey != "builtin:symptoms" }
+        if (archived.isNotEmpty()) item {
+            Text(stringResource(R.string.archived_categories), Modifier.padding(top = 24.dp).semantics { heading() },
+                style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.archived_categories_hint), style = MaterialTheme.typography.bodySmall, color = t.muted)
+        }
+        items(archived.size, key = { "archived:${archived[it].id}" }) { index ->
+            val category = archived[index]
+            Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Icon(painterResource(FpIcons.byKey[category.iconKey] ?: R.drawable.ic_fp_tags), null, Modifier.size(24.dp), tint = t.muted)
+                Text(category.name, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = t.muted)
+                TextButton(onClick = { onRestore(category) }) { Text(stringResource(R.string.restore_category)) }
+            }
+        }
     }
     itemCategory?.let { category -> AddItemDialog({ itemCategory = null }) { name, icon ->
         onItem(name, icon, category.category?.id, category.key == "symptoms"); itemCategory = null

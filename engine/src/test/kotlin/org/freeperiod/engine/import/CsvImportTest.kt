@@ -14,7 +14,13 @@ class CsvImportTest {
     @Test fun isoStartEndAndOwnExport() {
         val periods = listOf(Period(0, LocalDate.parse("2026-01-02"), LocalDate.parse("2026-01-06"), CycleUse.EXCLUDE),
             Period(0, LocalDate.parse("2026-02-01"), null))
-        assertEquals(periods, parsed(CsvExport.periods(periods)))
+        // The own export is one file of days; an ongoing period comes back ending on the export day, and a
+        // logged day without a flow inside a period still counts because period_day decides.
+        val export = CsvExport.export(periods, listOf(org.freeperiod.engine.DayLog(LocalDate.parse("2026-01-03"),
+            mood = org.freeperiod.engine.Mood.GOOD), org.freeperiod.engine.DayLog(LocalDate.parse("2026-01-20"),
+            flow = org.freeperiod.engine.FlowLevel.LIGHT)), emptyList(), today = LocalDate.parse("2026-02-03"))
+        assertEquals(listOf(Period(0, LocalDate.parse("2026-01-02"), LocalDate.parse("2026-01-06")),
+            Period(0, LocalDate.parse("2026-02-01"), LocalDate.parse("2026-02-03"))), parsed(export))
         assertEquals(periods.first().copy(cycleUse = CycleUse.AUTO),
             parsed("Start Date,End Date\n2026-01-02,2026-01-06").single())
     }

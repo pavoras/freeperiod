@@ -16,7 +16,7 @@ import org.freeperiod.engine.ReminderKind
 
 private val Context.deviceSettings by preferencesDataStore(name = "device_settings")
 
-enum class LockTimeout { IMMEDIATELY, ONE_MINUTE, FIVE_MINUTES }
+enum class LockTimeout { IMMEDIATELY, ONE_MINUTE, FIVE_MINUTES, TEN_MINUTES, FIFTEEN_MINUTES }
 
 data class AppSettings(
     val onboardingDone: Boolean = false,

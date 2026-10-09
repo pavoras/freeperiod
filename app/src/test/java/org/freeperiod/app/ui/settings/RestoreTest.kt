@@ -89,19 +89,17 @@ class RestoreTest : DatabaseTest() {
         assertFalse(vm.state.value.awaitingDocument)
     }
 
-    @Test fun csvUsesOneSnapshotAndReportsSuccessOnlyAfterBothWrites() = runTest {
+    @Test fun csvIsOneFileFromOneSnapshotAndReportsSuccessAfterTheWrite() = runTest {
         repository.saveDayLog(DayLog(today, mood = Mood.GOOD))
         val vm = model()
         vm.exportCsv().join()
         assertNull(vm.state.value.message)
-        vm.createdDocument(uri).join()
-        assertTrue(vm.state.value.awaitingDocument)
-        assertNull(vm.state.value.message)
         repository.saveDayLog(DayLog(today, mood = Mood.BAD))
         vm.createdDocument(uri).join()
-        assertEquals(2, io.writes)
+        assertEquals(1, io.writes)
+        assertFalse(vm.state.value.awaitingDocument)
         assertEquals(R.string.csv_saved, vm.state.value.message)
-        assertTrue(io.contents.first().contains("good"))
+        assertTrue(io.contents.single().contains("good"))
     }
     @Test fun csvIncludesCustomItems() = runTest {
         val category = repository.addCustomCategory("Movement")
@@ -111,8 +109,6 @@ class RestoreTest : DatabaseTest() {
         vm.exportCsv().join()
         vm.createdDocument(uri).join()
         assertTrue(io.contents.single().contains("Movement:Walk"))
-        assertTrue(vm.state.value.awaitingDocument)
-        vm.createdDocument(uri).join()
         assertEquals(R.string.csv_saved, vm.state.value.message)
     }
 

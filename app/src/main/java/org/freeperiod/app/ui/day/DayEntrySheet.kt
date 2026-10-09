@@ -3,6 +3,9 @@ package org.freeperiod.app.ui.day
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -60,6 +63,9 @@ fun DayEntrySheet(
     var dischargeOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
     var tagsOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
     var noteOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
+    var focusNote by remember { mutableStateOf(false) }
+    val list = rememberLazyListState()
+    val noteFocus = remember { FocusRequester() }
     var customOpen by rememberSaveable(state.date.toEpochDay()) { mutableStateOf("") }
     var moreSymptoms by rememberSaveable(state.date.toEpochDay()) { mutableStateOf(false) }
     val tones = LocalDaylight.current
@@ -103,7 +109,7 @@ fun DayEntrySheet(
         // No swipe-to-close: it was easy to trigger by accident while scrolling. The X button closes.
         containerColor = tones.surface, sheetGesturesEnabled = false, dragHandle = null) {
         Scaffold(containerColor = tones.surface, snackbarHost = { SnackbarHost(snackbar) }, modifier = Modifier.fillMaxHeight()) { padding ->
-            LazyColumn(Modifier.fillMaxSize().padding(padding).imePadding(),
+            LazyColumn(Modifier.fillMaxSize().padding(padding).imePadding(), state = list,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 item {
@@ -174,14 +180,22 @@ fun DayEntrySheet(
                                 if (dischargeOpen) Choices(null, Discharge.entries.filter { state.itemVisible("discharge", it.name) }, state.log.discharge, editable, ::dischargeLabel, actions.discharge)
                             }
                             "note" -> {
-                                FpSectionRow(category.icon, stringResource(category.label), notePreview(note).ifBlank { stringResource(R.string.entry_none) }, noteOpen) { noteOpen = !noteOpen }
+                                FpSectionRow(category.icon, stringResource(category.label), notePreview(note).ifBlank { stringResource(R.string.entry_none) }, noteOpen) { noteOpen = !noteOpen; focusNote = noteOpen }
                                 if (noteOpen) TextField(value = note, onValueChange = {
                                     if (it.length <= 2000 || it.length < note.length) { note = it; noteDirty = true; actions.note(it) }
                                 }, placeholder = { Text(stringResource(R.string.entry_note_placeholder)) }, enabled = editable,
-                                    modifier = Modifier.fillMaxWidth().testTag("entry-note"), minLines = 3, shape = FpShapes.button,
+                                    modifier = Modifier.fillMaxWidth().focusRequester(noteFocus).testTag("entry-note"), minLines = 3, shape = FpShapes.button,
                                     colors = TextFieldDefaults.colors(focusedContainerColor = tones.accent.container, unfocusedContainerColor = tones.accent.container,
                                         focusedTextColor = tones.accent.onContainer, unfocusedTextColor = tones.accent.onContainer,
                                         focusedPlaceholderColor = tones.accent.onContainer, unfocusedPlaceholderColor = tones.accent.onContainer))
+                                // Opening the note: scroll it to the top (the sheet's end stops it) and type right away;
+                                // the list keeps the focused field in view while the keyboard shrinks it.
+                                if (noteOpen) LaunchedEffect(focusNote) {
+                                    if (!focusNote) return@LaunchedEffect
+                                    list.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "note" }?.let { list.animateScrollToItem(it.index) }
+                                    noteFocus.requestFocus()
+                                    focusNote = false
+                                }
                             }
                             "ovulation_test" -> Choices(category.label, OvulationTest.entries.filter { state.itemVisible("ovulation_test", it.name) },
                                 state.log.ovulationTest, editable, { if (it == OvulationTest.POSITIVE) R.string.ovulation_positive else R.string.ovulation_negative }, actions.ovulationTest)

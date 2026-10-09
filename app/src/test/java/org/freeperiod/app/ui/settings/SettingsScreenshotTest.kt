@@ -41,6 +41,6 @@ class SettingsScreenshotTest : SettingsScreenshotFixture() {
     }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun main_deDark() = capture("settings/main_deDark", "Einstellungen", Locale.GERMANY, dark = true) {
-        SettingsScreen(SettingsUiState(28, loading = false, lockCanEnable = true), SettingsActions())
+        SettingsScreen(SettingsUiState(28, loading = false, lockCanEnable = true, measuredCycleLength = 29, measuredCycles = 5), SettingsActions())
     }
 }

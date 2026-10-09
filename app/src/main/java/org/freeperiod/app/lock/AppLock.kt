@@ -16,6 +16,8 @@ fun shouldLock(enabled: Boolean, coldStart: Boolean, backgroundedAtMs: Long?, no
         LockTimeout.IMMEDIATELY -> 0L
         LockTimeout.ONE_MINUTE -> 60_000L
         LockTimeout.FIVE_MINUTES -> 300_000L
+        LockTimeout.TEN_MINUTES -> 600_000L
+        LockTimeout.FIFTEEN_MINUTES -> 900_000L
     }
     return nowMs - backgroundedAtMs >= duration
 }

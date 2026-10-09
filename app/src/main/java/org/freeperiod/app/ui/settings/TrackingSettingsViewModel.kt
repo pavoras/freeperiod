@@ -58,6 +58,7 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
         else repository.updateCustomCategory(existing.copy(name = name, iconKey = icon))
     }
     fun archive(category: CustomCategory) = write { repository.updateCustomCategory(category.copy(archived = true)) }
+    fun restore(category: CustomCategory) = write { repository.updateCustomCategory(category.copy(archived = false)) }
     fun item(name: String, icon: String, categoryId: Long?, symptoms: Boolean, categoryName: String) = write {
         val categories = repository.snapshot().customCategories
         var backingName = categoryName

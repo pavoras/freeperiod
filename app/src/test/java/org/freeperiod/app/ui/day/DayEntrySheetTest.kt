@@ -96,6 +96,18 @@ class DayEntrySheetTest {
         compose.onNodeWithText("A calm day with time outside and").assertExists()
     }
 
+    @Test fun openingTheNoteFocusesItAndScrollsToTheEnd() {
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(DayEntryUiState(today, today, loading = false), DayEntryActions(), {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Note"))
+        compose.onNodeWithText("Note").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithTag("entry-note").assertIsFocused().assertIsDisplayed()
+        compose.onNodeWithText("Clear day").assertIsDisplayed()
+    }
+
     @Test fun selectedMoodHasSelectedSemanticsAndCanBeCleared() {
         val state = mutableStateOf(DayEntryUiState(today, today, log = DayLog(today, mood = Mood.GOOD), loading = false))
         compose.setContent { FreePeriodTheme {

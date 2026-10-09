@@ -96,7 +96,9 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
             if (!state.loading) {
                 TodayLegend(Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     scheduledBreak = state.prediction is PredictionState.ScheduledBreak,
-                    higherChance = state.fertileWindow != null, onEstimateInfo = { disclaimer = true })
+                    higherChance = state.fertileWindow != null,
+                    possible = state.prediction is PredictionState.Range,
+                    onEstimateInfo = { disclaimer = true })
             }
             state.error?.let { error ->
                 val message = when (error.periodError) {

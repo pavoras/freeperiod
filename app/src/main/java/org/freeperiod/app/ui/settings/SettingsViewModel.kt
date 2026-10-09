@@ -13,6 +13,9 @@ import org.freeperiod.app.data.SettingsStore
 import org.freeperiod.app.data.AppSettings
 import org.freeperiod.app.data.LockTimeout
 import java.time.LocalTime
+import kotlin.math.roundToInt
+import org.freeperiod.engine.PeriodRules
+import org.freeperiod.engine.Stats
 import org.freeperiod.engine.backup.*
 
 data class SettingsUiState(
@@ -24,6 +27,9 @@ data class SettingsUiState(
     val message: Int? = null,
     val device: AppSettings = AppSettings(),
     val lockCanEnable: Boolean = false,
+    /** Median of the recent logged cycles, as the prediction uses it; null until one full cycle exists. */
+    val measuredCycleLength: Int? = null,
+    val measuredCycles: Int = 0,
 )
 
 class SettingsViewModel(private val repository: Repository, private val settings: SettingsStore,
@@ -34,9 +40,12 @@ class SettingsViewModel(private val repository: Repository, private val settings
 
     init {
         viewModelScope.launch {
-            combine(repository.domainSettings, settings.settings) { domain, device ->
+            combine(repository.domainSettings, settings.settings, repository.periods) { domain, device, periods ->
+                val lengths = PeriodRules.cycles(periods).filter { it.eligible }.takeLast(12).map { it.length }
                 SettingsUiState(domain.typicalCycleLength, domain.predictionsPaused, device.accent, loading = false,
-                    device = device, lockCanEnable = canLock())
+                    device = device, lockCanEnable = canLock(),
+                    measuredCycleLength = lengths.takeIf { it.isNotEmpty() }?.let { Stats.median(it.takeLast(6)).roundToInt() },
+                    measuredCycles = lengths.size)
             }.catch { mutableState.update { it.copy(loading = false, message = R.string.error_storage) } }
                 .collect { value -> mutableState.update { value.copy(writing = it.writing, message = it.message) } }
         }

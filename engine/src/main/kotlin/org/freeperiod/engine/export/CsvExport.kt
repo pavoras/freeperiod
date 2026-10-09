@@ -1,23 +1,36 @@
 package org.freeperiod.engine.export
 
+import java.time.LocalDate
 import java.util.Locale
 import org.freeperiod.engine.DayLog
 import org.freeperiod.engine.CustomCategory
 import org.freeperiod.engine.Period
 import org.freeperiod.engine.Tag
 
-/** Unencrypted RFC 4180 exports with ISO dates and stable lowercase enum names. */
+/**
+ * Unencrypted RFC 4180 export in one file: one row per period day or logged day, ISO dates and stable
+ * lowercase enum names. FreePeriod.'s own CSV import reads the period days back from `period_day`.
+ */
 object CsvExport {
-    /** Exports days in date order, symptoms by name, and referenced tag names by ID. */
-    fun days(logs: List<DayLog>, tags: List<Tag>, customCategories: List<CustomCategory> = emptyList()): String {
+    private val header = listOf("date", "period_day", "flow", "mood", "pain", "sex", "discharge", "symptoms", "tags", "note",
+        "ovulation_test", "custom_items")
+
+    /** An ongoing period counts up to [today]; items of custom categories are written as category:item. */
+    fun export(periods: List<Period>, logs: List<DayLog>, tags: List<Tag>, customCategories: List<CustomCategory> = emptyList(),
+        today: LocalDate): String {
+        val periodDays = periods.flatMap { period ->
+            generateSequence(period.start) { it.plusDays(1) }.takeWhile { it <= (period.end ?: today) }.toList()
+        }.toSet()
+        val byDate = logs.associateBy { it.date }
         val byId = tags.associateBy { it.id }
         val categoryNames = customCategories.associate { it.id to it.name }
         return buildString {
-            appendRow(listOf("date", "flow", "mood", "pain", "sex", "discharge", "symptoms", "tags", "note", "ovulation_test", "custom_items"))
-            logs.sortedBy { it.date }.forEach { log ->
+            appendRow(header)
+            (periodDays + byDate.keys).sorted().forEach { date ->
+                val log = byDate[date] ?: DayLog(date)
                 appendRow(listOf(
-                    log.date.toString(), name(log.flow), name(log.mood), name(log.pain), name(log.sex), name(log.discharge),
-                    log.symptoms.sortedBy { it.name }.joinToString(";") { name(it) },
+                    date.toString(), if (date in periodDays) "yes" else "", name(log.flow), name(log.mood), name(log.pain),
+                    name(log.sex), name(log.discharge), log.symptoms.sortedBy { it.name }.joinToString(";") { name(it) },
                     log.tagIds.sorted().mapNotNull { byId[it]?.takeIf { it.categoryId == null }?.name }.joinToString(";"), log.note.orEmpty(),
                     name(log.ovulationTest), log.tagIds.sorted().mapNotNull { id ->
                         val tag = byId[id] ?: return@mapNotNull null
@@ -27,12 +40,6 @@ object CsvExport {
                 ))
             }
         }
-    }
-
-    /** Exports inclusive period boundaries in start order with auto/include/exclude cycle use. */
-    fun periods(periods: List<Period>): String = buildString {
-        appendRow(listOf("start", "end", "cycle_use"))
-        periods.sortedBy { it.start }.forEach { appendRow(listOf(it.start.toString(), it.end?.toString().orEmpty(), name(it.cycleUse))) }
     }
 
     private fun name(value: Enum<*>?): String = value?.name?.lowercase(Locale.ROOT).orEmpty()
