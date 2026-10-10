@@ -45,6 +45,7 @@ class MigrationTest {
             execSQL("INSERT INTO day_logs VALUES (?, 'LIGHT', 'GOOD', 'CRAMPS', 'MILD', 'NONE', 'CREAMY', 'Keep this', 'NEGATIVE')", arrayOf(today.toEpochDay()))
             execSQL("INSERT INTO day_tags VALUES (?, 9)", arrayOf(today.toEpochDay()))
             execSQL("INSERT INTO ui_overrides VALUES ('item:mood:GOOD', 1, 8)")
+            execSQL("INSERT INTO ui_overrides VALUES ('category:ovulation_test', 0, 3)")
             close()
         }
         val db = Room.databaseBuilder(context, FreePeriodDatabase::class.java, "migration-v2-test")
@@ -54,14 +55,16 @@ class MigrationTest {
             val data = repository.snapshot()
             assertEquals(CustomCategory(4, "My symptoms", "builtin:symptoms", 5, false), data.customCategories.single())
             assertEquals(Tag(9, "Own symptom", categoryId = 4, iconKey = "leaf"), data.tags.single())
-            assertEquals(UiOverride("item:mood:GOOD", true, 8), data.overrides.single())
+            assertEquals(UiOverride("item:mood:GOOD", true, 8), data.overrides.single { it.key == "item:mood:GOOD" })
+            // Version 6: a reorder's "shown" for the ovulation test outside trying to conceive becomes hidden.
+            assertTrue(data.overrides.single { it.key == "category:ovulation_test" }.hidden)
             assertEquals(DayLog(today, FlowLevel.LIGHT, Mood.GOOD, setOf(Symptom.CRAMPS), Pain.MILD,
                 Sex.NONE, Discharge.CREAMY, "Keep this", setOf(9), OvulationTest.NEGATIVE), data.dayLogs.single())
-            repository.setUiOverride(data.overrides.single().copy(label = "Content", iconKey = "calm"))
+            repository.setUiOverride(data.overrides.single { it.key == "item:mood:GOOD" }.copy(label = "Content", iconKey = "calm"))
             val ownCategory = repository.addCustomCategory("Activities", singleChoice = true)
             assertTrue(repository.snapshot().customCategories.single { it.id == ownCategory.id }.singleChoice)
-            assertEquals("Content", repository.snapshot().overrides.single().label)
-            assertEquals("calm", repository.snapshot().overrides.single().iconKey)
+            assertEquals("Content", repository.snapshot().overrides.single { it.key == "item:mood:GOOD" }.label)
+            assertEquals("calm", repository.snapshot().overrides.single { it.key == "item:mood:GOOD" }.iconKey)
             // Version 4: counts per item, counted categories, pain diary flag.
             val pills = repository.addBuiltInItem("medication", "Own medicine", "pill", "Medication")
             val counted = DayLog(today.minusDays(1), tagIds = setOf(pills.id), tagCounts = mapOf(pills.id to 3))
@@ -76,7 +79,7 @@ class MigrationTest {
             repository.saveDayLog(levels)
             assertEquals(levels, repository.snapshot().dayLogs.first())
             // Version 6: chart choice per category.
-            assertNull(repository.snapshot().overrides.single().chart)
+            assertNull(repository.snapshot().overrides.single { it.key == "item:mood:GOOD" }.chart)
             repository.setUiOverride(UiOverride("category:sex", false, 5, chart = true))
             assertEquals(true, repository.snapshot().overrides.single { it.key == "category:sex" }.chart)
         } finally { db.close() }

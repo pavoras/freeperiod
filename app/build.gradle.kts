@@ -50,6 +50,12 @@ android {
     compileSdk = 36
     buildToolsVersion = "35.0.0"
 
+    // F-Droid: no Google-signed dependency blob in the APK (its scanner rejects it); Play does not need it either.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     defaultConfig {
         applicationId = "org.freeperiod.app"
         minSdk = 26

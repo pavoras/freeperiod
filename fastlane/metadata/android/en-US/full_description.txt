@@ -1,0 +1,19 @@
+Your cycle, your space.
+
+FreePeriod is a period calendar and daily diary in one. Free and open source, with no ads, no subscription and no account.
+
+• Log your period with a tap and see your cycle day at a glance – as a calendar or as a cycle ring.
+• Calendar estimates for your next two periods, based on your own entries.
+• Optional: days with a higher chance of pregnancy, shown as a plain calendar estimate.
+• Daily diary: mood, flow, pain, symptoms, discharge, tags and notes; optionally appetite, sex drive, medication and a pain diary. Rename, reorder or hide anything and add your own categories and icons.
+• History with averages, logged symptoms and charts over a week, a month, 3 months or a year.
+• A PDF summary of your entries, for example for an appointment.
+• Reminders for your period, a pill or anything personal.
+• Life phases: during pregnancy, after birth and in menopause the estimates pause and your diary stays.
+• Six accent colours, light and dark mode, English and German.
+
+Private by design
+FreePeriod has no internet permission and no analytics. Your entries stay on your phone. Optional app lock, encrypted backup files (also automatic, to a folder you choose) and CSV export – you decide where files go.
+
+Honest limits
+FreePeriod is not a medical device, not a method of contraception and not a tool to help you get pregnant. All dates are estimates from your own entries and can be wrong. For questions about contraception, pregnancy or your health, talk to a doctor or pharmacist.

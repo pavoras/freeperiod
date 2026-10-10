@@ -28,6 +28,8 @@ permission, no analytics/crash SDKs. Not a medical device, not contraception. GP
 | Plans | `docs/superpowers/plans/2026-10-07-freeperiod-v1.md`, `…-v1-part2.md` |
 | Release checklist | `docs/release.md` |
 | Owner requests | `docs/owner-requests.md` – every idea/request of the owner, recorded at once, with status |
+| F-Droid | `docs/fdroid.md` (prepared: fastlane metadata, Gradle wrapper, draft fdroiddata YAML; submission open) |
+| Supporter purchase | `docs/supporter-purchase.md` (research only, owner decides; trader status is the main consequence) |
 | Design reference | `docs/design/drafts/draft-5.png` (final), Daylight palette in `ui/theme/` |
 | Codex rounds | `aufpasser/runden/prompt-N.txt`, `runde-N.md` (jsonl/log git-ignored) |
 | Signing | upload key + properties under `%USERPROFILE%\dev-tools\keys\` – **never read or print**; pass only the path |

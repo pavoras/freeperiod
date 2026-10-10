@@ -1,0 +1,19 @@
+Dein Zyklus, dein Raum.
+
+FreePeriod ist Periodenkalender und Tagebuch in einem. Kostenlos und Open Source, ohne Werbung, Abo oder Konto.
+
+• Trage deine Periode mit einem Tipp ein und sieh deinen Zyklustag auf einen Blick – als Kalender oder als Zykluskreis.
+• Kalenderschätzungen für deine nächsten zwei Perioden, aus deinen eigenen Einträgen.
+• Optional: Tage mit erhöhter Chance auf Schwangerschaft, als reine Kalenderschätzung.
+• Tagebuch: Stimmung, Blutung, Schmerzen, Symptome, Ausfluss, Tags und Notizen; optional Appetit, Libido, Medikamente und ein Schmerztagebuch. Alles umbenennen, umsortieren oder ausblenden, eigene Kategorien und Symbole ergänzen.
+• Verlauf mit Durchschnittswerten, eingetragenen Symptomen und Graphen über eine Woche, einen Monat, 3 Monate oder ein Jahr.
+• Eine PDF-Zusammenfassung deiner Einträge, zum Beispiel für einen Termin.
+• Erinnerungen für deine Periode, eine Pille oder etwas Persönliches.
+• Lebensphasen: In der Schwangerschaft, nach der Geburt und in der Menopause pausieren die Schätzungen, dein Tagebuch bleibt.
+• Sechs Akzentfarben, hell und dunkel, Deutsch und Englisch.
+
+Privat von Anfang an
+FreePeriod hat keine Internet-Berechtigung und keine Nutzungsanalyse. Deine Einträge bleiben auf deinem Handy. Optionale App-Sperre, verschlüsselte Backups (auch automatisch, in einen Ordner deiner Wahl) und CSV-Export – du entscheidest, wo Dateien landen.
+
+Klare Grenzen
+FreePeriod ist kein Medizinprodukt, kein Verhütungsmittel und kein Hilfsmittel, um schwanger zu werden. Alle Daten sind Schätzungen aus deinen eigenen Einträgen und können falsch sein. Bei Fragen zu Verhütung, Schwangerschaft oder Gesundheit wende dich an eine Ärztin, einen Arzt oder eine Apotheke.

@@ -39,13 +39,16 @@ class CustomizationV3Test : DatabaseTest() {
 
     @Test fun painDiaryCreatesItsCategoriesOnceAndNeverTouchesEntries() = runBlocking {
         val sets = listOf(ItemSetCategory("pain_diary:where", "Where it hurts", "person", listOf("Back" to "backache")),
-            ItemSetCategory("pain_diary:daily", "Daily life", "home", listOf("Rested in bed" to "bed")))
+            ItemSetCategory("pain_diary:daily", "Daily life", "home", listOf("Rested in bed" to "bed"), hidden = true))
         repository.addCustomCategory("Daily life")
         repository.turnOnPainDiary(sets, listOf(UiOverride("category:medication", false, 9)))
         var data = repository.snapshot()
         assertTrue(data.situation.painDiary)
         assertFalse(data.overrides.single { it.key == "category:medication" }.hidden)
-        assertEquals("Daily life 2", data.customCategories.single { it.itemSet == "pain_diary:daily" }.name)
+        val daily = data.customCategories.single { it.itemSet == "pain_diary:daily" }
+        assertEquals("Daily life 2", daily.name)
+        assertTrue(data.overrides.single { it.key == "customCategory:${daily.id}" }.hidden)
+        assertFalse(data.overrides.any { it.key == "customCategory:${data.customCategories.single { it.itemSet == "pain_diary:where" }.id}" })
         assertEquals(listOf("Back", "Rested in bed"), data.tags.map { it.name })
         val back = data.tags.first()
         repository.saveDayLog(DayLog(today, tagIds = setOf(back.id)))
@@ -134,5 +137,19 @@ class CustomizationV3Test : DatabaseTest() {
         repository.importCsv(csv, null)
         repository.importCsv(csv, null)
         assertEquals(before, repository.snapshot())
+    }
+
+    @Test fun theOvulationTestSwitchMatchesTheDayEntry() = runBlocking {
+        fun ovulation(includeHidden: Boolean) = runBlocking {
+            entryCategories(dayEntryState(repository.snapshot(), today, today), includeHidden).find { it.key == "ovulation_test" }
+        }
+        assertTrue(ovulation(includeHidden = true)!!.hidden)
+        assertNull(ovulation(includeHidden = false))
+        repository.setUiOverride(UiOverride("category:ovulation_test", false, 10))
+        assertNotNull(ovulation(includeHidden = false))
+        repository.resetCustomization()
+        repository.updateSituation(Situation(phase = LifePhase.TRYING_TO_CONCEIVE))
+        assertFalse(ovulation(includeHidden = true)!!.hidden)
+        assertNotNull(ovulation(includeHidden = false))
     }
 }

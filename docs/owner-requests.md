@@ -4,6 +4,28 @@ Every idea or request Marvin writes goes here right away, before working on it, 
 while something else is in progress. Status: `[ ]` open · `[~]` in progress · `[x]` done (with commit).
 Newest round on top. Decisions that change the product also go into the spec/handover.
 
+## Round 2026-10-11 (after testing dev.54)
+
+- [x] Pain diary: "Effect on your day" (Alltag) off by default when the pain diary is turned on.
+- [x] Ovulation test is switched on in Customize but not offered in the day entry (outside "trying to conceive") →
+      the switch must match what the day entry shows.
+
+## Roadmap decisions 2026-10-11
+
+- Widget: not for now. Health Connect: not planned for now.
+- [x] PDF summary checked on the owner's phone: "sieht fantastisch aus".
+- [ ] Flo import as soon as the owner has an export file.
+- [x] Prepare F-Droid soon (owner: "sollte ja nicht viel sein") – repo prepared, see docs/fdroid.md.
+- [x] Research a supporter one-time purchase via Google Play: what changes, how it works; owner's
+      premise: only the Play connection, nothing goes to the internet, no permission needed.
+- [x] Review (not build yet): History as a second tab with a chronological list of logged days, Daylio style
+      (swipe or a switch at the top); note short, expandable after 2–3 lines. Is it a good idea / needed?
+      Reviewed: good idea, not urgent. Owner: next feature, comes with 1.2.
+- [ ] 1.2: diary list in History ("Overview | Entries" switch + swipe, one card per logged day, note 3 lines
+      then "more", tap opens the day, month headers; search on top later).
+- [ ] F-Droid and the supporter purchase in 1.1 if feasible; then prepare everything and finish the release
+      (owner, 2026-10-11).
+
 ## Round 2026-10-10 (late, after testing dev.51) – done
 
 - [x] Ring view: buttons back below the ring, stacked, as in the first dark version (owner liked that).
@@ -52,7 +74,7 @@ Newest round on top. Decisions that change the product also go into the spec/han
 
 ## Still open from earlier
 
-- [ ] Owner checks the PDF summary on a device (Robolectric can't render PdfDocument).
+- [x] Owner checks the PDF summary on a device (Robolectric can't render PdfDocument) – looks great (2026-10-11).
 - [ ] Release prep 1.1: store texts (medication log, pain diary, PDF, charts, ring), privacy pages,
       Play health declaration check (`docs/release.md`).
-- [ ] Widget (planned for 1.2).
+- Widget: not for now (owner 2026-10-11).
