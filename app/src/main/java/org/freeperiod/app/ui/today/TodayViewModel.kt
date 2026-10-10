@@ -77,7 +77,12 @@ class TodayViewModel(
     }
 
     fun startPeriodToday(): Job = mutate {
-        val period = repository.addPeriod(clock(), null).getOrThrow()
+        val today = clock()
+        // Ended today or yesterday and bleeding again: that period goes on, instead of a second one right next to it.
+        val recent = repository.snapshot().periods
+            .filter { period -> period.start <= today && period.end?.let { it >= today.minusDays(1) } == true }.maxByOrNull { it.start }
+        val period = recent?.let { repository.updatePeriod(it.copy(end = null)).getOrThrow() }
+            ?: repository.addPeriod(today, null).getOrThrow()
         mutableState.update { it.copy(startedPeriodId = period.id, endSaved = null) }
     }
 

@@ -9,6 +9,9 @@ import kotlinx.coroutines.launch
 import org.freeperiod.app.data.ItemSetCategory
 import org.freeperiod.app.data.Repository
 import org.freeperiod.app.ui.day.builtInCategories
+import org.freeperiod.app.ui.day.dayEntryState
+import org.freeperiod.app.ui.day.entryCategories
+import java.time.LocalDate
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 import org.freeperiod.engine.backup.BackupSettings
@@ -57,7 +60,9 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
     fun appearance(value: UiOverride) = write { repository.setUiOverride(value) }
     fun editItem(tag: Tag) = write { repository.updateTag(tag) }
     fun deleteItem(id: Long) = write { repository.deleteItem(id) }
-    fun reorder(keys: List<String>) = write {
+    fun reorder(keys: List<String>) = write { writeOrder(keys) }
+
+    private suspend fun writeOrder(keys: List<String>) {
         val overrides = repository.snapshot().overrides
         // A category that starts hidden (medication) stays hidden when only its place changes.
         keys.forEachIndexed { index, key -> repository.setUiOverride((overrides.find { it.key == key }
@@ -92,6 +97,14 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
         val show = keys.mapNotNull { key -> data.overrides.find { it.key == key }?.copy(hidden = false)
             ?: builtInCategories.find { "category:${it.key}" == key && it.defaultHidden }?.let { UiOverride(key, false, it.order) } }
         repository.turnOnPainDiary(categories, show)
+        // Pain, medication and the pain diary's categories stand together, where pain was.
+        val after = repository.snapshot()
+        val ordered = entryCategories(dayEntryState(after, LocalDate.ofEpochDay(0), LocalDate.ofEpochDay(0)), includeHidden = true).map { it.overrideKey }
+        val group = listOf("category:pain", "category:medication") + categories.mapNotNull { set ->
+            after.customCategories.find { it.itemSet == set.key }?.let { "customCategory:${it.id}" } }
+        val rest = ordered.filterNot { it in group }
+        val at = ordered.takeWhile { it != "category:pain" }.count { it !in group }
+        writeOrder(rest.take(at) + group + rest.drop(at))
     }
     fun item(name: String, icon: String, categoryId: Long?, field: String?, categoryName: String) = write {
         if (field != null) repository.addBuiltInItem(field, name, icon, categoryName)

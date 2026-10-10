@@ -87,6 +87,8 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                     }
                 } }
             }
+            if (state.recentMood.isNotEmpty()) item { LevelChartFor(state, "mood", moodScale.map { it.name }, state.recentMood.mapValues { moodScale.indexOf(it.value) }, icons = true) }
+            if (state.recentPain.isNotEmpty()) item { LevelChartFor(state, "pain", Pain.entries.map { it.name }, state.recentPain.mapValues { it.value.ordinal }, icons = false) }
             if (state.phase in setOf(LifePhase.PERIMENOPAUSE, LifePhase.MENOPAUSE)) item { MonthlySymptoms(state) }
             else item { SymptomFrequency(state, state.symptomCounts, state.ownSymptomCounts, pluralStringResource(R.plurals.history_symptom_basis, state.symptomCycles, state.symptomCycles)) }
             if (state.error) item { Text(stringResource(R.string.error_storage), color = MaterialTheme.colorScheme.error) }
@@ -148,6 +150,19 @@ private fun MonthlySymptoms(state: HistoryUiState) {
         }
         SymptomFrequency(state, state.monthlySymptoms[month].orEmpty(), state.monthlyOwnSymptoms[month].orEmpty(), stringResource(R.string.history_monthly_symptoms))
     }
+}
+
+/** Mood from low to high, independent of the order the user chose for the day entry. */
+private val moodScale = listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT)
+
+/** Labels and icons follow the user's renames, so the chart speaks the same words as the day entry. */
+@Composable
+private fun LevelChartFor(state: HistoryUiState, field: String, scale: List<String>, values: Map<LocalDate, Int>, icons: Boolean) {
+    val items = builtInEntryItems(field)
+    val levels = scale.map { name -> items.first { it.name == name }.let { entryAppearance(it.key, it.label, it.icon, state.overrides) } }
+    val category = builtInCategories.first { it.key == field }
+    val title = entryAppearance(category.overrideKey, category.label, category.icon, state.overrides).label
+    LevelChart(title, levels, values, state.recentPeriodDays, state.today, icons)
 }
 
 @Composable

@@ -34,6 +34,10 @@ data class HistoryUiState(
     val customCategories: List<CustomCategory> = emptyList(),
     val ownSymptomCounts: Map<Long, Int> = emptyMap(),
     val monthlyOwnSymptoms: Map<YearMonth, Map<Long, Int>> = emptyMap(),
+    /** Last [CHART_DAYS] days: logged mood and pain, and which days were period days. */
+    val recentMood: Map<LocalDate, Mood> = emptyMap(),
+    val recentPain: Map<LocalDate, Pain> = emptyMap(),
+    val recentPeriodDays: Set<LocalDate> = emptySet(),
 )
 
 internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
@@ -47,6 +51,7 @@ internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
     val symptomCategories = data.customCategories.filter { it.builtInField() == "symptoms" }.map { it.id }.toSet()
     val ownSymptoms = data.tags.filter { it.categoryId in symptomCategories }.map { it.id }.toSet()
     fun ownCounts(logs: List<DayLog>) = logs.flatMap { it.tagIds.intersect(ownSymptoms) }.groupingBy { it }.eachCount()
+    val recent = summary(periods, data.dayLogs, today.minusDays(CHART_DAYS - 1L), today).days
     return HistoryUiState(today = today, phase = data.situation.phase,
         fullMonthsSinceLastEnd = fullMonthsSinceLastPeriodEnded(periods, today),
         monthlySymptoms = data.dayLogs.filter { it.date <= today }.groupBy { YearMonth.from(it.date) }.mapValues { (_, logs) ->
@@ -58,7 +63,10 @@ internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
         symptomCounts = if (window.isEmpty()) emptyMap() else Stats.symptomCounts(data.dayLogs, window.first().start, window.last().nextStart),
         symptomCycles = window.size, loading = false, overrides = data.overrides, tags = data.tags, customCategories = data.customCategories,
         ownSymptomCounts = if (window.isEmpty()) emptyMap() else ownCounts(data.dayLogs.filter { it.date >= window.first().start && it.date < window.last().nextStart }),
-        monthlyOwnSymptoms = data.dayLogs.filter { it.date <= today }.groupBy { YearMonth.from(it.date) }.mapValues { (_, logs) -> ownCounts(logs) })
+        monthlyOwnSymptoms = data.dayLogs.filter { it.date <= today }.groupBy { YearMonth.from(it.date) }.mapValues { (_, logs) -> ownCounts(logs) },
+        recentMood = recent.mapNotNull { day -> day.log.mood?.let { day.date to it } }.toMap(),
+        recentPain = recent.mapNotNull { day -> day.log.pain?.let { day.date to it } }.toMap(),
+        recentPeriodDays = recent.filter { it.periodDay }.map { it.date }.toSet())
 }
 
 class HistoryViewModel(private val repository: Repository, private val clock: () -> LocalDate = { LocalDate.now() }) : ViewModel() {

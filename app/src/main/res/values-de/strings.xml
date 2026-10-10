@@ -564,10 +564,6 @@
     <string name="archived_categories">Archiviert</string>
     <string name="archived_categories_hint">Archivierte Kategorien erscheinen nicht mehr im Tageseintrag. Deine früheren Einträge behalten sie.</string>
     <string name="restore_category">Wiederherstellen</string>
-    <plurals name="cycle_measured_explained">
-        <item quantity="one">FreePeriod. berechnet das aus deinen eingetragenen Perioden – bisher aus deinem letzten Zyklus –, du musst hier also nichts einstellen. Einen ungewöhnlichen Zyklus kannst du im Verlauf öffnen und ausschließen.</item>
-        <item quantity="other">FreePeriod. berechnet das aus deinen eingetragenen Perioden – dem mittleren Wert deiner letzten %1$d Zyklen –, du musst hier also nichts einstellen. Einen ungewöhnlichen Zyklus kannst du im Verlauf öffnen und ausschließen.</item>
-    </plurals>
     <plurals name="restore_periods">
         <item quantity="one">%1$d Periode</item>
         <item quantity="other">%1$d Perioden</item>
@@ -633,7 +629,7 @@
     <string name="set_sex">Sex</string>
     <string name="set_bowel">Stuhlgang</string>
     <string name="set_peeing">Wasserlassen</string>
-    <string name="set_daily">Alltag</string>
+    <string name="set_daily">Auswirkung auf den Alltag</string>
     <string name="set_missed">Arbeit oder Schule verpasst</string>
     <string name="set_cancelled">Pläne abgesagt</string>
     <string name="set_rested">Im Bett geblieben</string>
@@ -671,5 +667,11 @@
     <plurals name="summary_months">
         <item quantity="one">Letzter %1$d Monat</item>
         <item quantity="other">Letzte %1$d Monate</item>
+    </plurals>
+    <string name="history_chart_basis">Letzte 8 Wochen, so wie du es eingetragen hast. Hinterlegt: Periodentage.</string>
+    <string name="history_chart_today">Heute</string>
+    <plurals name="history_chart_days">
+        <item quantity="one">An %1$d von %2$d Tagen eingetragen</item>
+        <item quantity="other">An %1$d von %2$d Tagen eingetragen</item>
     </plurals>
 </resources>

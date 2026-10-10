@@ -119,7 +119,7 @@ fun SettingsRoute(container: AppContainer) {
                         privacy = { page = SettingsPage.PRIVACY }, about = { page = SettingsPage.ABOUT },
                         deleteAll = { model.deleteAllData() },
                         lockEnabled = { model.setLockEnabled(it) }, lockTimeout = { model.setLockTimeout(it) }),
-                        recovery.busy || recovery.awaitingDocument)
+                        recovery.busy || recovery.awaitingDocument, version)
                 }
                 SettingsPage.SITUATION -> SituationScreen(trackingState.data.situation, container.clock(), { tracking.situation(it) }, back,
                     onOfferReminder = { editReminder(it); page = SettingsPage.REMINDER_EDITOR },

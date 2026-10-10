@@ -43,7 +43,7 @@ data class SettingsActions(
 )
 
 @Composable
-fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false) {
+fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false, version: String = "") {
     var lengthDialog by rememberSaveable { mutableStateOf(false) }
     var csvDialog by rememberSaveable { mutableStateOf(false) }
     var deleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -59,11 +59,10 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         item { AppearanceTile(stringResource(accentLabel(state.accent)), enabled, actions.appearance) }
         if (state.loading) item { CircularProgressIndicator() }
         item { SettingsRow(R.string.customize_day_entry, enabled, actions.dayEntry) }
-        item {
-            // Once cycles are logged the typed length is no longer used: the row shows the measured one.
+        // Only a fallback until the first full cycle; afterwards History shows the measured length.
+        if (state.measuredCycleLength == null) item {
             SettingsRow(R.string.typical_cycle_length, enabled, { lengthDialog = true },
-                (state.measuredCycleLength ?: state.typicalCycleLength)?.let { stringResource(R.string.settings_cycle_days, it) }
-                    ?: stringResource(R.string.cycle_unknown))
+                state.typicalCycleLength?.let { stringResource(R.string.settings_cycle_days, it) } ?: stringResource(R.string.cycle_unknown))
         }
         item { SettingsRow(R.string.my_situation, enabled, actions.situation) }
         item { SettingsRow(R.string.reminders, enabled, actions.reminders) }
@@ -104,11 +103,12 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
             }
         }
         state.message?.let { label -> item { Text(stringResource(label), Modifier.padding(top = 12.dp)) } }
+        if (version.isNotEmpty()) item {
+            Text(stringResource(R.string.about_version, version), Modifier.padding(top = 8.dp),
+                style = MaterialTheme.typography.bodySmall, color = LocalDaylight.current.muted)
+        }
     }
-    if (lengthDialog && state.measuredCycleLength != null) AlertDialog(onDismissRequest = { lengthDialog = false },
-        title = { Text(stringResource(R.string.typical_cycle_length)) }, text = { Text(pluralStringResource(R.plurals.cycle_measured_explained, state.measuredCycles, state.measuredCycles)) },
-        confirmButton = { TextButton(onClick = { lengthDialog = false }) { Text(stringResource(R.string.got_it)) } })
-    else if (lengthDialog) TypicalLengthDialog(state.typicalCycleLength, { lengthDialog = false }) {
+    if (lengthDialog) TypicalLengthDialog(state.typicalCycleLength, { lengthDialog = false }) {
         lengthDialog = false
         actions.typicalLength(it)
     }

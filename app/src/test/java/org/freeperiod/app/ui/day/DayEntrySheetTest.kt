@@ -96,7 +96,7 @@ class DayEntrySheetTest {
         compose.onNodeWithText("A calm day with time outside and").assertExists()
     }
 
-    @Test fun openingTheNoteFocusesItAndScrollsToTheEnd() {
+    @Test fun openingTheNoteFocusesItWithoutJumpingToTheEnd() {
         compose.setContent { FreePeriodTheme {
             DayEntrySheet(DayEntryUiState(today, today, loading = false), DayEntryActions(), {}, {})
         } }
@@ -105,7 +105,7 @@ class DayEntrySheetTest {
         compose.onNodeWithText("Note").performClick()
         compose.waitForIdle()
         compose.onNodeWithTag("entry-note").assertIsFocused().assertIsDisplayed()
-        compose.onNodeWithText("Clear day").assertIsDisplayed()
+        compose.onNodeWithText("Note").assertIsDisplayed()
     }
 
     @Test fun selectedMoodHasSelectedSemanticsAndCanBeCleared() {

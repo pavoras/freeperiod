@@ -93,6 +93,21 @@ class TodayViewModelTest : DatabaseTest() {
         assertNull(vm.state.value.endSaved)
     }
 
+    @Test fun startAfterEndingTodayOrYesterdayContinuesThatPeriod() = runTest {
+        val vm = viewModel()
+        vm.startPeriodToday().join()
+        vm.confirmEnd(today).join()
+        vm.startPeriodToday().join()
+        assertNull(vm.state.value.error)
+        assertEquals(org.freeperiod.engine.Period(repository.snapshot().periods.single().id, today, null), repository.snapshot().periods.single())
+        repository.addPeriod(today.minusDays(40), today.minusDays(36)).getOrThrow()
+        val earlier = repository.snapshot().periods.single { it.start == today }
+        repository.updatePeriod(earlier.copy(start = today.minusDays(3), end = today.minusDays(1))).getOrThrow()
+        vm.startPeriodToday().join()
+        assertEquals(2, repository.snapshot().periods.size)
+        assertNull(repository.snapshot().periods.single { it.start == today.minusDays(3) }.end)
+    }
+
     @Test fun sameDayEndKeepsTheStartDate() = runTest {
         val vm = viewModel()
         vm.startPeriodToday().join()

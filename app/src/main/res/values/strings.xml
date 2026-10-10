@@ -564,10 +564,6 @@
     <string name="archived_categories">Archived</string>
     <string name="archived_categories_hint">Archived categories no longer appear in the day entry. Your past entries keep them.</string>
     <string name="restore_category">Restore</string>
-    <plurals name="cycle_measured_explained">
-        <item quantity="one">FreePeriod. works this out from your logged periods – so far from your last cycle – so there is nothing to set here. To leave out an unusual cycle, open it in History.</item>
-        <item quantity="other">FreePeriod. works this out from your logged periods – the middle value of your last %1$d cycles – so there is nothing to set here. To leave out an unusual cycle, open it in History.</item>
-    </plurals>
     <plurals name="restore_periods">
         <item quantity="one">%1$d period</item>
         <item quantity="other">%1$d periods</item>
@@ -633,7 +629,7 @@
     <string name="set_sex">Sex</string>
     <string name="set_bowel">Bowel movements</string>
     <string name="set_peeing">Peeing</string>
-    <string name="set_daily">Daily life</string>
+    <string name="set_daily">Effect on your day</string>
     <string name="set_missed">Missed work or school</string>
     <string name="set_cancelled">Cancelled plans</string>
     <string name="set_rested">Rested in bed</string>
@@ -671,5 +667,11 @@
     <plurals name="summary_months">
         <item quantity="one">Last %1$d month</item>
         <item quantity="other">Last %1$d months</item>
+    </plurals>
+    <string name="history_chart_basis">Last 8 weeks, as you logged it. Shaded: period days.</string>
+    <string name="history_chart_today">Today</string>
+    <plurals name="history_chart_days">
+        <item quantity="one">Logged on %1$d of %2$d days</item>
+        <item quantity="other">Logged on %1$d of %2$d days</item>
     </plurals>
 </resources>

@@ -32,6 +32,25 @@ class HistoryScreenshotTest {
     @Test fun sheet_enLight() = capture("sheet_enLight", Locale.US, sheet = true)
     @Test fun empty_enLight() = capture("empty_enLight", Locale.US, empty = true)
     @Test fun menopause_enLight() = capture("menopause_enLight", Locale.US, menopause = true)
+    @Test fun moodAndPain_enLight() = captureLevels("moodAndPain_enLight", Locale.US)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-night-xxhdpi")
+    fun moodAndPain_deDark() = captureLevels("moodAndPain_deDark", Locale.GERMANY, dark = true)
+    private fun captureLevels(name: String, locale: Locale, dark: Boolean = false) {
+        Locale.setDefault(locale)
+        val today = clock()
+        val moods = listOf(Mood.GOOD, Mood.OKAY, Mood.LOW, Mood.LOW, Mood.OKAY, Mood.GREAT, Mood.GOOD)
+        val logs = (0 until 50).filter { it % 9 != 4 }.map { back ->
+            val date = today.minusDays(back.toLong())
+            DayLog(date, mood = moods[back % moods.size], pain = if (back % 28 in 20..24) Pain.entries[(back % 4)] else null)
+        }
+        val periods = listOf(Period(1, today.minusDays(52), today.minusDays(48)), Period(2, today.minusDays(24), today.minusDays(20)))
+        val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = emptyList(), settings = BackupSettings(null, false)), today)
+        compose.setContent { FreePeriodTheme(darkTheme = dark) { Surface { HistoryScreen(state, { _, _ -> }) } } }
+        compose.waitForIdle()
+        compose.onNodeWithTag("history-list").performScrollToNode(hasText(if (locale.language == "de") "Schmerzen" else "Pain"))
+        compose.waitForIdle()
+        compose.onRoot().captureRoboImage("src/test/screenshots/history/$name.png")
+    }
     private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false, sheet: Boolean = false, menopause: Boolean = false) {
         Locale.setDefault(locale)
         val starts = listOf("2025-11-10", "2025-12-08", "2026-01-05", "2026-02-02", "2026-02-16", "2026-03-16")

@@ -33,12 +33,11 @@ class SettingsClarityTest {
         compose.waitForIdle()
     }
 
-    @Test fun loggedCyclesShowTheMeasuredLengthAndExplainIt() {
+    @Test fun measuredCyclesHideTheTypedFallback() {
+        // History shows the measured length; the setting only matters before the first full cycle.
         show(SettingsUiState(30, loading = false, measuredCycleLength = 29, measuredCycles = 5))
-        compose.onNodeWithText("29 days").performClick()
-        compose.waitForIdle()
-        compose.onNodeWithText("the middle value of your last 5 cycles", substring = true).assertExists()
-        compose.onNodeWithText("Days (15–90)").assertDoesNotExist()
+        compose.onNodeWithText("Typical cycle length").assertDoesNotExist()
+        compose.onNodeWithText("29 days").assertDoesNotExist()
     }
 
     @Test fun withoutCyclesTheTypedLengthIsAFallback() {

@@ -40,6 +40,11 @@ val releaseSigning = if (releasePackagingRequested) {
     }
 } else null
 
+val commitCount = providers.exec {
+    commandLine("git", "rev-list", "--count", "HEAD")
+    isIgnoreExitValue = true
+}.standardOutput.asText.get().trim().ifEmpty { "0" }
+
 android {
     namespace = "org.freeperiod.app"
     compileSdk = 36
@@ -49,8 +54,8 @@ android {
         applicationId = "org.freeperiod.app"
         minSdk = 26
         targetSdk = 36
-        versionCode = 2
-        versionName = "1.0.0"
+        versionCode = 3
+        versionName = "1.1.0"
     }
 
     signingConfigs {
@@ -65,6 +70,8 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
+            // Each test APK gets an ascending developer number (commit count), e.g. 1.1.0-dev.57.
+            versionNameSuffix = "-dev.$commitCount"
         }
         release {
             if (releaseSigning != null) signingConfig = signingConfigs.getByName("externalRelease")

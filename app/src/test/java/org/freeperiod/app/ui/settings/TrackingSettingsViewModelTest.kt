@@ -36,10 +36,14 @@ class TrackingSettingsViewModelTest : DatabaseTest() {
         vm.painDiary(true, listOf(org.freeperiod.app.data.ItemSetCategory("pain_diary:where", "Where it hurts", "person", listOf("Back" to "backache")))).join()
         var overrides = repository.snapshot().overrides
         assertFalse(overrides.single { it.key == "category:pain" }.hidden)
-        assertEquals(UiOverride("category:medication", false, 9), overrides.single { it.key == "category:medication" })
+        val medication = overrides.single { it.key == "category:medication" }
+        assertFalse(medication.hidden)
+        val order = entryCategories(dayEntryState(repository.snapshot(), today, today), includeHidden = true).map { it.overrideKey }
+        val pain = order.indexOf("category:pain")
+        assertEquals(listOf("category:pain", "category:medication", "customCategory:1"), order.subList(pain, pain + 3))
         vm.showCategory("medication", false).join()
         overrides = repository.snapshot().overrides
-        assertEquals(UiOverride("category:medication", true, 9), overrides.single { it.key == "category:medication" })
+        assertEquals(medication.copy(hidden = true), overrides.single { it.key == "category:medication" })
         vm.painDiary(false, emptyList(), archive = false).join()
         assertFalse(repository.snapshot().situation.painDiary)
         assertFalse(repository.snapshot().customCategories.single().archived)

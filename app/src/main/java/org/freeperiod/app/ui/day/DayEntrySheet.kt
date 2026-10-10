@@ -172,11 +172,10 @@ fun DayEntrySheet(
                                     colors = TextFieldDefaults.colors(focusedContainerColor = tones.accent.container, unfocusedContainerColor = tones.accent.container,
                                         focusedTextColor = tones.accent.onContainer, unfocusedTextColor = tones.accent.onContainer,
                                         focusedPlaceholderColor = tones.accent.onContainer, unfocusedPlaceholderColor = tones.accent.onContainer))
-                                // Opening the note: scroll it to the top (the sheet's end stops it) and type right away;
-                                // the list keeps the focused field in view while the keyboard shrinks it.
+                                // Opening the note: type right away. Focus scrolls only as far as needed, so the field
+                                // ends up just above the keyboard wherever the note sits in the list (no jump to the top).
                                 if (noteOpen) LaunchedEffect(focusNote) {
                                     if (!focusNote) return@LaunchedEffect
-                                    list.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "note" }?.let { list.animateScrollToItem(it.index) }
                                     noteFocus.requestFocus()
                                     focusNote = false
                                 }
