@@ -26,9 +26,12 @@ import androidx.compose.ui.unit.dp
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.ui.theme.*
+import org.freeperiod.app.ui.day.entryAppearance
+import org.freeperiod.app.ui.day.builtInEntryItems
+import org.freeperiod.engine.UiOverride
 
 @Composable
-fun AppearanceScreen(accent: Accent, onAccent: (Accent) -> Unit, onBack: () -> Unit) {
+fun AppearanceScreen(accent: Accent, onAccent: (Accent) -> Unit, onBack: () -> Unit, overrides: List<UiOverride> = emptyList()) {
     var preview by remember(accent) { mutableStateOf(accent) }
     val dark = isSystemInDarkTheme()
     FreePeriodTheme(darkTheme = dark, accent = preview) {
@@ -61,7 +64,7 @@ fun AppearanceScreen(accent: Accent, onAccent: (Accent) -> Unit, onBack: () -> U
                         }
                     }
                 }
-                AccentPreview()
+                AccentPreview(overrides)
             }
         }
     }
@@ -78,7 +81,7 @@ internal fun accentLabel(accent: Accent): Int = when (accent) {
 
 /** A small, clearly labelled sample (not a working screen): it ignores touches and shows the accent at a glance. */
 @Composable
-private fun AccentPreview() {
+private fun AccentPreview(overrides: List<UiOverride>) {
     val t = LocalDaylight.current
     Surface(Modifier.fillMaxWidth().padding(top = 14.dp)
         .pointerInput(Unit) { awaitPointerEventScope { while (true) awaitPointerEvent(PointerEventPass.Initial).changes.forEach { it.consume() } } }
@@ -104,8 +107,10 @@ private fun AccentPreview() {
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FpChip(false, {}, stringResource(R.string.mood_okay), Modifier.weight(1f))
-                FpChip(true, {}, stringResource(R.string.mood_good), Modifier.weight(1f))
+                builtInEntryItems("mood").filter { it.name in setOf("OKAY", "GOOD") }
+                    .sortedBy { item -> overrides.find { it.key == item.key }?.sortOrder ?: item.order }.forEach { item ->
+                        FpChip(item.name == "GOOD", {}, entryAppearance(item.key, item.label, item.icon, overrides).label, Modifier.weight(1f))
+                    }
             }
             FpButton({}, Modifier.fillMaxWidth()) { Text(stringResource(R.string.log_today)) }
         }

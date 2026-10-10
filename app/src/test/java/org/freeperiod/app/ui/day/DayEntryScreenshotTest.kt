@@ -6,6 +6,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.unit.Density
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -33,6 +34,26 @@ class DayEntryScreenshotTest {
     private val originalLocale = Locale.getDefault()
     private val clock: () -> LocalDate = { LocalDate.of(2026, 4, 12) }
     @After fun restoreLocale() { Locale.setDefault(originalLocale) }
+
+    @Test fun sixMoods_enLargeLight() = captureSixMoods("sixMoods_enLargeLight", false)
+    @Test @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-night-xxhdpi")
+    fun sixMoods_enLargeDark() = captureSixMoods("sixMoods_enLargeDark", true)
+
+    private fun captureSixMoods(name: String, dark: Boolean) {
+        Locale.setDefault(Locale.US)
+        val today = clock()
+        val state = DayEntryUiState(today, today, loading = false, log = DayLog(today, tagIds = setOf(6)),
+            tags = listOf(Tag(6, "Calm", categoryId = 1, iconKey = "calm")),
+            customCategories = listOf(CustomCategory(1, "Mood items", "builtin:mood", 0, false)))
+        compose.setContent {
+            CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, 1.3f)) {
+                FreePeriodTheme(darkTheme = dark) { Surface { DayEntrySheet(state, DayEntryActions(), {}, {}) } }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNodeWithText("Calm").assertIsDisplayed()
+        compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/day/$name.png")
+    }
 
     @Test fun filled_enLight() = capture("filled_enLight", Locale.US)
     @Test fun menopause_enLight() = capture("menopause_enLight", Locale.US, menopause = true)

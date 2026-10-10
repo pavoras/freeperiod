@@ -143,44 +143,24 @@ fun DayEntrySheet(
                 entryCategories(state).forEach { category ->
                     item(key = category.key) {
                         when (category.key) {
-                            "mood" -> {
-                                Text(stringResource(R.string.entry_mood), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium)
-                                val moods = listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT).filter { state.itemVisible("mood", it.name) }
-                                ChoiceGrid(moods, moods.map { stringResource(moodLabel(it)) }, 5) { mood ->
-                                    FpFaceChip(state.log.mood == mood, { actions.mood(if (state.log.mood == mood) null else mood) },
-                                        stringResource(moodLabel(mood)), Modifier.fillMaxWidth().fillMaxHeight(), editable) {
-                                        Icon(painterResource(moodIcon(mood)), null, Modifier.size(27.dp).testTag("mood-icon-${mood.name}"))
-                                    }
-                                }
-                            }
-                            "flow" -> Choices(category.label, FlowLevel.entries.filter { state.itemVisible("flow", it.name) }, state.log.flow, editable, ::flowLabel, actions.flow)
-                            "pain" -> Choices(category.label, Pain.entries.filter { state.itemVisible("pain", it.name) }, state.log.pain, editable, ::painLabel, actions.pain)
+                            "mood", "flow", "pain" -> EntryChoices(category, state, actions, editable)
                             "symptoms" -> {
-                                Text(stringResource(R.string.entry_symptoms), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium)
-                                val symptoms = state.visibleSymptoms(moreSymptoms) + listOf(null)
-                                val moreLabel = stringResource(if (moreSymptoms) R.string.entry_less else R.string.entry_more)
-                                ChoiceGrid(symptoms, symptoms.map { if (it == null) moreLabel else stringResource(symptomLabel(it)) }, 4) { symptom ->
-                                    if (symptom == null) FpChip(moreSymptoms, { moreSymptoms = !moreSymptoms },
-                                        moreLabel, Modifier.fillMaxWidth(), stacked = true,
-                                        icon = { Icon(painterResource(R.drawable.ic_fp_more), null, Modifier.size(20.dp)) })
-                                    else FpChip(symptom in state.log.symptoms, { actions.symptom(symptom) }, stringResource(symptomLabel(symptom)),
-                                        Modifier.fillMaxWidth().fillMaxHeight(), editable, stacked = true,
-                                        icon = { Icon(painterResource(symptomIcon(symptom)), null, Modifier.size(20.dp)) })
+                                EntryChoices(category, state, actions, editable, moreSymptoms = moreSymptoms,
+                                    onMore = { moreSymptoms = !moreSymptoms })
+                            }
+                            "sex", "discharge" -> {
+                                val appearance = category.appearance(state)
+                                val summary = state.entryItems(category).filter { state.selected(it) }.map { it.appearance(state).label }
+                                    .joinToString().ifBlank { stringResource(R.string.entry_none) }
+                                val open = if (category.key == "sex") sexOpen else dischargeOpen
+                                FpSectionRow(appearance.icon, appearance.label, summary, open) {
+                                    if (category.key == "sex") sexOpen = !sexOpen else dischargeOpen = !dischargeOpen
                                 }
-                                CustomItemChips(state.visibleTags(category), state, actions, editable)
-                            }
-                            "sex" -> {
-                                FpSectionRow(category.icon, stringResource(category.label), state.log.sex?.let { stringResource(sexLabel(it)) }
-                                    ?: stringResource(R.string.entry_none), sexOpen) { sexOpen = !sexOpen }
-                                if (sexOpen) Choices(null, Sex.entries.filter { state.itemVisible("sex", it.name) }, state.log.sex, editable, ::sexLabel, actions.sex)
-                            }
-                            "discharge" -> {
-                                FpSectionRow(category.icon, stringResource(category.label), state.log.discharge?.let { stringResource(dischargeLabel(it)) }
-                                    ?: stringResource(R.string.entry_none), dischargeOpen) { dischargeOpen = !dischargeOpen }
-                                if (dischargeOpen) Choices(null, Discharge.entries.filter { state.itemVisible("discharge", it.name) }, state.log.discharge, editable, ::dischargeLabel, actions.discharge)
+                                if (open) EntryChoices(category, state, actions, editable, showTitle = false)
                             }
                             "note" -> {
-                                FpSectionRow(category.icon, stringResource(category.label), notePreview(note).ifBlank { stringResource(R.string.entry_none) }, noteOpen) { noteOpen = !noteOpen; focusNote = noteOpen }
+                                val appearance = category.appearance(state)
+                                FpSectionRow(appearance.icon, appearance.label, notePreview(note).ifBlank { stringResource(R.string.entry_none) }, noteOpen) { noteOpen = !noteOpen; focusNote = noteOpen }
                                 if (noteOpen) TextField(value = note, onValueChange = {
                                     if (it.length <= 2000 || it.length < note.length) { note = it; noteDirty = true; actions.note(it) }
                                 }, placeholder = { Text(stringResource(R.string.entry_note_placeholder)) }, enabled = editable,
@@ -197,20 +177,22 @@ fun DayEntrySheet(
                                     focusNote = false
                                 }
                             }
-                            "ovulation_test" -> Choices(category.label, OvulationTest.entries.filter { state.itemVisible("ovulation_test", it.name) },
-                                state.log.ovulationTest, editable, { if (it == OvulationTest.POSITIVE) R.string.ovulation_positive else R.string.ovulation_negative }, actions.ovulationTest)
+                            "ovulation_test" -> EntryChoices(category, state, actions, editable)
                             else -> {
-                                val tags = state.visibleTags(category)
+                                val items = state.entryItems(category)
+                                val tags = items.mapNotNull { it.tag }
                                 val open = if (category.key == "tags") tagsOpen else category.key in customOpen.split(',')
-                                FpSectionRow(category.icon, category.category?.name ?: stringResource(category.label),
-                                    tags.filter { it.id in state.log.tagIds }.joinToString { it.name }.ifBlank { stringResource(R.string.entry_none) }, open) {
+                                val appearance = category.appearance(state)
+                                FpSectionRow(appearance.icon, appearance.label,
+                                    items.filter { state.selected(it) }.map { it.appearance(state).label }.joinToString()
+                                        .ifBlank { stringResource(R.string.entry_none) }, open) {
                                     if (category.key == "tags") tagsOpen = !tagsOpen
                                     else { val keys = customOpen.split(',').filter { it.isNotBlank() }.toSet()
                                         customOpen = (if (open) keys - category.key else keys + category.key).joinToString(",") }
                                 }
                                 if (open) {
                                     if (category.key == "tags") TagEntry(state.copy(tags = tags), actions, editable)
-                                    else CustomItemChips(tags, state, actions, editable)
+                                    else EntryChoices(category, state, actions, editable, showTitle = false)
                                 }
                             }
                         }
@@ -236,7 +218,7 @@ fun DayEntrySheet(
  * label decides. Large fonts and long German words get fewer, wider chips instead of broken letters.
  */
 @Composable
-private fun <T> ChoiceGrid(values: List<T>, labels: List<String>, maxColumns: Int, content: @Composable (T) -> Unit) {
+private fun <T> ChoiceGrid(values: List<T>, labels: List<String>, maxColumns: Int, inlineIcon: Boolean = false, content: @Composable (T) -> Unit) {
     val measurer = rememberTextMeasurer()
     val style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
     BoxWithConstraints(Modifier.fillMaxWidth()) {
@@ -245,7 +227,7 @@ private fun <T> ChoiceGrid(values: List<T>, labels: List<String>, maxColumns: In
         }
         val longest = parts.maxOfOrNull { measurer.measure(it, style, softWrap = false).size.width } ?: 0
         val gap = 4.dp
-        val needed = with(LocalDensity.current) { longest.toDp() } + 16.dp // chip padding + borders
+        val needed = with(LocalDensity.current) { longest.toDp() } + 16.dp + if (inlineIcon) 24.dp else 0.dp // padding, borders and icon
         val columns = ((maxWidth + gap) / (needed + gap)).toInt().coerceIn(1, maxOf(1, maxColumns))
         // Balance the rows (5 items in 4 columns become 3 + 2, not 4 + 1).
         val rows = (values.size + columns - 1) / columns
@@ -267,11 +249,49 @@ private fun <T> ChoiceRows(values: List<T>, columns: Int, content: @Composable (
 }
 
 @Composable
-private fun <T> Choices(title: Int?, values: List<T>, selected: T?, enabled: Boolean, label: (T) -> Int, onChange: (T?) -> Unit) {
-    title?.let { Text(stringResource(it), Modifier.padding(top = 8.dp), style = MaterialTheme.typography.titleMedium) }
-    ChoiceGrid(values, values.map { stringResource(label(it)) }, minOf(values.size, 5)) { value ->
-        FpChip(selected == value, { onChange(if (selected == value) null else value) },
-            stringResource(label(value)), Modifier.fillMaxWidth().fillMaxHeight(), enabled)
+private fun EntryChoices(category: EntryCategory, state: DayEntryUiState, actions: DayEntryActions, enabled: Boolean,
+    showTitle: Boolean = true, moreSymptoms: Boolean = true, onMore: (() -> Unit)? = null) {
+    if (showTitle) {
+        val appearance = category.appearance(state)
+        Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Icon(painterResource(appearance.icon), null, Modifier.size(20.dp))
+            Text(appearance.label, style = MaterialTheme.typography.titleMedium)
+        }
+    }
+    val symptoms = state.visibleSymptoms(moreSymptoms).map { it.name }.toSet()
+    val items = state.entryItems(category).filter { category.key != "symptoms" || it.tag != null || it.name in symptoms }
+    val appearances = items.map { it.appearance(state) }
+    // Scales and plain choices stay text-only unless the user picked an icon; one repeated icon adds nothing.
+    val iconFields = setOf("mood", "symptoms")
+    val showIcon = items.map { item -> category.key in iconFields || item.tag != null ||
+        state.overrides.any { it.key == item.key && it.iconKey != null } }
+    val moreLabel = stringResource(if (moreSymptoms) R.string.entry_less else R.string.entry_more)
+    val values = if (onMore != null) items + null else items
+    val labels = appearances.map { it.label } + if (onMore != null) listOf(moreLabel) else emptyList()
+    ChoiceGrid(values, labels, if (category.key == "symptoms") 4 else 5, inlineIcon = category.key !in iconFields && showIcon.any { it }) { item ->
+        if (item == null) FpChip(moreSymptoms, { onMore?.invoke() }, moreLabel, Modifier.fillMaxWidth(), stacked = true,
+            icon = { Icon(painterResource(R.drawable.ic_fp_more), null, Modifier.size(20.dp)) })
+        else {
+            val appearance = appearances[items.indexOf(item)]
+            val selected = state.selected(item)
+            FpChip(selected, { item.tag?.let { actions.tag(it.id) } ?: run {
+                val name = item.name.takeUnless { selected }
+                when (category.key) {
+                    "mood" -> actions.mood(name?.let(Mood::valueOf))
+                    "flow" -> actions.flow(name?.let(FlowLevel::valueOf))
+                    "pain" -> actions.pain(name?.let(Pain::valueOf))
+                    "sex" -> actions.sex(name?.let(Sex::valueOf))
+                    "discharge" -> actions.discharge(name?.let(Discharge::valueOf))
+                    "ovulation_test" -> actions.ovulationTest(name?.let(OvulationTest::valueOf))
+                    "symptoms" -> actions.symptom(Symptom.valueOf(requireNotNull(item.name)))
+                }
+            } }, appearance.label, Modifier.fillMaxWidth().fillMaxHeight(), enabled,
+                stacked = category.key in setOf("mood", "symptoms"),
+                icon = if (!showIcon[items.indexOf(item)]) null else { { Icon(painterResource(appearance.icon), null,
+                    Modifier.size(if (category.key == "mood") 27.dp else 20.dp)
+                        .testTag(if (category.key == "mood" && item.tag == null) "mood-icon-${item.name}" else "entry-icon-${item.key}")) } })
+        }
     }
 }
 
@@ -284,13 +304,4 @@ internal fun errorLabel(error: DayEntryError): Int = when (error) {
     DayEntryError.END_IN_FUTURE -> R.string.error_period_end_future
     DayEntryError.TAG_NAME -> R.string.tag_name_error
     DayEntryError.STORAGE -> R.string.error_storage
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun CustomItemChips(tags: List<Tag>, state: DayEntryUiState, actions: DayEntryActions, enabled: Boolean) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(FpSpacing.gap), verticalArrangement = Arrangement.spacedBy(FpSpacing.compact)) {
-        tags.forEach { tag -> FpChip(tag.id in state.log.tagIds, { actions.tag(tag.id) }, tag.name, enabled = enabled,
-            icon = { Icon(painterResource(FpIcons.byKey[tag.iconKey] ?: R.drawable.ic_fp_tags), null, Modifier.size(20.dp)) }) }
-    }
 }

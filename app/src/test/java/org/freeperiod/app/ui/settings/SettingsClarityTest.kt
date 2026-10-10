@@ -80,7 +80,7 @@ class SettingsClarityTest {
         val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false),
             customCategories = listOf(sport))
         compose.setContent { FreePeriodTheme { Surface {
-            DayEntrySettingsScreen(data, LocalDate.of(2026, 4, 12), {}, { _, _, _ -> }, {}, { _, _, _ -> }, {}, { _, _, _, _ -> },
+            DayEntrySettingsScreen(data, LocalDate.of(2026, 4, 12), {}, { _, _, _ -> }, {}, { _, _, _, _ -> }, {}, { _, _, _, _ -> },
                 onRestore = { restored = it })
         } } }
         compose.onNode(hasScrollAction()).performScrollToNode(hasText("Restore"))

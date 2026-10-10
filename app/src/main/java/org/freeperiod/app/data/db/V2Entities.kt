@@ -9,10 +9,12 @@ data class CustomCategoryEntity(
     val iconKey: String,
     val sortOrder: Int,
     val archived: Boolean,
+    @ColumnInfo(defaultValue = "0") val singleChoice: Boolean = false,
 )
 
 @Entity(tableName = "ui_overrides")
-data class UiOverrideEntity(@PrimaryKey val key: String, val hidden: Boolean, val sortOrder: Int)
+data class UiOverrideEntity(@PrimaryKey val key: String, val hidden: Boolean, val sortOrder: Int,
+    val label: String? = null, val iconKey: String? = null)
 
 @Entity(tableName = "situation")
 data class SituationEntity(

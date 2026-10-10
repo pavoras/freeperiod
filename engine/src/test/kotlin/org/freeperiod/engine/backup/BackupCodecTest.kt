@@ -44,6 +44,22 @@ class BackupCodecTest {
         assertEquals(DecodeResult.Ok(data), BackupCodec.decode(bytes, password) { today })
     }
 
+    @Test fun schemaThreeCustomizationRoundTrip() {
+        val customized = data.copy(customCategories = listOf(CustomCategory(1, "Activities", "leaf", 10, false, true)),
+            overrides = listOf(UiOverride("item:mood:GOOD", false, 2, "Content", "calm")))
+        assertEquals(DecodeResult.Ok(customized), decode(encode(customized)))
+    }
+
+    @Test fun schemaTwoWithoutNewFieldsRestoresAsThree() {
+        val legacy = """{"schemaVersion":2,"periods":[],"dayLogs":[],"tags":[{"id":1,"name":"Walk","categoryId":1,"iconKey":"tag"}],"settings":{"typicalCycleLength":null,"predictionsPaused":false},"customCategories":[{"id":1,"name":"Activities","iconKey":"leaf","sortOrder":10,"archived":false}],"overrides":[{"key":"category:mood","hidden":true,"sortOrder":3}]}"""
+        val restored = (decode(rawBackup(legacy)) as DecodeResult.Ok).data
+        assertEquals(3, restored.schemaVersion)
+        assertFalse(restored.customCategories.single().singleChoice)
+        assertNull(restored.overrides.single().label)
+        assertNull(restored.overrides.single().iconKey)
+        assertEquals(1L, restored.tags.single().categoryId)
+    }
+
     @Test fun wrongPasswordFailsWithoutData() {
         val result = BackupCodec.decode(encode(), "wrong password".toCharArray(), today)
         assertEquals(DecodeResult.WrongPasswordOrCorrupt, result)
@@ -124,13 +140,13 @@ class BackupCodecTest {
     }
 
     @Test fun schemaVersionUnsupported() {
-        assertEquals(DecodeResult.UnsupportedVersion, decode(rawBackup("""{"schemaVersion":3,"unknownFutureField":true}""")))
+        assertEquals(DecodeResult.UnsupportedVersion, decode(rawBackup("""{"schemaVersion":4,"unknownFutureField":true}""")))
     }
 
     @Test fun decodesSchema1() {
         val legacy = """{"schemaVersion":1,"periods":[{"id":1,"start":"2026-02-01","end":"2026-02-05","cycleUse":"EXCLUDE"}],"dayLogs":[{"date":"2026-02-01","flow":"LIGHT","tagIds":[7],"note":"${"x".repeat(2001)}"}],"tags":[{"id":7,"name":"Walk","archived":true}],"settings":{"typicalCycleLength":28,"predictionsPaused":false}}"""
         val result = decode(rawBackup(legacy)) as DecodeResult.Ok
-        assertEquals(2, result.data.schemaVersion)
+        assertEquals(3, result.data.schemaVersion)
         assertEquals(listOf(Tag(7, "Walk", true)), result.data.tags)
         assertEquals(Situation(), result.data.situation)
         assertTrue(result.data.situation.fertileWindowEnabled)

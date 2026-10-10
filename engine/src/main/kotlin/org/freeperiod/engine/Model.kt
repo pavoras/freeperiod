@@ -24,13 +24,15 @@ data class Tag(
     val iconKey: String = "tag",
 )
 
-/** Custom multi-select category; archived entries remain available in history. */
+/** Custom category; archived entries remain available in history. */
 @Serializable
-data class CustomCategory(val id: Long, val name: String, val iconKey: String, val sortOrder: Int, val archived: Boolean)
+data class CustomCategory(val id: Long, val name: String, val iconKey: String, val sortOrder: Int, val archived: Boolean,
+    val singleChoice: Boolean = false)
 
 /** Stable keys: category:<field>, item:<field>:<ENUM>, customCategory:<id>, tag:<id>. */
 @Serializable
-data class UiOverride(val key: String, val hidden: Boolean, val sortOrder: Int)
+data class UiOverride(val key: String, val hidden: Boolean, val sortOrder: Int,
+    val label: String? = null, val iconKey: String? = null)
 
 /** Optional observations for one calendar day; null means not logged. */
 @Serializable

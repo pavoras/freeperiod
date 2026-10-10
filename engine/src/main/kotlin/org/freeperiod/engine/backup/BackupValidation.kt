@@ -4,9 +4,9 @@ import java.time.LocalDate
 import java.util.Locale
 import org.freeperiod.engine.*
 
-/** Validates an entire schema-2 snapshot before any restore can mutate storage. */
+/** Validates an entire snapshot before any restore can mutate storage. */
 fun validBackup(data: BackupData, today: LocalDate): Boolean {
-    if (data.schemaVersion != 2 || data.settings.typicalCycleLength?.let { it !in 15..90 } == true) return false
+    if (data.schemaVersion !in 2..3 || data.settings.typicalCycleLength?.let { it !in 15..90 } == true) return false
     if (!uniquePositiveIds(data.periods.map { it.id }) || !uniquePositiveIds(data.tags.map { it.id }) ||
         !uniquePositiveIds(data.customCategories.map { it.id }) || !uniquePositiveIds(data.reminders.map { it.id })) return false
     if (data.dayLogs.map { it.date }.toSet().size != data.dayLogs.size) return false
@@ -15,12 +15,16 @@ fun validBackup(data: BackupData, today: LocalDate): Boolean {
     val periodIds = data.periods.map { it.id }.toSet()
     if (data.dayLogs.any { !tagIds.containsAll(it.tagIds) } || !periodIds.containsAll(data.hintDismissals)) return false
     if (data.tags.any { it.categoryId != null && it.categoryId !in categoryIds }) return false
+    if (data.dayLogs.any { !EntrySelection.valid(it, data.tags, data.customCategories) }) return false
+    val markers = data.customCategories.mapNotNull { it.builtInField() }
+    if (markers.distinct().size != markers.size) return false
     if (data.tags.any { it.name.isBlank() || it.iconKey.isBlank() } ||
         data.customCategories.any { it.name.isBlank() || it.iconKey.isBlank() }) return false
     if (data.tags.map { it.categoryId to it.name.lowercase(Locale.ROOT) }.toSet().size != data.tags.size) return false
     if (data.customCategories.map { it.name.lowercase(Locale.ROOT) }.toSet().size != data.customCategories.size) return false
     if (data.overrides.map { it.key }.toSet().size != data.overrides.size ||
-        data.overrides.any { !validOverrideKey(it.key, categoryIds, tagIds) }) return false
+        data.overrides.any { !validOverrideKey(it.key, categoryIds, tagIds) ||
+            it.label?.isBlank() == true || it.iconKey?.isBlank() == true }) return false
     if (data.reminders.any {
         if (it.kind == ReminderKind.PERIOD_DUE) it.daysBefore == null || it.daysBefore < 0 else it.daysBefore != null
     }) return false

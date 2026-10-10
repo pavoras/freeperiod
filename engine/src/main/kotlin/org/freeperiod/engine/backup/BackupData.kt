@@ -10,7 +10,7 @@ data class BackupSettings(val typicalCycleLength: Int?, val predictionsPaused: B
 /** The versioned payload of an encrypted backup, excluding device preferences. */
 @Serializable
 data class BackupData(
-    val schemaVersion: Int = 2,
+    val schemaVersion: Int = 3,
     val periods: List<Period>,
     val dayLogs: List<DayLog>,
     val tags: List<Tag>,

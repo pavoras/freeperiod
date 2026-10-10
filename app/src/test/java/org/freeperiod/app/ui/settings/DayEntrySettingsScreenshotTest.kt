@@ -31,9 +31,35 @@ class DayEntrySettingsScreenshotTest {
     private val today = LocalDate.of(2026, 4, 12)
     @Before fun setup() { compose.activity.setTheme(R.style.Theme_FreePeriod); Locale.setDefault(Locale.US) }
     @After fun reset() { Locale.setDefault(originalLocale) }
+    @Test @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h1200dp-xxhdpi")
+    fun expandedMoodWithOwnItem_enLight() {
+        val data = BackupData(periods = emptyList(), dayLogs = emptyList(), settings = BackupSettings(null, false),
+            tags = listOf(Tag(6, "Calm", categoryId = 1, iconKey = "calm")),
+            customCategories = listOf(CustomCategory(1, "Mood items", "builtin:mood", 0, false)))
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface {
+            DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _, _, _ -> }, {}, { _, _, _, _ -> })
+        } } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Mood").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Calm").assertIsDisplayed()
+        compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/expandedMoodWithOwnItem_enLight.png")
+    }
+
+    @Test fun renameEntry_enLight() {
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface {
+            CompositionLocalProvider(LocalInlineEditors provides true) {
+                RenameEntryDialog("Content", "calm", {}, { _, _ -> }, {})
+            }
+        } } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Reset name and icon").assertIsDisplayed()
+        compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/renameEntry_enLight.png")
+    }
+
     @Test fun main_enLight() {
         val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
-        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _, _ -> }, {}, { _, _, _, _ -> }) } } }
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _, _, _ -> }, {}, { _, _, _, _ -> }) } } }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/main_enLight.png")
     }
@@ -43,7 +69,7 @@ class DayEntrySettingsScreenshotTest {
         val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, 1.5f)) {
-                FreePeriodTheme(darkTheme = true) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _, _ -> }, {}, { _, _, _, _ -> }) } }
+                FreePeriodTheme(darkTheme = true) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _, _, _ -> }, {}, { _, _, _, _ -> }) } }
             }
         }
         compose.waitForIdle()

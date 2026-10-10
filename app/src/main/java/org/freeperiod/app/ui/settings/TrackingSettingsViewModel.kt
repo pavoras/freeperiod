@@ -48,24 +48,26 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
     }
     fun reminder(value: Reminder) = write { repository.saveReminder(value) }
     fun deleteReminder(id: Long) = write { repository.deleteReminder(id) }
-    fun override(key: String, hidden: Boolean, order: Int) = write { repository.setUiOverride(UiOverride(key, hidden, order)) }
-    fun reorder(keys: List<String>) = write {
-        keys.forEachIndexed { index, key -> repository.setUiOverride(UiOverride(key,
-            mutable.value.data.overrides.find { it.key == key }?.hidden ?: false, index)) }
+    fun override(key: String, hidden: Boolean, order: Int) = write {
+        val previous = repository.snapshot().overrides.find { it.key == key } ?: UiOverride(key, false, order)
+        repository.setUiOverride(previous.copy(hidden = hidden, sortOrder = order))
     }
-    fun category(name: String, icon: String, existing: CustomCategory? = null) = write {
-        if (existing == null) repository.addCustomCategory(name, icon, sortOrder = 100 + mutable.value.data.customCategories.size)
-        else repository.updateCustomCategory(existing.copy(name = name, iconKey = icon))
+    fun appearance(value: UiOverride) = write { repository.setUiOverride(value) }
+    fun editItem(tag: Tag) = write { repository.updateTag(tag) }
+    fun deleteItem(id: Long) = write { repository.deleteItem(id) }
+    fun reorder(keys: List<String>) = write {
+        val overrides = repository.snapshot().overrides
+        keys.forEachIndexed { index, key -> repository.setUiOverride(
+            (overrides.find { it.key == key } ?: UiOverride(key, false, index)).copy(sortOrder = index)) }
+    }
+    fun category(name: String, icon: String, existing: CustomCategory? = null, singleChoice: Boolean = existing?.singleChoice ?: false) = write {
+        if (existing == null) repository.addCustomCategory(name, icon, sortOrder = 100 + mutable.value.data.customCategories.size, singleChoice = singleChoice)
+        else repository.updateCustomCategory(existing.copy(name = name, iconKey = icon, singleChoice = singleChoice))
     }
     fun archive(category: CustomCategory) = write { repository.updateCustomCategory(category.copy(archived = true)) }
     fun restore(category: CustomCategory) = write { repository.updateCustomCategory(category.copy(archived = false)) }
-    fun item(name: String, icon: String, categoryId: Long?, symptoms: Boolean, categoryName: String) = write {
-        val categories = repository.snapshot().customCategories
-        var backingName = categoryName
-        var suffix = 2
-        while (categories.any { it.name.equals(backingName, ignoreCase = true) }) backingName = "$categoryName ${suffix++}"
-        val id = if (symptoms) categories.find { it.iconKey == "builtin:symptoms" }?.id
-            ?: repository.addCustomCategory(backingName, "builtin:symptoms").id else categoryId
-        repository.addTag(name, id, icon)
+    fun item(name: String, icon: String, categoryId: Long?, field: String?, categoryName: String) = write {
+        if (field != null) repository.addBuiltInItem(field, name, icon, categoryName)
+        else repository.addTag(name, categoryId, icon)
     }
 }

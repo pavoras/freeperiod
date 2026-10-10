@@ -69,17 +69,18 @@ class DayEntryViewModel(
     fun dismissError() { mutableState.update { it.copy(error = null) } }
 
     fun setFlow(value: FlowLevel?): Job = editLog(suggestStart = true) { it.copy(flow = value) }
-    fun setMood(value: Mood?): Job = editLog { it.copy(mood = value) }
-    fun setPain(value: Pain?): Job = editLog { it.copy(pain = value) }
-    fun setSex(value: Sex?): Job = editLog { it.copy(sex = value) }
-    fun setDischarge(value: Discharge?): Job = editLog { it.copy(discharge = value) }
+    fun setMood(value: Mood?): Job = selectBuiltIn("mood", value?.name)
+    fun setPain(value: Pain?): Job = selectBuiltIn("pain", value?.name)
+    fun setSex(value: Sex?): Job = selectBuiltIn("sex", value?.name)
+    fun setDischarge(value: Discharge?): Job = selectBuiltIn("discharge", value?.name)
     fun setOvulationTest(value: OvulationTest?): Job = editLog { it.copy(ovulationTest = value) }
     fun setNote(value: String): Job = editLog { it.copy(note = value.takeUnless(String::isEmpty)) }
     fun toggleSymptom(value: Symptom): Job = editLog {
         it.copy(symptoms = if (value in it.symptoms) it.symptoms - value else it.symptoms + value)
     }
-    fun toggleTag(id: Long): Job = editLog {
-        it.copy(tagIds = if (id in it.tagIds) it.tagIds - id else it.tagIds + id)
+    fun toggleTag(id: Long): Job = editLogWithData { log, data -> EntrySelection.tag(log, id, data.tags, data.customCategories) }
+    private fun selectBuiltIn(field: String, name: String?): Job = editLogWithData { log, data ->
+        EntrySelection.builtIn(log, field, name, data.tags, data.customCategories)
     }
 
     fun clearDay(): Job = mutate {
@@ -132,10 +133,13 @@ class DayEntryViewModel(
         return valid
     }
 
-    private fun editLog(suggestStart: Boolean = false, transform: (DayLog) -> DayLog): Job = mutate {
+    private fun editLog(suggestStart: Boolean = false, transform: (DayLog) -> DayLog): Job =
+        editLogWithData(suggestStart) { log, _ -> transform(log) }
+
+    private fun editLogWithData(suggestStart: Boolean = false, transform: (DayLog, BackupData) -> DayLog): Job = mutate {
         val data = repository.snapshot()
         val previous = data.dayLogs.find { it.date == date } ?: DayLog(date)
-        val log = transform(previous)
+        val log = transform(previous, data)
         repository.saveDayLog(log)
         if (suggestStart && log.flow != previous.flow && PeriodRules.suggestsPeriodStart(log, data.periods, clock())) {
             eventChannel.send(DayEntryEvent.SuggestPeriodStart)

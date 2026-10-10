@@ -26,6 +26,22 @@ class DayEntryViewModelTest : DatabaseTest() {
     private fun viewModel(date: java.time.LocalDate = today) = DayEntryViewModel(date, repository) { today }
         .also { models.put("day", it) }
 
+    @Test fun queuedEnumAndOwnChoicesRemainExclusive() = runTest {
+        val first = repository.addBuiltInItem("mood", "Calm", "calm", "Mood")
+        val second = repository.addBuiltInItem("mood", "Excited", "sparkles", "Mood")
+        val activity = repository.addTag("Walk")
+        val vm = viewModel()
+        vm.toggleTag(activity.id)
+        vm.setMood(Mood.GOOD)
+        vm.toggleTag(first.id)
+        vm.toggleTag(second.id).join()
+        assertNull(repository.snapshot().dayLogs.single().mood)
+        assertEquals(setOf(activity.id, second.id), repository.snapshot().dayLogs.single().tagIds)
+        vm.setMood(Mood.GREAT).join()
+        assertEquals(Mood.GREAT, repository.snapshot().dayLogs.single().mood)
+        assertEquals(setOf(activity.id), repository.snapshot().dayLogs.single().tagIds)
+    }
+
     @Test fun tapSavesImmediately() = runTest {
         val vm = viewModel()
         vm.setMood(Mood.GOOD).join()

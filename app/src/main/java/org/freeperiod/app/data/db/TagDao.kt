@@ -11,5 +11,7 @@ interface TagDao {
     @Update suspend fun update(tag: TagEntity)
     @Query("UPDATE tags SET name = :name WHERE id = :id") suspend fun rename(id: Long, name: String)
     @Query("UPDATE tags SET archived = 1 WHERE id = :id") suspend fun archive(id: Long)
+    @Query("SELECT EXISTS(SELECT 1 FROM day_tags WHERE tagId = :id)") suspend fun isUsed(id: Long): Boolean
+    @Query("DELETE FROM tags WHERE id = :id") suspend fun delete(id: Long)
     @Query("DELETE FROM tags") suspend fun deleteAll()
 }

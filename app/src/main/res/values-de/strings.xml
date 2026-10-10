@@ -415,7 +415,7 @@
     </plurals>
     <string name="import_title">Importieren</string>
     <string name="import_from_app">Aus einer anderen App importieren</string>
-    <string name="import_intro">Wähle eine CSV mit bisherigen Perioden oder stelle ein FreePeriod.-Backup wieder her.</string>
+    <string name="import_intro">Wähle eine CSV mit bisherigen Perioden und Einträgen oder stelle ein FreePeriod.-Backup wieder her.</string>
     <string name="import_csv">CSV-Datei wählen</string>
     <string name="import_backup">FreePeriod.-Backup</string>
     <string name="import_coming_soon">Clue- und Flo-Exporte kommen bald.</string>
@@ -428,7 +428,7 @@
         <item quantity="other">%1$d Perioden vom %2$s bis %3$s</item>
     </plurals>
     <string name="import_ongoing">Ein leeres Enddatum wird als laufende Periode importiert.</string>
-    <string name="import_confirm">Perioden importieren</string>
+    <string name="import_confirm">Importieren</string>
     <string name="import_invalid">Keine gültigen Perioden gefunden. Prüfe Spalten und Daten; Daten dürfen nicht in der Zukunft liegen.</string>
     <string name="customize_day_entry">Tageseintrag anpassen</string>
     <string name="feedback">Feedback senden</string>
@@ -566,5 +566,19 @@
     <plurals name="import_skipped">
         <item quantity="one">%1$d überlappende Periode übersprungen.</item>
         <item quantity="other">%1$d überlappende Perioden übersprungen.</item>
+    </plurals>
+    <string name="rename_entry">Umbenennen</string>
+    <string name="rename_entry_description">%1$s umbenennen</string>
+    <string name="reset_entry_appearance">Name und Symbol zurücksetzen</string>
+    <string name="delete_entry_item">Eintrag löschen</string>
+    <string name="pick_one">Eins wählen</string>
+    <string name="pick_several">Mehrere wählen</string>
+    <plurals name="import_entry_preview">
+        <item quantity="one">%d Tageseintrag wird importiert. Vorhandene Einträge an diesen Tagen werden ersetzt.</item>
+        <item quantity="other">%d Tageseinträge werden importiert. Vorhandene Einträge an diesen Tagen werden ersetzt.</item>
+    </plurals>
+    <plurals name="import_entries_imported">
+        <item quantity="one">%d Tageseintrag importiert.</item>
+        <item quantity="other">%d Tageseinträge importiert.</item>
     </plurals>
 </resources>

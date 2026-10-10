@@ -12,7 +12,7 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
 class ImportScreenshotTest : SettingsScreenshotFixture() {
-    @Test fun preview_enLight() = capture("import/preview_enLight", "Import periods") {
+    @Test fun preview_enLight() = capture("import/preview_enLight", "Choose CSV file") {
         val periods = listOf("2026-01-02", "2026-02-01", "2026-03-03").map {
             val start = LocalDate.parse(it)
             Period(0, start, start.plusDays(4))

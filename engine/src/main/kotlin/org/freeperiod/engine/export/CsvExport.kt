@@ -2,7 +2,7 @@ package org.freeperiod.engine.export
 
 import java.time.LocalDate
 import java.util.Locale
-import org.freeperiod.engine.DayLog
+import org.freeperiod.engine.*
 import org.freeperiod.engine.CustomCategory
 import org.freeperiod.engine.Period
 import org.freeperiod.engine.Tag
@@ -24,18 +24,25 @@ object CsvExport {
         val byDate = logs.associateBy { it.date }
         val byId = tags.associateBy { it.id }
         val categoryNames = customCategories.associate { it.id to it.name }
+        val markers = customCategories.mapNotNull { category -> category.builtInField()?.let { category.id to it } }.toMap()
         return buildString {
             appendRow(header)
             (periodDays + byDate.keys).sorted().forEach { date ->
                 val log = byDate[date] ?: DayLog(date)
+                val selected = log.tagIds.sorted().mapNotNull(byId::get)
+                fun own(field: String) = selected.filter { markers[it.categoryId] == field }
+                fun single(field: String, value: Enum<*>?) = value?.let(::name)
+                    ?: own(field).firstOrNull()?.let { csvItemName(it.name, builtInNames(field)) }.orEmpty()
                 appendRow(listOf(
-                    date.toString(), if (date in periodDays) "yes" else "", name(log.flow), name(log.mood), name(log.pain),
-                    name(log.sex), name(log.discharge), log.symptoms.sortedBy { it.name }.joinToString(";") { name(it) },
-                    log.tagIds.sorted().mapNotNull { byId[it]?.takeIf { it.categoryId == null }?.name }.joinToString(";"), log.note.orEmpty(),
+                    date.toString(), if (date in periodDays) "yes" else "", name(log.flow), single("mood", log.mood), single("pain", log.pain),
+                    single("sex", log.sex), single("discharge", log.discharge),
+                    (log.symptoms.sortedBy { it.name }.map(::name) + own("symptoms").map { csvItemName(it.name, builtInNames("symptoms")) }).joinToString(";"),
+                    log.tagIds.sorted().mapNotNull { byId[it]?.takeIf { it.categoryId == null }?.name?.let { csvItemName(it) } }.joinToString(";"), log.note.orEmpty(),
                     name(log.ovulationTest), log.tagIds.sorted().mapNotNull { id ->
                         val tag = byId[id] ?: return@mapNotNull null
+                        if (tag.categoryId in markers) return@mapNotNull null
                         val category = categoryNames[tag.categoryId] ?: return@mapNotNull null
-                        "$category:${tag.name}"
+                        "${csvItemName(category)}:${csvItemName(tag.name)}"
                     }.joinToString(";"),
                 ))
             }

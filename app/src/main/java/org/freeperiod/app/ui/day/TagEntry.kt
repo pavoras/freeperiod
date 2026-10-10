@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -31,9 +32,10 @@ internal fun TagEntry(state: DayEntryUiState, actions: DayEntryActions, editable
     Text(stringResource(R.string.tag_archive_hint), style = MaterialTheme.typography.bodySmall)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         state.tags.filter { !it.archived || it.id in state.log.tagIds }.forEach { tag ->
+            val appearance = entryAppearance("tag:${tag.id}", R.string.item_name, R.drawable.ic_fp_tags, state.overrides, tag)
             val checked = tag.id in state.log.tagIds
-            val archiveLabel = stringResource(R.string.archive_tag, tag.name)
-            val editLabel = stringResource(R.string.rename_tag, tag.name)
+            val archiveLabel = stringResource(R.string.archive_tag, appearance.label)
+            val editLabel = stringResource(R.string.rename_tag, appearance.label)
             val tones = LocalDaylight.current
             val fill by animateColorAsState(if (checked) tones.accent.container else tones.surface, tween(120), label = "tagFill")
             Surface(shape = if (checked) FpShapes.selectedChip else FpShapes.chip,
@@ -44,7 +46,9 @@ internal fun TagEntry(state: DayEntryUiState, actions: DayEntryActions, editable
                         onClick = { actions.tag(tag.id) }, onLongClickLabel = archiveLabel,
                         onLongClick = { actions.archiveTag(tag.id) }).padding(start = 12.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text(if (tag.archived) stringResource(R.string.tag_archived, tag.name) else tag.name,
+                    Icon(painterResource(appearance.icon), null, Modifier.size(20.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(if (tag.archived) stringResource(R.string.tag_archived, appearance.label) else appearance.label,
                         fontWeight = if (checked) FontWeight.Medium else FontWeight.Normal)
                     TextButton(enabled = editable, modifier = Modifier.semantics { contentDescription = editLabel },
                         onClick = { editingId = tag.id; name = tag.name; showField = true }) {

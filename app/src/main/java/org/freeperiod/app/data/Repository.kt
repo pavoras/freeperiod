@@ -12,6 +12,7 @@ import kotlinx.coroutines.sync.withLock
 import org.freeperiod.app.data.db.*
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.*
+import org.freeperiod.engine.importing.*
 
 class PeriodValidationException(val error: PeriodError) : Exception(error.name)
 
@@ -46,7 +47,9 @@ class Repository(
     val hintDismissals: Flow<Set<Long>> = dismissalsDao.observeAll().map { it.toSet() }
 
     /** Inserts a batch atomically, returning overlapping blocks in input order. Other errors roll back. */
-    suspend fun addPeriods(periods: List<Period>): List<Period> = write {
+    suspend fun addPeriods(periods: List<Period>): List<Period> = write { insertPeriods(periods) }
+
+    private suspend fun insertPeriods(periods: List<Period>): List<Period> {
         val accepted = periodsDao.getAll().map { it.domain() }.toMutableList()
         val skipped = mutableListOf<Period>()
         val today = clock()
@@ -58,7 +61,21 @@ class Repository(
                 else -> throw PeriodValidationException(error)
             }
         }
-        skipped
+        return skipped
+    }
+
+    suspend fun importCsv(text: String, format: CsvDateFormat?): Pair<Int, Int> = write {
+        val existingTags = tagsDao.getAll().map { it.domain() }
+        val existingCategories = categoriesDao.getAll().map { it.domain() }
+        val parsed = CsvImport.parse(text, format, existingTags, existingCategories) as? CsvImportResult.Parsed
+            ?: error("Invalid CSV")
+        require(parsed.dayLogs.all { it.date <= clock() })
+        val skipped = insertPeriods(parsed.periods).size
+        parsed.customCategories.filter { category -> existingCategories.none { it.id == category.id } }
+            .forEach { categoriesDao.insert(it.entity()) }
+        parsed.tags.filter { tag -> existingTags.none { it.id == tag.id } }.forEach { tagsDao.insert(it.entity()) }
+        parsed.dayLogs.forEach { saveLog(it) }
+        parsed.periods.size - skipped to skipped
     }
 
     suspend fun addPeriod(start: LocalDate, end: LocalDate?): Result<Period> = periodResult {
@@ -107,14 +124,34 @@ class Repository(
 
     suspend fun archiveTag(id: Long) { write { tagsDao.archive(id) } }
 
-    suspend fun addCustomCategory(name: String, iconKey: String = "tag", sortOrder: Int = 0): CustomCategory = write {
-        val category = CustomCategory(0, name.trim(), iconKey, sortOrder, false)
+    suspend fun deleteItem(id: Long) { write {
+        if (tagsDao.isUsed(id)) tagsDao.archive(id)
+        else { overridesDao.delete("tag:$id"); tagsDao.delete(id) }
+    } }
+
+    /** Creates a marker and its first item in one transaction, without exposing it as a category. */
+    suspend fun addBuiltInItem(field: String, name: String, icon: String, categoryName: String): Tag = write {
+        require(field in ownItemFields)
+        val categories = categoriesDao.getAll().map { it.domain() }
+        val existing = categories.find { it.builtInField() == field }
+        var uniqueName = categoryName
+        var suffix = 2
+        while (categories.any { it.name.equals(uniqueName, ignoreCase = true) }) uniqueName = "$categoryName ${suffix++}"
+        val categoryId = existing?.id ?: categoriesDao.insert(
+            CustomCategory(0, uniqueName, "builtin:$field", 0, false).entity())
+        val tag = Tag(0, name.trim(), categoryId = categoryId, iconKey = icon)
+        validateTag(tag)
+        tag.copy(id = tagsDao.insert(tag.entity()))
+    }
+
+    suspend fun addCustomCategory(name: String, iconKey: String = "tag", sortOrder: Int = 0, singleChoice: Boolean = false): CustomCategory = write {
+        val category = CustomCategory(0, name.trim(), iconKey, sortOrder, false, singleChoice)
         validateCategory(category)
         category.copy(id = categoriesDao.insert(category.entity()))
     }
 
     suspend fun updateCustomCategory(category: CustomCategory) { write {
-        require(categoriesDao.getAll().any { it.id == category.id })
+        requireNotNull(categoriesDao.getAll().find { it.id == category.id })
         val normalized = category.copy(name = category.name.trim())
         validateCategory(normalized)
         categoriesDao.update(normalized.entity())
@@ -221,6 +258,7 @@ class Repository(
     }
 
     private suspend fun saveLog(log: DayLog) {
+        require(EntrySelection.valid(log, tagsDao.getAll().map { it.domain() }, categoriesDao.getAll().map { it.domain() }))
         val date = log.date.toEpochDay()
         if (log.isEmpty()) {
             logsDao.delete(date)

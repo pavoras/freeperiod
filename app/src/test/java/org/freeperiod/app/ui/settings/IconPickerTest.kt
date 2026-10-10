@@ -59,20 +59,26 @@ class IconPickerTest {
         compose.onNodeWithContentDescription("Tag").assertIsNotSelected()
     }
 
-    @Test fun newCategorySavesItsIcon() {
+    @Test fun newCategorySavesItsIconAndSingleChoice() {
         var saved: Triple<String, String, CustomCategory?>? = null
+        var singleChoice = false
         val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { CompositionLocalProvider(LocalInlineEditors provides true) {
-            DayEntrySettingsScreen(data, LocalDate.of(2026, 4, 12), {}, { _, _, _ -> }, {}, { name, icon, existing -> saved = Triple(name, icon, existing) },
+            DayEntrySettingsScreen(data, LocalDate.of(2026, 4, 12), {}, { _, _, _ -> }, {}, { name, icon, existing, one ->
+                saved = Triple(name, icon, existing); singleChoice = one },
                 {}, { _, _, _, _ -> })
         } } } }
         compose.onNode(hasScrollAction()).performScrollToNode(hasText("Add category"))
         compose.onNodeWithText("Add category").performClick()
         compose.onNodeWithText("Category name").performTextInput("Sport")
+        compose.waitForIdle()
+        compose.onNodeWithText("Pick several").assertIsSelected()
+        compose.onNodeWithText("Pick one").performClick()
         compose.onNodeWithContentDescription("Dumbbell").performScrollTo().performClick()
         compose.onNodeWithText("Save").performClick()
         compose.waitForIdle()
         assertEquals(Triple("Sport", "dumbbell", null), saved)
+        assertTrue(singleChoice)
     }
 
     @Test fun picker_enLight() {

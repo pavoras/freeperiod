@@ -415,7 +415,7 @@
     </plurals>
     <string name="import_title">Import</string>
     <string name="import_from_app">Import from another app</string>
-    <string name="import_intro">Choose a CSV with past periods or restore a FreePeriod. backup.</string>
+    <string name="import_intro">Choose a CSV with past periods and entries or restore a FreePeriod. backup.</string>
     <string name="import_csv">Choose CSV file</string>
     <string name="import_backup">FreePeriod. backup</string>
     <string name="import_coming_soon">Clue and Flo exports coming soon.</string>
@@ -428,7 +428,7 @@
         <item quantity="other">%1$d periods from %2$s to %3$s</item>
     </plurals>
     <string name="import_ongoing">An empty end date is imported as an ongoing period.</string>
-    <string name="import_confirm">Import periods</string>
+    <string name="import_confirm">Import</string>
     <string name="import_invalid">No valid periods found. Check the columns and dates; dates must not be in the future.</string>
     <string name="customize_day_entry">Customize day entry</string>
     <string name="feedback">Send feedback</string>
@@ -566,5 +566,19 @@
     <plurals name="import_skipped">
         <item quantity="one">%1$d overlapping period skipped.</item>
         <item quantity="other">%1$d overlapping periods skipped.</item>
+    </plurals>
+    <string name="rename_entry">Rename</string>
+    <string name="rename_entry_description">Rename %1$s</string>
+    <string name="reset_entry_appearance">Reset name and icon</string>
+    <string name="delete_entry_item">Delete item</string>
+    <string name="pick_one">Pick one</string>
+    <string name="pick_several">Pick several</string>
+    <plurals name="import_entry_preview">
+        <item quantity="one">%d diary entry will be imported. Existing entries on these days will be replaced.</item>
+        <item quantity="other">%d diary entries will be imported. Existing entries on these days will be replaced.</item>
+    </plurals>
+    <plurals name="import_entries_imported">
+        <item quantity="one">%d diary entry imported.</item>
+        <item quantity="other">%d diary entries imported.</item>
     </plurals>
 </resources>

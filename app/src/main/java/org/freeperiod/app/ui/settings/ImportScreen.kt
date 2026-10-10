@@ -39,6 +39,9 @@ fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
                 }), Modifier.fillMaxWidth(), enabled = !state.busy)
             }
         }
+        if (state.dayLogs.isNotEmpty()) Text(pluralStringResource(
+            if (state.imported == null) R.plurals.import_entry_preview else R.plurals.import_entries_imported,
+            state.dayLogs.size, state.dayLogs.size))
         if (state.periods.isNotEmpty()) {
             val first = state.periods.minOf { it.start }
             val last = state.periods.maxOf { it.end ?: it.start }
@@ -49,6 +52,9 @@ fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
                 else Text(listOfNotNull(pluralStringResource(R.plurals.import_imported, state.imported, state.imported),
                     if (state.skipped > 0) pluralStringResource(R.plurals.import_skipped, state.skipped, state.skipped) else null).joinToString(" "))
             }
+        }
+        if (state.periods.isEmpty() && state.dayLogs.isNotEmpty()) {
+            if (state.imported == null) FpButton(onConfirm, enabled = !state.busy) { Text(stringResource(R.string.import_confirm)) }
         }
         if (state.busy) CircularProgressIndicator()
         state.error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }

@@ -21,6 +21,15 @@ class TrackingSettingsViewModelTest : DatabaseTest() {
     @Before fun setup() { Dispatchers.setMain(UnconfinedTestDispatcher()) }
     @After fun reset() { models.clear(); Dispatchers.resetMain() }
     private fun model() = TrackingSettingsViewModel(repository).also { models.put("tracking", it) }
+    @Test fun hideAndReorderPreserveNamesAndIcons() = runTest {
+        val vm = model()
+        vm.appearance(UiOverride("item:mood:GOOD", false, 3, "Content", "calm")).join()
+        vm.override("item:mood:GOOD", true, 3).join()
+        vm.reorder(listOf("item:mood:GOOD", "item:mood:BAD")).join()
+        assertEquals(UiOverride("item:mood:GOOD", true, 0, "Content", "calm"),
+            repository.snapshot().overrides.single { it.key == "item:mood:GOOD" })
+    }
+
     @Test fun situationPreferencePersistsAcrossPhaseChanges() = runTest {
         val vm = model()
         vm.situation(Situation(fertileWindowEnabled = false)).join()
@@ -32,7 +41,7 @@ class TrackingSettingsViewModelTest : DatabaseTest() {
     @Test fun customSymptomsStayInSymptomsAndKeepCategoryNamesUnique() = runTest {
         repository.addCustomCategory("Symptoms")
         val vm = model()
-        vm.item("My item", "warmth", null, true, "Symptoms").join()
+        vm.item("My item", "warmth", null, "symptoms", "Symptoms").join()
         val data = repository.snapshot()
         assertEquals(2, data.customCategories.size)
         val state = dayEntryState(data, today, today)

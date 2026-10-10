@@ -25,7 +25,7 @@ import java.time.format.FormatStyle
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.ui.theme.*
-import org.freeperiod.app.ui.day.symptomLabel
+import org.freeperiod.app.ui.day.*
 import org.freeperiod.engine.*
 
 @Composable
@@ -88,7 +88,7 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                 } }
             }
             if (state.phase == LifePhase.MENOPAUSE) item { MonthlySymptoms(state) }
-            else item { SymptomFrequency(state.symptomCounts, pluralStringResource(R.plurals.history_symptom_basis, state.symptomCycles, state.symptomCycles)) }
+            else item { SymptomFrequency(state, state.symptomCounts, state.ownSymptomCounts, pluralStringResource(R.plurals.history_symptom_basis, state.symptomCycles, state.symptomCycles)) }
             if (state.error) item { Text(stringResource(R.string.error_storage), color = MaterialTheme.colorScheme.error) }
         }
     }
@@ -146,18 +146,29 @@ private fun MonthlySymptoms(state: HistoryUiState) {
                 Icon(painterResource(R.drawable.ic_fp_next), stringResource(R.string.history_next_month))
             }
         }
-        SymptomFrequency(state.monthlySymptoms[month].orEmpty(), stringResource(R.string.history_monthly_symptoms))
+        SymptomFrequency(state, state.monthlySymptoms[month].orEmpty(), state.monthlyOwnSymptoms[month].orEmpty(), stringResource(R.string.history_monthly_symptoms))
     }
 }
 
 @Composable
-private fun SymptomFrequency(counts: Map<Symptom, Int>, basis: String) {
+private fun SymptomFrequency(state: HistoryUiState, counts: Map<Symptom, Int>, ownCounts: Map<Long, Int>, basis: String) {
     Column(verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
-        Text(stringResource(R.string.history_symptoms), style = MaterialTheme.typography.titleLarge)
+        val entry = DayEntryUiState(state.today, state.today,
+            log = DayLog(state.today, symptoms = counts.keys, tagIds = ownCounts.keys),
+            tags = state.tags, customCategories = state.customCategories, overrides = state.overrides)
+        val category = builtInCategories.single { it.key == "symptoms" }
+        Text(category.appearance(entry).label, style = MaterialTheme.typography.titleLarge)
         Text(basis, style = MaterialTheme.typography.bodySmall, color = LocalDaylight.current.muted)
-        if (counts.isEmpty()) Text(stringResource(R.string.history_no_symptoms))
-        counts.entries.sortedByDescending { it.value }.forEach { (symptom, count) ->
-            Text(pluralStringResource(R.plurals.history_symptom_count, count, count, stringResource(symptomLabel(symptom))))
+        if (counts.isEmpty() && ownCounts.isEmpty()) Text(stringResource(R.string.history_no_symptoms))
+        entry.entryItems(category).filter { entry.selected(it) }.forEach { item ->
+            val count = item.tag?.let { ownCounts[it.id] } ?: counts[Symptom.valueOf(requireNotNull(item.name))]
+            if (count != null) {
+                val appearance = item.appearance(entry)
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Icon(painterResource(appearance.icon), null, Modifier.size(20.dp))
+                    Text(pluralStringResource(R.plurals.history_symptom_count, count, count, appearance.label))
+                }
+            }
         }
     }
 }

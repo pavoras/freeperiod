@@ -109,7 +109,7 @@ object BackupCodec {
             val version = payload["schemaVersion"]?.jsonPrimitive?.intOrNull ?: return DecodeResult.InvalidContent
             val data = when (version) {
                 1 -> json.decodeFromJsonElement<BackupDataV1>(payload).toV2()
-                2 -> json.decodeFromJsonElement<BackupData>(payload)
+                2, 3 -> json.decodeFromJsonElement<BackupData>(payload).copy(schemaVersion = 3)
                 else -> return DecodeResult.UnsupportedVersion
             }
             return if (validBackup(data, today)) DecodeResult.Ok(data) else DecodeResult.InvalidContent
