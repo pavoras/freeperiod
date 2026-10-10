@@ -310,6 +310,8 @@
     <string name="method_patch">Patch</string>
     <string name="method_iud_hormonal">Hormonal IUD</string>
     <string name="method_iud_copper">Copper IUD</string>
+    <string name="method_copper_chain">Copper chain (frameless IUD)</string>
+    <string name="method_copper_ball">Copper ball (IUB)</string>
     <string name="method_implant">Implant</string>
     <string name="method_injection">Injection</string>
     <string name="method_condom">Condoms</string>

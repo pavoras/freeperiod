@@ -42,7 +42,7 @@ class FertilityTest {
     @Test fun hormonalMethodsDisallowFertileWindow() {
         for (phase in LifePhase.entries) for (method in Method.entries) for (on in listOf(false, true)) {
             val allowed = on && phase in setOf(LifePhase.REGULAR, LifePhase.TRYING_TO_CONCEIVE, LifePhase.PERIMENOPAUSE) &&
-                method in setOf(Method.NONE, Method.IUD_COPPER, Method.CONDOM, Method.OTHER)
+                method in setOf(Method.NONE, Method.IUD_COPPER, Method.COPPER_CHAIN, Method.COPPER_BALL, Method.CONDOM, Method.OTHER)
             val situation = Situation(phase = phase, method = method, fertileWindowEnabled = on)
             assertEquals("$phase/$method/$on", allowed, situation.fertileWindowAllowed())
             assertEquals("$phase/$method/$on", allowed, fertileWindow(range, situation) != null)

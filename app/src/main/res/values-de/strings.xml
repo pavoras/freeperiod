@@ -310,6 +310,8 @@
     <string name="method_patch">Pflaster</string>
     <string name="method_iud_hormonal">Hormonspirale</string>
     <string name="method_iud_copper">Kupferspirale</string>
+    <string name="method_copper_chain">Kupferkette</string>
+    <string name="method_copper_ball">Kupferball</string>
     <string name="method_implant">Implantat</string>
     <string name="method_injection">Spritze</string>
     <string name="method_condom">Kondome</string>

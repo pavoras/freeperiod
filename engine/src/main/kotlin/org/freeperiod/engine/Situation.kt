@@ -10,7 +10,7 @@ enum class LifePhase { REGULAR, TRYING_TO_CONCEIVE, PREGNANT, POSTPARTUM, PERIME
 
 /** Stable method names used by persistence and backup. */
 @Serializable
-enum class Method { NONE, PILL_COMBINED, PILL_PROGESTIN, RING, PATCH, IUD_HORMONAL, IUD_COPPER, IMPLANT, INJECTION, CONDOM, OTHER }
+enum class Method { NONE, PILL_COMBINED, PILL_PROGESTIN, RING, PATCH, IUD_HORMONAL, IUD_COPPER, COPPER_CHAIN, COPPER_BALL, IMPLANT, INJECTION, CONDOM, OTHER }
 
 /** Optional method configuration, independent of the life phase and display preferences. */
 @Serializable
@@ -37,7 +37,7 @@ fun Situation.predictionMode(): PredictionMode = when {
 /** Calendar estimates require the display preference and a compatible phase and method. */
 fun Situation.fertileWindowAllowed(): Boolean = fertileWindowEnabled &&
     phase in setOf(LifePhase.REGULAR, LifePhase.TRYING_TO_CONCEIVE, LifePhase.PERIMENOPAUSE) &&
-    method in setOf(Method.NONE, Method.IUD_COPPER, Method.CONDOM, Method.OTHER)
+    method in setOf(Method.NONE, Method.IUD_COPPER, Method.COPPER_CHAIN, Method.COPPER_BALL, Method.CONDOM, Method.OTHER)
 
 /** Complete months since end + 1; ongoing bleeding returns zero and absent history returns null. */
 fun fullMonthsSinceLastPeriodEnded(periods: List<Period>, today: LocalDate): Int? {

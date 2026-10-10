@@ -35,6 +35,8 @@ internal fun methodLabel(value: Method): Int = when (value) {
     Method.PATCH -> R.string.method_patch
     Method.IUD_HORMONAL -> R.string.method_iud_hormonal
     Method.IUD_COPPER -> R.string.method_iud_copper
+    Method.COPPER_CHAIN -> R.string.method_copper_chain
+    Method.COPPER_BALL -> R.string.method_copper_ball
     Method.IMPLANT -> R.string.method_implant
     Method.INJECTION -> R.string.method_injection
     Method.CONDOM -> R.string.method_condom
@@ -56,7 +58,7 @@ internal fun methodReminderPreset(method: Method, today: LocalDate): Reminder? {
         Method.RING -> Recurrence.EveryNDays(1, today)
         Method.PATCH -> Recurrence.EveryNDays(1, today)
         Method.INJECTION -> Recurrence.EveryNDays(1, today)
-        Method.IUD_HORMONAL, Method.IUD_COPPER, Method.IMPLANT -> Recurrence.Once(today)
+        Method.IUD_HORMONAL, Method.IUD_COPPER, Method.COPPER_CHAIN, Method.COPPER_BALL, Method.IMPLANT -> Recurrence.Once(today)
         else -> return null
     }
     return Reminder(0, if (method in listOf(Method.PILL_COMBINED, Method.PILL_PROGESTIN)) ReminderKind.PILL else ReminderKind.METHOD,
