@@ -6,6 +6,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE ui_overrides ADD COLUMN chart INTEGER")
+        // Reordering used to store the ovulation test as shown, which only took effect when trying to conceive.
+        // The switch now means what it says, so outside that phase keep it hidden as the user saw it.
+        db.execSQL("UPDATE ui_overrides SET hidden = 1 WHERE `key` = 'category:ovulation_test' AND hidden = 0 AND " +
+            "COALESCE((SELECT phase FROM situation WHERE id = 0), 'REGULAR') != 'TRYING_TO_CONCEIVE'")
     }
 }
 

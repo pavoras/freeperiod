@@ -13,6 +13,7 @@ import org.freeperiod.app.ui.day.EntryCategory
 import org.freeperiod.app.ui.day.builtInCategories
 import org.freeperiod.app.ui.day.dayEntryState
 import org.freeperiod.app.ui.day.entryCategories
+import org.freeperiod.app.ui.day.hiddenByDefault
 import java.time.LocalDate
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
@@ -53,6 +54,11 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
                 pill = if (value.pill != previous.pill) value.pill else current.pill,
                 fertileWindowEnabled = if (value.fertileWindowEnabled != previous.fertileWindowEnabled) value.fertileWindowEnabled
                     else current.fertileWindowEnabled))
+            // The ovulation test comes with trying to conceive and goes with it, also after the order was changed.
+            val trying = LifePhase.TRYING_TO_CONCEIVE
+            if (value.phase != previous.phase && trying in setOf(value.phase, previous.phase))
+                repository.snapshot().overrides.find { it.key == "category:ovulation_test" }
+                    ?.let { repository.setUiOverride(it.copy(hidden = value.phase != trying)) }
         }
     }
     fun reminder(value: Reminder) = write { repository.saveReminder(value) }
@@ -67,10 +73,11 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
     fun reorder(keys: List<String>) = write { writeOrder(keys) }
 
     private suspend fun writeOrder(keys: List<String>) {
-        val overrides = repository.snapshot().overrides
+        val data = repository.snapshot()
         // A category that starts hidden (medication) stays hidden when only its place changes.
-        keys.forEachIndexed { index, key -> repository.setUiOverride((overrides.find { it.key == key }
-            ?: UiOverride(key, builtInCategories.any { "category:${it.key}" == key && it.defaultHidden }, index)).copy(sortOrder = index)) }
+        keys.forEachIndexed { index, key -> repository.setUiOverride((data.overrides.find { it.key == key }
+            ?: UiOverride(key, builtInCategories.find { "category:${it.key}" == key }?.hiddenByDefault(data.situation) == true, index))
+            .copy(sortOrder = index)) }
     }
     /** Adds the category when its id is 0, otherwise saves the edited one. */
     fun category(draft: CustomCategory) = write {
@@ -94,8 +101,9 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
         val default = builtInCategories.first { it.key == field }
         val key = "category:$field"
         val previous = data.overrides.find { it.key == key }
-        repository.setUiOverride((previous ?: UiOverride(key, default.defaultHidden, default.order)).copy(hidden = !visible))
-        if (visible && (previous?.hidden ?: default.defaultHidden)) when (field) {
+        val hiddenByDefault = default.hiddenByDefault(data.situation)
+        repository.setUiOverride((previous ?: UiOverride(key, hiddenByDefault, default.order)).copy(hidden = !visible))
+        if (visible && (previous?.hidden ?: hiddenByDefault)) when (field) {
             "appetite" -> placeAfter(key, listOfNotNull(dailyKey(data), "category:symptoms"))
             "libido" -> placeAfter(key, listOf("category:sex"))
         }
@@ -123,8 +131,9 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
     fun painDiary(on: Boolean, categories: List<ItemSetCategory>, archive: Boolean = false) = write {
         if (!on) return@write repository.turnOffPainDiary(archive)
         val data = repository.snapshot()
+        // Categories that start off (effect on your day) keep whatever the user chose.
         val keys = listOf("category:pain", "category:medication") + data.customCategories
-            .filter { category -> categories.any { it.key == category.itemSet } }.map { "customCategory:${it.id}" }
+            .filter { category -> categories.any { it.key == category.itemSet && !it.hidden } }.map { "customCategory:${it.id}" }
         val show = keys.mapNotNull { key -> data.overrides.find { it.key == key }?.copy(hidden = false)
             ?: builtInCategories.find { "category:${it.key}" == key && it.defaultHidden }?.let { UiOverride(key, false, it.order) } }
         repository.turnOnPainDiary(categories, show)

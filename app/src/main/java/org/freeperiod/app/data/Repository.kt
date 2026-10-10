@@ -16,8 +16,12 @@ import org.freeperiod.engine.importing.*
 
 class PeriodValidationException(val error: PeriodError) : Exception(error.name)
 
-/** One category of an item set: created once, found again later by [key] (stored in CustomCategory.itemSet). */
-data class ItemSetCategory(val key: String, val name: String, val iconKey: String, val items: List<Pair<String, String>>)
+/**
+ * One category of an item set: created once, found again later by [key] (stored in CustomCategory.itemSet).
+ * [hidden]: created switched off in the day entry.
+ */
+data class ItemSetCategory(val key: String, val name: String, val iconKey: String, val items: List<Pair<String, String>>,
+    val hidden: Boolean = false)
 
 const val PAIN_DIARY = "pain_diary:"
 
@@ -169,6 +173,7 @@ class Repository(
             while (existing.any { it.name.equals(name, ignoreCase = true) }) name = "${set.name} ${suffix++}"
             val category = CustomCategory(0, name, set.iconKey, 100 + existing.size, false, itemSet = set.key)
             val id = categoriesDao.insert(category.entity())
+            if (set.hidden) overridesDao.upsert(UiOverride("customCategory:$id", true, category.sortOrder).entity())
             existing += category.copy(id = id)
             set.items.forEach { (item, icon) -> tagsDao.insert(Tag(0, item, categoryId = id, iconKey = icon).entity()) }
         }

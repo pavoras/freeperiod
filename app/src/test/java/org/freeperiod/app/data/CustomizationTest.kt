@@ -36,11 +36,12 @@ class CustomizationTest : DatabaseTest() {
         assertTrue(entryCategories(state).any { it.category?.id == category.id })
         assertEquals(setOf(item.id), state.log.tagIds)
     }
-    @Test fun reorderingDoesNotHidePhaseSpecificItems() = runBlocking {
-        repository.setUiOverride(UiOverride("category:ovulation_test", false, 0))
+    @Test fun theOvulationTestFollowsThePhaseUntilTheUserChooses() = runBlocking {
         assertFalse(entryCategories(dayEntryState(repository.snapshot(), today, today)).any { it.key == "ovulation_test" })
         repository.updateSituation(Situation(phase = LifePhase.TRYING_TO_CONCEIVE))
         assertTrue(entryCategories(dayEntryState(repository.snapshot(), today, today)).any { it.key == "ovulation_test" })
+        repository.setUiOverride(UiOverride("category:ovulation_test", true, 0))
+        assertFalse(entryCategories(dayEntryState(repository.snapshot(), today, today)).any { it.key == "ovulation_test" })
     }
     @Test fun hiddenBuiltInStaysInHistory() = runBlocking {
         repository.saveDayLog(DayLog(today, symptoms = setOf(Symptom.CRAMPS)))

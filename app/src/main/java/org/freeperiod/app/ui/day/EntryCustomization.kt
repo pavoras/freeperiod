@@ -113,6 +113,10 @@ internal fun DayEntryUiState.entryItems(category: EntryCategory, includeHidden: 
         .sortedWith(compareBy({ it.order }, { it.key }))
 }
 
+/** Hidden until the user turns it on: the extras that start off, and the ovulation test outside trying to conceive. */
+internal fun EntryCategory.hiddenByDefault(situation: Situation): Boolean =
+    defaultHidden || key == "ovulation_test" && situation.phase != LifePhase.TRYING_TO_CONCEIVE
+
 internal fun entryCategories(state: DayEntryUiState, includeHidden: Boolean = false): List<EntryCategory> {
     val custom = state.customCategories.filter { it.builtInField() == null && (!it.archived ||
         !includeHidden && state.tags.any { tag -> tag.categoryId == it.id && tag.id in state.log.tagIds }) }.map {
@@ -120,10 +124,10 @@ internal fun entryCategories(state: DayEntryUiState, includeHidden: Boolean = fa
     }
     return (builtInCategories + custom).map { category ->
         val override = state.overrides.find { it.key == category.overrideKey }
-        category.copy(order = override?.sortOrder ?: category.order, hidden = override?.hidden ?: category.defaultHidden)
+        category.copy(order = override?.sortOrder ?: category.order, hidden = override?.hidden ?: category.hiddenByDefault(state.situation))
     }.filter { category ->
         val used = state.entryItems(category).any { state.selected(it) } || category.key == "note" && !state.log.note.isNullOrBlank()
-        includeHidden || used || (!category.hidden && (category.key != "ovulation_test" || state.situation.phase == LifePhase.TRYING_TO_CONCEIVE))
+        includeHidden || used || !category.hidden
     }.sortedWith(compareBy({ it.order }, { it.key }))
 }
 

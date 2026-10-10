@@ -1,0 +1,6 @@
+First release.
+• A period calendar and daily diary, stored on your phone.
+• Cycle history, calendar estimates and optional reminders.
+• Custom diary categories, six accents and optional app lock.
+• Encrypted backup files and CSV export/import.
+• English and German. No ads, subscription or account.

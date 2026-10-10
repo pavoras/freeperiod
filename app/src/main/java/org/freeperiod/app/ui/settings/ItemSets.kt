@@ -16,5 +16,7 @@ private val painDiary = listOf(
 
 /** Names come from the current language once; afterwards they are the user's own and can be renamed. */
 internal fun painDiaryCategories(text: (Int) -> String): List<ItemSetCategory> = painDiary.map { (key, category, items) ->
-    ItemSetCategory(key, text(category.first), category.second, items.map { (label, icon) -> text(label) to icon })
+    // Effect on your day starts off; the user turns it on in Customize day entry.
+    ItemSetCategory(key, text(category.first), category.second, items.map { (label, icon) -> text(label) to icon },
+        hidden = key == "pain_diary:daily")
 }

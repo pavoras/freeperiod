@@ -1,0 +1,6 @@
+Erste Version.
+• Periodenkalender und Tagebuch, lokal auf deinem Handy.
+• Zyklusverlauf, Kalenderschätzungen und optionale Erinnerungen.
+• Eigene Kategorien, sechs Akzentfarben und optionale App-Sperre.
+• Verschlüsselte Backups und CSV-Export/-Import.
+• Deutsch und Englisch. Ohne Werbung, Abo oder Konto.
