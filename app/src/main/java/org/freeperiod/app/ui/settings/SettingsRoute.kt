@@ -34,7 +34,7 @@ import kotlinx.serialization.json.Json
 private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY, IMPORT, SUMMARY }
 
 @Composable
-fun SettingsRoute(container: AppContainer) {
+fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit: () -> Unit = {}) {
     val context = LocalContext.current
     val appContext = context.applicationContext
     val model: SettingsViewModel = viewModel(factory = viewModelFactory {
@@ -57,14 +57,15 @@ fun SettingsRoute(container: AppContainer) {
     val settings by model.state.collectAsStateWithLifecycle()
     val recovery by backup.state.collectAsStateWithLifecycle()
     val reminderAccess = rememberReminderAccess(container.notifications)
-    var page by rememberSaveable { mutableStateOf(SettingsPage.MAIN) }
+    // Opened from the day entry: only Customize day entry, and back returns there.
+    var page by rememberSaveable { mutableStateOf(if (dayEntryOnly) SettingsPage.DAY_ENTRY else SettingsPage.MAIN) }
     var externalError by remember { mutableStateOf(false) }
-    val back = { page = when (page) { SettingsPage.REMINDER_EDITOR -> SettingsPage.REMINDERS; SettingsPage.IMPORT -> SettingsPage.BACKUP; else -> SettingsPage.MAIN }; backup.cancelRestore() }
+    val back = { if (dayEntryOnly && page == SettingsPage.DAY_ENTRY) onExit() else page = when (page) { SettingsPage.REMINDER_EDITOR -> SettingsPage.REMINDERS; SettingsPage.IMPORT -> SettingsPage.BACKUP; else -> SettingsPage.MAIN }; backup.cancelRestore() }
     fun saveReminder(value: org.freeperiod.engine.Reminder) {
         if (value.enabled && trackingState.data.reminders.none { it.enabled }) reminderAccess.requestPermission()
         tracking.reminder(value)
     }
-    BackHandler(page != SettingsPage.MAIN, onBack = back)
+    BackHandler(page != SettingsPage.MAIN || dayEntryOnly, onBack = back)
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { backup.createdDocument(it) }
     val createCsv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { backup.createdDocument(it) }
     val createPdf = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { backup.createdDocument(it) }
@@ -123,8 +124,9 @@ fun SettingsRoute(container: AppContainer) {
                 }
                 SettingsPage.SITUATION -> SituationScreen(trackingState.data.situation, container.clock(), { tracking.situation(it) }, back,
                     onOfferReminder = { editReminder(it); page = SettingsPage.REMINDER_EDITOR },
-                    extras = TrackingExtras(trackingState.data.overrides.any { it.key == "category:medication" && !it.hidden },
-                        { tracking.showCategory("medication", it) },
+                    extras = TrackingExtras(optionalCategories.filter { field ->
+                            trackingState.data.overrides.any { it.key == "category:$field" && !it.hidden } }.toSet(),
+                        { field, show -> tracking.showCategory(field, show) },
                         { on, hide -> tracking.painDiary(on, painDiaryCategories(context::getString), hide) }))
                 SettingsPage.REMINDERS -> RemindersScreen(trackingState.data.reminders, ::saveReminder,
                     { editReminder(it); page = SettingsPage.REMINDER_EDITOR }, {

@@ -21,15 +21,37 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit.DAYS
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.components.FpChip
 import org.freeperiod.app.ui.day.ResolvedEntryAppearance
 import org.freeperiod.app.ui.theme.*
 
-/** Days shown in the History charts. */
-internal const val CHART_DAYS = 56
+/** Time spans the History charts can show; [days] ends today. */
+enum class ChartRange(val days: Int, val label: Int) {
+    WEEK(7, R.string.history_range_week), MONTH(30, R.string.history_range_month),
+    QUARTER(91, R.string.history_range_quarter), YEAR(365, R.string.history_range_year),
+}
+
+/** The longest range: History loads this much once and every chart cuts its range from it. */
+internal val CHART_DAYS = ChartRange.entries.maxOf { it.days }
 
 private val rowHeight = 28.dp
-/** Same axis width in every chart, so days line up between mood and pain. */
-private val axisWidth = 72.dp
+/** Same axis width in every chart, so days line up between the charts. */
+private val axisWidth = 100.dp
+
+/** Heading, range picker and the shared reading hint above the charts. */
+@Composable
+internal fun ChartRangePicker(range: ChartRange, onRange: (ChartRange) -> Unit) {
+    val t = LocalDaylight.current
+    Column(verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+        Text(stringResource(R.string.history_charts), style = MaterialTheme.typography.titleLarge)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            ChartRange.entries.forEach { option ->
+                FpChip(option == range, { onRange(option) }, stringResource(option.label), Modifier.weight(1f))
+            }
+        }
+        Text(stringResource(R.string.history_chart_basis), style = MaterialTheme.typography.bodySmall, color = t.muted)
+    }
+}
 
 /**
  * Logged levels as dots per day (index 0 = lowest row), period days shaded. It shows entries as they are:
@@ -37,15 +59,15 @@ private val axisWidth = 72.dp
  */
 @Composable
 internal fun LevelChart(title: String, levels: List<ResolvedEntryAppearance>, values: Map<LocalDate, Int>,
-    periodDays: Set<LocalDate>, to: LocalDate, icons: Boolean) {
+    periodDays: Set<LocalDate>, to: LocalDate, icons: Boolean, days: Int) {
     val t = LocalDaylight.current
-    val from = to.minusDays(CHART_DAYS - 1L)
+    val from = to.minusDays(days - 1L)
+    val shown = values.filterKeys { it in from..to }.toSortedMap()
     val locale = LocalConfiguration.current.locales[0]
     val dates = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-    val spoken = pluralStringResource(R.plurals.history_chart_days, values.size, values.size, CHART_DAYS)
+    val spoken = pluralStringResource(R.plurals.history_chart_days, shown.size, shown.size, days)
     Column(verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
-        Text(title, style = MaterialTheme.typography.titleLarge)
-        Text(stringResource(R.string.history_chart_basis), style = MaterialTheme.typography.bodySmall, color = t.muted)
+        Text(title, style = MaterialTheme.typography.titleMedium)
         Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) { contentDescription = "$title. $spoken" }) {
             Column(Modifier.width(axisWidth)) {
                 levels.asReversed().forEach { level ->
@@ -57,8 +79,11 @@ internal fun LevelChart(title: String, levels: List<ResolvedEntryAppearance>, va
                 }
             }
             Canvas(Modifier.weight(1f).height(rowHeight * levels.size)) {
-                val step = size.width / CHART_DAYS
+                val step = size.width / days
                 val row = size.height / levels.size
+                // A year has ~1 px per day: dots and lines shrink with the day width instead of merging.
+                val dot = (step * 0.42f).coerceIn(1.2.dp.toPx(), 4.dp.toPx())
+                val stroke = (step * 0.3f).coerceIn(0.8.dp.toPx(), 1.5.dp.toPx())
                 fun x(date: LocalDate) = (DAYS.between(from, date) + 0.5f) * step
                 fun y(level: Int) = size.height - (level + 0.5f) * row
                 // One band per run of period days (no seams between days).
@@ -69,13 +94,13 @@ internal fun LevelChart(title: String, levels: List<ResolvedEntryAppearance>, va
                     drawRect(t.accent.container, Offset(x(run.first()) - step / 2, 0f), Size(step * run.size, size.height))
                 }
                 repeat(levels.size) { level -> drawLine(t.line, Offset(0f, y(level)), Offset(size.width, y(level)), 1.dp.toPx()) }
-                val points = values.filterKeys { it in from..to }.toSortedMap()
-                // Lines only join neighbouring days; a gap stays a gap.
-                points.entries.zipWithNext().forEach { (a, b) ->
+                // Lines only join neighbouring days; a gap stays a gap. Over months the days are too narrow
+                // for lines to read as more than noise, so only the dots stay.
+                if (step >= 4.dp.toPx()) shown.entries.zipWithNext().forEach { (a, b) ->
                     if (DAYS.between(a.key, b.key) == 1L)
-                        drawLine(t.accent.periodBorder, Offset(x(a.key), y(a.value)), Offset(x(b.key), y(b.value)), 1.5.dp.toPx())
+                        drawLine(t.accent.periodBorder, Offset(x(a.key), y(a.value)), Offset(x(b.key), y(b.value)), stroke)
                 }
-                points.forEach { (day, level) -> drawCircle(t.accent.periodBorder, 3.5.dp.toPx(), Offset(x(day), y(level))) }
+                shown.forEach { (day, level) -> drawCircle(t.accent.periodBorder, dot, Offset(x(day), y(level))) }
             }
         }
         Row(Modifier.fillMaxWidth().padding(start = axisWidth)) {

@@ -23,6 +23,8 @@ internal val builtInCategories = listOf(
     EntryCategory("ovulation_test", R.string.entry_ovulation_test, R.drawable.ic_fp_today, 8),
     // Off until the user turns it on (Customize day entry or the pain diary in My situation).
     EntryCategory("medication", R.string.entry_medication, R.drawable.ic_item_pill, 9, defaultHidden = true),
+    EntryCategory("appetite", R.string.entry_appetite, R.drawable.ic_item_cutlery, 10, defaultHidden = true),
+    EntryCategory("libido", R.string.entry_libido, R.drawable.ic_item_sparkles, 11, defaultHidden = true),
 )
 
 internal data class EntryItem(val key: String, val name: String?, val label: Int, val icon: Int,
@@ -54,6 +56,8 @@ internal fun builtInEntryItems(field: String): List<EntryItem> {
         "symptoms" -> Symptom.entries.sortedBy { listOf(Symptom.CRAMPS, Symptom.BLOATING, Symptom.HEADACHE).indexOf(it).let { i -> if (i < 0) 3 else i } }.map { Triple(it.name, symptomLabel(it), symptomIcon(it)) }
         "sex" -> Sex.entries.map { Triple(it.name, sexLabel(it), R.drawable.ic_fp_sex) }
         "discharge" -> Discharge.entries.map { Triple(it.name, dischargeLabel(it), R.drawable.ic_fp_discharge) }
+        "appetite" -> Appetite.entries.map { Triple(it.name, appetiteLabel(it), R.drawable.ic_item_cutlery) }
+        "libido" -> Libido.entries.map { Triple(it.name, libidoLabel(it), R.drawable.ic_item_sparkles) }
         "ovulation_test" -> OvulationTest.entries.map { Triple(it.name,
             if (it == OvulationTest.POSITIVE) R.string.ovulation_positive else R.string.ovulation_negative, R.drawable.ic_fp_today) }
         else -> emptyList()
@@ -69,6 +73,8 @@ internal fun DayEntryUiState.selected(item: EntryItem): Boolean = item.tag?.let 
     "discharge" -> log.discharge?.name == item.name
     "symptoms" -> log.symptoms.any { it.name == item.name }
     "ovulation_test" -> log.ovulationTest?.name == item.name
+    "appetite" -> log.appetite?.name == item.name
+    "libido" -> log.libido?.name == item.name
     else -> false
 }
 

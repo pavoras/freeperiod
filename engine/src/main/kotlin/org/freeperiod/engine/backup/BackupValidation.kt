@@ -39,12 +39,14 @@ fun validBackup(data: BackupData, today: LocalDate): Boolean {
 
 private fun uniquePositiveIds(ids: List<Long>): Boolean = ids.all { it > 0 } && ids.toSet().size == ids.size
 
-private val categories = setOf("flow", "mood", "pain", "symptoms", "sex", "discharge", "tags", "note", "ovulation_test", "medication")
+private val categories = setOf("flow", "mood", "pain", "symptoms", "sex", "discharge", "tags", "note", "ovulation_test", "medication",
+    "appetite", "libido")
 private val items: Map<String, Set<String>> = mapOf(
     "flow" to FlowLevel.entries.map { it.name }.toSet(), "mood" to Mood.entries.map { it.name }.toSet(),
     "pain" to Pain.entries.map { it.name }.toSet(), "symptoms" to Symptom.entries.map { it.name }.toSet(),
     "sex" to Sex.entries.map { it.name }.toSet(), "discharge" to Discharge.entries.map { it.name }.toSet(),
     "ovulation_test" to OvulationTest.entries.map { it.name }.toSet(),
+    "appetite" to Appetite.entries.map { it.name }.toSet(), "libido" to Libido.entries.map { it.name }.toSet(),
 )
 
 private fun validOverrideKey(key: String, categoryIds: Set<Long>, tagIds: Set<Long>): Boolean {

@@ -13,7 +13,7 @@ import org.freeperiod.engine.Tag
  */
 object CsvExport {
     private val header = listOf("date", "period_day", "flow", "mood", "pain", "sex", "discharge", "symptoms", "tags", "note",
-        "ovulation_test", "custom_items", "medication")
+        "ovulation_test", "custom_items", "medication", "appetite", "libido")
 
     /**
      * An ongoing period counts up to [today]; items of custom categories are written as category:item.
@@ -48,6 +48,7 @@ object CsvExport {
                         "${csvItemName(category)}:${csvCountedName(tag.name, log.count(id))}"
                     }.joinToString(";"),
                     own("medication").joinToString(";") { csvCountedName(it.name, log.count(it.id)) },
+                    name(log.appetite), name(log.libido),
                 ))
             }
         }

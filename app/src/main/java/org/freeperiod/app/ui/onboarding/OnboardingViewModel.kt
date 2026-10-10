@@ -16,6 +16,8 @@ import kotlinx.serialization.json.Json
 import org.freeperiod.app.R
 import org.freeperiod.app.data.Repository
 import org.freeperiod.app.data.SettingsStore
+import org.freeperiod.app.ui.day.EntryCategory
+import org.freeperiod.app.ui.day.builtInCategories
 import org.freeperiod.engine.*
 
 /** Selected calendar days remain the source of truth until the one-transaction import. */
@@ -40,6 +42,8 @@ data class OnboardingUiState(
     val existingPeriods: List<Period> = emptyList(),
     val periodsCommitted: Boolean = false,
     val skippedPeriods: Int = 0,
+    /** Day-entry categories to show; starts with the app's defaults. */
+    val tracked: Set<String> = onboardingCategories.filterNot { it.defaultHidden }.map { it.key }.toSet(),
     val busy: Boolean = false,
     val message: Int? = null,
 ) {
@@ -58,6 +62,9 @@ data class OnboardingUiState(
         (hideCycleLength || unknown || typicalLength.isBlank() || typicalLength.toIntOrNull() in 15..90)
     val situation get() = Situation(phase = phase, method = method, pill = pill)
 }
+
+/** Offered in setup; flow is always there and the ovulation test follows the life phase. */
+internal val onboardingCategories: List<EntryCategory> = builtInCategories.filter { it.key !in setOf("flow", "ovulation_test") }
 
 internal fun selectedPeriods(days: Set<LocalDate>, ongoing: Boolean): List<Period> {
     val sorted = days.sorted()
@@ -99,6 +106,7 @@ class OnboardingViewModel(private val repository: Repository, private val settin
     fun setPeriodReminder(value: Boolean) = change { it.copy(periodReminder = value) }
     fun setDailyReminder(value: Boolean) = change { it.copy(dailyReminder = value) }
     fun setMethodReminder(value: Reminder?) = change { it.copy(methodReminder = value) }
+    fun setTracked(key: String, on: Boolean) = change { it.copy(tracked = if (on) it.tracked + key else it.tracked - key) }
     fun dismissOngoingQuestion() = change { it.copy(askOngoing = false) }
     fun setOngoing(value: Boolean) = change { it.copy(ongoing = value, askOngoing = false) }
     fun setRangeMode(value: Boolean) = change { it.copy(rangeMode = value, rangeStart = null) }
@@ -128,7 +136,7 @@ class OnboardingViewModel(private val repository: Repository, private val settin
             change { it.copy(askOngoing = true) }; return
         }
         if (current.page == 4 && !current.unknown && current.typicalLength.toIntOrNull() !in 15..90) return
-        val page = if (current.page == 3 && current.hideCycleLength) 5 else (current.page + 1).coerceAtMost(5)
+        val page = if (current.page == 3 && current.hideCycleLength) 5 else (current.page + 1).coerceAtMost(6)
         change { it.copy(page = page, message = null) }
     }
     fun back() = change { it.copy(page = if (it.page == 5 && it.hideCycleLength) 3 else (it.page - 1).coerceAtLeast(0), message = null) }
@@ -138,7 +146,7 @@ class OnboardingViewModel(private val repository: Repository, private val settin
             2 -> if (!state.value.validPill) change { it.copy(pillActive = "", pillBreak = "", packStart = "") }
             3 -> if (!state.value.periodsCommitted) change { it.copy(selectedDays = emptySet(), ongoing = null, rangeStart = null) }
             4 -> change { it.copy(unknown = true) }
-            5 -> { change { it.copy(periodReminder = false, dailyReminder = false, methodReminder = null) }; return finish() }
+            6 -> { change { it.copy(periodReminder = false, dailyReminder = false, methodReminder = null) }; return finish() }
         }
         next()
         return viewModelScope.launch { }
@@ -155,9 +163,16 @@ class OnboardingViewModel(private val repository: Repository, private val settin
             if (!draft.periodsCommitted) {
                 val skipped = repository.addPeriods(draft.draftPeriods)
                 change { it.copy(periodsCommitted = true, skippedPeriods = skipped.size) }
-                if (skipped.isNotEmpty()) { change { it.copy(page = 5) }; return@launch }
+                if (skipped.isNotEmpty()) { change { it.copy(page = 6) }; return@launch }
             }
             repository.updateSituation(draft.situation)
+            // Only choices that differ from the defaults are stored, like a change in Customize day entry.
+            val overrides = repository.snapshot().overrides
+            onboardingCategories.filter { (it.key !in draft.tracked) != it.defaultHidden }.forEach { category ->
+                val key = "category:${category.key}"
+                repository.setUiOverride((overrides.find { it.key == key } ?: UiOverride(key, false, category.order))
+                    .copy(hidden = category.key !in draft.tracked))
+            }
             if (!draft.hideCycleLength) repository.updateDomainSettings(repository.snapshot().settings.copy(
                 typicalCycleLength = if (draft.unknown || draft.typicalLength.isBlank()) null else draft.typicalLength.toInt()))
             settings.migrateReminders(repository)
@@ -188,6 +203,7 @@ private fun OnboardingUiState.savedDraft() = Bundle().apply {
     ongoing?.let { putBoolean("ongoing", it) }; putBoolean("askOngoing", askOngoing)
     putBoolean("rangeMode", rangeMode); rangeStart?.let { putLong("rangeStart", it.toEpochDay()) }
     putBoolean("committed", periodsCommitted); putInt("skipped", skippedPeriods)
+    putStringArray("tracked", tracked.toTypedArray())
 }
 private fun restoreOnboarding(bundle: Bundle?, today: LocalDate): OnboardingUiState {
     if (bundle == null) return OnboardingUiState(today = today)
@@ -201,5 +217,6 @@ private fun restoreOnboarding(bundle: Bundle?, today: LocalDate): OnboardingUiSt
         methodReminder = bundle.getString("methodReminder")?.let { Json.decodeFromString<Reminder>(it) },
         ongoing = if (bundle.containsKey("ongoing")) bundle.getBoolean("ongoing") else null, askOngoing = bundle.getBoolean("askOngoing"),
         rangeMode = bundle.getBoolean("rangeMode"), rangeStart = if (bundle.containsKey("rangeStart")) LocalDate.ofEpochDay(bundle.getLong("rangeStart")) else null,
-        periodsCommitted = bundle.getBoolean("committed"), skippedPeriods = bundle.getInt("skipped"))
+        periodsCommitted = bundle.getBoolean("committed"), skippedPeriods = bundle.getInt("skipped"),
+        tracked = bundle.getStringArray("tracked")?.toSet() ?: OnboardingUiState(today = today).tracked)
 }

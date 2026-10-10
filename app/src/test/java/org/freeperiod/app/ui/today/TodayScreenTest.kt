@@ -38,6 +38,37 @@ class TodayScreenTest {
         compose.onNodeWithText("Not a medical device").assertDoesNotExist()
     }
 
+    @Test fun swipingSwitchesToTheRingAndTheDotsSwitchBack() {
+        var ring: Boolean? = null
+        compose.setContent { FreePeriodTheme { TodayScreen(todayFixture("regular"), {}, {}, {}, {}, {}, {}, onRingChange = { ring = it }) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Next period likely", substring = true).assertDoesNotExist()
+        // Over the calendar, which scrolls vertically: a horizontal swipe still changes the view.
+        compose.onRoot().performTouchInput { swipeLeft() }
+        compose.waitForIdle()
+        compose.onNodeWithText("Next period likely", substring = true).assertIsDisplayed()
+        assertEquals(true, ring)
+        compose.onNodeWithContentDescription("Calendar").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Next period likely", substring = true).assertDoesNotExist()
+    }
+
+    @Test fun theBigNumberAndTheRingNumberBringBackToday() {
+        var jumps = 0
+        compose.setContent { FreePeriodTheme { TodayScreen(todayFixture("regular"), {}, {}, {}, {}, {}, {}, onJumpToToday = { jumps++ }) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Cycle day").performClick()
+        assertEquals(1, jumps)
+        compose.onRoot().performTouchInput { swipeLeft() }
+        compose.waitForIdle()
+        compose.onNode(SemanticsMatcher("jump to today") {
+            it.config.getOrElseNullable(androidx.compose.ui.semantics.SemanticsActions.OnClick) { null }?.label == "Show today in the calendar"
+        }).performClick()
+        compose.waitForIdle()
+        assertEquals(2, jumps)
+        compose.onNodeWithText("Next period likely", substring = true).assertDoesNotExist()
+    }
+
     @Test fun windowIsExplainedInTheLegendNotInTheCard() {
         val state = todayFixture("fertile", LocalDate.of(2026, 4, 6))
         compose.setContent { FreePeriodTheme { TodayScreen(state, {}, {}, {}, {}, {}, {}) } }

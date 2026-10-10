@@ -65,9 +65,12 @@ internal fun methodReminderPreset(method: Method, today: LocalDate): Reminder? {
         null, recurrence, LocalTime.of(20, 0), false)
 }
 
-/** Optional day-entry parts switched on from My situation: medication, and the pain diary (on, hide its categories). */
-data class TrackingExtras(val medication: Boolean = false, val onMedication: (Boolean) -> Unit = {},
+/** Optional day-entry parts switched on from My situation: built-in categories off by default, and the pain diary (on, hide its categories). */
+data class TrackingExtras(val shown: Set<String> = emptySet(), val onShow: (String, Boolean) -> Unit = { _, _ -> },
     val painDiary: (Boolean, Boolean) -> Unit = { _, _ -> })
+
+/** Built-in categories that are off until turned on here (or in Customize day entry). */
+internal val optionalCategories = listOf("medication", "appetite", "libido")
 
 @Composable
 fun SituationScreen(situation: Situation, today: LocalDate, onSave: (Situation) -> Unit, onBack: () -> Unit,
@@ -122,8 +125,12 @@ fun SituationScreen(situation: Situation, today: LocalDate, onSave: (Situation) 
                     onChange = { if (it) extras.painDiary(true, false) else painDiaryOff = true })
                 Text(stringResource(R.string.pain_diary_detail), style = MaterialTheme.typography.bodySmall, color = t.muted)
                 HorizontalDivider(color = t.line)
-                FpSwitchRow(stringResource(R.string.entry_medication), extras.medication, onChange = extras.onMedication)
+                FpSwitchRow(stringResource(R.string.entry_medication), "medication" in extras.shown, onChange = { extras.onShow("medication", it) })
                 Text(stringResource(R.string.medication_hint), style = MaterialTheme.typography.bodySmall, color = t.muted)
+                HorizontalDivider(color = t.line)
+                FpSwitchRow(stringResource(R.string.entry_appetite), "appetite" in extras.shown, onChange = { extras.onShow("appetite", it) })
+                FpSwitchRow(stringResource(R.string.entry_libido), "libido" in extras.shown, onChange = { extras.onShow("libido", it) })
+                Text(stringResource(R.string.levels_hint), style = MaterialTheme.typography.bodySmall, color = t.muted)
             }
         }
         item { Text(stringResource(R.string.situation_disclosure), style = MaterialTheme.typography.bodySmall, color = t.muted) }

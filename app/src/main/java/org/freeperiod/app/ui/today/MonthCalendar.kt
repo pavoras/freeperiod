@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -73,6 +74,8 @@ fun MonthCalendar(
     modifier: Modifier = Modifier,
     locale: Locale = LocalConfiguration.current.locales[0],
     scheduledBreak: Boolean = false,
+    /** Changes when the calendar should scroll back to today. */
+    jump: Int = 0,
 ) {
     val t = LocalDaylight.current
     val anchor = remember { month }
@@ -90,6 +93,17 @@ fun MonthCalendar(
         snapshotFlow { rows.getOrNull(list.firstVisibleItemIndex)?.month }.distinctUntilChanged().collect { it?.let(latestChange) }
     }
     val scope = rememberCoroutineScope()
+    var handledJump by rememberSaveable { mutableIntStateOf(jump) }
+    LaunchedEffect(jump) {
+        if (jump == handledJump) return@LaunchedEffect
+        handledJump = jump
+        val today = days.entries.firstOrNull { it.value.today }?.key ?: return@LaunchedEffect
+        val month = YearMonth.from(today)
+        val week = rows.indexOfFirst { it is CalendarRow.Week && it.month == month &&
+            today.dayOfMonth in weekDays(month, it.index, locale) }
+        // The month title stays in view unless today is far down; then two weeks before today.
+        list.animateScrollToItem(maxOf(titleIndex(month), week - 2).coerceAtLeast(0))
+    }
     val previous = stringResource(R.string.previous_month)
     val next = stringResource(R.string.next_month)
     val density = LocalDensity.current
@@ -129,6 +143,12 @@ fun MonthCalendar(
             }
         }
     }
+}
+
+/** Days of [month] in its week row [index]. */
+private fun weekDays(month: YearMonth, index: Int, locale: Locale): IntRange {
+    val offset = (month.atDay(1).dayOfWeek.value - WeekFields.of(locale).firstDayOfWeek.value + 7) % 7
+    return (index * 7 - offset + 1)..(index * 7 - offset + 7)
 }
 
 @Composable

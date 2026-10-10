@@ -48,8 +48,10 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
         val entry by navigation.currentBackStackEntryAsState()
         val route = entry?.destination?.route
         Scaffold(bottomBar = {
-            if (onboardingDone && route != "day/{epochDay}") {
+            if (onboardingDone && route != "day/{epochDay}" && route != "settings/day-entry") {
                 FpNavBar(route) { destination ->
+                    // Today again while on Today: the calendar goes back to today.
+                    if (destination == "today" && route == "today") return@FpNavBar todayViewModel.jumpToToday()
                     navigation.navigate(destination) {
                         popUpTo(navigation.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
@@ -70,6 +72,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     val context = LocalContext.current
                     androidx.activity.compose.BackHandler(state.page > 0, onBack = model::back)
                     OnboardingScreen(state, OnboardingActions(
+                        track = { key, on -> model.setTracked(key, on) },
                         importPeriods = { navigation.navigate("import") },
                         next = model::next, back = model::back, skip = { model.skip() }, finish = { model.finish() },
                         phase = model::setPhase, method = model::setMethod, pillRhythm = model::setPillRhythm, packStart = model::setPackStart,
@@ -97,7 +100,8 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     TodayScreen(state, { todayViewModel.startPeriodToday() }, { todayViewModel.confirmEnd(it) },
                         { navigation.navigate("day/${it.toEpochDay()}") }, { todayViewModel.pausePredictions() },
                         { todayViewModel.showMonth(it) }, todayViewModel::dismissError,
-                        onUndoEnd = { todayViewModel.undoPeriodEnd(it) })
+                        onUndoEnd = { todayViewModel.undoPeriodEnd(it) }, onRingChange = { todayViewModel.showRing(it) },
+                        onJumpToToday = { todayViewModel.jumpToToday() })
                 }
                 composable("history") {
                     val model: HistoryViewModel = viewModel(factory = viewModelFactory {
@@ -108,6 +112,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     HistoryScreen(state, onInclude = { id, included -> model.setCycleIncluded(id, included) }, onDismissHint = { model.dismissLongCycleHint(it) })
                 }
                 composable("settings") { SettingsRoute(container) }
+                composable("settings/day-entry") { SettingsRoute(container, dayEntryOnly = true) { navigation.popBackStack() } }
                 composable("day/{epochDay}", arguments = listOf(navArgument("epochDay") { type = NavType.LongType })) { day ->
                     val date = LocalDate.ofEpochDay(requireNotNull(day.arguments).getLong("epochDay"))
                     val model: DayEntryViewModel = viewModel(factory = viewModelFactory {
@@ -124,6 +129,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                         removePeriodStart = { model.removePeriodStart() }, endPeriod = { model.setPeriodEnd(it) },
                         clear = { model.clearDay() }, undo = { model.undoClear(it) },
                         count = { id, times -> model.setCount(id, times) },
+                        level = { field, name -> model.setLevel(field, name) },
                         addItem = { field, category, name, icon, categoryName -> model.addItem(field, category, name, icon, categoryName) },
                     )
                     Surface(Modifier.fillMaxSize()) {
@@ -136,7 +142,9 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                             }
                         }, onDismiss = {
                             scope.launch { model.awaitWrites(); navigation.popBackStack() }
-                        }, events = model.events)
+                        }, events = model.events, onCustomize = {
+                            scope.launch { model.awaitWrites(); navigation.navigate("settings/day-entry") }
+                        })
                     }
                 }
             }

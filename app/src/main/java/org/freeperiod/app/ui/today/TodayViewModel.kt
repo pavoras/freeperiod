@@ -36,6 +36,10 @@ data class TodayUiState(
     val loading: Boolean = true,
     val writing: Boolean = false,
     val error: TodayError? = null,
+    /** Shows the cycle ring rather than the calendar. */
+    val ring: Boolean = false,
+    /** Counts requests to scroll the calendar back to today (tap on the big number or on the Today tab). */
+    val todayJump: Int = 0,
 )
 
 data class PeriodEndReceipt(val before: Period, val after: Period)
@@ -44,7 +48,7 @@ data class TodayError(val periodError: PeriodError? = null)
 
 class TodayViewModel(
     private val repository: Repository,
-    settings: SettingsStore,
+    private val settings: SettingsStore,
     private val clock: () -> LocalDate = { LocalDate.now() },
     private val situation: (() -> Situation)? = null,
 ) : ViewModel() {
@@ -57,6 +61,16 @@ class TodayViewModel(
                     _, _, _, _, _ -> Unit
             }.collect { refresh().join() }
         }
+        viewModelScope.launch {
+            settings.settings.map { it.homeRing }.distinctUntilChanged().collect { ring -> mutableState.update { it.copy(ring = ring) } }
+        }
+    }
+
+    fun jumpToToday() { mutableState.update { it.copy(todayJump = it.todayJump + 1) } }
+
+    fun showRing(ring: Boolean): Job = viewModelScope.launch {
+        mutableState.update { it.copy(ring = ring) }
+        settings.update { it.copy(homeRing = ring) }
     }
 
     fun refresh(): Job = viewModelScope.launch {
@@ -125,7 +139,8 @@ class TodayViewModel(
     private fun recompute(data: BackupData) {
         mutableState.update { previous ->
             todayState(data, clock(), previous.month, situation?.invoke() ?: data.situation).copy(writing = previous.writing,
-                error = previous.error, endSaved = previous.endSaved, startedPeriodId = previous.startedPeriodId)
+                error = previous.error, endSaved = previous.endSaved, startedPeriodId = previous.startedPeriodId, ring = previous.ring,
+                todayJump = previous.todayJump)
         }
     }
 }

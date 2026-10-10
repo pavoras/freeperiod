@@ -34,11 +34,22 @@ data class HistoryUiState(
     val customCategories: List<CustomCategory> = emptyList(),
     val ownSymptomCounts: Map<Long, Int> = emptyMap(),
     val monthlyOwnSymptoms: Map<YearMonth, Map<Long, Int>> = emptyMap(),
-    /** Last [CHART_DAYS] days: logged mood and pain, and which days were period days. */
-    val recentMood: Map<LocalDate, Mood> = emptyMap(),
-    val recentPain: Map<LocalDate, Pain> = emptyMap(),
+    /** Last [CHART_DAYS] days: logged item name per chart field and day (only fields with entries), and the period days. */
+    val levels: Map<String, Map<LocalDate, String>> = emptyMap(),
     val recentPeriodDays: Set<LocalDate> = emptySet(),
 )
+
+/** Fields with an order from low to high, shown as charts in History. */
+internal val chartFields = listOf("mood", "flow", "pain", "appetite", "libido")
+
+private fun DayLog.level(field: String): String? = when (field) {
+    "mood" -> mood?.name
+    "flow" -> flow?.name
+    "pain" -> pain?.name
+    "appetite" -> appetite?.name
+    "libido" -> libido?.name
+    else -> null
+}
 
 internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
     val periods = data.periods.filter { it.start <= today }
@@ -64,8 +75,8 @@ internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
         symptomCycles = window.size, loading = false, overrides = data.overrides, tags = data.tags, customCategories = data.customCategories,
         ownSymptomCounts = if (window.isEmpty()) emptyMap() else ownCounts(data.dayLogs.filter { it.date >= window.first().start && it.date < window.last().nextStart }),
         monthlyOwnSymptoms = data.dayLogs.filter { it.date <= today }.groupBy { YearMonth.from(it.date) }.mapValues { (_, logs) -> ownCounts(logs) },
-        recentMood = recent.mapNotNull { day -> day.log.mood?.let { day.date to it } }.toMap(),
-        recentPain = recent.mapNotNull { day -> day.log.pain?.let { day.date to it } }.toMap(),
+        levels = chartFields.associateWith { field -> recent.mapNotNull { day -> day.log.level(field)?.let { day.date to it } }.toMap() }
+            .filterValues { it.isNotEmpty() },
         recentPeriodDays = recent.filter { it.periodDay }.map { it.date }.toSet())
 }
 

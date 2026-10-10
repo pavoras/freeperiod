@@ -52,6 +52,13 @@ class TodayScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun fertile_deDark() = capture("fertile_deDark", "fertile", Locale.GERMANY, dark = true)
     @Test fun disclaimer_enLight() = capture("disclaimer_enLight", "fertile", disclaimer = true)
+    @Test fun ring_enLight() = capture("ring_enLight", "regular", ring = true)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun ring_deDark() = capture("ring_deDark", "fertile", Locale.GERMANY, dark = true, ring = true)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun ring_deLarge() = capture("ring_deLarge", "ongoing", Locale.GERMANY, fontScale = 1.5f, ring = true)
+    @Test fun ringScheduledBreak_enLight() = capture("ringScheduledBreak_enLight", "scheduledBreak", ring = true)
+    @Test fun ringMenopause_enLight() = capture("ringMenopause_enLight", "menopause", ring = true)
 
     @Test fun calendarPredicted_enLight() {
         Locale.setDefault(Locale.US)
@@ -71,9 +78,9 @@ class TodayScreenshotTest {
     }
 
     private fun capture(name: String, scenario: String, locale: Locale = Locale.US, dark: Boolean = false,
-        fontScale: Float = 1f, disclaimer: Boolean = false) {
+        fontScale: Float = 1f, disclaimer: Boolean = false, ring: Boolean = false) {
         Locale.setDefault(locale)
-        val state = todayFixture(scenario, clock())
+        val state = todayFixture(scenario, clock()).copy(ring = ring)
         compose.setContent {
             val config = Configuration(LocalConfiguration.current).apply { setLocales(LocaleList(locale)); this.fontScale = fontScale }
             CompositionLocalProvider(LocalConfiguration provides config,
@@ -94,7 +101,7 @@ class TodayScreenshotTest {
             compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/today/$name.png")
             return
         }
-        if (scenario == "fertile") compose.onNodeWithContentDescription(
+        if (scenario == "fertile" && !ring) compose.onNodeWithContentDescription(
             if (locale.language == "de") "9 April 2026, erhöhte Chance auf Schwangerschaft, Kalenderschätzung"
             else "9 April 2026, higher chance of pregnancy, calendar estimate").assertExists()
         compose.onRoot().captureRoboImage("src/test/screenshots/today/$name.png")

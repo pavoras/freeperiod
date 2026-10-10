@@ -448,6 +448,13 @@
     <string name="import_confirm">Importieren</string>
     <string name="import_invalid">Keine gültigen Perioden gefunden. Prüfe Spalten und Daten; Daten dürfen nicht in der Zukunft liegen.</string>
     <string name="customize_day_entry">Tageseintrag anpassen</string>
+    <string name="customize_categories">Kategorien anpassen</string>
+    <string name="home_view_calendar">Kalender</string>
+    <string name="home_view_ring">Zykluskreis</string>
+    <string name="jump_to_today">Heute im Kalender zeigen</string>
+    <string name="onboarding_track_title">Was möchtest du erfassen?</string>
+    <string name="onboarding_track_intro">Periode und Blutung sind immer dabei. Wähle, was dir sonst wichtig ist.</string>
+    <string name="onboarding_track_later">Jederzeit änderbar: Einstellungen › Tageseintrag anpassen oder über das Zahnrad im Tageseintrag.</string>
     <string name="feedback">Feedback senden</string>
     <string name="feedback_subject">Feedback zu FreePeriod.</string>
     <string name="feedback_text">Öffnet deine E-Mail-App mit einer Nachricht an uns. Du siehst alles, bevor du sie sendest. FreePeriod. hängt nie deine Perioden, Einträge oder Notizen an.</string>
@@ -605,6 +612,15 @@
     </plurals>
     <string name="entry_medication">Medikamente</string>
     <string name="medication_hint">Notiere, was du genommen hast. FreePeriod. gibt keine Hinweise zu Medikamenten.</string>
+    <string name="entry_appetite">Appetit</string>
+    <string name="appetite_low">Wenig</string>
+    <string name="appetite_normal">Normal</string>
+    <string name="appetite_high">Viel</string>
+    <string name="entry_libido">Libido</string>
+    <string name="libido_low">Wenig</string>
+    <string name="libido_normal">Normal</string>
+    <string name="libido_high">Viel</string>
+    <string name="levels_hint">Erscheinen im Tageseintrag und als Verlauf.</string>
     <string name="count_less">%1$s weniger</string>
     <string name="count_more">%1$s mehr</string>
     <plurals name="count_times">
@@ -668,7 +684,12 @@
         <item quantity="one">Letzter %1$d Monat</item>
         <item quantity="other">Letzte %1$d Monate</item>
     </plurals>
-    <string name="history_chart_basis">Letzte 8 Wochen, so wie du es eingetragen hast. Hinterlegt: Periodentage.</string>
+    <string name="history_charts">Im Verlauf</string>
+    <string name="history_range_week">Woche</string>
+    <string name="history_range_month">Monat</string>
+    <string name="history_range_quarter">3 Monate</string>
+    <string name="history_range_year">Jahr</string>
+    <string name="history_chart_basis">So, wie du es eingetragen hast. Hinterlegt: Periodentage.</string>
     <string name="history_chart_today">Heute</string>
     <plurals name="history_chart_days">
         <item quantity="one">An %1$d von %2$d Tagen eingetragen</item>

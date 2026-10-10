@@ -33,6 +33,8 @@ data class DayEntryUiState(
     val situation: Situation = Situation(),
     val customCategories: List<CustomCategory> = emptyList(),
     val overrides: List<UiOverride> = emptyList(),
+    /** Inside a logged period (also its ongoing days up to today). */
+    val periodDay: Boolean = false,
 ) {
     val readOnly: Boolean get() = date > today
 }
@@ -42,6 +44,7 @@ internal fun dayEntryState(data: BackupData, date: LocalDate, today: LocalDate) 
     periodStart = data.periods.any { it.start == date }, periodEnd = data.periods.any { it.end == date },
     canEndPeriod = data.periods.any { it.start <= date }, loading = false,
     situation = data.situation, customCategories = data.customCategories, overrides = data.overrides,
+    periodDay = PeriodRules.periodOn(data.periods.filter { it.start <= today }.sortedBy { it.start }, date, today) != null,
 )
 
 class DayEntryViewModel(
@@ -73,6 +76,7 @@ class DayEntryViewModel(
     fun setPain(value: Pain?): Job = selectBuiltIn("pain", value?.name)
     fun setSex(value: Sex?): Job = selectBuiltIn("sex", value?.name)
     fun setDischarge(value: Discharge?): Job = selectBuiltIn("discharge", value?.name)
+    fun setLevel(field: String, name: String?): Job = selectBuiltIn(field, name)
     fun setOvulationTest(value: OvulationTest?): Job = editLog { it.copy(ovulationTest = value) }
     fun setNote(value: String): Job = editLog { it.copy(note = value.takeUnless(String::isEmpty)) }
     fun toggleSymptom(value: Symptom): Job = editLog {

@@ -11,6 +11,18 @@ internal fun flowLabel(value: FlowLevel): Int = when (value) {
     FlowLevel.HEAVY -> R.string.flow_heavy
 }
 
+internal fun appetiteLabel(value: Appetite): Int = when (value) {
+    Appetite.LOW -> R.string.appetite_low
+    Appetite.NORMAL -> R.string.appetite_normal
+    Appetite.HIGH -> R.string.appetite_high
+}
+
+internal fun libidoLabel(value: Libido): Int = when (value) {
+    Libido.LOW -> R.string.libido_low
+    Libido.NORMAL -> R.string.libido_normal
+    Libido.HIGH -> R.string.libido_high
+}
+
 internal fun moodLabel(value: Mood): Int = when (value) {
     Mood.GREAT -> R.string.mood_great
     Mood.GOOD -> R.string.mood_good

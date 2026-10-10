@@ -1,6 +1,7 @@
 package org.freeperiod.app.ui.today
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -29,25 +30,15 @@ import org.freeperiod.engine.*
 
 @Composable
 fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
-    onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier) {
+    onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onJumpToToday: () -> Unit = {}) {
     val locale = LocalConfiguration.current.locales[0]
     val prediction = state.prediction
     val t = LocalDaylight.current
     val large = LocalDensity.current.fontScale >= 1.3f
-    val packDay = when (prediction) {
-        is PredictionState.ScheduledBreak -> prediction.packDay
-        is PredictionState.ContinuousPill -> prediction.packDay
-        else -> null
-    }
-    val number = if (prediction is PredictionState.Menopause) null else packDay ?: state.periodDay ?: state.cycleDay
+    val (label, number, packDay) = cycleHeadline(state)
     val stackTimeline = large || (number ?: 0) >= 100
-    val label = when {
-        packDay != null -> stringResource(R.string.pack_day_label, packDay)
-        state.periodDay != null -> stringResource(R.string.period_day_label, state.periodDay)
-        else -> stringResource(R.string.cycle_day_label)
-    }
     val numeral: @Composable () -> Unit = {
-        if (number != null) Column {
+        if (number != null) Column(Modifier.clickable(onClickLabel = stringResource(R.string.jump_to_today), onClick = onJumpToToday)) {
             Text(label, style = MaterialTheme.typography.bodyMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp), verticalAlignment = Alignment.Bottom) {
                 Text(number.toString(), Modifier.alignByBaseline(), style = MaterialTheme.typography.displayLarge)
@@ -71,26 +62,58 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
             }
             // A predicted range is already on the timeline (and in the calendar), so the card shows no text for it.
             val rangeOnTimeline = prediction is PredictionState.Range && state.timeline != null
-            val hints = listOfNotNull(R.string.today_welcome_hint.takeIf { prediction is PredictionState.NoData },
-                R.string.today_perimenopause.takeIf { state.situation.phase == LifePhase.PERIMENOPAUSE },
-                R.string.today_irregular_method.takeIf { state.situation.method == Method.PILL_PROGESTIN && prediction is PredictionState.Range })
+            val hints = todayHints(state)
             if (!rangeOnTimeline || hints.isNotEmpty()) Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 if (!rangeOnTimeline) Text(predictionText(prediction, state.today, locale), style = MaterialTheme.typography.bodyLarge)
                 hints.forEach { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = t.muted) }
             }
-            TodayActions(stringResource(if (state.ongoingPeriodId == null) R.string.period_started else R.string.period_ended),
-                stringResource(R.string.log_today), !state.writing,
-                { state.periodEndForToday?.let(onConfirmEnd) ?: onStartPeriod() }, onLogToday)
-            if (prediction is PredictionState.RangePassed) TextButton(onClick = onPausePredictions, enabled = !state.writing) {
-                Text(stringResource(R.string.pause_predictions))
-            }
+            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions)
+        }
+    }
+}
+
+/** The big number on Today (pack day, period day or cycle day) with its label; no number in menopause. */
+internal data class CycleHeadline(val label: String, val number: Int?, val packDay: Int?)
+
+@Composable
+internal fun cycleHeadline(state: TodayUiState): CycleHeadline {
+    val prediction = state.prediction
+    val packDay = when (prediction) {
+        is PredictionState.ScheduledBreak -> prediction.packDay
+        is PredictionState.ContinuousPill -> prediction.packDay
+        else -> null
+    }
+    val number = if (prediction is PredictionState.Menopause) null else packDay ?: state.periodDay ?: state.cycleDay
+    val label = when {
+        packDay != null -> stringResource(R.string.pack_day_label, packDay)
+        state.periodDay != null -> stringResource(R.string.period_day_label, state.periodDay)
+        else -> stringResource(R.string.cycle_day_label)
+    }
+    return CycleHeadline(label, number, packDay)
+}
+
+internal fun todayHints(state: TodayUiState): List<Int> = listOfNotNull(
+    R.string.today_welcome_hint.takeIf { state.prediction is PredictionState.NoData },
+    R.string.today_perimenopause.takeIf { state.situation.phase == LifePhase.PERIMENOPAUSE },
+    R.string.today_irregular_method.takeIf { state.situation.method == Method.PILL_PROGESTIN && state.prediction is PredictionState.Range })
+
+/** Period started/ended and Log today, plus pausing predictions after a missed range: the same on card and ring. */
+@Composable
+internal fun TodayPrimaryActions(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
+    onLogToday: () -> Unit, onPausePredictions: () -> Unit, stacked: Boolean = false) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        TodayActions(stringResource(if (state.ongoingPeriodId == null) R.string.period_started else R.string.period_ended),
+            stringResource(R.string.log_today), !state.writing,
+            { state.periodEndForToday?.let(onConfirmEnd) ?: onStartPeriod() }, onLogToday, stacked)
+        if (state.prediction is PredictionState.RangePassed) TextButton(onClick = onPausePredictions, enabled = !state.writing) {
+            Text(stringResource(R.string.pause_predictions))
         }
     }
 }
 
 @Composable
 private fun TodayActions(primaryLabel: String, secondaryLabel: String, enabled: Boolean,
-    onPrimary: () -> Unit, onSecondary: () -> Unit) {
+    onPrimary: () -> Unit, onSecondary: () -> Unit, stacked: Boolean = false) {
     val tokens = LocalDaylight.current
     val colors = remember(tokens) { todayFillColors(tokens) }
     val density = LocalDensity.current
@@ -115,7 +138,7 @@ private fun TodayActions(primaryLabel: String, secondaryLabel: String, enabled: 
                 Text(secondaryLabel, Modifier.fillMaxWidth(), style = style, maxLines = 1, softWrap = false, textAlign = TextAlign.Center)
             }
         }
-        if (fitsSideBySide) Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (fitsSideBySide && !stacked) Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             primary(Modifier.weight(1f))
             secondary(Modifier.width(secondaryWidth))
         } else Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

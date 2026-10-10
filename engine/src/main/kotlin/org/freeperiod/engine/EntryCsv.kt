@@ -6,6 +6,8 @@ internal fun builtInNames(field: String): Set<String> = when (field) {
     "symptoms" -> Symptom.entries.map { it.name }
     "sex" -> Sex.entries.map { it.name }
     "discharge" -> Discharge.entries.map { it.name }
+    "appetite" -> Appetite.entries.map { it.name }
+    "libido" -> Libido.entries.map { it.name }
     "medication" -> emptyList()
     else -> emptyList()
 }.toSet()

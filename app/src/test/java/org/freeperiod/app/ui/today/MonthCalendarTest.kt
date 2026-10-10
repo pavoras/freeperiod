@@ -1,5 +1,7 @@
 package org.freeperiod.app.ui.today
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -32,6 +34,19 @@ class MonthCalendarTest {
         compose.onNodeWithContentDescription("12 April 2026, period day, period likely, higher chance of pregnancy, calendar estimate, logged, today")
             .assertHasClickAction().performClick()
         assertEquals(date, selected)
+    }
+
+    @Test fun jumpScrollsBackToToday() {
+        val today = LocalDate.of(2026, 4, 12)
+        val days = calendarMonths(YearMonth.from(today)).flatMap { month -> (1..month.lengthOfMonth()).map { month.atDay(it) } }
+            .associateWith { DayMarks(false, false, false, it == today) }
+        var jump by androidx.compose.runtime.mutableIntStateOf(0)
+        compose.setContent { FreePeriodTheme { MonthCalendar(YearMonth.from(today).minusMonths(5), days, {}, {}, locale = Locale.US, jump = jump) } }
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("12 April 2026, today").assertDoesNotExist()
+        jump = 1
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("12 April 2026, today").assertIsDisplayed()
     }
 
     @Test fun usWeekStartsOnSunday() = assertFirstWeekday(Locale.US, "Sunday", "Monday")
