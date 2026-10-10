@@ -31,6 +31,8 @@ object EntrySelection {
             "discharge" -> selected.copy(discharge = name?.let(Discharge::valueOf))
             "flow" -> selected.copy(flow = name?.let(FlowLevel::valueOf))
             "ovulation_test" -> selected.copy(ovulationTest = name?.let(OvulationTest::valueOf))
+            "appetite" -> selected.copy(appetite = name?.let(Appetite::valueOf))
+            "libido" -> selected.copy(libido = name?.let(Libido::valueOf))
             else -> error("Not a single-choice field")
         }
     }

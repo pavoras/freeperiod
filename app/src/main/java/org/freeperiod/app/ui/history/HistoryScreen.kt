@@ -33,6 +33,7 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
     onDismissHint: (Long) -> Unit = {}) {
     var selectedId by rememberSaveable { mutableStateOf<Long?>(null) }
     var visibleIds by remember(state.cycles.map { it.startPeriodId }) { mutableStateOf(emptySet<Long>()) }
+    var range by rememberSaveable { mutableStateOf(ChartRange.MONTH) }
     val tones = LocalDaylight.current
     val locale = LocalConfiguration.current.locales[0]
     val numberFormat = NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = 1 }
@@ -87,8 +88,10 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                     }
                 } }
             }
-            if (state.recentMood.isNotEmpty()) item { LevelChartFor(state, "mood", moodScale.map { it.name }, state.recentMood.mapValues { moodScale.indexOf(it.value) }, icons = true) }
-            if (state.recentPain.isNotEmpty()) item { LevelChartFor(state, "pain", Pain.entries.map { it.name }, state.recentPain.mapValues { it.value.ordinal }, icons = false) }
+            if (state.levels.isNotEmpty()) {
+                item { ChartRangePicker(range) { range = it } }
+                chartFields.filter { it in state.levels }.forEach { field -> item(key = "chart:$field") { LevelChartFor(state, field, range.days) } }
+            }
             if (state.phase in setOf(LifePhase.PERIMENOPAUSE, LifePhase.MENOPAUSE)) item { MonthlySymptoms(state) }
             else item { SymptomFrequency(state, state.symptomCounts, state.ownSymptomCounts, pluralStringResource(R.plurals.history_symptom_basis, state.symptomCycles, state.symptomCycles)) }
             if (state.error) item { Text(stringResource(R.string.error_storage), color = MaterialTheme.colorScheme.error) }
@@ -155,14 +158,20 @@ private fun MonthlySymptoms(state: HistoryUiState) {
 /** Mood from low to high, independent of the order the user chose for the day entry. */
 private val moodScale = listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT)
 
+/** Every chart field's items from low to high (the enums of the others are already in that order). */
+private fun chartScale(field: String): List<String> =
+    if (field == "mood") moodScale.map { it.name } else builtInEntryItems(field).map { requireNotNull(it.name) }
+
 /** Labels and icons follow the user's renames, so the chart speaks the same words as the day entry. */
 @Composable
-private fun LevelChartFor(state: HistoryUiState, field: String, scale: List<String>, values: Map<LocalDate, Int>, icons: Boolean) {
+private fun LevelChartFor(state: HistoryUiState, field: String, days: Int) {
     val items = builtInEntryItems(field)
+    val scale = chartScale(field)
     val levels = scale.map { name -> items.first { it.name == name }.let { entryAppearance(it.key, it.label, it.icon, state.overrides) } }
     val category = builtInCategories.first { it.key == field }
     val title = entryAppearance(category.overrideKey, category.label, category.icon, state.overrides).label
-    LevelChart(title, levels, values, state.recentPeriodDays, state.today, icons)
+    LevelChart(title, levels, state.levels[field].orEmpty().mapValues { scale.indexOf(it.value) }, state.recentPeriodDays, state.today,
+        icons = field == "mood", days = days)
 }
 
 @Composable

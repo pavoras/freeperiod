@@ -47,7 +47,7 @@ class SituationScreenshotTest {
     fun alsoTrackMenopause_deLight() {
         Locale.setDefault(Locale.GERMANY)
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface {
-            SituationScreen(Situation(phase = LifePhase.MENOPAUSE, painDiary = true), today, {}, {}, {}, TrackingExtras(medication = true))
+            SituationScreen(Situation(phase = LifePhase.MENOPAUSE, painDiary = true), today, {}, {}, {}, TrackingExtras(shown = setOf("medication", "appetite")))
         } } }
         compose.waitForIdle()
         compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Medikamente"))

@@ -96,6 +96,17 @@ class OnboardingViewModelTest : DatabaseTest() {
         vm.onResume().join(); vm.finish().join()
         assertNull(repository.snapshot().periods.single().end)
     }
+    @Test fun trackingChoicesBecomeDayEntrySettings() = runTest {
+        val vm = model()
+        assertTrue("mood" in vm.state.value.tracked)
+        assertFalse("appetite" in vm.state.value.tracked)
+        vm.setTracked("appetite", true)
+        vm.setTracked("sex", false)
+        vm.finish().join()
+        val overrides = repository.snapshot().overrides.associate { it.key to it.hidden }
+        assertEquals(mapOf("category:appetite" to false, "category:sex" to true), overrides)
+    }
+
     @Test fun cycleLengthHiddenWithEligibleCycle() = runTest {
         val vm = model()
         vm.markRange(today.minusDays(35), today.minusDays(31))
@@ -114,7 +125,7 @@ class OnboardingViewModelTest : DatabaseTest() {
     }
     @Test fun allStepsAreSkippableAndRemindersStayOff() = runTest {
         val vm = model()
-        repeat(6) { vm.skip().join() }
+        repeat(7) { vm.skip().join() }
         assertTrue(settings.settings.first().onboardingDone)
         assertTrue(repository.snapshot().periods.isEmpty())
         assertTrue(repository.snapshot().reminders.none { it.enabled })

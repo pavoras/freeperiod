@@ -448,6 +448,13 @@
     <string name="import_confirm">Import</string>
     <string name="import_invalid">No valid periods found. Check the columns and dates; dates must not be in the future.</string>
     <string name="customize_day_entry">Customize day entry</string>
+    <string name="customize_categories">Customize categories</string>
+    <string name="home_view_calendar">Calendar</string>
+    <string name="home_view_ring">Cycle ring</string>
+    <string name="jump_to_today">Show today in the calendar</string>
+    <string name="onboarding_track_title">What do you want to track?</string>
+    <string name="onboarding_track_intro">Your period and bleeding are always there. Pick what else matters to you.</string>
+    <string name="onboarding_track_later">You can change this any time: Settings › Customize day entry, or the gear in the day entry.</string>
     <string name="feedback">Send feedback</string>
     <string name="feedback_subject">FreePeriod. feedback</string>
     <string name="feedback_text">Opens your email app with a message to us. You see everything before you send it. FreePeriod. never adds your periods, entries or notes.</string>
@@ -605,6 +612,15 @@
     </plurals>
     <string name="entry_medication">Medication</string>
     <string name="medication_hint">Log what you took. FreePeriod. gives no advice on medication.</string>
+    <string name="entry_appetite">Appetite</string>
+    <string name="appetite_low">Little</string>
+    <string name="appetite_normal">Normal</string>
+    <string name="appetite_high">A lot</string>
+    <string name="entry_libido">Sex drive</string>
+    <string name="libido_low">Low</string>
+    <string name="libido_normal">Normal</string>
+    <string name="libido_high">High</string>
+    <string name="levels_hint">Appear in the day entry and as a chart in History.</string>
     <string name="count_less">Less %1$s</string>
     <string name="count_more">More %1$s</string>
     <plurals name="count_times">
@@ -668,7 +684,12 @@
         <item quantity="one">Last %1$d month</item>
         <item quantity="other">Last %1$d months</item>
     </plurals>
-    <string name="history_chart_basis">Last 8 weeks, as you logged it. Shaded: period days.</string>
+    <string name="history_charts">Over time</string>
+    <string name="history_range_week">Week</string>
+    <string name="history_range_month">Month</string>
+    <string name="history_range_quarter">3 months</string>
+    <string name="history_range_year">Year</string>
+    <string name="history_chart_basis">As you logged it. Shaded: period days.</string>
     <string name="history_chart_today">Today</string>
     <plurals name="history_chart_days">
         <item quantity="one">Logged on %1$d of %2$d days</item>

@@ -40,6 +40,8 @@ internal fun summaryRows(summary: Summary, data: BackupData, text: (Int) -> Stri
             (values.filterNotNull() + own(field)).takeIf { it.isNotEmpty() }?.let { "${title(field)}: ${it.joinToString()}" }
         val other = listOfNotNull(
             field("mood", log.mood?.let { builtIn("mood", it.name) }),
+            log.appetite?.let { "${title("appetite")}: ${builtIn("appetite", it.name)}" },
+            log.libido?.let { "${title("libido")}: ${builtIn("libido", it.name)}" },
             field("symptoms", *log.symptoms.sortedBy { it.ordinal }.map { builtIn("symptoms", it.name) }.toTypedArray()),
             field("sex", log.sex?.let { builtIn("sex", it.name) }),
             field("discharge", log.discharge?.let { builtIn("discharge", it.name) }),

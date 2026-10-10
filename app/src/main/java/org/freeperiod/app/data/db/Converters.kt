@@ -2,7 +2,9 @@ package org.freeperiod.app.data.db
 
 import androidx.room.TypeConverter
 import java.time.LocalDate
+import org.freeperiod.engine.Appetite
 import org.freeperiod.engine.CycleUse
+import org.freeperiod.engine.Libido
 import org.freeperiod.engine.FlowLevel
 import org.freeperiod.engine.Mood
 import org.freeperiod.engine.Pain
@@ -28,6 +30,10 @@ class Converters {
     @TypeConverter fun nameToDischarge(value: String?): Discharge? = value?.let(Discharge::valueOf)
     @TypeConverter fun ovulationTestToName(value: OvulationTest?): String? = value?.name
     @TypeConverter fun nameToOvulationTest(value: String?): OvulationTest? = value?.let(OvulationTest::valueOf)
+    @TypeConverter fun appetiteToName(value: Appetite?): String? = value?.name
+    @TypeConverter fun nameToAppetite(value: String?): Appetite? = value?.let(Appetite::valueOf)
+    @TypeConverter fun libidoToName(value: Libido?): String? = value?.name
+    @TypeConverter fun nameToLibido(value: String?): Libido? = value?.let(Libido::valueOf)
 
     @TypeConverter fun symptomsToNames(value: Set<Symptom>): String = value.map { it.name }.sorted().joinToString(";")
     @TypeConverter fun namesToSymptoms(value: String): Set<Symptom> = if (value.isEmpty()) emptySet()

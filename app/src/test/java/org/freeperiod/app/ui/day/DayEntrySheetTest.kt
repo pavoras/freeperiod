@@ -77,6 +77,54 @@ class DayEntrySheetTest {
         assertEquals(FlowLevel.LIGHT, selected)
     }
 
+    @Test fun emptyDayOutsideAPeriodShowsNoBleedingWithoutSavingIt() {
+        var selected: FlowLevel? = FlowLevel.HEAVY
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(DayEntryUiState(today, today, loading = false), DayEntryActions(flow = { selected = it }), {}, {})
+        } }
+        compose.waitForIdle()
+        val none = compose.onAllNodes(hasText("None") and isSelectable())[0]
+        none.assertIsSelected()
+        assertEquals(FlowLevel.HEAVY, selected)
+        // Tapping it stores the answer instead of clearing it.
+        none.performClick()
+        assertEquals(FlowLevel.NONE, selected)
+    }
+
+    @Test fun periodDayHasNoPreselectedBleeding() {
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(DayEntryUiState(today, today, loading = false, periodDay = true), DayEntryActions(), {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onAllNodes(hasText("None") and isSelectable())[0].assertIsNotSelected()
+    }
+
+    @Test fun customizeCategoriesIsOneTapAway() {
+        var opened = 0
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(DayEntryUiState(today, today, loading = false), DayEntryActions(), {}, {}, onCustomize = { opened++ })
+        } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Customize categories").performClick()
+        assertEquals(1, opened)
+    }
+
+    @Test fun appetiteAndSexDriveAreChoicesOnceShown() {
+        var level: Pair<String, String?>? = null
+        val shown = listOf(UiOverride("category:appetite", false, 10), UiOverride("category:libido", false, 11))
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(DayEntryUiState(today, today, loading = false, overrides = shown),
+                DayEntryActions(level = { field, name -> level = field to name }), {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("A lot") and isSelectable())
+        compose.onNode(hasText("A lot") and isSelectable()).performClick()
+        assertEquals("appetite" to "HIGH", level)
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("High") and isSelectable())
+        compose.onNode(hasText("High") and isSelectable()).performClick()
+        assertEquals("libido" to "HIGH", level)
+    }
+
     @Test fun noteAutosavesAndPreviews() {
         var saved = ""
         compose.setContent { FreePeriodTheme {

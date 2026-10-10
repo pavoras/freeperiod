@@ -39,6 +39,21 @@ class TodayViewModelTest : DatabaseTest() {
         assertNotNull(vm.state.value.fertileWindow)
     }
 
+    @Test fun theChosenViewIsRememberedAndJumpsCount() = runTest {
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.showRing(true).join()
+        assertTrue(vm.state.value.ring)
+        val again = viewModel()
+        again.refresh().join()
+        assertTrue(again.state.value.ring)
+        again.jumpToToday()
+        again.refresh().join()
+        assertEquals(1, again.state.value.todayJump)
+        again.showRing(false).join()
+        assertFalse(again.state.value.ring)
+    }
+
     @Test fun todayUsesStoredSituation() = runTest {
         repository.updateSituation(org.freeperiod.engine.Situation(phase = org.freeperiod.engine.LifePhase.MENOPAUSE))
         val vm = viewModel()

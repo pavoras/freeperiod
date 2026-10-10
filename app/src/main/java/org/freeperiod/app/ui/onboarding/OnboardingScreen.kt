@@ -32,6 +32,7 @@ data class OnboardingActions(
     val periodReminder: (Boolean) -> Unit = {}, val dailyReminder: (Boolean) -> Unit = {},
     val methodReminder: (Reminder?) -> Unit = {}, val systemSettings: () -> Unit = {},
     val importPeriods: () -> Unit = {},
+    val track: (String, Boolean) -> Unit = { _, _ -> },
 )
 
 @Composable
@@ -49,7 +50,7 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
             Text(stringResource(R.string.app_name), Modifier.weight(1f), style = MaterialTheme.typography.headlineMedium)
             TextButton(onClick = actions.skip, enabled = !state.busy) { Text(stringResource(R.string.onboarding_skip)) }
         }
-        Text(stringResource(R.string.onboarding_step_of, state.page + 1, 6), Modifier.padding(horizontal = FpSpacing.screen), style = MaterialTheme.typography.bodySmall, color = tones.muted)
+        Text(stringResource(R.string.onboarding_step_of, state.page + 1, 7), Modifier.padding(horizontal = FpSpacing.screen), style = MaterialTheme.typography.bodySmall, color = tones.muted)
         Box(Modifier.weight(1f)) {
             if (state.page == 3) PastPeriodsPicker(state, actions)
             else Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
@@ -96,6 +97,17 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
                             isError = !state.unknown && state.typicalLength.isNotBlank() && state.typicalLength.toIntOrNull() !in 15..90)
                     }
                     5 -> {
+                        Text(stringResource(R.string.onboarding_track_title), style = MaterialTheme.typography.titleLarge)
+                        Text(stringResource(R.string.onboarding_track_intro))
+                        // Same card as Customize day entry, so the step shows where this lives later.
+                        SettingsPanel {
+                            onboardingCategories.forEach { category ->
+                                FpSwitchRow(stringResource(category.label), category.key in state.tracked, !state.busy, { actions.track(category.key, it) })
+                            }
+                        }
+                        Text(stringResource(R.string.onboarding_track_later), style = MaterialTheme.typography.bodySmall, color = tones.muted)
+                    }
+                    6 -> {
                         Text(stringResource(R.string.reminders), style = MaterialTheme.typography.titleLarge)
                         Text(stringResource(R.string.onboarding_reminders_optional))
                         FpSwitchRow(stringResource(R.string.period_reminder), state.periodReminder, !state.busy, actions.periodReminder)
@@ -124,8 +136,8 @@ fun OnboardingScreen(state: OnboardingUiState, actions: OnboardingActions, notif
                 4 -> state.unknown || state.typicalLength.toIntOrNull() in 15..90
                 else -> true
             }
-            FpButton(if (state.page == 5) actions.finish else actions.next, enabled = canContinue) {
-                Text(stringResource(if (state.page == 5) R.string.onboarding_finish else R.string.onboarding_continue))
+            FpButton(if (state.page == 6) actions.finish else actions.next, enabled = canContinue) {
+                Text(stringResource(if (state.page == 6) R.string.onboarding_finish else R.string.onboarding_continue))
             }
         }
     }

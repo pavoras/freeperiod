@@ -9,3 +9,4 @@ Start here: `docs/handover.md` (current state, release status, commands, open ta
 - Never read or print anything under `%USERPROFILE%\dev-tools\keys`; pass only paths.
 - Keep `docs/handover.md` current when the state changes (release, decisions, open tasks).
 - Answer the owner (Marvin) short; German or English as he writes.
+- Every idea/request Marvin writes goes into `docs/owner-requests.md` at once (also mid-task); work from that list.

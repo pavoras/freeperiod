@@ -51,7 +51,7 @@ object CsvImport {
     }
 
     private fun diaryHeader(header: List<String>): Boolean =
-        header.any { it in ownItemFields || it in setOf("flow", "ovulationtest", "tags", "customitems") }
+        header.any { it in ownItemFields || it in setOf("flow", "ovulationtest", "tags", "customitems", "appetite", "libido") }
 
     private fun periods(rows: List<List<String>>, header: List<String>, start: Int, end: Int, format: CsvDateFormat): List<Period>? {
         val cycle = header.indexOf("cycleuse")
@@ -165,6 +165,8 @@ object CsvImport {
                 }
                 log.copy(flow = cell("flow").takeIf { it.isNotBlank() }?.let { FlowLevel.valueOf(it.uppercase(Locale.ROOT)) },
                     ovulationTest = cell("ovulationtest").takeIf { it.isNotBlank() }?.let { OvulationTest.valueOf(it.uppercase(Locale.ROOT)) },
+                    appetite = cell("appetite").takeIf { it.isNotBlank() }?.let { Appetite.valueOf(it.uppercase(Locale.ROOT)) },
+                    libido = cell("libido").takeIf { it.isNotBlank() }?.let { Libido.valueOf(it.uppercase(Locale.ROOT)) },
                     note = cell("note").takeIf { it.isNotEmpty() })
             }
             require(logs.map { it.date }.distinct().size == logs.size)

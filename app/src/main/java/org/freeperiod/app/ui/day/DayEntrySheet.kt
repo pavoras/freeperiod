@@ -50,6 +50,8 @@ data class DayEntryActions(
     val count: (Long, Int) -> Unit = { _, _ -> },
     /** New own item for a built-in field or an own category, logged once on this day: field, category id, name, icon, category name. */
     val addItem: (String?, Long?, String, String, String) -> Unit = { _, _, _, _, _ -> },
+    /** Pick-one scale without own items (appetite, sex drive): field and item name, null clears it. */
+    val level: (String, String?) -> Unit = { _, _ -> },
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -60,6 +62,8 @@ fun DayEntrySheet(
     onDateChange: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
     events: Flow<DayEntryEvent> = emptyFlow(),
+    /** Opens Customize day entry; null hides the link (previews). */
+    onCustomize: (() -> Unit)? = null,
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val dateText = state.date.format(DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(locale, "EEEMMMd")).withLocale(locale))
@@ -117,7 +121,15 @@ fun DayEntrySheet(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 item {
-                    Text(stringResource(R.string.day_entry), style = MaterialTheme.typography.labelSmall, color = tones.muted)
+                    Row(Modifier.fillMaxWidth().heightIn(min = 48.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(R.string.day_entry), Modifier.weight(1f), style = MaterialTheme.typography.labelSmall, color = tones.muted)
+                        // Where the categories come from, one tap away from where they are used.
+                        if (onCustomize != null) TextButton(onClick = onCustomize, contentPadding = PaddingValues(horizontal = 8.dp)) {
+                            Icon(painterResource(R.drawable.ic_fp_settings), null, Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text(stringResource(R.string.customize_categories), style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(dateText, Modifier.weight(1f), style = MaterialTheme.typography.headlineSmall)
                         IconButton(onClick = { onDateChange(state.date.minusDays(1)) }) {
@@ -147,7 +159,7 @@ fun DayEntrySheet(
                 entryCategories(state).forEach { category ->
                     item(key = category.key) {
                         when (category.key) {
-                            "mood", "flow", "pain" -> EntryChoices(category, state, actions, editable)
+                            "mood", "flow", "pain", "appetite", "libido" -> EntryChoices(category, state, actions, editable)
                             "symptoms" -> {
                                 EntryChoices(category, state, actions, editable, moreSymptoms = moreSymptoms,
                                     onMore = { moreSymptoms = !moreSymptoms })
@@ -276,6 +288,8 @@ private fun EntryChoices(category: EntryCategory, state: DayEntryUiState, action
     val showIcon = items.map { item -> category.key in iconFields || item.tag != null ||
         state.overrides.any { it.key == item.key && it.iconKey != null } }
     val moreLabel = stringResource(if (moreSymptoms) R.string.entry_less else R.string.entry_more)
+    // No bleeding is the usual answer outside a period: shown as chosen until something else is picked (nothing is saved).
+    val impliedNone = category.key == "flow" && state.log.flow == null && !state.periodDay && !state.readOnly
     val values = if (onMore != null) items + null else items
     val labels = appearances.map { it.label } + if (onMore != null) listOf(moreLabel) else emptyList()
     ChoiceGrid(values, labels, if (category.key == "symptoms") 4 else 5, inlineIcon = category.key !in iconFields && showIcon.any { it }) { item ->
@@ -284,7 +298,7 @@ private fun EntryChoices(category: EntryCategory, state: DayEntryUiState, action
         else {
             val appearance = appearances[items.indexOf(item)]
             val selected = state.selected(item)
-            FpChip(selected, { item.tag?.let { actions.tag(it.id) } ?: run {
+            FpChip(selected || impliedNone && item.tag == null && item.name == FlowLevel.NONE.name, { item.tag?.let { actions.tag(it.id) } ?: run {
                 val name = item.name.takeUnless { selected }
                 when (category.key) {
                     "mood" -> actions.mood(name?.let(Mood::valueOf))
@@ -293,6 +307,7 @@ private fun EntryChoices(category: EntryCategory, state: DayEntryUiState, action
                     "sex" -> actions.sex(name?.let(Sex::valueOf))
                     "discharge" -> actions.discharge(name?.let(Discharge::valueOf))
                     "ovulation_test" -> actions.ovulationTest(name?.let(OvulationTest::valueOf))
+                    "appetite", "libido" -> actions.level(category.key, name)
                     "symptoms" -> actions.symptom(Symptom.valueOf(requireNotNull(item.name)))
                 }
             } }, appearance.label, Modifier.fillMaxWidth().fillMaxHeight(), enabled,

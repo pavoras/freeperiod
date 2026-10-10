@@ -1,7 +1,9 @@
 package org.freeperiod.app.data.db
 
 import androidx.room.*
+import org.freeperiod.engine.Appetite
 import org.freeperiod.engine.CycleUse
+import org.freeperiod.engine.Libido
 import org.freeperiod.engine.FlowLevel
 import org.freeperiod.engine.Mood
 import org.freeperiod.engine.Pain
@@ -28,6 +30,8 @@ data class DayLogEntity(
     val discharge: Discharge? = null,
     val note: String? = null,
     val ovulationTest: OvulationTest? = null,
+    val appetite: Appetite? = null,
+    val libido: Libido? = null,
 )
 
 @Entity(tableName = "tags", indices = [Index("categoryId"), Index(value = ["categoryId", "name"], unique = true)],

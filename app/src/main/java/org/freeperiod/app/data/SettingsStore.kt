@@ -40,6 +40,8 @@ data class AppSettings(
     val autoBackupPassword: String? = null,
     val autoBackupLast: LocalDate? = null,
     val autoBackupFailed: Boolean = false,
+    /** Today opens on the cycle ring instead of the calendar (the last view the user swiped to). */
+    val homeRing: Boolean = false,
 )
 
 class SettingsStore internal constructor(private val store: DataStore<Preferences>) {
@@ -73,6 +75,7 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
             prefs.set(autoBackupPassword, value.autoBackupPassword)
             prefs.set(autoBackupLast, value.autoBackupLast?.toString())
             prefs[autoBackupFailed] = value.autoBackupFailed
+            prefs[homeRing] = value.homeRing
         }
     }
 
@@ -120,6 +123,7 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         autoBackupPassword = prefs[autoBackupPassword],
         autoBackupLast = prefs[autoBackupLast]?.let(LocalDate::parse),
         autoBackupFailed = prefs[autoBackupFailed] ?: false,
+        homeRing = prefs[homeRing] ?: false,
     )
 
     private fun MutablePreferences.set(key: Preferences.Key<String>, value: String?) {
@@ -144,5 +148,6 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         val autoBackupPassword = stringPreferencesKey("auto_backup_password")
         val autoBackupLast = stringPreferencesKey("auto_backup_last")
         val autoBackupFailed = booleanPreferencesKey("auto_backup_failed")
+        val homeRing = booleanPreferencesKey("home_ring")
     }
 }

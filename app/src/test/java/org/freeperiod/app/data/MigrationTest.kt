@@ -10,6 +10,7 @@ import org.freeperiod.app.data.db.FreePeriodDatabase
 import org.freeperiod.app.data.db.MIGRATION_1_2
 import org.freeperiod.app.data.db.MIGRATION_2_3
 import org.freeperiod.app.data.db.MIGRATION_3_4
+import org.freeperiod.app.data.db.MIGRATION_4_5
 import org.freeperiod.engine.*
 import org.junit.Assert.*
 import org.junit.Test
@@ -22,7 +23,7 @@ import org.robolectric.annotation.Config
 class MigrationTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @Test fun v2ToV4KeepsCustomizationAndEntries() = runBlocking {
+    @Test fun v2ToV5KeepsCustomizationAndEntries() = runBlocking {
         val today = java.time.LocalDate.of(2026, 4, 12)
         context.deleteDatabase("migration-v2-test")
         val schema = JSONObject(context.assets.open("${FreePeriodDatabase::class.java.name}/2.json").bufferedReader().use { it.readText() }).getJSONObject("database")
@@ -46,7 +47,7 @@ class MigrationTest {
             close()
         }
         val db = Room.databaseBuilder(context, FreePeriodDatabase::class.java, "migration-v2-test")
-            .addMigrations(MIGRATION_2_3, MIGRATION_3_4).allowMainThreadQueries().build()
+            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).allowMainThreadQueries().build()
         try {
             val repository = Repository(db) { today }
             val data = repository.snapshot()
@@ -69,10 +70,14 @@ class MigrationTest {
             assertTrue(repository.snapshot().customCategories.single { it.id == ownCategory.id }.counted)
             repository.updateSituation(Situation(painDiary = true))
             assertTrue(repository.snapshot().situation.painDiary)
+            // Version 5: appetite and sex drive.
+            val levels = DayLog(today.minusDays(2), appetite = Appetite.HIGH, libido = Libido.LOW)
+            repository.saveDayLog(levels)
+            assertEquals(levels, repository.snapshot().dayLogs.first())
         } finally { db.close() }
     }
 
-    @Test fun v1ToV4KeepsData() = runBlocking {
+    @Test fun v1ToV5KeepsData() = runBlocking {
         val today = java.time.LocalDate.of(2026, 4, 12)
         val start = today.minusDays(10).toEpochDay()
         val end = start + 4
@@ -100,7 +105,7 @@ class MigrationTest {
             close()
         }
         val db = Room.databaseBuilder(context, FreePeriodDatabase::class.java, "migration-test")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).allowMainThreadQueries().build()
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5).allowMainThreadQueries().build()
         try {
             val data = Repository(db) { today }.snapshot()
             assertEquals(Period(7, today.minusDays(10), today.minusDays(6), CycleUse.EXCLUDE), data.periods.single())
@@ -113,6 +118,7 @@ class MigrationTest {
             assertEquals(setOf(9L), data.dayLogs.first().tagIds)
             assertEquals(setOf(Symptom.HOT_FLUSHES, Symptom.NIGHT_SWEATS), data.dayLogs.first().symptoms)
             assertNull(data.dayLogs.first().ovulationTest)
+            assertNull(data.dayLogs.first().appetite)
             assertEquals(Situation(), data.situation)
             assertTrue(data.reminders.isEmpty())
         } finally { db.close() }

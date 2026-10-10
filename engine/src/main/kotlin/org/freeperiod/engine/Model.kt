@@ -51,10 +51,13 @@ data class DayLog(
     val ovulationTest: OvulationTest? = null,
     /** How many times an item was logged that day, only for counts of 2 and more (absent = once). */
     val tagCounts: Map<Long, Int> = emptyMap(),
+    val appetite: Appetite? = null,
+    val libido: Libido? = null,
 ) {
     /** Returns true when all observations are null or empty, preserving explicit NONE values. */
     fun isEmpty(): Boolean = flow == null && mood == null && symptoms.isEmpty() && pain == null &&
-        sex == null && discharge == null && note.isNullOrEmpty() && tagIds.isEmpty() && ovulationTest == null
+        sex == null && discharge == null && note.isNullOrEmpty() && tagIds.isEmpty() && ovulationTest == null &&
+        appetite == null && libido == null
 }
 
 /** Logged ovulation test result, distinct from no observation. */
@@ -72,6 +75,14 @@ enum class Mood { GREAT, GOOD, OKAY, LOW, BAD }
 /** Logged pain levels. */
 @Serializable
 enum class Pain { NONE, MILD, MODERATE, SEVERE }
+
+/** Logged appetite, low to high. */
+@Serializable
+enum class Appetite { LOW, NORMAL, HIGH }
+
+/** Logged sex drive, low to high. */
+@Serializable
+enum class Libido { LOW, NORMAL, HIGH }
 
 /** Logged sexual activity categories. */
 @Serializable

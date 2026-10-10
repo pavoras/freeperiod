@@ -27,6 +27,7 @@ permission, no analytics/crash SDKs. Not a medical device, not contraception. GP
 | Spec | `docs/superpowers/specs/2026-10-07-freeperiod-design.md` + **rev 2** `2026-10-08-freeperiod-v1-scope-2.md` (rev 2 wins; §13 = decisions of 2026-10-09) + **1.1 scope** `2026-10-10-freeperiod-v1.1-scope.md` (wins for 1.1) |
 | Plans | `docs/superpowers/plans/2026-10-07-freeperiod-v1.md`, `…-v1-part2.md` |
 | Release checklist | `docs/release.md` |
+| Owner requests | `docs/owner-requests.md` – every idea/request of the owner, recorded at once, with status |
 | Design reference | `docs/design/drafts/draft-5.png` (final), Daylight palette in `ui/theme/` |
 | Codex rounds | `aufpasser/runden/prompt-N.txt`, `runde-N.md` (jsonl/log git-ignored) |
 | Signing | upload key + properties under `%USERPROFILE%\dev-tools\keys\` – **never read or print**; pass only the path |
@@ -65,7 +66,7 @@ Robolectric 4.16.1, Roborazzi 1.50.0, compileSdk/targetSdk 36, minSdk 26. Offlin
 | signed AAB | `gradle -q --offline -Pfreeperiod.signing="$USERPROFILE/dev-tools/keys/freeperiod-signing.properties" :app:bundleRelease` → `app/build/outputs/bundle/release/app-release.aab`; verify with `jarsigner -verify` and that the manifest has no INTERNET |
 | debug APK for the owner | `app/build/outputs/apk/debug/app-debug.apk` (built by `-Voll`), send with SendUserFile |
 
-Last full gate: 570 tests green (2026-10-10). 74 screenshot references.
+Last full gate: 589 tests green (2026-10-10). 74 screenshot references.
 
 Working habits that matter here:
 - Long runs (gate, recording) in the background **with a watcher** (progress every ≤ 5–15 min,
@@ -85,7 +86,7 @@ Working habits that matter here:
   model, see §6), `Fertility.kt` (higher-chance days), `Situation.kt`, `PillSchedule.kt`,
   `Reminders.kt`/`Recurrence.kt`, `Timeline.kt`, `Stats.kt`, `backup/` (encrypted codec, schema 3,
   readers for 1 and 2), `EntrySelection`/`EntryAppearance`/`EntryCsv` (own items, labels/icons, CSV names), `export/CsvExport.kt`, `import/CsvImport.kt`.
-- `:app` (Compose, manual DI in `AppContainer`): `data/` (Room DB version 4 + `Migrations.kt`,
+- `:app` (Compose, manual DI in `AppContainer`): `data/` (Room DB version 5 + `Migrations.kt`,
   `SettingsStore` DataStore), `backup/` (incl. `AutoBackup`, `KeystoreSeal`, `AutoBackupWorker`), `lock/AppLock.kt`, `reminders/` (WorkManager, boot/time
   receivers), `ui/` (`today`, `day`, `history`, `settings`, `onboarding`, `nav`, `components`,
   `theme`).
@@ -126,10 +127,15 @@ Working habits that matter here:
   (counts, Room 4), pain diary (My situation › Also track), menopause items, PDF summary – details in the
   1.1 spec §2. Owner feedback round (f216bd3): version 1.1.0 / versionCode 3, debug builds
   `1.1.0-dev.<commit count>` shown at the bottom of Settings; mood/pain charts in History (entries only,
-  56 days). Home cycle view (swipe calendar ↔ ring, pure extension): owner picks one of 3 drafts
-  (A dot ring, B soft ring, C horizon arc + week strip; renderer `scratchpad` only, rebuild if needed).
+  56 days). Round 2026-10-10 evening (see `docs/owner-requests.md`): Home cycle ring (owner chose
+  draft A "dot ring"; swipe calendar ↔ ring, dots tappable, last view kept in `AppSettings.homeRing`;
+  ring view without the card), appetite + sex drive (enums `Appetite`/`Libido`, Room 5, off by default,
+  switches in My situation › Also track), History charts for mood/flow/pain/appetite/libido with
+  week/month/3 months/year, flow "None" preselected on empty non-period days (display only), "Customize
+  categories" link in the day entry, setup step "What do you want to track?" (7 steps now), tap on the
+  big number / Today tab scrolls the calendar back to today.
   **Next:** owner tests the APK; then release prep: privacy pages, store
-  texts (mention medication log, pain diary, PDF), Play health declaration check (`docs/release.md`).
+  texts (mention medication log, pain diary, PDF, charts, ring), Play health declaration check (`docs/release.md`).
 - Known cosmetic: store screenshots show a half calendar row above the legend (real app rendering);
   the DE day-entry screenshot shows the "Sex" row at the bottom (owner avoided the word in the
   listing text; offer a change if it matters).

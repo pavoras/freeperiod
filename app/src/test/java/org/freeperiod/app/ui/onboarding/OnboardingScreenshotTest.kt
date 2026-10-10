@@ -31,6 +31,13 @@ class OnboardingScreenshotTest : SettingsScreenshotFixture() {
         OnboardingScreen(pastPeriods(), OnboardingActions())
     }
     @Test fun reminders_enLight() = capture("onboarding/reminders_enLight", "Reminders") {
+        OnboardingScreen(OnboardingUiState(page = 6, today = clock()), OnboardingActions())
+    }
+    @Test fun tracking_enLight() = capture("onboarding/tracking_enLight", "What do you want to track?") {
+        OnboardingScreen(OnboardingUiState(page = 5, today = clock()), OnboardingActions())
+    }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun tracking_deDark() = capture("onboarding/tracking_deDark", "Was möchtest du erfassen?", Locale.GERMANY, dark = true) {
         OnboardingScreen(OnboardingUiState(page = 5, today = clock()), OnboardingActions())
     }
     @Test fun import_enLight() = capture("onboarding/import_enLight", "Import from another app") {
