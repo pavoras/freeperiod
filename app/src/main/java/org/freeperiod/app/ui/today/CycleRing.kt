@@ -56,14 +56,11 @@ private fun Density.ringGeometry(side: Float, days: Int): RingGeometry {
 @Composable
 internal fun CycleRingPage(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
     onDayClick: (LocalDate) -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onShowToday: () -> Unit = {}) {
-    // Actions on top and stacked (owner's choice), at the same side margins as the card's buttons in the
-    // calendar view (12 dp + 16 dp), so swiping leaves them in place. The ring gets the rest of the space,
-    // centred, with a clear margin all round instead of touching the edges.
+    // The ring takes the free space, centred with a clear margin; the actions sit below it, stacked
+    // (owner's choice after trying them on top).
     Column(modifier.fillMaxSize()) {
-        Box(Modifier.padding(start = 28.dp, end = 28.dp, top = 16.dp)) {
-            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions, stacked = true)
-        }
-        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().padding(24.dp),
+            contentAlignment = Alignment.Center) {
             val density = LocalDensity.current
             val measurer = rememberTextMeasurer()
             val locale = LocalConfiguration.current.locales[0]
@@ -76,7 +73,7 @@ internal fun CycleRingPage(state: TodayUiState, onStartPeriod: () -> Unit, onCon
             // screen it moves below the ring, so it never runs over the dots.
             val (inside, below) = with(density) {
                 val radius = ringGeometry(side.toPx(), 1).radius
-                val width = radius * 1.2f
+                val width = radius * 1.1f
                 fun height(maxWidth: Float) = lines.sumOf { (text, style) ->
                     measurer.measure(text, style, constraints = Constraints(maxWidth = maxWidth.roundToInt())).size.height + 2.dp.roundToPx()
                 }
@@ -95,6 +92,9 @@ internal fun CycleRingPage(state: TodayUiState, onStartPeriod: () -> Unit, onCon
                 RingSentence(state, headline.number != null, label = headline.label.takeIf { headline.number != null })
             }
         }
+        Box(Modifier.padding(horizontal = 12.dp)) {
+            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions, stacked = true)
+        }
     }
 }
 
@@ -108,7 +108,8 @@ private fun CycleRing(state: TodayUiState, onDayClick: (LocalDate) -> Unit, onSh
     val density = LocalDensity.current
     val measurer = rememberTextMeasurer()
     val labelStyle = MaterialTheme.typography.labelSmall.copy(color = t.muted)
-    val dayLabels = density.fontScale < 1.3f
+    // Large text needs the room inside the ring.
+    val dateLabels = density.fontScale < 1.3f
     val timeline = state.timeline
     val days = remember(timeline) {
         timeline?.let { generateSequence(it.axisStart) { day -> day.plusDays(1) }.takeWhile { day -> day <= it.axisEnd }.toList() }.orEmpty()
@@ -157,15 +158,15 @@ private fun CycleRing(state: TodayUiState, onDayClick: (LocalDate) -> Unit, onSh
                     drawCircle(t.accent.todayRing, dot + 3.dp.toPx(), point, style = Stroke(2.dp.toPx()))
                     if (!marks.period) drawCircle(t.ink, 2.5.dp.toPx(), point)
                 }
-                // Day 1, 8, 15, ... inside the ring, for counting without tapping (large text needs that room).
-                if (index % 7 == 0 && dayLabels) {
-                    val label = measurer.measure((index + 1).toString(), labelStyle)
+                // Every fifth date of the month, numbered by that date: the dot next to "15" is the 15th.
+                if (date.dayOfMonth % 5 == 0 && dateLabels) {
+                    val label = measurer.measure(date.dayOfMonth.toString(), labelStyle)
                     val spot = at(radius - dot - 6.dp.toPx() - label.size.width / 2f)
                     drawText(label, topLeft = spot - Offset(label.size.width / 2f, label.size.height / 2f))
                 }
             }
         }
-        RingCenter(state, onShowToday, sentence, Modifier.widthIn(max = with(density) { (geometry.radius * 1.2f).toDp() }))
+        RingCenter(state, onShowToday, sentence, Modifier.widthIn(max = with(density) { (geometry.radius * 1.1f).toDp() }))
     }
 }
 
@@ -185,7 +186,8 @@ private fun RingCenter(state: TodayUiState, onShowToday: () -> Unit, sentence: B
                     style = MaterialTheme.typography.displayLarge.copy(fontFamily = DmSans), color = t.accent.accent)
             }
         }
-        if (sentence) RingSentence(state, headline.number != null)
+        // Pulled up a little: the big numeral's line box leaves a gap below the digits.
+        if (sentence) Box(Modifier.offset(y = (-6).dp)) { RingSentence(state, headline.number != null) }
     }
 }
 

@@ -88,9 +88,9 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                     }
                 } }
             }
-            if (state.levels.isNotEmpty()) {
+            if (state.charts.isNotEmpty()) {
                 item { ChartRangePicker(range) { range = it } }
-                chartFields.filter { it in state.levels }.forEach { field -> item(key = "chart:$field") { LevelChartFor(state, field, range.days) } }
+                state.charts.forEach { chart -> item(key = "chart:${chart.category.overrideKey}") { HistoryChartFor(state, chart, range.days) } }
             }
             if (state.phase in setOf(LifePhase.PERIMENOPAUSE, LifePhase.MENOPAUSE)) item { MonthlySymptoms(state) }
             else item { SymptomFrequency(state, state.symptomCounts, state.ownSymptomCounts, pluralStringResource(R.plurals.history_symptom_basis, state.symptomCycles, state.symptomCycles)) }
@@ -155,23 +155,22 @@ private fun MonthlySymptoms(state: HistoryUiState) {
     }
 }
 
-/** Mood from low to high, independent of the order the user chose for the day entry. */
-private val moodScale = listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT)
-
-/** Every chart field's items from low to high (the enums of the others are already in that order). */
-private fun chartScale(field: String): List<String> =
-    if (field == "mood") moodScale.map { it.name } else builtInEntryItems(field).map { requireNotNull(it.name) }
-
 /** Labels and icons follow the user's renames, so the chart speaks the same words as the day entry. */
 @Composable
-private fun LevelChartFor(state: HistoryUiState, field: String, days: Int) {
-    val items = builtInEntryItems(field)
-    val scale = chartScale(field)
-    val levels = scale.map { name -> items.first { it.name == name }.let { entryAppearance(it.key, it.label, it.icon, state.overrides) } }
-    val category = builtInCategories.first { it.key == field }
-    val title = entryAppearance(category.overrideKey, category.label, category.icon, state.overrides).label
-    LevelChart(title, levels, state.levels[field].orEmpty().mapValues { scale.indexOf(it.value) }, state.recentPeriodDays, state.today,
-        icons = field == "mood", days = days)
+private fun HistoryChartFor(state: HistoryUiState, chart: HistoryChart, days: Int) {
+    val category = chart.category
+    val title = entryAppearance(category.overrideKey, category.label, category.icon,
+        if (category.category == null) state.overrides else emptyList(), category = category.category).label
+    val levels = chart.levels?.map { entryAppearance(it.key, it.label, it.icon, state.overrides, it.tag) }
+    if (levels != null) LevelChart(title, levels.map { it.label to it.icon }, chart.values, state.recentPeriodDays, state.today,
+        icons = category.key == "mood", days = days)
+    else {
+        // Counts: one row per number up to the highest; with many rows only the lowest, middle and highest are labelled.
+        val most = chart.values.values.max()
+        val rows = (1..most).map { n -> (if (most <= 6 || n == 1 || n == most || n == (most + 1) / 2) "$n" else "") to 0 }
+        LevelChart(title, rows, chart.values.mapValues { it.value - 1 }, state.recentPeriodDays, state.today,
+            icons = false, days = days, rowHeight = (168.dp / most).coerceAtMost(28.dp))
+    }
 }
 
 @Composable

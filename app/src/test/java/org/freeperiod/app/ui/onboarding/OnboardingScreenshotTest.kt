@@ -13,7 +13,7 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
 class OnboardingScreenshotTest : SettingsScreenshotFixture() {
-    @Test fun welcome_enLight() = capture("onboarding/welcome_enLight", "Welcome to FreePeriod.") {
+    @Test fun welcome_enLight() = capture("onboarding/welcome_enLight", "Welcome to FreePeriod") {
         OnboardingScreen(OnboardingUiState(today = clock()), OnboardingActions())
     }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")

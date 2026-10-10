@@ -49,7 +49,9 @@ class HistoryScreenshotTest {
                 appetite = Appetite.entries[(back / 3) % 3])
         }
         val periods = (0 until 13).map { Period(it + 1L, today.minusDays(24L + 28 * it), today.minusDays(20L + 28 * it)) }.reversed()
-        val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = emptyList(), settings = BackupSettings(null, false)), today)
+        // Appetite starts hidden; turned on, it gets its chart.
+        val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = emptyList(), settings = BackupSettings(null, false),
+            overrides = listOf(UiOverride("category:appetite", false, 4))), today)
         compose.setContent { FreePeriodTheme(darkTheme = dark) { Surface { HistoryScreen(state, { _, _ -> }) } } }
         compose.waitForIdle()
         range?.let {

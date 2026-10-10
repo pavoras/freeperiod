@@ -23,9 +23,9 @@ internal const val SUPPORT_EMAIL = "support@jaysay.it"
 
 /** Technical lines only; never cycle data, entries or notes. The user sees and can edit them in the mail app. */
 internal fun feedbackInfo(version: String, sdk: Int, device: String, locale: Locale): String =
-    "FreePeriod. $version · Android API $sdk · $device · ${locale.toLanguageTag()}"
+    "FreePeriod $version · Android API $sdk · $device · ${locale.toLanguageTag()}"
 
-/** Hands a prepared email to the user's mail app; FreePeriod. itself sends nothing and needs no internet. */
+/** Hands a prepared email to the user's mail app; FreePeriod itself sends nothing and needs no internet. */
 @Composable
 internal fun FeedbackDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current

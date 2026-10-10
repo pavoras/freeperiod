@@ -32,7 +32,7 @@ class TodayScreenTest {
         compose.onNodeWithContentDescription("About this calendar estimate").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Not a medical device").assertIsDisplayed()
-        compose.onNodeWithText("FreePeriod. is not a medical device.", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("FreePeriod is not a medical device.", substring = true).assertIsDisplayed()
         compose.onNodeWithText("Got it").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Not a medical device").assertDoesNotExist()

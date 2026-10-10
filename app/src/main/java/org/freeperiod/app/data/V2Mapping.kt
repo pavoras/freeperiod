@@ -8,8 +8,8 @@ import org.freeperiod.engine.*
 
 internal fun CustomCategoryEntity.domain() = CustomCategory(id, name, iconKey, sortOrder, archived, singleChoice, counted, itemSet)
 internal fun CustomCategory.entity() = CustomCategoryEntity(id, name, iconKey, sortOrder, archived, singleChoice, counted, itemSet)
-internal fun UiOverrideEntity.domain() = UiOverride(key, hidden, sortOrder, label, iconKey)
-internal fun UiOverride.entity() = UiOverrideEntity(key, hidden, sortOrder, label, iconKey)
+internal fun UiOverrideEntity.domain() = UiOverride(key, hidden, sortOrder, label, iconKey, chart)
+internal fun UiOverride.entity() = UiOverrideEntity(key, hidden, sortOrder, label, iconKey, chart)
 internal fun SituationEntity?.domain(): Situation = if (this == null) Situation() else Situation(
     LifePhase.valueOf(phase), Method.valueOf(method), pillPackStartEpochDay?.let {
         PillSchedule(LocalDate.ofEpochDay(it), requireNotNull(pillActiveDays), requireNotNull(pillBreakDays))

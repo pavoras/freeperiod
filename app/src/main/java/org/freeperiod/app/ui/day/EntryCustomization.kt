@@ -11,23 +11,23 @@ data class EntryCategory(val key: String, val label: Int, val icon: Int, val ord
     val overrideKey get() = category?.let { "customCategory:${it.id}" } ?: "category:$key"
 }
 
+// Medication, appetite and sex drive are off until the user turns them on (Customize day entry or My situation).
 internal val builtInCategories = listOf(
     EntryCategory("mood", R.string.entry_mood, R.drawable.ic_mood_okay, 0),
     EntryCategory("flow", R.string.entry_flow, R.drawable.ic_fp_cycle, 1),
     EntryCategory("pain", R.string.entry_pain, R.drawable.ic_symptom_cramps, 2),
     EntryCategory("symptoms", R.string.entry_symptoms, R.drawable.ic_symptom_fatigue, 3),
-    EntryCategory("sex", R.string.entry_sex, R.drawable.ic_fp_sex, 4),
-    EntryCategory("discharge", R.string.entry_discharge, R.drawable.ic_fp_discharge, 5),
-    EntryCategory("tags", R.string.entry_tags, R.drawable.ic_fp_tags, 6),
-    EntryCategory("note", R.string.entry_note, R.drawable.ic_fp_note, 7),
-    EntryCategory("ovulation_test", R.string.entry_ovulation_test, R.drawable.ic_fp_today, 8),
-    // Off until the user turns it on (Customize day entry or the pain diary in My situation).
-    EntryCategory("medication", R.string.entry_medication, R.drawable.ic_item_pill, 9, defaultHidden = true),
-    EntryCategory("appetite", R.string.entry_appetite, R.drawable.ic_item_cutlery, 10, defaultHidden = true),
-    EntryCategory("libido", R.string.entry_libido, R.drawable.ic_item_sparkles, 11, defaultHidden = true),
+    EntryCategory("appetite", R.string.entry_appetite, R.drawable.ic_item_cutlery, 4, defaultHidden = true),
+    EntryCategory("sex", R.string.entry_sex, R.drawable.ic_fp_sex, 5),
+    EntryCategory("libido", R.string.entry_libido, R.drawable.ic_item_sparkles, 6, defaultHidden = true),
+    EntryCategory("discharge", R.string.entry_discharge, R.drawable.ic_fp_discharge, 7),
+    EntryCategory("note", R.string.entry_note, R.drawable.ic_fp_note, 8),
+    EntryCategory("tags", R.string.entry_tags, R.drawable.ic_fp_tags, 9),
+    EntryCategory("ovulation_test", R.string.entry_ovulation_test, R.drawable.ic_fp_today, 10),
+    EntryCategory("medication", R.string.entry_medication, R.drawable.ic_item_pill, 11, defaultHidden = true),
 )
 
-internal data class EntryItem(val key: String, val name: String?, val label: Int, val icon: Int,
+data class EntryItem(val key: String, val name: String?, val label: Int, val icon: Int,
     val tag: Tag? = null, val order: Int = 0, val hidden: Boolean = false)
 internal data class ResolvedEntryAppearance(val label: String, val icon: Int, val iconKey: String)
 
@@ -65,18 +65,30 @@ internal fun builtInEntryItems(field: String): List<EntryItem> {
     return values.mapIndexed { index, (name, label, icon) -> EntryItem("item:$field:$name", name, label, icon, order = index) }
 }
 
-internal fun DayEntryUiState.selected(item: EntryItem): Boolean = item.tag?.let { it.id in log.tagIds } ?: when (item.key.split(':')[1]) {
-    "mood" -> log.mood?.name == item.name
-    "flow" -> log.flow?.name == item.name
-    "pain" -> log.pain?.name == item.name
-    "sex" -> log.sex?.name == item.name
-    "discharge" -> log.discharge?.name == item.name
-    "symptoms" -> log.symptoms.any { it.name == item.name }
-    "ovulation_test" -> log.ovulationTest?.name == item.name
-    "appetite" -> log.appetite?.name == item.name
-    "libido" -> log.libido?.name == item.name
+internal fun DayEntryUiState.selected(item: EntryItem): Boolean = log.has(item)
+
+internal fun DayLog.has(item: EntryItem): Boolean = item.tag?.let { it.id in tagIds } ?: when (item.key.split(':')[1]) {
+    "mood" -> mood?.name == item.name
+    "flow" -> flow?.name == item.name
+    "pain" -> pain?.name == item.name
+    "sex" -> sex?.name == item.name
+    "discharge" -> discharge?.name == item.name
+    "symptoms" -> symptoms.any { it.name == item.name }
+    "ovulation_test" -> ovulationTest?.name == item.name
+    "appetite" -> appetite?.name == item.name
+    "libido" -> libido?.name == item.name
     else -> false
 }
+
+/** Built-in pick-one fields; their items are levels from low (first) to high (last). */
+private val levelFields = setOf("mood", "flow", "pain", "sex", "discharge", "ovulation_test", "appetite", "libido")
+/** Charts History shows until the user switches them off. */
+private val defaultChartFields = setOf("mood", "flow", "pain", "appetite", "libido")
+
+/** Pick-one categories (levels) and counted ones (number per day) can be a chart in History; pick-several can't. */
+internal fun EntryCategory.chartable(): Boolean = counted() || key in levelFields || category?.singleChoice == true
+internal fun EntryCategory.charted(overrides: List<UiOverride>): Boolean =
+    chartable() && overrides.find { it.key == overrideKey }?.chart ?: (key in defaultChartFields)
 
 internal fun DayEntryUiState.categoryTags(category: EntryCategory): List<Tag> {
     val id = when {

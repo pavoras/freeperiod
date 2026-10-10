@@ -40,7 +40,7 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     onCategory: (CustomCategory) -> Unit, onArchive: (CustomCategory) -> Unit,
     onItem: (String, String, Long?, String?) -> Unit, onRestore: (CustomCategory) -> Unit = {},
     onAppearance: (UiOverride) -> Unit = {}, onEditItem: (Tag) -> Unit = {}, onDeleteItem: (Long) -> Unit = {},
-    archive: ArchiveActions = ArchiveActions()) {
+    archive: ArchiveActions = ArchiveActions(), onChart: (EntryCategory, Boolean) -> Unit = { _, _ -> }) {
     val state = dayEntryState(data, today, today)
     val categories = entryCategories(state, includeHidden = true)
     var expanded by rememberSaveable { mutableStateOf("") }
@@ -84,8 +84,15 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
                     }
                 }
                 if (open) Column(Modifier.padding(start = 16.dp, bottom = 8.dp)) {
+                    val charted = category.charted(data.overrides)
+                    if (category.chartable()) FpSwitchRow(stringResource(R.string.chart_in_history), charted, onChange = { onChart(category, it) })
+                    // A chart's levels read like the chart: highest on top. Stored (and in the day entry) lowest first.
+                    val scale = charted && !category.counted()
+                    if (scale) Text(stringResource(R.string.chart_order_hint), Modifier.padding(bottom = 4.dp),
+                        style = MaterialTheme.typography.bodySmall, color = t.muted)
+                    val shown = if (scale) items.asReversed() else items
                     // One row per item: tap the name to rename (and delete own items), arrows to reorder.
-                    items.forEachIndexed { itemIndex, item ->
+                    shown.forEachIndexed { itemIndex, item ->
                         val itemAppearance = item.appearance(state)
                         val renameItem = stringResource(R.string.rename_entry_description, itemAppearance.label)
                         val override = data.overrides.find { it.key == item.key } ?: UiOverride(item.key, item.hidden, item.order)
@@ -96,7 +103,7 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
                                 Icon(painterResource(itemAppearance.icon), null, Modifier.size(20.dp), tint = if (item.hidden) t.muted else t.ink)
                                 Text(itemAppearance.label, color = if (item.hidden) t.muted else t.ink)
                             }
-                            MoveButtons(itemIndex, items.map { it.key }, itemAppearance.label, onReorder)
+                            MoveButtons(itemIndex, shown.map { it.key }, itemAppearance.label) { onReorder(if (scale) it.asReversed() else it) }
                             VisibilitySwitch(itemAppearance.label, !item.hidden) { onOverride(item.key, !it, item.order) }
                         }
                     }

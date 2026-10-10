@@ -117,7 +117,7 @@ internal object SummaryPdf {
             y = MARGIN
         }
 
-        // Every page says where the content comes from and what FreePeriod. is not.
+        // Every page says where the content comes from and what FreePeriod is not.
         private fun close(done: PdfDocument.Page) {
             val footer = layout("${text(R.string.summary_footer)} · ${text(R.string.summary_page).format(number)}", small, WIDTH - 2 * MARGIN)
             done.canvas.save()

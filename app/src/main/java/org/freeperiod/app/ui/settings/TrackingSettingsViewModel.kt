@@ -7,7 +7,9 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.freeperiod.app.data.ItemSetCategory
+import org.freeperiod.app.data.PAIN_DIARY
 import org.freeperiod.app.data.Repository
+import org.freeperiod.app.ui.day.EntryCategory
 import org.freeperiod.app.ui.day.builtInCategories
 import org.freeperiod.app.ui.day.dayEntryState
 import org.freeperiod.app.ui.day.entryCategories
@@ -15,6 +17,8 @@ import java.time.LocalDate
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 import org.freeperiod.engine.backup.BackupSettings
+
+private const val PAIN_DIARY_DAILY = "${PAIN_DIARY}daily"
 
 data class TrackingSettingsState(val data: BackupData = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false)), val loading: Boolean = true, val error: Boolean = false)
 
@@ -81,12 +85,39 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
     fun deleteItemForever(tag: Tag) = write { repository.deleteItemsForever(setOf(tag.id)) }
     fun resetCustomization() = write { repository.resetCustomization() }
 
-    /** Shows or hides a built-in day-entry category (e.g. medication) without changing its place. */
+    /**
+     * Shows or hides a built-in day-entry category. Medication keeps its place; appetite and sex drive join in their
+     * usual place when turned on (after symptoms / after sex), also after the order was changed.
+     */
     fun showCategory(field: String, visible: Boolean) = write {
+        val data = repository.snapshot()
         val default = builtInCategories.first { it.key == field }
         val key = "category:$field"
-        val previous = repository.snapshot().overrides.find { it.key == key } ?: UiOverride(key, default.defaultHidden, default.order)
-        repository.setUiOverride(previous.copy(hidden = !visible))
+        val previous = data.overrides.find { it.key == key }
+        repository.setUiOverride((previous ?: UiOverride(key, default.defaultHidden, default.order)).copy(hidden = !visible))
+        if (visible && (previous?.hidden ?: default.defaultHidden)) when (field) {
+            "appetite" -> placeAfter(key, listOfNotNull(dailyKey(data), "category:symptoms"))
+            "libido" -> placeAfter(key, listOf("category:sex"))
+        }
+    }
+
+    private fun dailyKey(data: BackupData) = data.customCategories.find { it.itemSet == PAIN_DIARY_DAILY }?.let { "customCategory:${it.id}" }
+
+    /** Moves [key] right after the first of [anchors] that is shown; no shown anchor leaves the order as it is. */
+    private suspend fun placeAfter(key: String, anchors: List<String>) {
+        val epoch = LocalDate.ofEpochDay(0)
+        val categories = entryCategories(dayEntryState(repository.snapshot(), epoch, epoch), includeHidden = true)
+        val anchor = anchors.firstOrNull { anchor -> categories.any { it.overrideKey == anchor && !it.hidden } } ?: return
+        val rest = categories.map { it.overrideKey } - key
+        val at = rest.indexOf(anchor) + 1
+        writeOrder(rest.take(at) + key + rest.drop(at))
+    }
+
+    /** Switches the History chart of a category on or off. */
+    fun chart(category: EntryCategory, on: Boolean) = write {
+        val previous = repository.snapshot().overrides.find { it.key == category.overrideKey }
+            ?: UiOverride(category.overrideKey, category.hidden, category.order)
+        repository.setUiOverride(previous.copy(chart = on))
     }
 
     fun painDiary(on: Boolean, categories: List<ItemSetCategory>, archive: Boolean = false) = write {
@@ -97,14 +128,15 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
         val show = keys.mapNotNull { key -> data.overrides.find { it.key == key }?.copy(hidden = false)
             ?: builtInCategories.find { "category:${it.key}" == key && it.defaultHidden }?.let { UiOverride(key, false, it.order) } }
         repository.turnOnPainDiary(categories, show)
-        // Pain, medication and the pain diary's categories stand together, where pain was.
+        // Pain, medication and where/during stand together, where pain was; effect on your day follows symptoms.
         val after = repository.snapshot()
         val ordered = entryCategories(dayEntryState(after, LocalDate.ofEpochDay(0), LocalDate.ofEpochDay(0)), includeHidden = true).map { it.overrideKey }
-        val group = listOf("category:pain", "category:medication") + categories.mapNotNull { set ->
+        val group = listOf("category:pain", "category:medication") + categories.filter { it.key != PAIN_DIARY_DAILY }.mapNotNull { set ->
             after.customCategories.find { it.itemSet == set.key }?.let { "customCategory:${it.id}" } }
         val rest = ordered.filterNot { it in group }
         val at = ordered.takeWhile { it != "category:pain" }.count { it !in group }
         writeOrder(rest.take(at) + group + rest.drop(at))
+        dailyKey(after)?.let { placeAfter(it, listOf("category:symptoms")) }
     }
     fun item(name: String, icon: String, categoryId: Long?, field: String?, categoryName: String) = write {
         if (field != null) repository.addBuiltInItem(field, name, icon, categoryName)

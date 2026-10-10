@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.freeperiod.app.data.Repository
+import org.freeperiod.app.ui.day.*
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 
@@ -34,21 +35,31 @@ data class HistoryUiState(
     val customCategories: List<CustomCategory> = emptyList(),
     val ownSymptomCounts: Map<Long, Int> = emptyMap(),
     val monthlyOwnSymptoms: Map<YearMonth, Map<Long, Int>> = emptyMap(),
-    /** Last [CHART_DAYS] days: logged item name per chart field and day (only fields with entries), and the period days. */
-    val levels: Map<String, Map<LocalDate, String>> = emptyMap(),
+    /** Last [CHART_DAYS] days: one chart per shown category with the chart switched on and entries, and the period days. */
+    val charts: List<HistoryChart> = emptyList(),
     val recentPeriodDays: Set<LocalDate> = emptySet(),
 )
 
-/** Fields with an order from low to high, shown as charts in History. */
-internal val chartFields = listOf("mood", "flow", "pain", "appetite", "libido")
+/**
+ * A category over time. [levels]: its items from low (index 0, bottom row) to high, in the order the user set;
+ * [values] are indexes into it. For a counted category [levels] is null and [values] are the counts per day.
+ */
+data class HistoryChart(val category: EntryCategory, val levels: List<EntryItem>?, val values: Map<LocalDate, Int>)
 
-private fun DayLog.level(field: String): String? = when (field) {
-    "mood" -> mood?.name
-    "flow" -> flow?.name
-    "pain" -> pain?.name
-    "appetite" -> appetite?.name
-    "libido" -> libido?.name
-    else -> null
+/** Charts in day-entry order; a hidden category has none, a hidden item only gets a row while it is in range. */
+private fun charts(data: BackupData, days: List<SummaryDay>, today: LocalDate): List<HistoryChart> {
+    val entry = dayEntryState(data, today, today).copy(log = DayLog(today))
+    return entryCategories(entry).filter { it.charted(data.overrides) }.mapNotNull { category ->
+        val items = entry.entryItems(category, includeHidden = true)
+        val chart = if (category.counted()) HistoryChart(category, null, days.associate { day ->
+            day.date to items.sumOf { item -> item.tag?.takeIf { it.id in day.log.tagIds }?.let { day.log.tagCounts[it.id] ?: 1 } ?: 0 }
+        }.filterValues { it > 0 }) else {
+            val picked = days.mapNotNull { day -> items.firstOrNull { day.log.has(it) }?.let { day.date to it } }.toMap()
+            val levels = items.filter { !it.hidden || it in picked.values }
+            HistoryChart(category, levels, picked.mapValues { levels.indexOf(it.value) })
+        }
+        chart.takeIf { it.values.isNotEmpty() }
+    }
 }
 
 internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
@@ -75,8 +86,7 @@ internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
         symptomCycles = window.size, loading = false, overrides = data.overrides, tags = data.tags, customCategories = data.customCategories,
         ownSymptomCounts = if (window.isEmpty()) emptyMap() else ownCounts(data.dayLogs.filter { it.date >= window.first().start && it.date < window.last().nextStart }),
         monthlyOwnSymptoms = data.dayLogs.filter { it.date <= today }.groupBy { YearMonth.from(it.date) }.mapValues { (_, logs) -> ownCounts(logs) },
-        levels = chartFields.associateWith { field -> recent.mapNotNull { day -> day.log.level(field)?.let { day.date to it } }.toMap() }
-            .filterValues { it.isNotEmpty() },
+        charts = charts(data, recent, today),
         recentPeriodDays = recent.filter { it.periodDay }.map { it.date }.toSet())
 }
 

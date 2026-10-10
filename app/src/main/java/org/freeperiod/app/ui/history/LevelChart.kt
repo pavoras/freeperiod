@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -22,7 +23,6 @@ import java.time.format.FormatStyle
 import java.time.temporal.ChronoUnit.DAYS
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.components.FpChip
-import org.freeperiod.app.ui.day.ResolvedEntryAppearance
 import org.freeperiod.app.ui.theme.*
 
 /** Time spans the History charts can show; [days] ends today. */
@@ -34,7 +34,6 @@ enum class ChartRange(val days: Int, val label: Int) {
 /** The longest range: History loads this much once and every chart cuts its range from it. */
 internal val CHART_DAYS = ChartRange.entries.maxOf { it.days }
 
-private val rowHeight = 28.dp
 /** Same axis width in every chart, so days line up between the charts. */
 private val axisWidth = 100.dp
 
@@ -54,12 +53,12 @@ internal fun ChartRangePicker(range: ChartRange, onRange: (ChartRange) -> Unit) 
 }
 
 /**
- * Logged levels as dots per day (index 0 = lowest row), period days shaded. It shows entries as they are:
+ * Logged levels (label, icon) as dots per day (index 0 = lowest row), period days shaded. It shows entries as they are:
  * no averages, scores or trends. [icons] puts the level icons on the axis instead of their names.
  */
 @Composable
-internal fun LevelChart(title: String, levels: List<ResolvedEntryAppearance>, values: Map<LocalDate, Int>,
-    periodDays: Set<LocalDate>, to: LocalDate, icons: Boolean, days: Int) {
+internal fun LevelChart(title: String, levels: List<Pair<String, Int>>, values: Map<LocalDate, Int>,
+    periodDays: Set<LocalDate>, to: LocalDate, icons: Boolean, days: Int, rowHeight: Dp = 28.dp) {
     val t = LocalDaylight.current
     val from = to.minusDays(days - 1L)
     val shown = values.filterKeys { it in from..to }.toSortedMap()
@@ -70,10 +69,10 @@ internal fun LevelChart(title: String, levels: List<ResolvedEntryAppearance>, va
         Text(title, style = MaterialTheme.typography.titleMedium)
         Row(Modifier.fillMaxWidth().semantics(mergeDescendants = true) { contentDescription = "$title. $spoken" }) {
             Column(Modifier.width(axisWidth)) {
-                levels.asReversed().forEach { level ->
+                levels.asReversed().forEach { (label, icon) ->
                     Box(Modifier.height(rowHeight).fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                        if (icons) Icon(painterResource(level.icon), null, Modifier.size(20.dp), tint = t.muted)
-                        else Text(level.label, style = MaterialTheme.typography.labelSmall, color = t.muted, maxLines = 1,
+                        if (icons) Icon(painterResource(icon), null, Modifier.size(20.dp), tint = t.muted)
+                        else Text(label, style = MaterialTheme.typography.labelSmall, color = t.muted, maxLines = 1,
                             overflow = TextOverflow.Ellipsis)
                     }
                 }

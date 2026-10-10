@@ -88,4 +88,25 @@ class SettingsClarityTest {
         compose.waitForIdle()
         assertEquals(sport, restored)
     }
+
+    @Test fun aChartedCategoryListsItsLevelsHighestFirstAndHasAChartSwitch() {
+        var order: List<String>? = null
+        var chart: Pair<String, Boolean>? = null
+        val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
+        compose.setContent { FreePeriodTheme { Surface {
+            DayEntrySettingsScreen(data, LocalDate.of(2026, 4, 12), {}, { _, _, _ -> }, { order = it }, {}, {}, { _, _, _, _ -> },
+                onChart = { category, on -> chart = category.overrideKey to on })
+        } } }
+        compose.onNodeWithText("Pain").performClick()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Chart in History"))
+        compose.onNode(hasContentDescription("Chart in History") and isToggleable()).assertIsOn()
+        // Severe is listed on top; moving it down swaps it with Moderate, stored lowest first.
+        val rows = compose.onAllNodes(hasText("Severe") or hasText("Moderate") or hasText("Mild")).fetchSemanticsNodes()
+            .map { it.config[androidx.compose.ui.semantics.SemanticsProperties.Text].joinToString() }
+        assertEquals(listOf("Severe", "Moderate", "Mild"), rows.filter { it in setOf("Severe", "Moderate", "Mild") })
+        compose.onNodeWithContentDescription("Move Severe down").performClick()
+        assertEquals(listOf("item:pain:NONE", "item:pain:MILD", "item:pain:SEVERE", "item:pain:MODERATE"), order)
+        compose.onNode(hasContentDescription("Chart in History") and isToggleable()).performClick()
+        assertEquals("category:pain" to false, chart)
+    }
 }
