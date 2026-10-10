@@ -87,7 +87,7 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                     }
                 } }
             }
-            if (state.phase == LifePhase.MENOPAUSE) item { MonthlySymptoms(state) }
+            if (state.phase in setOf(LifePhase.PERIMENOPAUSE, LifePhase.MENOPAUSE)) item { MonthlySymptoms(state) }
             else item { SymptomFrequency(state, state.symptomCounts, state.ownSymptomCounts, pluralStringResource(R.plurals.history_symptom_basis, state.symptomCycles, state.symptomCycles)) }
             if (state.error) item { Text(stringResource(R.string.error_storage), color = MaterialTheme.colorScheme.error) }
         }

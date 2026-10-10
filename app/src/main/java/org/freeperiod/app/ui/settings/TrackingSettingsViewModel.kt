@@ -6,7 +6,9 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import org.freeperiod.app.data.ItemSetCategory
 import org.freeperiod.app.data.Repository
+import org.freeperiod.app.ui.day.builtInCategories
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 import org.freeperiod.engine.backup.BackupSettings
@@ -57,15 +59,40 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
     fun deleteItem(id: Long) = write { repository.deleteItem(id) }
     fun reorder(keys: List<String>) = write {
         val overrides = repository.snapshot().overrides
-        keys.forEachIndexed { index, key -> repository.setUiOverride(
-            (overrides.find { it.key == key } ?: UiOverride(key, false, index)).copy(sortOrder = index)) }
+        // A category that starts hidden (medication) stays hidden when only its place changes.
+        keys.forEachIndexed { index, key -> repository.setUiOverride((overrides.find { it.key == key }
+            ?: UiOverride(key, builtInCategories.any { "category:${it.key}" == key && it.defaultHidden }, index)).copy(sortOrder = index)) }
     }
-    fun category(name: String, icon: String, existing: CustomCategory? = null, singleChoice: Boolean = existing?.singleChoice ?: false) = write {
-        if (existing == null) repository.addCustomCategory(name, icon, sortOrder = 100 + mutable.value.data.customCategories.size, singleChoice = singleChoice)
-        else repository.updateCustomCategory(existing.copy(name = name, iconKey = icon, singleChoice = singleChoice))
+    /** Adds the category when its id is 0, otherwise saves the edited one. */
+    fun category(draft: CustomCategory) = write {
+        if (draft.id == 0L) repository.addCustomCategory(draft.name, draft.iconKey, sortOrder = 100 + mutable.value.data.customCategories.size,
+            singleChoice = draft.singleChoice, counted = draft.counted)
+        else repository.updateCustomCategory(draft)
     }
     fun archive(category: CustomCategory) = write { repository.updateCustomCategory(category.copy(archived = true)) }
     fun restore(category: CustomCategory) = write { repository.updateCustomCategory(category.copy(archived = false)) }
+    fun deleteCategory(category: CustomCategory) = write { repository.deleteCustomCategory(category.id) }
+    fun restoreItem(tag: Tag) = write { repository.updateTag(tag.copy(archived = false)) }
+    fun deleteItemForever(tag: Tag) = write { repository.deleteItemsForever(setOf(tag.id)) }
+    fun resetCustomization() = write { repository.resetCustomization() }
+
+    /** Shows or hides a built-in day-entry category (e.g. medication) without changing its place. */
+    fun showCategory(field: String, visible: Boolean) = write {
+        val default = builtInCategories.first { it.key == field }
+        val key = "category:$field"
+        val previous = repository.snapshot().overrides.find { it.key == key } ?: UiOverride(key, default.defaultHidden, default.order)
+        repository.setUiOverride(previous.copy(hidden = !visible))
+    }
+
+    fun painDiary(on: Boolean, categories: List<ItemSetCategory>, archive: Boolean = false) = write {
+        if (!on) return@write repository.turnOffPainDiary(archive)
+        val data = repository.snapshot()
+        val keys = listOf("category:pain", "category:medication") + data.customCategories
+            .filter { category -> categories.any { it.key == category.itemSet } }.map { "customCategory:${it.id}" }
+        val show = keys.mapNotNull { key -> data.overrides.find { it.key == key }?.copy(hidden = false)
+            ?: builtInCategories.find { "category:${it.key}" == key && it.defaultHidden }?.let { UiOverride(key, false, it.order) } }
+        repository.turnOnPainDiary(categories, show)
+    }
     fun item(name: String, icon: String, categoryId: Long?, field: String?, categoryName: String) = write {
         if (field != null) repository.addBuiltInItem(field, name, icon, categoryName)
         else repository.addTag(name, categoryId, icon)

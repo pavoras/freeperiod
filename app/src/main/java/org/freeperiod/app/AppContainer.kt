@@ -8,6 +8,7 @@ import org.freeperiod.app.data.SettingsStore
 import org.freeperiod.app.data.db.FreePeriodDatabase
 import org.freeperiod.app.data.db.MIGRATION_1_2
 import org.freeperiod.app.data.db.MIGRATION_2_3
+import org.freeperiod.app.data.db.MIGRATION_3_4
 import org.freeperiod.app.backup.*
 import androidx.work.WorkManager
 import kotlinx.coroutines.*
@@ -19,7 +20,7 @@ class AppContainer(context: Context) {
     private val appContext = context.applicationContext
     val clock: () -> LocalDate = { LocalDate.now() }
     private val database = Room.databaseBuilder(context.applicationContext,
-        FreePeriodDatabase::class.java, "freeperiod.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+        FreePeriodDatabase::class.java, "freeperiod.db").addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
     val settings = SettingsStore(context)
     val repository: Repository = Repository(database, afterRestore = { data ->
         settings.resetReminderDelivery(data.reminders)

@@ -3,6 +3,15 @@ package org.freeperiod.app.data.db
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE day_tags ADD COLUMN count INTEGER NOT NULL DEFAULT 1")
+        db.execSQL("ALTER TABLE custom_categories ADD COLUMN counted INTEGER NOT NULL DEFAULT 0")
+        db.execSQL("ALTER TABLE custom_categories ADD COLUMN itemSet TEXT")
+        db.execSQL("ALTER TABLE situation ADD COLUMN painDiary INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
 val MIGRATION_2_3 = object : Migration(2, 3) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE ui_overrides ADD COLUMN label TEXT")

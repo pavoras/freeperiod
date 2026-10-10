@@ -7,7 +7,7 @@ import org.freeperiod.app.ui.components.FpIcons
 import org.freeperiod.engine.*
 
 data class EntryCategory(val key: String, val label: Int, val icon: Int, val order: Int,
-    val category: CustomCategory? = null, val hidden: Boolean = false) {
+    val category: CustomCategory? = null, val hidden: Boolean = false, val defaultHidden: Boolean = false) {
     val overrideKey get() = category?.let { "customCategory:${it.id}" } ?: "category:$key"
 }
 
@@ -21,6 +21,8 @@ internal val builtInCategories = listOf(
     EntryCategory("tags", R.string.entry_tags, R.drawable.ic_fp_tags, 6),
     EntryCategory("note", R.string.entry_note, R.drawable.ic_fp_note, 7),
     EntryCategory("ovulation_test", R.string.entry_ovulation_test, R.drawable.ic_fp_today, 8),
+    // Off until the user turns it on (Customize day entry or the pain diary in My situation).
+    EntryCategory("medication", R.string.entry_medication, R.drawable.ic_item_pill, 9, defaultHidden = true),
 )
 
 internal data class EntryItem(val key: String, val name: String?, val label: Int, val icon: Int,
@@ -100,7 +102,7 @@ internal fun entryCategories(state: DayEntryUiState, includeHidden: Boolean = fa
     }
     return (builtInCategories + custom).map { category ->
         val override = state.overrides.find { it.key == category.overrideKey }
-        category.copy(order = override?.sortOrder ?: category.order, hidden = override?.hidden == true)
+        category.copy(order = override?.sortOrder ?: category.order, hidden = override?.hidden ?: category.defaultHidden)
     }.filter { category ->
         val used = state.entryItems(category).any { state.selected(it) } || category.key == "note" && !state.log.note.isNullOrBlank()
         includeHidden || used || (!category.hidden && (category.key != "ovulation_test" || state.situation.phase == LifePhase.TRYING_TO_CONCEIVE))
@@ -110,9 +112,13 @@ internal fun entryCategories(state: DayEntryUiState, includeHidden: Boolean = fa
 internal fun DayEntryUiState.itemVisible(field: String, name: String): Boolean =
     overrides.none { it.key == "item:$field:$name" && it.hidden } || selected(builtInEntryItems(field).single { it.name == name })
 internal fun DayEntryUiState.visibleTags(category: EntryCategory): List<Tag> = entryItems(category).mapNotNull { it.tag }
-internal val menopauseSymptoms = setOf(Symptom.HOT_FLUSHES, Symptom.NIGHT_SWEATS, Symptom.BRAIN_FOG, Symptom.JOINT_PAIN)
+/** Only offered in peri-/menopause (or when already logged). */
+internal val menopauseSymptoms = setOf(Symptom.HOT_FLUSHES, Symptom.NIGHT_SWEATS, Symptom.BRAIN_FOG, Symptom.JOINT_PAIN,
+    Symptom.VAGINAL_DRYNESS, Symptom.HEART_RACING)
+/** Shown up front in peri-/menopause; mood swings and low sex drive are also under "More" for everyone. */
+private val menopauseShortList = menopauseSymptoms + setOf(Symptom.MOOD_SWINGS, Symptom.LOW_LIBIDO)
 internal fun DayEntryUiState.visibleSymptoms(more: Boolean): List<Symptom> {
-    val phaseItems = if (situation.phase in setOf(LifePhase.PERIMENOPAUSE, LifePhase.MENOPAUSE)) menopauseSymptoms else emptySet()
+    val phaseItems = if (situation.phase in setOf(LifePhase.PERIMENOPAUSE, LifePhase.MENOPAUSE)) menopauseShortList else emptySet()
     val base = if (more) Symptom.entries.filter { it !in menopauseSymptoms || it in phaseItems || it in log.symptoms }
         else listOf(Symptom.CRAMPS, Symptom.BLOATING, Symptom.HEADACHE) + phaseItems + log.symptoms
     return base.distinct().filter { itemVisible("symptoms", it.name) }

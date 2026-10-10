@@ -16,6 +16,11 @@ import org.freeperiod.engine.importing.*
 
 class PeriodValidationException(val error: PeriodError) : Exception(error.name)
 
+/** One category of an item set: created once, found again later by [key] (stored in CustomCategory.itemSet). */
+data class ItemSetCategory(val key: String, val name: String, val iconKey: String, val items: List<Pair<String, String>>)
+
+const val PAIN_DIARY = "pain_diary:"
+
 class Repository(
     private val db: FreePeriodDatabase,
     private val afterRestore: suspend (BackupData) -> Unit = {},
@@ -129,6 +134,53 @@ class Repository(
         else { overridesDao.delete("tag:$id"); tagsDao.delete(id) }
     } }
 
+    /** Deletes archived own items for good, also from past days; a day left without any entry disappears. */
+    suspend fun deleteItemsForever(ids: Set<Long>) { write { purgeTags(ids) } }
+
+    /** Deletes an own category with its items, also from past days. */
+    suspend fun deleteCustomCategory(id: Long) { write {
+        purgeTags(tagsDao.getAll().filter { it.categoryId == id }.map { it.id }.toSet())
+        overridesDao.delete("customCategory:$id")
+        categoriesDao.delete(id)
+    } }
+
+    /** Back to built-in names, icons, order and visibility; own items, categories and entries stay. */
+    suspend fun resetCustomization() { write { overridesDao.deleteAll() } }
+
+    private suspend fun purgeTags(ids: Set<Long>) {
+        logsDao.getWithTags().map { it.domain() }.filter { log -> log.tagIds.any { it in ids } }
+            .forEach { saveLog(it.withoutTags(ids)) }
+        ids.forEach { overridesDao.delete("tag:$it"); tagsDao.delete(it) }
+    }
+
+    /** Pain diary on: shows pain and medication ([show]), brings back or creates its categories; entries stay untouched. */
+    suspend fun turnOnPainDiary(categories: List<ItemSetCategory>, show: List<UiOverride>) { write {
+        situationDao.upsert(situationDao.get().domain().copy(painDiary = true).entity())
+        show.forEach { overridesDao.upsert(it.entity()) }
+        val existing = categoriesDao.getAll().map { it.domain() }.toMutableList()
+        categories.forEach { set ->
+            val found = existing.find { it.itemSet == set.key }
+            if (found != null) {
+                if (found.archived) categoriesDao.update(found.copy(archived = false).entity())
+                return@forEach
+            }
+            var name = set.name
+            var suffix = 2
+            while (existing.any { it.name.equals(name, ignoreCase = true) }) name = "${set.name} ${suffix++}"
+            val category = CustomCategory(0, name, set.iconKey, 100 + existing.size, false, itemSet = set.key)
+            val id = categoriesDao.insert(category.entity())
+            existing += category.copy(id = id)
+            set.items.forEach { (item, icon) -> tagsDao.insert(Tag(0, item, categoryId = id, iconKey = icon).entity()) }
+        }
+    } }
+
+    /** Pain diary off; its categories are archived only when the user asks. */
+    suspend fun turnOffPainDiary(archiveCategories: Boolean) { write {
+        situationDao.upsert(situationDao.get().domain().copy(painDiary = false).entity())
+        if (archiveCategories) categoriesDao.getAll().map { it.domain() }.filter { it.itemSet?.startsWith(PAIN_DIARY) == true }
+            .forEach { categoriesDao.update(it.copy(archived = true).entity()) }
+    } }
+
     /** Creates a marker and its first item in one transaction, without exposing it as a category. */
     suspend fun addBuiltInItem(field: String, name: String, icon: String, categoryName: String): Tag = write {
         require(field in ownItemFields)
@@ -144,8 +196,9 @@ class Repository(
         tag.copy(id = tagsDao.insert(tag.entity()))
     }
 
-    suspend fun addCustomCategory(name: String, iconKey: String = "tag", sortOrder: Int = 0, singleChoice: Boolean = false): CustomCategory = write {
-        val category = CustomCategory(0, name.trim(), iconKey, sortOrder, false, singleChoice)
+    suspend fun addCustomCategory(name: String, iconKey: String = "tag", sortOrder: Int = 0, singleChoice: Boolean = false,
+        counted: Boolean = false): CustomCategory = write {
+        val category = CustomCategory(0, name.trim(), iconKey, sortOrder, false, singleChoice, counted)
         validateCategory(category)
         category.copy(id = categoriesDao.insert(category.entity()))
     }
@@ -265,7 +318,7 @@ class Repository(
         } else {
             logsDao.upsert(log.entity())
             logsDao.deleteLinks(date)
-            logsDao.insertLinks(log.tagIds.map { DayTagEntity(date, it) })
+            logsDao.insertLinks(log.tagIds.map { DayTagEntity(date, it, log.tagCounts[it] ?: 1) })
         }
     }
 

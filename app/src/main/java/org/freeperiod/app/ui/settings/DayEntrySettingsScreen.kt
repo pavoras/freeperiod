@@ -26,13 +26,21 @@ import java.time.LocalDate
 private data class EntryEditor(val key: String, val appearance: ResolvedEntryAppearance,
     val override: UiOverride, val tag: Tag? = null)
 
+/** Archived things and the whole customization; past days keep their entries until deleted for good. */
+data class ArchiveActions(val deleteCategory: (CustomCategory) -> Unit = {}, val restoreItem: (Tag) -> Unit = {},
+    val deleteItemForever: (Tag) -> Unit = {}, val resetAll: () -> Unit = {})
+
+/** A permanent deletion or reset waiting for confirmation. */
+private data class Pending(val title: String, val body: Int, val confirm: Int, val action: () -> Unit)
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Unit,
     onOverride: (String, Boolean, Int) -> Unit, onReorder: (List<String>) -> Unit,
-    onCategory: (String, String, CustomCategory?, Boolean) -> Unit, onArchive: (CustomCategory) -> Unit,
+    onCategory: (CustomCategory) -> Unit, onArchive: (CustomCategory) -> Unit,
     onItem: (String, String, Long?, String?) -> Unit, onRestore: (CustomCategory) -> Unit = {},
-    onAppearance: (UiOverride) -> Unit = {}, onEditItem: (Tag) -> Unit = {}, onDeleteItem: (Long) -> Unit = {}) {
+    onAppearance: (UiOverride) -> Unit = {}, onEditItem: (Tag) -> Unit = {}, onDeleteItem: (Long) -> Unit = {},
+    archive: ArchiveActions = ArchiveActions()) {
     val state = dayEntryState(data, today, today)
     val categories = entryCategories(state, includeHidden = true)
     var expanded by rememberSaveable { mutableStateOf("") }
@@ -41,6 +49,9 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     var categoryEditor by remember { mutableStateOf<CustomCategory?>(null) }
     var categoryDialog by rememberSaveable { mutableStateOf(false) }
     var editor by remember { mutableStateOf<EntryEditor?>(null) }
+    var pending by remember { mutableStateOf<Pending?>(null) }
+    var archivedItem by remember { mutableStateOf<Tag?>(null) }
+    val deleteTitle = stringResource(R.string.delete_forever_title)
     val t = LocalDaylight.current
     LazyColumn(Modifier.fillMaxSize().background(t.background), contentPadding = PaddingValues(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -89,6 +100,17 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
                             VisibilitySwitch(itemAppearance.label, !item.hidden) { onOverride(item.key, !it, item.order) }
                         }
                     }
+                    // Archived own items stay for past days until the user deletes them for good.
+                    state.categoryTags(category).filter { it.archived }.forEach { tag ->
+                        val itemAppearance = entryAppearance("tag:${tag.id}", R.string.item_name, R.drawable.ic_fp_tags, data.overrides, tag)
+                        Row(Modifier.fillMaxWidth().heightIn(min = 48.dp).clickable { archivedItem = tag },
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Icon(painterResource(itemAppearance.icon), null, Modifier.size(20.dp), tint = t.muted)
+                            Text(itemAppearance.label, Modifier.weight(1f), color = t.muted)
+                            Text(stringResource(R.string.archived_item), Modifier.padding(end = 12.dp),
+                                style = MaterialTheme.typography.bodySmall, color = t.muted)
+                        }
+                    }
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (category.key in ownItemFields || category.key == "tags" || category.category != null)
                             TextButton(onClick = { itemCategory = category }) { Text(stringResource(R.string.add_entry_item)) }
@@ -116,12 +138,40 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
         items(archived.size, key = { "archived:${archived[it].id}" }) { index ->
             val category = archived[index]
             val appearance = entryAppearance("customCategory:${category.id}", R.string.entry_tags, R.drawable.ic_fp_tags, emptyList(), category = category)
-            Row(Modifier.fillMaxWidth().heightIn(min = 56.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Icon(painterResource(appearance.icon), null, Modifier.size(24.dp), tint = t.muted)
-                Text(appearance.label, Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge, color = t.muted)
-                TextButton(onClick = { onRestore(category) }) { Text(stringResource(R.string.restore_category)) }
+            Column(Modifier.padding(top = 12.dp)) {
+                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Icon(painterResource(appearance.icon), null, Modifier.size(24.dp), tint = t.muted)
+                    Text(appearance.label, style = MaterialTheme.typography.bodyLarge, color = t.muted)
+                }
+                FlowRow(Modifier.padding(start = 24.dp)) {
+                    TextButton(onClick = { onRestore(category) }) { Text(stringResource(R.string.restore_category)) }
+                    TextButton(onClick = { pending = Pending(deleteTitle.format(appearance.label), R.string.delete_category_body,
+                        R.string.delete_forever) { archive.deleteCategory(category) } }) {
+                        Text(stringResource(R.string.delete_forever), color = MaterialTheme.colorScheme.error)
+                    }
+                }
             }
         }
+        item {
+            val title = stringResource(R.string.restore_defaults)
+            TextButton(onClick = { pending = Pending(title, R.string.restore_defaults_body, R.string.restore_defaults, archive.resetAll) },
+                Modifier.padding(top = 24.dp)) { Text(title) }
+        }
+    }
+    archivedItem?.let { tag ->
+        val label = entryAppearance("tag:${tag.id}", R.string.item_name, R.drawable.ic_fp_tags, data.overrides, tag).label
+        AlertDialog(onDismissRequest = { archivedItem = null }, title = { Text(label) },
+            text = { Text(stringResource(R.string.archived_item_body)) },
+            confirmButton = { TextButton(onClick = { archive.restoreItem(tag); archivedItem = null }) { Text(stringResource(R.string.restore_category)) } },
+            dismissButton = { TextButton(onClick = {
+                archivedItem = null
+                pending = Pending(deleteTitle.format(label), R.string.delete_item_body, R.string.delete_forever) { archive.deleteItemForever(tag) }
+            }) { Text(stringResource(R.string.delete_forever), color = MaterialTheme.colorScheme.error) } })
+    }
+    pending?.let { confirm ->
+        AlertDialog(onDismissRequest = { pending = null }, title = { Text(confirm.title) }, text = { Text(stringResource(confirm.body)) },
+            confirmButton = { TextButton(onClick = { confirm.action(); pending = null }) { Text(stringResource(confirm.confirm)) } },
+            dismissButton = { TextButton(onClick = { pending = null }) { Text(stringResource(R.string.cancel)) } })
     }
     itemCategory?.let { category -> AddItemDialog({ itemCategory = null }) { name, icon ->
         onItem(name, icon, category.category?.id, category.key.takeIf { it in ownItemFields }); itemCategory = null
@@ -139,13 +189,20 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     if (categoryDialog) {
         var name by rememberSaveable(categoryEditor?.id) { mutableStateOf(categoryEditor?.name.orEmpty()) }
         var icon by rememberSaveable(categoryEditor?.id) { mutableStateOf(categoryEditor?.iconKey ?: "tag") }
-        var singleChoice by rememberSaveable(categoryEditor?.id) { mutableStateOf(categoryEditor?.singleChoice ?: false) }
+        // Pick one, pick several, or count how often per day.
+        var type by rememberSaveable(categoryEditor?.id) { mutableStateOf(categoryEditor?.let {
+            if (it.counted) R.string.category_count else if (it.singleChoice) R.string.pick_one else R.string.pick_several } ?: R.string.pick_several) }
         SettingsEditorDialog(stringResource(if (categoryEditor == null) R.string.add_category else R.string.edit_category),
-            { categoryDialog = false }, { onCategory(name.trim(), icon, categoryEditor, singleChoice); categoryDialog = false }, name.isNotBlank()) {
+            { categoryDialog = false }, {
+                onCategory((categoryEditor ?: CustomCategory(0, "", "tag", 0, false)).copy(name = name.trim(), iconKey = icon,
+                    singleChoice = type == R.string.pick_one, counted = type == R.string.category_count))
+                categoryDialog = false
+            }, name.isNotBlank()) {
             SettingsTextField(name, { name = it }, stringResource(R.string.category_name))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FpChip(singleChoice, { singleChoice = true }, stringResource(R.string.pick_one), Modifier.weight(1f))
-                FpChip(!singleChoice, { singleChoice = false }, stringResource(R.string.pick_several), Modifier.weight(1f))
+                listOf(R.string.pick_one, R.string.pick_several, R.string.category_count).forEach { option ->
+                    FpChip(type == option, { type = option }, stringResource(option), Modifier.weight(1f))
+                }
             }
             IconPicker(icon, { icon = it })
         }

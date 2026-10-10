@@ -39,7 +39,7 @@ fun validBackup(data: BackupData, today: LocalDate): Boolean {
 
 private fun uniquePositiveIds(ids: List<Long>): Boolean = ids.all { it > 0 } && ids.toSet().size == ids.size
 
-private val categories = setOf("flow", "mood", "pain", "symptoms", "sex", "discharge", "tags", "note", "ovulation_test")
+private val categories = setOf("flow", "mood", "pain", "symptoms", "sex", "discharge", "tags", "note", "ovulation_test", "medication")
 private val items: Map<String, Set<String>> = mapOf(
     "flow" to FlowLevel.entries.map { it.name }.toSet(), "mood" to Mood.entries.map { it.name }.toSet(),
     "pain" to Pain.entries.map { it.name }.toSet(), "symptoms" to Symptom.entries.map { it.name }.toSet(),

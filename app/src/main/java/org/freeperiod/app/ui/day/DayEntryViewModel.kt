@@ -78,6 +78,12 @@ class DayEntryViewModel(
     fun toggleSymptom(value: Symptom): Job = editLog {
         it.copy(symptoms = if (value in it.symptoms) it.symptoms - value else it.symptoms + value)
     }
+    fun setCount(id: Long, times: Int): Job = editLog { EntrySelection.setCount(it, id, times) }
+    fun addItem(field: String?, categoryId: Long?, name: String, icon: String, categoryName: String): Job = mutate {
+        val tag = if (field != null) repository.addBuiltInItem(field, name, icon, categoryName)
+            else repository.addTag(name, categoryId, icon)
+        repository.saveDayLog(EntrySelection.setCount(currentLog(), tag.id, 1))
+    }
     fun toggleTag(id: Long): Job = editLogWithData { log, data -> EntrySelection.tag(log, id, data.tags, data.customCategories) }
     private fun selectBuiltIn(field: String, name: String?): Job = editLogWithData { log, data ->
         EntrySelection.builtIn(log, field, name, data.tags, data.customCategories)

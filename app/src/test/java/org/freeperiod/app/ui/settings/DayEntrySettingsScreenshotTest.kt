@@ -34,16 +34,33 @@ class DayEntrySettingsScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h1200dp-xxhdpi")
     fun expandedMoodWithOwnItem_enLight() {
         val data = BackupData(periods = emptyList(), dayLogs = emptyList(), settings = BackupSettings(null, false),
-            tags = listOf(Tag(6, "Calm", categoryId = 1, iconKey = "calm")),
+            tags = listOf(Tag(6, "Calm", categoryId = 1, iconKey = "calm"), Tag(7, "Excited", categoryId = 1, iconKey = "sparkles", archived = true)),
             customCategories = listOf(CustomCategory(1, "Mood items", "builtin:mood", 0, false)))
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface {
-            DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _, _, _ -> }, {}, { _, _, _, _ -> })
+            DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, {}, {}, { _, _, _, _ -> })
         } } }
         compose.waitForIdle()
         compose.onNodeWithText("Mood").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Calm").assertIsDisplayed()
+        compose.onNodeWithText("Excited").assertIsDisplayed()
         compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/expandedMoodWithOwnItem_enLight.png")
+    }
+
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun archivedCategoryAndRestoreDefaults_deLight() {
+        Locale.setDefault(Locale.GERMANY)
+        val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false),
+            customCategories = listOf(CustomCategory(2, "Aktivitäten", "bike", 100, true)))
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface {
+            DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, {}, {}, { _, _, _, _ -> })
+        } } }
+        compose.waitForIdle()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Standard wiederherstellen"))
+        compose.waitForIdle()
+        compose.onNodeWithText("Aktivitäten").assertIsDisplayed()
+        compose.onNodeWithText("Standard wiederherstellen").assertIsDisplayed()
+        compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/archivedCategoryAndRestoreDefaults_deLight.png")
     }
 
     @Test fun renameEntry_enLight() {
@@ -59,7 +76,7 @@ class DayEntrySettingsScreenshotTest {
 
     @Test fun main_enLight() {
         val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
-        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _, _, _ -> }, {}, { _, _, _, _ -> }) } } }
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, {}, {}, { _, _, _, _ -> }) } } }
         compose.waitForIdle()
         compose.onRoot().captureRoboImage("src/test/screenshots/day-settings/main_enLight.png")
     }
@@ -69,7 +86,7 @@ class DayEntrySettingsScreenshotTest {
         val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, 1.5f)) {
-                FreePeriodTheme(darkTheme = true) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, { _, _, _, _ -> }, {}, { _, _, _, _ -> }) } }
+                FreePeriodTheme(darkTheme = true) { Surface { DayEntrySettingsScreen(data, today, {}, { _, _, _ -> }, {}, {}, {}, { _, _, _, _ -> }) } }
             }
         }
         compose.waitForIdle()

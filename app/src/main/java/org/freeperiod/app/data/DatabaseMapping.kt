@@ -16,7 +16,8 @@ internal fun DayLog.entity() = DayLogEntity(date.toEpochDay(), flow, mood,
     converters.symptomsToNames(symptoms), pain, sex, discharge, note, ovulationTest)
 internal fun DayLogWithTags.domain() = DayLog(LocalDate.ofEpochDay(log.epochDay), log.flow,
     log.mood, converters.namesToSymptoms(log.symptoms), log.pain, log.sex, log.discharge,
-    log.note, links.map { it.tagId }.toSet(), log.ovulationTest)
+    log.note, links.map { it.tagId }.toSet(), log.ovulationTest,
+    links.filter { it.count > 1 }.associate { it.tagId to it.count })
 internal fun DomainSettingsEntity?.domain() = BackupSettings(this?.typicalCycleLength,
     this?.predictionsPaused ?: false)
 internal fun BackupSettings.entity() = DomainSettingsEntity(0, typicalCycleLength, predictionsPaused)

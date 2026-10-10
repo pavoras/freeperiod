@@ -23,12 +23,15 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import org.freeperiod.app.AppContainer
 import org.freeperiod.app.R
+import org.freeperiod.app.summary.SummaryPdf
+import org.freeperiod.app.summary.summaryRows
+import org.freeperiod.engine.summary
 import org.freeperiod.app.lock.lockAvailable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY, IMPORT }
+private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY, IMPORT, SUMMARY }
 
 @Composable
 fun SettingsRoute(container: AppContainer) {
@@ -64,6 +67,7 @@ fun SettingsRoute(container: AppContainer) {
     BackHandler(page != SettingsPage.MAIN, onBack = back)
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { backup.createdDocument(it) }
     val createCsv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { backup.createdDocument(it) }
+    val createPdf = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { backup.createdDocument(it) }
     val openBackup = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { backup.restoreDocument(it) }
     val chooseFolder = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { auto.folderChosen(it?.toString()) }
     LaunchedEffect(auto) {
@@ -78,8 +82,11 @@ fun SettingsRoute(container: AppContainer) {
             try {
                 when (request) {
                     DocumentRequest.Open -> openBackup.launch(arrayOf("application/octet-stream", "*/*"))
-                    is DocumentRequest.Create -> if (request.mime == "text/csv") createCsv.launch(request.filename)
-                        else createBackup.launch(request.filename)
+                    is DocumentRequest.Create -> when (request.mime) {
+                        "text/csv" -> createCsv.launch(request.filename)
+                        "application/pdf" -> createPdf.launch(request.filename)
+                        else -> createBackup.launch(request.filename)
+                    }
                 }
             } catch (_: ActivityNotFoundException) { backup.documentLaunchFailed() }
             catch (_: SecurityException) { backup.documentLaunchFailed() }
@@ -91,6 +98,7 @@ fun SettingsRoute(container: AppContainer) {
         catch (_: ActivityNotFoundException) { externalError = true }
         catch (_: SecurityException) { externalError = true }
     }
+    val locale = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]
     val version = remember(context) { context.packageManager.getPackageInfo(context.packageName, 0).versionName.orEmpty() }
     Surface(Modifier.fillMaxSize(), color = androidx.compose.material3.MaterialTheme.colorScheme.background) {
         Column {
@@ -107,15 +115,17 @@ fun SettingsRoute(container: AppContainer) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 openExternal(Intent(Settings.ACTION_APP_LOCALE_SETTINGS, Uri.parse("package:${context.packageName}")))
                             }
-                        }, backup = { page = SettingsPage.BACKUP }, csv = { backup.exportCsv() },
+                        }, backup = { page = SettingsPage.BACKUP }, csv = { backup.exportCsv() }, summary = { page = SettingsPage.SUMMARY },
                         privacy = { page = SettingsPage.PRIVACY }, about = { page = SettingsPage.ABOUT },
                         deleteAll = { model.deleteAllData() },
                         lockEnabled = { model.setLockEnabled(it) }, lockTimeout = { model.setLockTimeout(it) }),
                         recovery.busy || recovery.awaitingDocument)
                 }
-                SettingsPage.SITUATION -> SituationScreen(trackingState.data.situation, container.clock(), { tracking.situation(it) }, back) {
-                    editReminder(it); page = SettingsPage.REMINDER_EDITOR
-                }
+                SettingsPage.SITUATION -> SituationScreen(trackingState.data.situation, container.clock(), { tracking.situation(it) }, back,
+                    onOfferReminder = { editReminder(it); page = SettingsPage.REMINDER_EDITOR },
+                    extras = TrackingExtras(trackingState.data.overrides.any { it.key == "category:medication" && !it.hidden },
+                        { tracking.showCategory("medication", it) },
+                        { on, hide -> tracking.painDiary(on, painDiaryCategories(context::getString), hide) }))
                 SettingsPage.REMINDERS -> RemindersScreen(trackingState.data.reminders, ::saveReminder,
                     { editReminder(it); page = SettingsPage.REMINDER_EDITOR }, {
                         editReminder(org.freeperiod.engine.Reminder(0, org.freeperiod.engine.ReminderKind.CUSTOM, null,
@@ -128,16 +138,24 @@ fun SettingsRoute(container: AppContainer) {
                 } ?: RemindersScreen(trackingState.data.reminders, ::saveReminder, {}, {}, {}, back)
                 SettingsPage.DAY_ENTRY -> DayEntrySettingsScreen(trackingState.data, container.clock(), back,
                     { key, hidden, order -> tracking.override(key, hidden, order) }, { tracking.reorder(it) },
-                    { name, icon, category, singleChoice -> tracking.category(name, icon, category, singleChoice) }, { tracking.archive(it) },
+                    { tracking.category(it) }, { tracking.archive(it) },
                     { name, icon, category, field -> tracking.item(name, icon, category, field,
                         context.getString(org.freeperiod.app.ui.day.builtInCategories.find { it.key == field }?.label ?: R.string.entry_tags)) },
                     onRestore = { tracking.restore(it) }, onAppearance = { tracking.appearance(it) },
-                    onEditItem = { tracking.editItem(it) }, onDeleteItem = { tracking.deleteItem(it) })
+                    onEditItem = { tracking.editItem(it) }, onDeleteItem = { tracking.deleteItem(it) },
+                    archive = ArchiveActions({ tracking.deleteCategory(it) }, { tracking.restoreItem(it) },
+                        { tracking.deleteItemForever(it) }, { tracking.resetCustomization() }))
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back, trackingState.data.overrides)
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
                     backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { page = SettingsPage.IMPORT },
                     auto = autoState, autoActions = AutoBackupActions(auto::choose, auto::start, auto::backUpNow, auto::turnOff))
                 SettingsPage.IMPORT -> ImportRoute(container) { page = SettingsPage.BACKUP }
+                SettingsPage.SUMMARY -> SummaryScreen(recovery.busy || recovery.awaitingDocument, recovery.message, recovery.error, { months, notes ->
+                    backup.exportSummary(months) { data, from, to ->
+                        val facts = summary(data.periods, data.dayLogs, from, to)
+                        SummaryPdf.render(facts, summaryRows(facts, data, context::getString, notes), context::getString, to, locale)
+                    }
+                }, back)
                 SettingsPage.PRIVACY -> PrivacyScreen(back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.PRIVACY_URL))) }
                 SettingsPage.ABOUT -> AboutScreen(version, back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.SOURCE_URL))) }
             }

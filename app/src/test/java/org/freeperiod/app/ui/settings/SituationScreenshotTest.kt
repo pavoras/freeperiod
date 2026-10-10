@@ -43,6 +43,18 @@ class SituationScreenshotTest {
         compose.onNodeWithContentDescription("Show days with a higher chance of pregnancy").assertIsOn()
         compose.onRoot().captureRoboImage("src/test/screenshots/settings/situationFertile_enLight.png")
     }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun alsoTrackMenopause_deLight() {
+        Locale.setDefault(Locale.GERMANY)
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface {
+            SituationScreen(Situation(phase = LifePhase.MENOPAUSE, painDiary = true), today, {}, {}, {}, TrackingExtras(medication = true))
+        } } }
+        compose.waitForIdle()
+        compose.onNode(SemanticsMatcher.keyIsDefined(SemanticsActions.ScrollToIndex)).performScrollToNode(hasText("Medikamente"))
+        compose.waitForIdle()
+        compose.onNodeWithContentDescription("Schmerztagebuch").assertIsOn()
+        compose.onRoot().captureRoboImage("src/test/screenshots/situation/alsoTrackMenopause_deLight.png")
+    }
     @Test fun situation_enLight() {
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { SituationScreen(Situation(), today, {}, {}, {}) } } }
         compose.waitForIdle()

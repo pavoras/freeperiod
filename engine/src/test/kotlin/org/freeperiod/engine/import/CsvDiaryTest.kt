@@ -38,6 +38,22 @@ class CsvDiaryTest {
         assertEquals(tags.map { it.name }, restored.tags.map { it.name })
         assertEquals("A:B;C", restored.customCategories.single { it.builtInField() == null }.name)
     }
+    @Test fun medicationAndCountedCategoriesRoundTripWithTheirCounts() {
+        val categories = listOf(CustomCategory(1, "Medication", "builtin:medication", 0, false),
+            CustomCategory(2, "Water", "tag", 0, false, counted = true))
+        val tags = listOf(Tag(10, "Own medicine 400 mg", categoryId = 1), Tag(11, "Tea: green", categoryId = 1),
+            Tag(12, "Glass", categoryId = 2))
+        val log = DayLog(today, tagIds = setOf(10, 11, 12), tagCounts = mapOf(10L to 2, 12L to 5))
+        val csv = CsvExport.export(emptyList(), listOf(log), tags, categories, today)
+        assertTrue(csv, csv.contains(",Water:Glass:5,Own medicine 400 mg:2;Tea%3A green\r\n"))
+        val restored = CsvImport.parse(csv) as CsvImportResult.Parsed
+        val byName = restored.tags.associate { it.name to it.id }
+        assertEquals(mapOf(byName.getValue("Own medicine 400 mg") to 2, byName.getValue("Glass") to 5),
+            restored.dayLogs.single().tagCounts)
+        assertEquals(3, restored.dayLogs.single().tagIds.size)
+        assertEquals("medication", restored.customCategories.single { it.id == restored.tags.single { it.name == "Tea: green" }.categoryId }.builtInField())
+    }
+
     @Test fun ownMoodAndSymptomsRoundTripIntoTheirFieldColumns() {
         val categories = listOf(CustomCategory(1, "Mood items", "builtin:mood", 0, false),
             CustomCategory(2, "Symptom items", "builtin:symptoms", 0, false))

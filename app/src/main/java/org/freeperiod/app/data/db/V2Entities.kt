@@ -10,6 +10,8 @@ data class CustomCategoryEntity(
     val sortOrder: Int,
     val archived: Boolean,
     @ColumnInfo(defaultValue = "0") val singleChoice: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val counted: Boolean = false,
+    val itemSet: String? = null,
 )
 
 @Entity(tableName = "ui_overrides")
@@ -25,6 +27,7 @@ data class SituationEntity(
     val pillActiveDays: Int?,
     val pillBreakDays: Int?,
     val fertileWindowEnabled: Boolean,
+    @ColumnInfo(defaultValue = "0") val painDiary: Boolean = false,
 )
 
 @Entity(tableName = "reminders")

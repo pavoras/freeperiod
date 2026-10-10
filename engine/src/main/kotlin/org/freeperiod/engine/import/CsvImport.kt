@@ -114,6 +114,14 @@ object CsvImport {
             categories += created
             return created.id
         }
+        /** "name" or "name:count" (names escape their own colons). */
+        fun counted(value: String): Pair<String, Int> {
+            val parts = value.split(':')
+            require(parts.size in 1..2)
+            val times = if (parts.size == 2) requireNotNull(parts[1].toIntOrNull()) else 1
+            require(times in 1..MAX_DAILY_COUNT)
+            return parts[0] to times
+        }
         fun tag(rawName: String, categoryId: Long?): Long {
             val name = csvItemNameDecoded(rawName)
             require(name.isNotBlank())
@@ -147,8 +155,13 @@ object CsvImport {
                 cell("customitems").split(';').filter { it.isNotBlank() }.forEach { value ->
                     val parts = value.split(':', limit = 2)
                     require(parts.size == 2 && parts[0].isNotBlank())
-                    val id = tag(parts[1], category(csvItemNameDecoded(parts[0])))
-                    log = log.copy(tagIds = log.tagIds + id)
+                    val (name, times) = counted(parts[1])
+                    val id = tag(name, category(csvItemNameDecoded(parts[0])))
+                    log = EntrySelection.setCount(log, id, times)
+                }
+                cell("medication").split(';').filter { it.isNotBlank() }.forEach { value ->
+                    val (name, times) = counted(value)
+                    log = EntrySelection.setCount(log, tag(name, category("builtin:medication", "medication")), times)
                 }
                 log.copy(flow = cell("flow").takeIf { it.isNotBlank() }?.let { FlowLevel.valueOf(it.uppercase(Locale.ROOT)) },
                     ovulationTest = cell("ovulationtest").takeIf { it.isNotBlank() }?.let { OvulationTest.valueOf(it.uppercase(Locale.ROOT)) },

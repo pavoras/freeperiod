@@ -30,6 +30,21 @@ class TrackingSettingsViewModelTest : DatabaseTest() {
             repository.snapshot().overrides.single { it.key == "item:mood:GOOD" })
     }
 
+    @Test fun painDiaryShowsPainAndMedicationAndMedicationSwitchKeepsItsPlace() = runTest {
+        val vm = model()
+        vm.override("category:pain", true, 2).join()
+        vm.painDiary(true, listOf(org.freeperiod.app.data.ItemSetCategory("pain_diary:where", "Where it hurts", "person", listOf("Back" to "backache")))).join()
+        var overrides = repository.snapshot().overrides
+        assertFalse(overrides.single { it.key == "category:pain" }.hidden)
+        assertEquals(UiOverride("category:medication", false, 9), overrides.single { it.key == "category:medication" })
+        vm.showCategory("medication", false).join()
+        overrides = repository.snapshot().overrides
+        assertEquals(UiOverride("category:medication", true, 9), overrides.single { it.key == "category:medication" })
+        vm.painDiary(false, emptyList(), archive = false).join()
+        assertFalse(repository.snapshot().situation.painDiary)
+        assertFalse(repository.snapshot().customCategories.single().archived)
+    }
+
     @Test fun situationPreferencePersistsAcrossPhaseChanges() = runTest {
         val vm = model()
         vm.situation(Situation(fertileWindowEnabled = false)).join()

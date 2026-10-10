@@ -13,9 +13,12 @@ import org.freeperiod.engine.Tag
  */
 object CsvExport {
     private val header = listOf("date", "period_day", "flow", "mood", "pain", "sex", "discharge", "symptoms", "tags", "note",
-        "ovulation_test", "custom_items")
+        "ovulation_test", "custom_items", "medication")
 
-    /** An ongoing period counts up to [today]; items of custom categories are written as category:item. */
+    /**
+     * An ongoing period counts up to [today]; items of custom categories are written as category:item.
+     * Counted items get ":n" when logged more than once that day (medication and counted categories).
+     */
     fun export(periods: List<Period>, logs: List<DayLog>, tags: List<Tag>, customCategories: List<CustomCategory> = emptyList(),
         today: LocalDate): String {
         val periodDays = periods.flatMap { period ->
@@ -42,8 +45,9 @@ object CsvExport {
                         val tag = byId[id] ?: return@mapNotNull null
                         if (tag.categoryId in markers) return@mapNotNull null
                         val category = categoryNames[tag.categoryId] ?: return@mapNotNull null
-                        "${csvItemName(category)}:${csvItemName(tag.name)}"
+                        "${csvItemName(category)}:${csvCountedName(tag.name, log.count(id))}"
                     }.joinToString(";"),
+                    own("medication").joinToString(";") { csvCountedName(it.name, log.count(it.id)) },
                 ))
             }
         }

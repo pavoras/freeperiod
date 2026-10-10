@@ -19,6 +19,29 @@ class EntrySelectionTest {
         Tag(5, "Run", categoryId = 3), Tag(6, "Own symptom", categoryId = 4),
         Tag(7, "Own sex", categoryId = 5), Tag(8, "Own discharge", categoryId = 6))
 
+    @Test fun countsGoUpAndDownAndZeroRemovesTheItem() {
+        val once = EntrySelection.setCount(DayLog(date), 9, 1)
+        assertEquals(setOf(9L), once.tagIds)
+        assertTrue(once.tagCounts.isEmpty())
+        val thrice = EntrySelection.setCount(once, 9, 3)
+        assertEquals(3, thrice.count(9))
+        assertEquals(mapOf(9L to 3), thrice.tagCounts)
+        assertEquals(1, EntrySelection.setCount(thrice, 9, 1).count(9))
+        assertEquals(MAX_DAILY_COUNT, EntrySelection.setCount(thrice, 9, 500).count(9))
+        assertEquals(DayLog(date), EntrySelection.setCount(thrice, 9, 0))
+    }
+
+    @Test fun togglingOrReplacingACountedItemDropsItsCount() {
+        val medication = CustomCategory(7, "Medication", "builtin:medication", 0, false)
+        val pills = Tag(9, "Own medicine", categoryId = 7)
+        val counted = DayLog(date, tagIds = setOf(9), tagCounts = mapOf(9L to 2))
+        assertEquals(DayLog(date), EntrySelection.tag(counted, 9, tags + pills, categories + medication))
+        assertTrue(medication.isCounted())
+        assertTrue(EntrySelection.valid(counted, tags + pills, categories + medication))
+        assertFalse(EntrySelection.valid(DayLog(date, tagCounts = mapOf(9L to 2)), tags + pills, categories + medication))
+        assertFalse(EntrySelection.valid(counted.copy(tagCounts = mapOf(9L to 1)), tags + pills, categories + medication))
+    }
+
     @Test fun builtInSelectionRemovesOnlyItsOwnTags() {
         val log = DayLog(date, tagIds = setOf(1, 2, 3, 6))
         val selected = EntrySelection.builtIn(log, "mood", "GOOD", tags, categories)

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.isDialog
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.Density
 import com.github.takahirom.roborazzi.captureRoboImage
 import java.time.LocalDate
@@ -53,6 +54,24 @@ class DayEntryScreenshotTest {
         compose.waitForIdle()
         compose.onNodeWithText("Calm").assertIsDisplayed()
         compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/day/$name.png")
+    }
+
+    @Test @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h1000dp-xxhdpi")
+    fun medication_enLight() {
+        Locale.setDefault(Locale.US)
+        val today = clock()
+        val state = DayEntryUiState(today, today, loading = false,
+            log = DayLog(today, pain = Pain.MODERATE, tagIds = setOf(7, 8), tagCounts = mapOf(7L to 2)),
+            tags = listOf(Tag(7, "My tablets", categoryId = 2, iconKey = "pill"), Tag(8, "Heat patch", categoryId = 2, iconKey = "hot_water_bottle"),
+                Tag(9, "Tea", categoryId = 2, iconKey = "teacup")),
+            customCategories = listOf(CustomCategory(2, "Medication", "builtin:medication", 0, false)),
+            overrides = listOf(UiOverride("category:medication", false, 2)))
+        compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { DayEntrySheet(state, DayEntryActions(), {}, {}) } } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Medication").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Tea").assertIsDisplayed()
+        compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/day/medication_enLight.png")
     }
 
     @Test fun filled_enLight() = capture("filled_enLight", Locale.US)

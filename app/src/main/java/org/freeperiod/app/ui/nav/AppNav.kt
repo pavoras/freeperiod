@@ -123,6 +123,8 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                         archiveTag = { model.archiveTag(it) }, startPeriod = { model.startPeriod(it) },
                         removePeriodStart = { model.removePeriodStart() }, endPeriod = { model.setPeriodEnd(it) },
                         clear = { model.clearDay() }, undo = { model.undoClear(it) },
+                        count = { id, times -> model.setCount(id, times) },
+                        addItem = { field, category, name, icon, categoryName -> model.addItem(field, category, name, icon, categoryName) },
                     )
                     Surface(Modifier.fillMaxSize()) {
                         DayEntrySheet(state, actions, onDateChange = { selected ->

@@ -56,7 +56,8 @@ class BackupViewModel(
     private var reading = false
     private var restoreBytes: ByteArray? = null
     private var replacement: BackupData? = null
-    private var csv = false
+    /** Message after the last file is saved (backup, CSV or summary). */
+    private var saved = R.string.backup_saved
 
     fun createBackup(password: String, confirm: String): Job = operation(R.string.file_write_error) {
         when {
@@ -68,7 +69,7 @@ class BackupViewModel(
                 val bytes = try {
                     withContext(Dispatchers.Default) { BackupCodec.encode(snapshot, secret) }
                 } finally { secret.fill('\u0000') }
-                csv = false
+                saved = R.string.backup_saved
                 outputs = listOf(Output("freeperiod-${clock()}.fpbackup", "application/octet-stream", bytes))
                 requestOutput()
             }
@@ -142,7 +143,19 @@ class BackupViewModel(
             listOf(Output("freeperiod-$date.csv", "text/csv",
                 CsvExport.export(data.periods, data.dayLogs, data.tags, data.customCategories, date).toByteArray()))
         }
-        csv = true
+        saved = R.string.csv_saved
+        requestOutput()
+    }
+
+    /** Summary of entries for the last [months] (0 = everything); [render] draws the PDF outside the ViewModel. */
+    fun exportSummary(months: Int, render: (BackupData, LocalDate, LocalDate) -> ByteArray): Job = operation(R.string.file_write_error) {
+        val data = repository.snapshot()
+        val today = clock()
+        val first = (data.periods.map { it.start } + data.dayLogs.map { it.date }).minOrNull() ?: today
+        val from = if (months == 0) minOf(first, today) else today.minusMonths(months.toLong()).plusDays(1)
+        val bytes = withContext(Dispatchers.Default) { render(data, from, today) }
+        saved = R.string.summary_saved
+        outputs = listOf(Output("freeperiod-summary-$today.pdf", "application/pdf", bytes))
         requestOutput()
     }
 
@@ -163,7 +176,7 @@ class BackupViewModel(
             output.bytes.fill(0)
             outputs = outputs.drop(1)
             if (outputs.isNotEmpty()) requestOutput()
-            else message(if (csv) R.string.csv_saved else R.string.backup_saved)
+            else message(saved)
         }
     }
 

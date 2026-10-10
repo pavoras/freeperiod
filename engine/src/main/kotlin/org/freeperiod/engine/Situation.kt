@@ -19,6 +19,8 @@ data class Situation(
     val method: Method = Method.NONE,
     val pill: PillSchedule? = null,
     val fertileWindowEnabled: Boolean = true,
+    /** The pain diary item set is on (pain, medication and its own categories in the day entry). */
+    val painDiary: Boolean = false,
 )
 
 /** Prediction source before manual pause and calendar-date checks are applied. */

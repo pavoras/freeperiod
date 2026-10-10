@@ -9,6 +9,7 @@ interface CustomCategoryDao {
     @Query("SELECT * FROM custom_categories ORDER BY id") suspend fun getAll(): List<CustomCategoryEntity>
     @Insert suspend fun insert(category: CustomCategoryEntity): Long
     @Update suspend fun update(category: CustomCategoryEntity)
+    @Query("DELETE FROM custom_categories WHERE id = :id") suspend fun delete(id: Long)
     @Query("DELETE FROM custom_categories") suspend fun deleteAll()
 }
 

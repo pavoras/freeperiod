@@ -6,17 +6,17 @@ import java.time.LocalTime
 import org.freeperiod.app.data.db.*
 import org.freeperiod.engine.*
 
-internal fun CustomCategoryEntity.domain() = CustomCategory(id, name, iconKey, sortOrder, archived, singleChoice)
-internal fun CustomCategory.entity() = CustomCategoryEntity(id, name, iconKey, sortOrder, archived, singleChoice)
+internal fun CustomCategoryEntity.domain() = CustomCategory(id, name, iconKey, sortOrder, archived, singleChoice, counted, itemSet)
+internal fun CustomCategory.entity() = CustomCategoryEntity(id, name, iconKey, sortOrder, archived, singleChoice, counted, itemSet)
 internal fun UiOverrideEntity.domain() = UiOverride(key, hidden, sortOrder, label, iconKey)
 internal fun UiOverride.entity() = UiOverrideEntity(key, hidden, sortOrder, label, iconKey)
 internal fun SituationEntity?.domain(): Situation = if (this == null) Situation() else Situation(
     LifePhase.valueOf(phase), Method.valueOf(method), pillPackStartEpochDay?.let {
         PillSchedule(LocalDate.ofEpochDay(it), requireNotNull(pillActiveDays), requireNotNull(pillBreakDays))
-    }, fertileWindowEnabled,
+    }, fertileWindowEnabled, painDiary,
 )
 internal fun Situation.entity() = SituationEntity(0, phase.name, method.name,
-    pill?.packStart?.toEpochDay(), pill?.activeDays, pill?.breakDays, fertileWindowEnabled)
+    pill?.packStart?.toEpochDay(), pill?.activeDays, pill?.breakDays, fertileWindowEnabled, painDiary)
 
 internal fun Reminder.entity(lastDeliveredDate: Long? = null): ReminderEntity {
     val base = ReminderEntity(id = id, kind = kind.name, title = title, recurrenceKind = "DAILY",

@@ -27,7 +27,9 @@ data class Tag(
 /** Custom category; archived entries remain available in history. */
 @Serializable
 data class CustomCategory(val id: Long, val name: String, val iconKey: String, val sortOrder: Int, val archived: Boolean,
-    val singleChoice: Boolean = false)
+    val singleChoice: Boolean = false, val counted: Boolean = false,
+    /** Set when the category came from an item set (e.g. "pain_diary:where"), so turning the set on again finds it. */
+    val itemSet: String? = null)
 
 /** Stable keys: category:<field>, item:<field>:<ENUM>, customCategory:<id>, tag:<id>. */
 @Serializable
@@ -47,6 +49,8 @@ data class DayLog(
     val note: String? = null,
     val tagIds: Set<Long> = emptySet(),
     val ovulationTest: OvulationTest? = null,
+    /** How many times an item was logged that day, only for counts of 2 and more (absent = once). */
+    val tagCounts: Map<Long, Int> = emptyMap(),
 ) {
     /** Returns true when all observations are null or empty, preserving explicit NONE values. */
     fun isEmpty(): Boolean = flow == null && mood == null && symptoms.isEmpty() && pain == null &&
@@ -83,6 +87,7 @@ enum class Symptom {
     CRAMPS, HEADACHE, BACKACHE, BLOATING, BREAST_TENDERNESS, ACNE, FATIGUE, NAUSEA,
     CRAVINGS, INSOMNIA, DIGESTION, ANXIOUS, IRRITABLE, SAD, ENERGETIC,
     HOT_FLUSHES, NIGHT_SWEATS, BRAIN_FOG, JOINT_PAIN,
+    VAGINAL_DRYNESS, MOOD_SWINGS, HEART_RACING, LOW_LIBIDO,
 }
 
 /** A completed start-to-start interval with its prediction eligibility. */

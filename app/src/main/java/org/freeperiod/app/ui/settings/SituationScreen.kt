@@ -65,10 +65,15 @@ internal fun methodReminderPreset(method: Method, today: LocalDate): Reminder? {
         null, recurrence, LocalTime.of(20, 0), false)
 }
 
+/** Optional day-entry parts switched on from My situation: medication, and the pain diary (on, hide its categories). */
+data class TrackingExtras(val medication: Boolean = false, val onMedication: (Boolean) -> Unit = {},
+    val painDiary: (Boolean, Boolean) -> Unit = { _, _ -> })
+
 @Composable
 fun SituationScreen(situation: Situation, today: LocalDate, onSave: (Situation) -> Unit, onBack: () -> Unit,
-    onOfferReminder: (Reminder) -> Unit) {
+    onOfferReminder: (Reminder) -> Unit, extras: TrackingExtras = TrackingExtras()) {
     var offer by remember { mutableStateOf<Method?>(null) }
+    var painDiaryOff by rememberSaveable { mutableStateOf(false) }
     var pillDialog by rememberSaveable { mutableStateOf(false) }
     var methodSheet by rememberSaveable { mutableStateOf(false) }
     val t = LocalDaylight.current
@@ -108,8 +113,25 @@ fun SituationScreen(situation: Situation, today: LocalDate, onSave: (Situation) 
             }
         }
         if (situation.phase == LifePhase.PERIMENOPAUSE) item { Text(stringResource(R.string.phase_vary), color = t.muted) }
+        // A fixed sentence for the phase, never triggered by entries.
+        if (situation.phase == LifePhase.MENOPAUSE) item { Text(stringResource(R.string.menopause_bleeding_note), color = t.muted) }
+        item {
+            SettingsPanel {
+                Text(stringResource(R.string.also_track), style = MaterialTheme.typography.titleMedium)
+                FpSwitchRow(stringResource(R.string.pain_diary), situation.painDiary,
+                    onChange = { if (it) extras.painDiary(true, false) else painDiaryOff = true })
+                Text(stringResource(R.string.pain_diary_detail), style = MaterialTheme.typography.bodySmall, color = t.muted)
+                HorizontalDivider(color = t.line)
+                FpSwitchRow(stringResource(R.string.entry_medication), extras.medication, onChange = extras.onMedication)
+                Text(stringResource(R.string.medication_hint), style = MaterialTheme.typography.bodySmall, color = t.muted)
+            }
+        }
         item { Text(stringResource(R.string.situation_disclosure), style = MaterialTheme.typography.bodySmall, color = t.muted) }
     }
+    if (painDiaryOff) AlertDialog(containerColor = LocalDaylight.current.surface, onDismissRequest = { painDiaryOff = false },
+        title = { Text(stringResource(R.string.pain_diary_off)) }, text = { Text(stringResource(R.string.pain_diary_off_body)) },
+        confirmButton = { TextButton(onClick = { painDiaryOff = false; extras.painDiary(false, true) }) { Text(stringResource(R.string.hide_them)) } },
+        dismissButton = { TextButton(onClick = { painDiaryOff = false; extras.painDiary(false, false) }) { Text(stringResource(R.string.keep_them)) } })
     if (methodSheet) SettingsChoiceSheet(stringResource(R.string.tracking_method), Method.entries, situation.method,
         { stringResource(methodLabel(it)) }, { methodSheet = false }) { method ->
         methodSheet = false

@@ -60,12 +60,10 @@ class IconPickerTest {
     }
 
     @Test fun newCategorySavesItsIconAndSingleChoice() {
-        var saved: Triple<String, String, CustomCategory?>? = null
-        var singleChoice = false
+        var saved: CustomCategory? = null
         val data = BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(), settings = BackupSettings(null, false))
         compose.setContent { FreePeriodTheme(darkTheme = false) { Surface { CompositionLocalProvider(LocalInlineEditors provides true) {
-            DayEntrySettingsScreen(data, LocalDate.of(2026, 4, 12), {}, { _, _, _ -> }, {}, { name, icon, existing, one ->
-                saved = Triple(name, icon, existing); singleChoice = one },
+            DayEntrySettingsScreen(data, LocalDate.of(2026, 4, 12), {}, { _, _, _ -> }, {}, { saved = it },
                 {}, { _, _, _, _ -> })
         } } } }
         compose.onNode(hasScrollAction()).performScrollToNode(hasText("Add category"))
@@ -77,8 +75,7 @@ class IconPickerTest {
         compose.onNodeWithContentDescription("Dumbbell").performScrollTo().performClick()
         compose.onNodeWithText("Save").performClick()
         compose.waitForIdle()
-        assertEquals(Triple("Sport", "dumbbell", null), saved)
-        assertTrue(singleChoice)
+        assertEquals(CustomCategory(0, "Sport", "dumbbell", 0, false, singleChoice = true), saved)
     }
 
     @Test fun picker_enLight() {

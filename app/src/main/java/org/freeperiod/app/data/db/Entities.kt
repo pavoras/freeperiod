@@ -47,7 +47,7 @@ data class TagEntity(
         ForeignKey(entity = TagEntity::class, parentColumns = ["id"],
             childColumns = ["tagId"], onDelete = ForeignKey.CASCADE),
     ], indices = [Index("tagId")])
-data class DayTagEntity(val epochDay: Long, val tagId: Long)
+data class DayTagEntity(val epochDay: Long, val tagId: Long, @ColumnInfo(defaultValue = "1") val count: Int = 1)
 
 @Entity(tableName = "domain_settings")
 data class DomainSettingsEntity(

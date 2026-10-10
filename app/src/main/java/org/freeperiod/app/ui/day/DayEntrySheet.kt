@@ -46,6 +46,10 @@ data class DayEntryActions(
     val clear: () -> Unit = {},
     val undo: (DayLog) -> Unit = {},
     val ovulationTest: (OvulationTest?) -> Unit = {},
+    /** How many times an item was logged (0 removes it). */
+    val count: (Long, Int) -> Unit = { _, _ -> },
+    /** New own item for a built-in field or an own category, logged once on this day: field, category id, name, icon, category name. */
+    val addItem: (String?, Long?, String, String, String) -> Unit = { _, _, _, _, _ -> },
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -178,7 +182,13 @@ fun DayEntrySheet(
                                 }
                             }
                             "ovulation_test" -> EntryChoices(category, state, actions, editable)
-                            else -> {
+                            else -> if (category.counted()) {
+                                val open = category.key in customOpen.split(',')
+                                CountedEntry(category, state, actions, editable, open) {
+                                    val keys = customOpen.split(',').filter { it.isNotBlank() }.toSet()
+                                    customOpen = (if (open) keys - category.key else keys + category.key).joinToString(",")
+                                }
+                            } else {
                                 val items = state.entryItems(category)
                                 val tags = items.mapNotNull { it.tag }
                                 val open = if (category.key == "tags") tagsOpen else category.key in customOpen.split(',')

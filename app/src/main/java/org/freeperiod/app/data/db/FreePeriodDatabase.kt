@@ -6,7 +6,7 @@ import androidx.room.TypeConverters
 
 @Database(entities = [PeriodEntity::class, DayLogEntity::class, TagEntity::class,
     DayTagEntity::class, DomainSettingsEntity::class, CustomCategoryEntity::class, UiOverrideEntity::class,
-    SituationEntity::class, ReminderEntity::class, HintDismissalEntity::class], version = 3, exportSchema = true)
+    SituationEntity::class, ReminderEntity::class, HintDismissalEntity::class], version = 4, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class FreePeriodDatabase : RoomDatabase() {
     abstract fun periodDao(): PeriodDao

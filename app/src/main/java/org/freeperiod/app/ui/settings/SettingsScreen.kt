@@ -34,6 +34,7 @@ data class SettingsActions(
     val language: () -> Unit = {},
     val backup: () -> Unit = {},
     val csv: () -> Unit = {},
+    val summary: () -> Unit = {},
     val privacy: () -> Unit = {},
     val about: () -> Unit = {},
     val deleteAll: () -> Unit = {},
@@ -91,6 +92,7 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
             })
         }
         item { SettingsRow(R.string.export_csv, enabled, { csvDialog = true }) }
+        item { SettingsRow(R.string.summary_screen, enabled, actions.summary) }
         item { SettingsRow(R.string.privacy_policy, enabled, actions.privacy) }
         item { SettingsRow(R.string.feedback, enabled, { feedbackDialog = true }) }
         item { SettingsRow(R.string.about, enabled, actions.about) }
@@ -146,6 +148,7 @@ internal fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, deta
         R.string.language -> R.drawable.ic_fp_language
         R.string.backup_restore -> R.drawable.ic_fp_backup
         R.string.export_csv -> R.drawable.ic_fp_export
+        R.string.summary_screen -> R.drawable.ic_fp_history
         R.string.privacy_policy -> R.drawable.ic_fp_privacy
         R.string.about -> R.drawable.ic_fp_about
         R.string.lock_timeout, R.string.daily_reminder_time -> R.drawable.ic_fp_clock

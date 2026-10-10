@@ -6,6 +6,7 @@ internal fun builtInNames(field: String): Set<String> = when (field) {
     "symptoms" -> Symptom.entries.map { it.name }
     "sex" -> Sex.entries.map { it.name }
     "discharge" -> Discharge.entries.map { it.name }
+    "medication" -> emptyList()
     else -> emptyList()
 }.toSet()
 
@@ -15,6 +16,10 @@ internal fun csvItemName(name: String, reserved: Set<String> = emptySet()): Stri
     return if (reserved.any { it.equals(name, ignoreCase = true) })
         "%" + name.first().code.toString(16).uppercase() + escaped.drop(1) else escaped
 }
+
+/** An item name, followed by ":count" when it was logged more than once that day. */
+internal fun csvCountedName(name: String, count: Int, reserved: Set<String> = emptySet()): String =
+    csvItemName(name, reserved) + if (count > 1) ":$count" else ""
 
 internal fun csvItemNameDecoded(name: String): String = Regex("%([0-9A-Fa-f]{2})").replace(name) {
     it.groupValues[1].toInt(16).toChar().toString()
