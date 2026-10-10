@@ -8,13 +8,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import org.freeperiod.app.R
+import org.freeperiod.app.backup.AutoBackupInterval
 import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.ui.theme.*
 
@@ -29,6 +34,8 @@ fun BackupScreen(
     onBack: () -> Unit,
     onImport: (() -> Unit)? = null,
     restoreOnly: Boolean = false,
+    auto: AutoBackupUiState? = null,
+    autoActions: AutoBackupActions = AutoBackupActions(),
 ) {
     // Passwords deliberately do not enter saved instance state.
     var password by remember { mutableStateOf("") }
@@ -43,6 +50,10 @@ fun BackupScreen(
             FpButton(action, primary = false, enabled = enabled) { Text(stringResource(R.string.import_title)) }
         }
         if (state.summary == null) {
+            if (!restoreOnly && auto != null) {
+                AutoBackupSection(auto, autoActions)
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            }
             if (!restoreOnly) {
                 Text(stringResource(R.string.create_backup), style = MaterialTheme.typography.titleLarge)
                 Text(stringResource(R.string.backup_forgotten_warning), style = MaterialTheme.typography.bodyMedium)
@@ -81,6 +92,56 @@ fun BackupScreen(
     }
     if (askRestore && state.summary != null) ConfirmationDialog(R.string.restore_replace, R.string.restore_replace_warning,
         R.string.restore_replace, onDismiss = { askRestore = false }, onConfirm = { askRestore = false; onRestore() })
+}
+
+class AutoBackupActions(
+    val interval: (AutoBackupInterval) -> Unit = {},
+    val start: (String, String) -> Unit = { _, _ -> },
+    val now: () -> Unit = {},
+    val off: () -> Unit = {},
+)
+
+@Composable
+private fun AutoBackupSection(state: AutoBackupUiState, actions: AutoBackupActions) {
+    var password by remember { mutableStateOf("") }
+    var confirm by remember { mutableStateOf("") }
+    val t = LocalDaylight.current
+    Text(stringResource(R.string.auto_backup), style = MaterialTheme.typography.titleLarge)
+    if (state.on) {
+        val locale = LocalConfiguration.current.locales[0]
+        Text(stringResource(R.string.auto_backup_status, stringResource(intervalLabel(state.interval)), state.folderName.orEmpty()),
+            style = MaterialTheme.typography.bodyLarge)
+        Text(state.last?.let { stringResource(R.string.auto_backup_last,
+            it.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))) }
+            ?: stringResource(R.string.auto_backup_none_yet), style = MaterialTheme.typography.bodyMedium, color = t.muted)
+        if (state.failed) Text(stringResource(R.string.auto_backup_failed), color = MaterialTheme.colorScheme.error)
+    } else {
+        Text(stringResource(R.string.auto_backup_intro), style = MaterialTheme.typography.bodyMedium)
+    }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        AutoBackupInterval.entries.forEach {
+            FpChip(state.interval == it, { actions.interval(it) }, stringResource(intervalLabel(it)), enabled = !state.busy)
+        }
+    }
+    if (state.on) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            FpButton(actions.now, primary = false, enabled = !state.busy) { Text(stringResource(R.string.auto_backup_now)) }
+            TextButton(actions.off, enabled = !state.busy) { Text(stringResource(R.string.auto_backup_turn_off)) }
+        }
+    } else {
+        Text(stringResource(R.string.backup_forgotten_warning), style = MaterialTheme.typography.bodyMedium)
+        PasswordField(password, { password = it }, R.string.backup_password, !state.busy)
+        PasswordField(confirm, { confirm = it }, R.string.backup_confirm_password, !state.busy)
+        FpButton(onClick = { actions.start(password, confirm); password = ""; confirm = "" }, enabled = !state.busy) {
+            Text(stringResource(R.string.auto_backup_turn_on))
+        }
+    }
+    state.message?.let { Text(stringResource(it), color = if (state.error) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface) }
+}
+
+internal fun intervalLabel(value: AutoBackupInterval) = when (value) {
+    AutoBackupInterval.DAILY -> R.string.auto_backup_daily
+    AutoBackupInterval.WEEKLY -> R.string.auto_backup_weekly
 }
 
 @Composable

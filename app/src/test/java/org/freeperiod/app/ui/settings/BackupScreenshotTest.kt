@@ -19,4 +19,12 @@ class BackupScreenshotTest : SettingsScreenshotFixture() {
         BackupScreen(BackupUiState(restoreFileSelected = true, summary = BackupSummary(3, clock().dayOfMonth)),
             { _, _ -> }, {}, {}, {}, {}, {})
     }
+    @Test fun autoBackupSetup_enLight() = capture("backup/autoBackupSetup_enLight", "Automatic backup") {
+        BackupScreen(BackupUiState(), { _, _ -> }, {}, {}, {}, {}, {}, onImport = {}, auto = AutoBackupUiState())
+    }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun autoBackupOn_deLight() = capture("backup/autoBackupOn_deLight", "Automatisches Backup", Locale.GERMANY) {
+        BackupScreen(BackupUiState(), { _, _ -> }, {}, {}, {}, {}, {}, onImport = {}, auto = AutoBackupUiState(on = true,
+            folderName = "Nextcloud", interval = org.freeperiod.app.backup.AutoBackupInterval.DAILY, last = clock(), failed = true))
+    }
 }

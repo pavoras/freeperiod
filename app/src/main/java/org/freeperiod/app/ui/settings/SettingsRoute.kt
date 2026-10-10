@@ -35,11 +35,15 @@ fun SettingsRoute(container: AppContainer) {
     val context = LocalContext.current
     val appContext = context.applicationContext
     val model: SettingsViewModel = viewModel(factory = viewModelFactory {
-        initializer { SettingsViewModel(container.repository, container.settings) { lockAvailable(appContext) } }
+        initializer { SettingsViewModel(container.repository, container.settings, { lockAvailable(appContext) }) { container.autoBackup.turnOff() } }
     })
     val backup: BackupViewModel = viewModel(factory = viewModelFactory {
         initializer { BackupViewModel(container.repository, container.backupIo, container.clock) }
     })
+    val auto: AutoBackupViewModel = viewModel(factory = viewModelFactory {
+        initializer { AutoBackupViewModel(container.autoBackup, container.settings) }
+    })
+    val autoState by auto.state.collectAsStateWithLifecycle()
     val tracking: TrackingSettingsViewModel = viewModel(factory = viewModelFactory {
         initializer { TrackingSettingsViewModel(container.repository) }
     })
@@ -61,6 +65,14 @@ fun SettingsRoute(container: AppContainer) {
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { backup.createdDocument(it) }
     val createCsv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { backup.createdDocument(it) }
     val openBackup = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { backup.restoreDocument(it) }
+    val chooseFolder = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { auto.folderChosen(it?.toString()) }
+    LaunchedEffect(auto) {
+        auto.folderRequests.collect {
+            try { chooseFolder.launch(null) }
+            catch (_: ActivityNotFoundException) { auto.folderChosen(null) }
+            catch (_: SecurityException) { auto.folderChosen(null) }
+        }
+    }
     LaunchedEffect(backup) {
         backup.documents.collect { request ->
             try {
@@ -123,7 +135,8 @@ fun SettingsRoute(container: AppContainer) {
                     onEditItem = { tracking.editItem(it) }, onDeleteItem = { tracking.deleteItem(it) })
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back, trackingState.data.overrides)
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
-                    backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { page = SettingsPage.IMPORT })
+                    backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { page = SettingsPage.IMPORT },
+                    auto = autoState, autoActions = AutoBackupActions(auto::choose, auto::start, auto::backUpNow, auto::turnOff))
                 SettingsPage.IMPORT -> ImportRoute(container) { page = SettingsPage.BACKUP }
                 SettingsPage.PRIVACY -> PrivacyScreen(back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.PRIVACY_URL))) }
                 SettingsPage.ABOUT -> AboutScreen(version, back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.SOURCE_URL))) }

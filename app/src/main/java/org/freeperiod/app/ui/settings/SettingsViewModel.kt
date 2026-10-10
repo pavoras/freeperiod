@@ -33,7 +33,7 @@ data class SettingsUiState(
 )
 
 class SettingsViewModel(private val repository: Repository, private val settings: SettingsStore,
-    private val canLock: () -> Boolean = { false }) : ViewModel() {
+    private val canLock: () -> Boolean = { false }, private val autoBackupOff: suspend () -> Unit = {}) : ViewModel() {
     private val mutableState = MutableStateFlow(SettingsUiState())
     val state = mutableState.asStateFlow()
     private var pending: Job? = null
@@ -79,6 +79,8 @@ class SettingsViewModel(private val repository: Repository, private val settings
     fun deleteAllData(): Job = enqueue {
         repository.replaceAll(BackupData(periods = emptyList(), dayLogs = emptyList(), tags = emptyList(),
             settings = BackupSettings(null, false)))
+        // Deleting everything also forgets the automatic-backup folder and password.
+        autoBackupOff()
         mutableState.update { it.copy(message = R.string.data_deleted) }
     }
 

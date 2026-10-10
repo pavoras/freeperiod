@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import java.time.LocalDate
 import java.time.LocalTime
+import org.freeperiod.app.backup.AutoBackupInterval
 import org.freeperiod.app.ui.theme.Accent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -30,6 +32,14 @@ data class AppSettings(
     val explicitNotifications: Boolean = false,
     val lastNotifiedPeriodId: Long? = null,
     val remindersMigrated: Boolean = false,
+    /** Persisted document-tree URI; null means automatic backup is off. */
+    val autoBackupFolder: String? = null,
+    val autoBackupFolderName: String? = null,
+    val autoBackupInterval: AutoBackupInterval = AutoBackupInterval.WEEKLY,
+    /** Keystore-sealed password, never the password itself. */
+    val autoBackupPassword: String? = null,
+    val autoBackupLast: LocalDate? = null,
+    val autoBackupFailed: Boolean = false,
 )
 
 class SettingsStore internal constructor(private val store: DataStore<Preferences>) {
@@ -57,6 +67,12 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
             value.lastNotifiedPeriodId?.let { prefs[lastNotifiedPeriodId] = it }
                 ?: prefs.remove(lastNotifiedPeriodId)
             prefs[remindersMigrated] = value.remindersMigrated
+            prefs.set(autoBackupFolder, value.autoBackupFolder)
+            prefs.set(autoBackupFolderName, value.autoBackupFolderName)
+            prefs[autoBackupInterval] = value.autoBackupInterval.name
+            prefs.set(autoBackupPassword, value.autoBackupPassword)
+            prefs.set(autoBackupLast, value.autoBackupLast?.toString())
+            prefs[autoBackupFailed] = value.autoBackupFailed
         }
     }
 
@@ -98,7 +114,17 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         explicitNotifications = prefs[explicitNotifications] ?: false,
         lastNotifiedPeriodId = prefs[lastNotifiedPeriodId],
         remindersMigrated = prefs[remindersMigrated] ?: false,
+        autoBackupFolder = prefs[autoBackupFolder],
+        autoBackupFolderName = prefs[autoBackupFolderName],
+        autoBackupInterval = AutoBackupInterval.entries.firstOrNull { it.name == prefs[autoBackupInterval] } ?: AutoBackupInterval.WEEKLY,
+        autoBackupPassword = prefs[autoBackupPassword],
+        autoBackupLast = prefs[autoBackupLast]?.let(LocalDate::parse),
+        autoBackupFailed = prefs[autoBackupFailed] ?: false,
     )
+
+    private fun MutablePreferences.set(key: Preferences.Key<String>, value: String?) {
+        if (value == null) remove(key) else this[key] = value
+    }
 
     private companion object {
         val onboardingDone = booleanPreferencesKey("onboarding_done")
@@ -112,5 +138,11 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         val explicitNotifications = booleanPreferencesKey("explicit_notifications")
         val lastNotifiedPeriodId = longPreferencesKey("last_notified_period_id")
         val remindersMigrated = booleanPreferencesKey("reminders_migrated")
+        val autoBackupFolder = stringPreferencesKey("auto_backup_folder")
+        val autoBackupFolderName = stringPreferencesKey("auto_backup_folder_name")
+        val autoBackupInterval = stringPreferencesKey("auto_backup_interval")
+        val autoBackupPassword = stringPreferencesKey("auto_backup_password")
+        val autoBackupLast = stringPreferencesKey("auto_backup_last")
+        val autoBackupFailed = booleanPreferencesKey("auto_backup_failed")
     }
 }
