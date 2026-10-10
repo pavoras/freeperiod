@@ -66,7 +66,7 @@ Robolectric 4.16.1, Roborazzi 1.50.0, compileSdk/targetSdk 36, minSdk 26. Offlin
 | signed AAB | `gradle -q --offline -Pfreeperiod.signing="$USERPROFILE/dev-tools/keys/freeperiod-signing.properties" :app:bundleRelease` → `app/build/outputs/bundle/release/app-release.aab`; verify with `jarsigner -verify` and that the manifest has no INTERNET |
 | debug APK for the owner | `app/build/outputs/apk/debug/app-debug.apk` (built by `-Voll`), send with SendUserFile |
 
-Last full gate: 589 tests green (2026-10-10). 74 screenshot references.
+Last full gate: 592 tests green (2026-10-11). 74 screenshot references.
 
 Working habits that matter here:
 - Long runs (gate, recording) in the background **with a watcher** (progress every ≤ 5–15 min,
@@ -86,7 +86,7 @@ Working habits that matter here:
   model, see §6), `Fertility.kt` (higher-chance days), `Situation.kt`, `PillSchedule.kt`,
   `Reminders.kt`/`Recurrence.kt`, `Timeline.kt`, `Stats.kt`, `backup/` (encrypted codec, schema 3,
   readers for 1 and 2), `EntrySelection`/`EntryAppearance`/`EntryCsv` (own items, labels/icons, CSV names), `export/CsvExport.kt`, `import/CsvImport.kt`.
-- `:app` (Compose, manual DI in `AppContainer`): `data/` (Room DB version 5 + `Migrations.kt`,
+- `:app` (Compose, manual DI in `AppContainer`): `data/` (Room DB version 6 + `Migrations.kt`,
   `SettingsStore` DataStore), `backup/` (incl. `AutoBackup`, `KeystoreSeal`, `AutoBackupWorker`), `lock/AppLock.kt`, `reminders/` (WorkManager, boot/time
   receivers), `ui/` (`today`, `day`, `history`, `settings`, `onboarding`, `nav`, `components`,
   `theme`).
@@ -126,7 +126,7 @@ Working habits that matter here:
   backup (merged branch `auto-backup`), delete after archive + restore defaults, medication log
   (counts, Room 4), pain diary (My situation › Also track), menopause items, PDF summary – details in the
   1.1 spec §2. Owner feedback round (f216bd3): version 1.1.0 / versionCode 3, debug builds
-  `1.1.0-dev.<commit count>` shown at the bottom of Settings; mood/pain charts in History (entries only,
+  `1.1.0-dev.<commit count>` shown in About; mood/pain charts in History (entries only,
   56 days). Round 2026-10-10 evening (see `docs/owner-requests.md`): Home cycle ring (owner chose
   draft A "dot ring"; swipe calendar ↔ ring, dots tappable, last view kept in `AppSettings.homeRing`;
   ring view without the card), appetite + sex drive (enums `Appetite`/`Libido`, Room 5, off by default,
@@ -134,6 +134,13 @@ Working habits that matter here:
   week/month/3 months/year, flow "None" preselected on empty non-period days (display only), "Customize
   categories" link in the day entry, setup step "What do you want to track?" (7 steps now), tap on the
   big number / Today tab scrolls the calendar back to today.
+  Round 2026-10-10 late (after testing dev.51): ring buttons below the ring again, every 5th calendar date
+  labelled, version only in About; day entry arrows slide the day in sideways (one sheet, AnimatedContent in
+  `AppNav`); default order appetite after symptoms, sex drive after sex, tags after note, pain diary's
+  "Effect on your day" after symptoms (turning appetite / sex drive on places them there); appetite and sex
+  drive collapsible; History charts per category switch (`UiOverride.chart`, Room 6): pick-one = levels in
+  the user's item order (Customize lists them highest first, day entry lowest first), counted = number per
+  day, hidden category = no chart; "FreePeriod" without the dot in running text (wordmark keeps it).
   **Next:** owner tests the APK; then release prep: privacy pages, store
   texts (mention medication log, pain diary, PDF, charts, ring), Play health declaration check (`docs/release.md`).
 - Known cosmetic: store screenshots show a half calendar row above the legend (real app rendering);

@@ -31,10 +31,13 @@ data class CustomCategory(val id: Long, val name: String, val iconKey: String, v
     /** Set when the category came from an item set (e.g. "pain_diary:where"), so turning the set on again finds it. */
     val itemSet: String? = null)
 
-/** Stable keys: category:<field>, item:<field>:<ENUM>, customCategory:<id>, tag:<id>. */
+/**
+ * Stable keys: category:<field>, item:<field>:<ENUM>, customCategory:<id>, tag:<id>.
+ * [chart]: whether History draws the category as a chart; null = the app's default for it.
+ */
 @Serializable
 data class UiOverride(val key: String, val hidden: Boolean, val sortOrder: Int,
-    val label: String? = null, val iconKey: String? = null)
+    val label: String? = null, val iconKey: String? = null, val chart: Boolean? = null)
 
 /** Optional observations for one calendar day; null means not logged. */
 @Serializable

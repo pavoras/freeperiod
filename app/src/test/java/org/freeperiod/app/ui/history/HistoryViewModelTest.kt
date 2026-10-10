@@ -109,4 +109,27 @@ class HistoryViewModelTest : DatabaseTest() {
         assertEquals(1, vm.state.value.symptomCycles)
         assertEquals(1, vm.state.value.symptomCounts[Symptom.CRAMPS])
     }
+
+    @Test fun chartsFollowTheCategoriesTheirItemsAndTheChartSwitch() {
+        val categories = listOf(CustomCategory(4, "Pain", "builtin:pain", 0, false), CustomCategory(5, "Pills", "pill", 100, false, counted = true))
+        val tags = listOf(Tag(9, "Very strong", categoryId = 4, iconKey = "cramps"), Tag(10, "Ibuprofen", categoryId = 5, iconKey = "pill"))
+        val logs = listOf(DayLog(today.minusDays(2), pain = Pain.MILD, sex = Sex.PROTECTED),
+            DayLog(today.minusDays(1), tagIds = setOf(9, 10), tagCounts = mapOf(10L to 3)))
+        fun charts(vararg overrides: UiOverride) = historyState(org.freeperiod.engine.backup.BackupData(periods = emptyList(), dayLogs = logs,
+            tags = tags, settings = org.freeperiod.engine.backup.BackupSettings(null, false), customCategories = categories,
+            overrides = overrides.toList()), today).charts.associateBy { it.category.overrideKey }
+        // Pain: an own level added at the end is the highest row; sex has no chart until it is switched on.
+        val pain = charts().getValue("category:pain")
+        assertEquals(listOf("item:pain:NONE", "item:pain:MILD", "item:pain:MODERATE", "item:pain:SEVERE", "tag:9"), pain.levels!!.map { it.key })
+        assertEquals(mapOf(today.minusDays(2) to 1, today.minusDays(1) to 4), pain.values)
+        assertFalse("category:sex" in charts())
+        assertFalse("customCategory:5" in charts())
+        val on = charts(UiOverride("category:sex", false, 5, chart = true), UiOverride("customCategory:5", false, 100, chart = true))
+        assertEquals(mapOf(today.minusDays(2) to 1), on.getValue("category:sex").values)
+        assertNull(on.getValue("customCategory:5").levels)
+        assertEquals(mapOf(today.minusDays(1) to 3), on.getValue("customCategory:5").values)
+        // Hidden in Customize day entry: no chart, also with the chart switched on.
+        assertFalse("category:pain" in charts(UiOverride("category:pain", true, 2, chart = true)))
+        assertFalse("category:pain" in charts(UiOverride("category:pain", false, 2, chart = false)))
+    }
 }

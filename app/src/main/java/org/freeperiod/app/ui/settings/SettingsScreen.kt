@@ -43,7 +43,7 @@ data class SettingsActions(
 )
 
 @Composable
-fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false, version: String = "") {
+fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false) {
     var lengthDialog by rememberSaveable { mutableStateOf(false) }
     var csvDialog by rememberSaveable { mutableStateOf(false) }
     var deleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -103,10 +103,6 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
             }
         }
         state.message?.let { label -> item { Text(stringResource(label), Modifier.padding(top = 12.dp)) } }
-        if (version.isNotEmpty()) item {
-            Text(stringResource(R.string.about_version, version), Modifier.padding(top = 8.dp),
-                style = MaterialTheme.typography.bodySmall, color = LocalDaylight.current.muted)
-        }
     }
     if (lengthDialog) TypicalLengthDialog(state.typicalCycleLength, { lengthDialog = false }) {
         lengthDialog = false

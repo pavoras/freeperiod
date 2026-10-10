@@ -120,7 +120,7 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit
                         privacy = { page = SettingsPage.PRIVACY }, about = { page = SettingsPage.ABOUT },
                         deleteAll = { model.deleteAllData() },
                         lockEnabled = { model.setLockEnabled(it) }, lockTimeout = { model.setLockTimeout(it) }),
-                        recovery.busy || recovery.awaitingDocument, version)
+                        recovery.busy || recovery.awaitingDocument)
                 }
                 SettingsPage.SITUATION -> SituationScreen(trackingState.data.situation, container.clock(), { tracking.situation(it) }, back,
                     onOfferReminder = { editReminder(it); page = SettingsPage.REMINDER_EDITOR },
@@ -146,7 +146,8 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit
                     onRestore = { tracking.restore(it) }, onAppearance = { tracking.appearance(it) },
                     onEditItem = { tracking.editItem(it) }, onDeleteItem = { tracking.deleteItem(it) },
                     archive = ArchiveActions({ tracking.deleteCategory(it) }, { tracking.restoreItem(it) },
-                        { tracking.deleteItemForever(it) }, { tracking.resetCustomization() }))
+                        { tracking.deleteItemForever(it) }, { tracking.resetCustomization() }),
+                    onChart = { category, on -> tracking.chart(category, on) })
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back, trackingState.data.overrides)
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
                     backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { page = SettingsPage.IMPORT },

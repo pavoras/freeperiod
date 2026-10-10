@@ -64,6 +64,8 @@ fun DayEntrySheet(
     events: Flow<DayEntryEvent> = emptyFlow(),
     /** Opens Customize day entry; null hides the link (previews). */
     onCustomize: (() -> Unit)? = null,
+    /** False when a caller hosts the sheet itself (to slide days in sideways inside one sheet). */
+    inSheet: Boolean = true,
 ) {
     val locale = LocalConfiguration.current.locales[0]
     val dateText = state.date.format(DateTimeFormatter.ofPattern(android.text.format.DateFormat.getBestDateTimePattern(locale, "EEEMMMd")).withLocale(locale))
@@ -112,10 +114,7 @@ fun DayEntrySheet(
             }
         }
     }
-    ModalBottomSheet(onDismissRequest = onDismiss, modifier = Modifier.fillMaxHeight(),
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        // No swipe-to-close: it was easy to trigger by accident while scrolling. The X button closes.
-        containerColor = tones.surface, sheetGesturesEnabled = false, dragHandle = null) {
+    val body: @Composable () -> Unit = {
         Scaffold(containerColor = tones.surface, snackbarHost = { SnackbarHost(snackbar) }, modifier = Modifier.fillMaxHeight()) { padding ->
             LazyColumn(Modifier.fillMaxSize().padding(padding).imePadding(), state = list,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
@@ -159,18 +158,23 @@ fun DayEntrySheet(
                 entryCategories(state).forEach { category ->
                     item(key = category.key) {
                         when (category.key) {
-                            "mood", "flow", "pain", "appetite", "libido" -> EntryChoices(category, state, actions, editable)
+                            "mood", "flow", "pain" -> EntryChoices(category, state, actions, editable)
                             "symptoms" -> {
                                 EntryChoices(category, state, actions, editable, moreSymptoms = moreSymptoms,
                                     onMore = { moreSymptoms = !moreSymptoms })
                             }
-                            "sex", "discharge" -> {
+                            "sex", "discharge", "appetite", "libido" -> {
                                 val appearance = category.appearance(state)
                                 val summary = state.entryItems(category).filter { state.selected(it) }.map { it.appearance(state).label }
                                     .joinToString().ifBlank { stringResource(R.string.entry_none) }
-                                val open = if (category.key == "sex") sexOpen else dischargeOpen
+                                val open = when (category.key) { "sex" -> sexOpen; "discharge" -> dischargeOpen; else -> category.key in customOpen.split(',') }
                                 FpSectionRow(appearance.icon, appearance.label, summary, open) {
-                                    if (category.key == "sex") sexOpen = !sexOpen else dischargeOpen = !dischargeOpen
+                                    when (category.key) {
+                                        "sex" -> sexOpen = !sexOpen
+                                        "discharge" -> dischargeOpen = !dischargeOpen
+                                        else -> { val keys = customOpen.split(',').filter { it.isNotBlank() }.toSet()
+                                            customOpen = (if (open) keys - category.key else keys + category.key).joinToString(",") }
+                                    }
                                 }
                                 if (open) EntryChoices(category, state, actions, editable, showTitle = false)
                             }
@@ -228,10 +232,20 @@ fun DayEntrySheet(
             }
         }
     }
+    if (inSheet) DayEntrySheetFrame(onDismiss, body) else body()
     if (askEndDate) PeriodEndPicker(state.date, state.today, { askEndDate = false }) { end ->
         askEndDate = false
         actions.startPeriod(end)
     }
+}
+
+/** The full-height sheet around a day entry. No swipe-to-close: it was easy to trigger by accident while scrolling; the X closes. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DayEntrySheetFrame(onDismiss: () -> Unit, content: @Composable () -> Unit) {
+    ModalBottomSheet(onDismissRequest = onDismiss, modifier = Modifier.fillMaxHeight(),
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        containerColor = LocalDaylight.current.surface, sheetGesturesEnabled = false, dragHandle = null) { content() }
 }
 
 /**

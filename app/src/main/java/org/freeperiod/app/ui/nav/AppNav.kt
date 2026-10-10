@@ -3,7 +3,9 @@ package org.freeperiod.app.ui.nav
 import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.animation.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.createSavedStateHandle
@@ -32,6 +34,7 @@ import org.freeperiod.app.ui.history.HistoryScreen
 import org.freeperiod.app.ui.history.HistoryViewModel
 import org.freeperiod.app.ui.day.DayEntryActions
 import org.freeperiod.app.ui.day.DayEntrySheet
+import org.freeperiod.app.ui.day.DayEntrySheetFrame
 import org.freeperiod.app.ui.day.DayEntryViewModel
 import org.freeperiod.app.ui.settings.ImportRoute
 import org.freeperiod.app.ui.settings.SettingsRoute
@@ -114,37 +117,43 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                 composable("settings") { SettingsRoute(container) }
                 composable("settings/day-entry") { SettingsRoute(container, dayEntryOnly = true) { navigation.popBackStack() } }
                 composable("day/{epochDay}", arguments = listOf(navArgument("epochDay") { type = NavType.LongType })) { day ->
-                    val date = LocalDate.ofEpochDay(requireNotNull(day.arguments).getLong("epochDay"))
-                    val model: DayEntryViewModel = viewModel(factory = viewModelFactory {
-                        initializer { DayEntryViewModel(date, container.repository, container.clock) }
-                    })
-                    val state by model.state.collectAsStateWithLifecycle()
-                    ResumeAndMidnightEffect(model::onResume)
-                    val actions = DayEntryActions(
-                        ovulationTest = { model.setOvulationTest(it) }, flow = { model.setFlow(it) }, mood = { model.setMood(it) }, pain = { model.setPain(it) },
-                        sex = { model.setSex(it) }, discharge = { model.setDischarge(it) }, note = { model.setNote(it) },
-                        symptom = { model.toggleSymptom(it) }, tag = { model.toggleTag(it) },
-                        addTag = { model.addTag(it) }, renameTag = { id, name -> model.renameTag(id, name) },
-                        archiveTag = { model.archiveTag(it) }, startPeriod = { model.startPeriod(it) },
-                        removePeriodStart = { model.removePeriodStart() }, endPeriod = { model.setPeriodEnd(it) },
-                        clear = { model.clearDay() }, undo = { model.undoClear(it) },
-                        count = { id, times -> model.setCount(id, times) },
-                        level = { field, name -> model.setLevel(field, name) },
-                        addItem = { field, category, name, icon, categoryName -> model.addItem(field, category, name, icon, categoryName) },
-                    )
+                    // One sheet stays open; the arrows slide the next or previous day in from the side they point to.
+                    var shown by rememberSaveable { mutableLongStateOf(requireNotNull(day.arguments).getLong("epochDay")) }
+                    val dismissals = remember { mutableMapOf<Long, () -> Unit>() }
                     Surface(Modifier.fillMaxSize()) {
-                        DayEntrySheet(state, actions, onDateChange = { selected ->
-                            scope.launch {
-                                model.awaitWrites()
-                                navigation.navigate("day/${selected.toEpochDay()}") {
-                                    popUpTo(day.destination.id) { inclusive = true }
-                                }
+                        DayEntrySheetFrame({ dismissals[shown]?.invoke() }) {
+                            AnimatedContent(shown, transitionSpec = {
+                                val forward = targetState > initialState
+                                (slideInHorizontally { if (forward) it else -it } togetherWith slideOutHorizontally { if (forward) -it else it })
+                                    .using(SizeTransform(clip = true))
+                            }, label = "day") { epochDay ->
+                                val date = LocalDate.ofEpochDay(epochDay)
+                                val model: DayEntryViewModel = viewModel(key = "day-$epochDay", factory = viewModelFactory {
+                                    initializer { DayEntryViewModel(date, container.repository, container.clock) }
+                                })
+                                val state by model.state.collectAsStateWithLifecycle()
+                                ResumeAndMidnightEffect(model::onResume)
+                                val actions = DayEntryActions(
+                                    ovulationTest = { model.setOvulationTest(it) }, flow = { model.setFlow(it) }, mood = { model.setMood(it) }, pain = { model.setPain(it) },
+                                    sex = { model.setSex(it) }, discharge = { model.setDischarge(it) }, note = { model.setNote(it) },
+                                    symptom = { model.toggleSymptom(it) }, tag = { model.toggleTag(it) },
+                                    addTag = { model.addTag(it) }, renameTag = { id, name -> model.renameTag(id, name) },
+                                    archiveTag = { model.archiveTag(it) }, startPeriod = { model.startPeriod(it) },
+                                    removePeriodStart = { model.removePeriodStart() }, endPeriod = { model.setPeriodEnd(it) },
+                                    clear = { model.clearDay() }, undo = { model.undoClear(it) },
+                                    count = { id, times -> model.setCount(id, times) },
+                                    level = { field, name -> model.setLevel(field, name) },
+                                    addItem = { field, category, name, icon, categoryName -> model.addItem(field, category, name, icon, categoryName) },
+                                )
+                                val dismiss = { scope.launch { model.awaitWrites(); navigation.popBackStack() }; Unit }
+                                SideEffect { dismissals[epochDay] = dismiss }
+                                DayEntrySheet(state, actions, onDateChange = { selected ->
+                                    scope.launch { model.awaitWrites(); shown = selected.toEpochDay() }
+                                }, onDismiss = dismiss, events = model.events, onCustomize = {
+                                    scope.launch { model.awaitWrites(); navigation.navigate("settings/day-entry") }
+                                }, inSheet = false)
                             }
-                        }, onDismiss = {
-                            scope.launch { model.awaitWrites(); navigation.popBackStack() }
-                        }, events = model.events, onCustomize = {
-                            scope.launch { model.awaitWrites(); navigation.navigate("settings/day-entry") }
-                        })
+                        }
                     }
                 }
             }

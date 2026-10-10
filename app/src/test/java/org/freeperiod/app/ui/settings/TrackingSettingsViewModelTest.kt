@@ -49,6 +49,19 @@ class TrackingSettingsViewModelTest : DatabaseTest() {
         assertFalse(repository.snapshot().customCategories.single().archived)
     }
 
+    @Test fun effectOnYourDayAppetiteAndSexDriveJoinTheirUsualPlaces() = runTest {
+        val vm = model()
+        vm.reorder(entryCategories(dayEntryState(repository.snapshot(), today, today), includeHidden = true).map { it.overrideKey }.reversed()).join()
+        vm.painDiary(true, listOf(org.freeperiod.app.data.ItemSetCategory("pain_diary:daily", "Effect on your day", "home",
+            listOf("Missed work" to "briefcase")))).join()
+        vm.showCategory("appetite", true).join()
+        vm.showCategory("libido", true).join()
+        val order = entryCategories(dayEntryState(repository.snapshot(), today, today), includeHidden = true).map { it.overrideKey }
+        val symptoms = order.indexOf("category:symptoms")
+        assertEquals(listOf("category:symptoms", "customCategory:1", "category:appetite"), order.subList(symptoms, symptoms + 3))
+        assertEquals(order.indexOf("category:sex") + 1, order.indexOf("category:libido"))
+    }
+
     @Test fun situationPreferencePersistsAcrossPhaseChanges() = runTest {
         val vm = model()
         vm.situation(Situation(fertileWindowEnabled = false)).join()

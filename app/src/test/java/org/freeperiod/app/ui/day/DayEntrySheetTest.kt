@@ -109,17 +109,23 @@ class DayEntrySheetTest {
         assertEquals(1, opened)
     }
 
-    @Test fun appetiteAndSexDriveAreChoicesOnceShown() {
+    @Test fun appetiteAndSexDriveAreCollapsibleChoicesOnceShown() {
         var level: Pair<String, String?>? = null
-        val shown = listOf(UiOverride("category:appetite", false, 10), UiOverride("category:libido", false, 11))
+        val shown = listOf(UiOverride("category:appetite", false, 4), UiOverride("category:libido", false, 6))
         compose.setContent { FreePeriodTheme {
             DayEntrySheet(DayEntryUiState(today, today, loading = false, overrides = shown),
                 DayEntryActions(level = { field, name -> level = field to name }), {}, {})
         } }
         compose.waitForIdle()
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Appetite"))
+        compose.onNode(hasText("Appetite")).performClick()
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("A lot") and isSelectable())
         compose.onNode(hasText("A lot") and isSelectable()).performClick()
         assertEquals("appetite" to "HIGH", level)
+        compose.onNode(hasText("Appetite")).performClick()
+        compose.onAllNodes(hasText("A lot") and isSelectable()).assertCountEquals(0)
+        compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Sex drive"))
+        compose.onNode(hasText("Sex drive")).performClick()
         compose.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("High") and isSelectable())
         compose.onNode(hasText("High") and isSelectable()).performClick()
         assertEquals("libido" to "HIGH", level)

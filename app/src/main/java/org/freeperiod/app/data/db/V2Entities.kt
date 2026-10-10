@@ -16,7 +16,7 @@ data class CustomCategoryEntity(
 
 @Entity(tableName = "ui_overrides")
 data class UiOverrideEntity(@PrimaryKey val key: String, val hidden: Boolean, val sortOrder: Int,
-    val label: String? = null, val iconKey: String? = null)
+    val label: String? = null, val iconKey: String? = null, val chart: Boolean? = null)
 
 @Entity(tableName = "situation")
 data class SituationEntity(

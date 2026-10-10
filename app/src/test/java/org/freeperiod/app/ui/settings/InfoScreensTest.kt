@@ -18,7 +18,7 @@ class InfoScreensTest {
         compose.setContent { FreePeriodTheme { PrivacyScreen({}, {}) } }
         compose.waitForIdle()
         compose.onNodeWithText("Not a medical device").assertIsDisplayed()
-        compose.onNodeWithText("FreePeriod. is not a medical device.", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("FreePeriod is not a medical device.", substring = true).assertIsDisplayed()
         val disclaimer = compose.onNodeWithText("Not a medical device").fetchSemanticsNode().boundsInRoot
         val storage = compose.onNodeWithText("Your periods, day entries", substring = true).fetchSemanticsNode().boundsInRoot
         org.junit.Assert.assertTrue(disclaimer.top < storage.top)

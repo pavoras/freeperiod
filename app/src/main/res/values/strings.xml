@@ -181,7 +181,7 @@
     <string name="restore_read">Read backup</string>
     <string name="restore_replace">Replace all data</string>
     <string name="restore_replace_warning">Restoring replaces all periods, day entries, tags and cycle settings on this phone. This cannot be undone.</string>
-    <string name="restore_not_backup">This is not a FreePeriod. backup file.</string>
+    <string name="restore_not_backup">This is not a FreePeriod backup file.</string>
     <string name="restore_unsupported">This backup uses a version that this app does not support.</string>
     <string name="restore_password_or_corrupt">The password is incorrect or the backup is damaged. Your data has not changed.</string>
     <string name="restore_invalid">The backup contains invalid or incomplete data. Your data has not changed.</string>
@@ -189,10 +189,10 @@
     <string name="restore_done">Backup restored. Data and cycle settings replaced.</string>
     <string name="csv_warning">CSV files are not encrypted. Anyone with access to them can read your entries. You get one file with a row per day, readable in any spreadsheet app.</string>
     <string name="csv_saved">Both CSV files saved.</string>
-    <string name="privacy_storage">Your periods, day entries, symptoms, moods, notes, tags and settings are stored on this phone only. FreePeriod. has no account or server.</string>
-    <string name="privacy_offline">FreePeriod. has no internet permission, analytics or ads. The app does not send your tracking data anywhere.</string>
+    <string name="privacy_storage">Your periods, day entries, symptoms, moods, notes, tags and settings are stored on this phone only. FreePeriod has no account or server.</string>
+    <string name="privacy_offline">FreePeriod has no internet permission, analytics or ads. The app does not send your tracking data anywhere.</string>
     <string name="privacy_files">Backups are encrypted files; CSV exports are not encrypted. You control these files and where they are saved. If you choose a cloud folder in the file picker, that app uploads the file to its cloud service.</string>
-    <string name="privacy_delete">To delete everything stored by FreePeriod., uninstall the app. To delete all tracking data and reset cycle settings, use “Delete all data” in Settings. Delete any backup or export files separately in the app where you saved them.</string>
+    <string name="privacy_delete">To delete everything stored by FreePeriod, uninstall the app. To delete all tracking data and reset cycle settings, use “Delete all data” in Settings. Delete any backup or export files separately in the app where you saved them.</string>
     <string name="privacy_contact">Contact: see the store listing</string>
     <string name="privacy_web_link">Open privacy policy in browser</string>
     <string name="about_version">Version %1$s</string>
@@ -214,7 +214,7 @@
     <string name="notifications_off">Notifications are off in system settings.</string>
     <string name="notification_settings">Open notification settings</string>
     <string name="reminder_channel">Reminders</string>
-    <string name="reminder_title">Reminder from FreePeriod.</string>
+    <string name="reminder_title">Reminder from FreePeriod</string>
     <string name="reminder_period_neutral">Time for a check-in.</string>
     <string name="reminder_daily">Time for your daily check-in</string>
     <plurals name="reminder_period_explicit">
@@ -231,7 +231,7 @@
     <string name="unlock">Unlock</string>
     <string name="lock_auth_error">Unlocking was cancelled or could not be completed. Try again when you are ready.</string>
     <string name="onboarding_skip">Skip</string>
-    <string name="onboarding_welcome">Welcome to FreePeriod.</string>
+    <string name="onboarding_welcome">Welcome to FreePeriod</string>
     <string name="onboarding_promise">No account. No ads. No subscription.</string>
     <string name="onboarding_local">Your data stays on your phone. No internet permission.</string>
     <string name="onboarding_optional">Everything here is optional. You can add or change details later.</string>
@@ -262,9 +262,9 @@
     <string name="history_cycle_label">Cycle length</string>
     <string name="history_period_label">Period length</string>
     <string name="history_days_unit">days</string>
-    <string name="app_estimates">FreePeriod. is not a medical device. It is not a method of contraception, not a tool to help you get pregnant, and gives no medical advice, diagnosis or treatment. All dates are calendar estimates from your own entries and can be wrong; they are not reliable. Every cycle is different: pregnancy is possible on any day, also outside the days with a higher chance. Talk to a doctor or pharmacist about contraception, pregnancy or health questions.</string>
+    <string name="app_estimates">FreePeriod is not a medical device. It is not a method of contraception, not a tool to help you get pregnant, and gives no medical advice, diagnosis or treatment. All dates are calendar estimates from your own entries and can be wrong; they are not reliable. Every cycle is different: pregnancy is possible on any day, also outside the days with a higher chance. Talk to a doctor or pharmacist about contraception, pregnancy or health questions.</string>
     <string name="medical_disclaimer_title">Not a medical device</string>
-    <string name="medical_disclaimer_note">These calendar estimates can be wrong and are not reliable. FreePeriod. is not for contraception, help getting pregnant, or medical advice.</string>
+    <string name="medical_disclaimer_note">These calendar estimates can be wrong and are not reliable. FreePeriod is not for contraception, help getting pregnant, or medical advice.</string>
     <string name="pregnancy_chance_info">About this calendar estimate</string>
     <string name="calendar_pregnancy_chance">higher chance of pregnancy, calendar estimate</string>
     <string name="show_pregnancy_chance">Show days with a higher chance of pregnancy</string>
@@ -311,7 +311,7 @@
     <string name="wordmark_stop">.</string>
     <string name="my_situation">My situation</string>
     <string name="situation_intro">Choose the view that suits your situation. You can change it anytime.</string>
-    <string name="situation_disclosure">FreePeriod. records what you enter and shows calendar estimates. It does not diagnose conditions or recommend treatment.</string>
+    <string name="situation_disclosure">FreePeriod records what you enter and shows calendar estimates. It does not diagnose conditions or recommend treatment.</string>
     <string name="life_phase">Life phase</string>
     <string name="tracking_method">Method</string>
     <string name="phase_regular">Regular tracking</string>
@@ -432,9 +432,9 @@
     </plurals>
     <string name="import_title">Import</string>
     <string name="import_from_app">Import from another app</string>
-    <string name="import_intro">Choose a CSV with past periods and entries or restore a FreePeriod. backup.</string>
+    <string name="import_intro">Choose a CSV with past periods and entries or restore a FreePeriod backup.</string>
     <string name="import_csv">Choose CSV file</string>
-    <string name="import_backup">FreePeriod. backup</string>
+    <string name="import_backup">FreePeriod backup</string>
     <string name="import_coming_soon">Clue and Flo exports coming soon.</string>
     <string name="import_choose_format">Choose the date format used in this file.</string>
     <string name="import_format_iso">Year/month/day (2026-04-12)</string>
@@ -456,8 +456,8 @@
     <string name="onboarding_track_intro">Your period and bleeding are always there. Pick what else matters to you.</string>
     <string name="onboarding_track_later">You can change this any time: Settings › Customize day entry, or the gear in the day entry.</string>
     <string name="feedback">Send feedback</string>
-    <string name="feedback_subject">FreePeriod. feedback</string>
-    <string name="feedback_text">Opens your email app with a message to us. You see everything before you send it. FreePeriod. never adds your periods, entries or notes.</string>
+    <string name="feedback_subject">FreePeriod feedback</string>
+    <string name="feedback_text">Opens your email app with a message to us. You see everything before you send it. FreePeriod never adds your periods, entries or notes.</string>
     <string name="feedback_include_info">Add technical info (app and Android version, device model, language)</string>
     <string name="feedback_open">Open email</string>
     <string name="feedback_no_app">No email app found. You can write to %1$s.</string>
@@ -567,7 +567,7 @@
     <string name="lock_intro_title">Turn on app lock?</string>
     <string name="lock_intro_body">When you open FreePeriod, it asks for your phone\'s screen lock – fingerprint, face, PIN, pattern or password – and again after the time you choose. Your phone checks it; FreePeriod never sees it. While the lock is on, the app is hidden in recent apps and screenshots are blocked.</string>
     <string name="lock_turn_on">Turn on</string>
-    <string name="typical_length_fallback">Only used until your first full cycle is logged. After that, FreePeriod. uses your own entries.</string>
+    <string name="typical_length_fallback">Only used until your first full cycle is logged. After that, FreePeriod uses your own entries.</string>
     <string name="archived_categories">Archived</string>
     <string name="archived_categories_hint">Archived categories no longer appear in the day entry. Your past entries keep them.</string>
     <string name="restore_category">Restore</string>
@@ -611,7 +611,7 @@
         <item quantity="other">%d diary entries imported.</item>
     </plurals>
     <string name="entry_medication">Medication</string>
-    <string name="medication_hint">Log what you took. FreePeriod. gives no advice on medication.</string>
+    <string name="medication_hint">Log what you took. FreePeriod gives no advice on medication.</string>
     <string name="entry_appetite">Appetite</string>
     <string name="appetite_low">Little</string>
     <string name="appetite_normal">Normal</string>
@@ -655,7 +655,7 @@
     <string name="symptom_low_libido">Low sex drive</string>
     <string name="menopause_bleeding_note">Bleeding after a year without periods is worth mentioning to a doctor.</string>
     <string name="summary_screen">Summary as PDF</string>
-    <string name="summary_intro">A clear overview of your entries, for example for an appointment. You choose where it is saved; FreePeriod. sends it nowhere.</string>
+    <string name="summary_intro">A clear overview of your entries, for example for an appointment. You choose where it is saved; FreePeriod sends it nowhere.</string>
     <string name="summary_range">Time span</string>
     <string name="summary_all">Everything</string>
     <string name="summary_notes">Include notes</string>
@@ -678,7 +678,7 @@
     <string name="summary_other">Other entries</string>
     <string name="summary_period_day">Period</string>
     <string name="summary_note">Note: %1$s</string>
-    <string name="summary_footer">Made from your own diary entries. FreePeriod. is not a medical device and does not interpret them.</string>
+    <string name="summary_footer">Made from your own diary entries. FreePeriod is not a medical device and does not interpret them.</string>
     <string name="summary_page">Page %1$d</string>
     <plurals name="summary_months">
         <item quantity="one">Last %1$d month</item>
@@ -690,6 +690,8 @@
     <string name="history_range_quarter">3 months</string>
     <string name="history_range_year">Year</string>
     <string name="history_chart_basis">As you logged it. Shaded: period days.</string>
+    <string name="chart_in_history">Chart in History</string>
+    <string name="chart_order_hint">Highest on top, as in the chart. The day entry starts with the lowest.</string>
     <string name="history_chart_today">Today</string>
     <plurals name="history_chart_days">
         <item quantity="one">Logged on %1$d of %2$d days</item>
