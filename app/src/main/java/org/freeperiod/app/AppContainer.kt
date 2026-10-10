@@ -7,7 +7,7 @@ import org.freeperiod.app.data.Repository
 import org.freeperiod.app.data.SettingsStore
 import org.freeperiod.app.data.db.FreePeriodDatabase
 import org.freeperiod.app.data.db.MIGRATION_1_2
-import org.freeperiod.app.backup.BackupIo
+import org.freeperiod.app.backup.*
 import androidx.work.WorkManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -15,6 +15,7 @@ import org.freeperiod.app.reminders.*
 import org.freeperiod.engine.predictionMode
 
 class AppContainer(context: Context) {
+    private val appContext = context.applicationContext
     val clock: () -> LocalDate = { LocalDate.now() }
     private val database = Room.databaseBuilder(context.applicationContext,
         FreePeriodDatabase::class.java, "freeperiod.db").addMigrations(MIGRATION_1_2).build()
@@ -28,6 +29,7 @@ class AppContainer(context: Context) {
     val notifications = Notifications(context.applicationContext)
     val reminderScheduler by lazy { ReminderScheduler(WorkManager.getInstance(context.applicationContext)) }
     val reminderDelivery = ReminderDelivery(repository, settings, notifications, clock)
+    val autoBackup = AutoBackup(repository, settings, KeystoreSeal(), TreeAccess(appContext.contentResolver))
 
     fun observeReminders() {
         notifications.createChannel()
@@ -35,6 +37,10 @@ class AppContainer(context: Context) {
             settings.migrateReminders(repository)
             combine(repository.reminders, repository.domainSettings, repository.situation, repository.periods) { _, _, _, _ -> Unit }
                 .collect { reminderScheduler.reconcile(repository) }
+        }
+        applicationScope.launch {
+            settings.settings.map { s -> s.autoBackupInterval.takeIf { s.autoBackupFolder != null } }.distinctUntilChanged()
+                .collect { scheduleAutoBackup(WorkManager.getInstance(appContext), it) }
         }
     }
 }

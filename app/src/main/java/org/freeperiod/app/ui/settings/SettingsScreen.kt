@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.R
+import org.freeperiod.app.backup.AutoBackupInterval
 import org.freeperiod.app.ui.theme.*
 import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.data.LockTimeout
@@ -80,7 +81,15 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
             if (state.device.lockEnabled) SettingsRow(R.string.lock_timeout, enabled, { timeoutDialog = true }, stringResource(timeoutLabel(state.device.lockTimeout)))
             Spacer(Modifier.height(12.dp))
         }
-        item { SettingsRow(R.string.backup_restore, enabled, actions.backup) }
+        item {
+            val device = state.device
+            SettingsRow(R.string.backup_restore, enabled, actions.backup, when {
+                device.autoBackupFolder == null -> null
+                device.autoBackupFailed -> stringResource(R.string.auto_backup_row_failed)
+                device.autoBackupInterval == AutoBackupInterval.DAILY -> stringResource(R.string.auto_backup_row_daily)
+                else -> stringResource(R.string.auto_backup_row_weekly)
+            })
+        }
         item { SettingsRow(R.string.export_csv, enabled, { csvDialog = true }) }
         item { SettingsRow(R.string.privacy_policy, enabled, actions.privacy) }
         item { SettingsRow(R.string.feedback, enabled, { feedbackDialog = true }) }
