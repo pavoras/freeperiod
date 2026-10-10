@@ -4,7 +4,7 @@ Every idea or request Marvin writes goes here right away, before working on it, 
 while something else is in progress. Status: `[ ]` open · `[~]` in progress · `[x]` done (with commit).
 Newest round on top. Decisions that change the product also go into the spec/handover.
 
-## Round 2026-10-10 (evening, after the 3 ring drafts)
+## Round 2026-10-10 (evening, after the 3 ring drafts) – done in d56f525 
 
 - [x] Home: cycle ring, direction A ("Perlenkette"), as a second view next to the calendar.
   - [x] In the ring view the card with cycle day + mini timeline goes away (redundant).
