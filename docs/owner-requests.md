@@ -18,6 +18,12 @@ Newest round on top. Decisions that change the product also go into the spec/han
 - [x] Hearts need a thin outline, otherwise they have no contrast over the buttons.
 - [x] Owner asked whether the replace-all restore is intended and good → yes, explained; suggestion for 1.2:
       warn when the backup is older than the newest entry on the phone.
+- [x] Owner tested versionCode 5: purchase works (1), the 1.1 smoke test passes (2).
+- [ ] Upload the 1.1 store texts and screenshots via the API (the service account should have the rights) and send
+      1.1 for review "wenn du dir sicher bist, dass alles stimmt". Content rating: now 14 because of in-app
+      purchases (owner); health declaration unchanged (owner handles both).
+- [ ] Play Console recommendations on v1.0.0: edge-to-edge (deprecated setStatusBarColor/setNavigationBarColor/
+      LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES), R8 optimized resource shrinking / AGP 9 → check.
 - [x] Tapping "Settings" in the bottom bar while on a settings sub-page goes back to the settings overview.
 - [x] Found by Claude: "FreePeriod" is still hyphenated ("Free-Period") in running text, e.g. the summary footer
       (DE dark) – avoid it app-wide, not only in the thank-you card.

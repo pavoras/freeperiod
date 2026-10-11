@@ -3,7 +3,7 @@
 Package: `org.freeperiod.app`  
 Developer organisation: `JaySay (Marvin Kemper)`  
 Contact: `support@jaysay.it`  
-Audience: ages 13 and up  
+Audience: ages 14 and up (content rating 14 since 1.1, owner 2026-10-11)  
 Prepared: 2026-10-08
 
 This is a submission worksheet, not a claim of Google approval. It uses the supplied release facts and the repository's Android backup rules. Current Play Console wording and policy guidance have not been checked online in this offline round. The account owner should match these proposals to the current form and the final release artifact.

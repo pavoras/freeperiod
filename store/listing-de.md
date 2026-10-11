@@ -32,7 +32,7 @@ FreePeriod ist kein Medizinprodukt, kein Verhütungsmittel und kein Hilfsmittel,
 
 Alles ist kostenlos. Wenn dir FreePeriod gefällt, kannst du die App mit einem freiwilligen einmaligen Kauf unterstützen; er schaltet nichts frei.
 
-Ab 13 Jahren.
+Ab 14 Jahren.
 Quellcode (GPL-3.0): https://github.com/pavoras/freeperiod
 Datenschutz: https://pavoras.github.io/freeperiod/privacy/de/
 Kontakt: support@jaysay.it

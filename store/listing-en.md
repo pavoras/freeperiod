@@ -32,7 +32,7 @@ FreePeriod is not a medical device, not a method of contraception and not a tool
 
 Everything is free. If you like FreePeriod, you can support it with an optional one-time purchase; it unlocks nothing.
 
-For ages 13 and up.
+For ages 14 and up.
 Source code (GPL-3.0): https://github.com/pavoras/freeperiod
 Privacy: https://pavoras.github.io/freeperiod/privacy/
 Contact: support@jaysay.it
