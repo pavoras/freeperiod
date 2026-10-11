@@ -38,7 +38,7 @@ permission, no analytics/crash SDKs. Not a medical device, not contraception. GP
 
 - v1.0.0 **versionCode 2** submitted for production review on 2026-10-09 (100 %, managed publishing
   optional).
-- v1.1.0 **versionCode 4** on the internal test track (2026-10-11; 3 before it) (uploaded via the Play Developer API
+- v1.1.0 **versionCode 5** on the internal test track (2026-10-11; 3 and 4 before it) (uploaded via the Play Developer API
   with the JaySay service account, which now has access to FreePeriod; the key stays on the JaySay server –
   same mechanism as `JaySay/aufpasser/play-upload.ps1`, package `org.freeperiod.app`). Open: create the
   one-time products `support_small` 5 € / `support_large` 10 € (created and tested by the owner); purchases are
