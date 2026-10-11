@@ -47,6 +47,14 @@ class SettingsStoreTest {
         assertNull(settings.lastNotifiedPeriodId)
     }
 
+    @Test fun theSupportThankYouPersists() = runBlocking {
+        assertFalse(settingsStore.settings.first().supported)
+        settingsStore.update { it.copy(supported = true) }
+        scope.coroutineContext[Job]!!.cancelAndJoin()
+        settingsStore = openStore()
+        assertTrue(settingsStore.settings.first().supported)
+    }
+
     @Test fun accentPersists() = runBlocking {
         for (accent in Accent.entries) {
             settingsStore.update { it.copy(accent = accent) }

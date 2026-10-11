@@ -30,7 +30,7 @@ object NoSupporter : Supporter {
     override fun buy(activity: Activity, productId: String) {}
 }
 
-/** Product ids as created in Play Console (one-time, not consumable), in the order shown: 4.99 € and 9.99 €. */
+/** Product ids as created in Play Console (one-time; the app consumes them so they can be bought again), in the order shown: 4.99 € and 9.99 €. */
 val supportProductIds = listOf("support_small", "support_large")
 
 /** Products in [supportProductIds] order; ids the store doesn't know are left out. */

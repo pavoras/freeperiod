@@ -37,7 +37,7 @@ class AppContainer(context: Context) {
     val reminderDelivery = ReminderDelivery(repository, settings, notifications, clock)
     val autoBackup = AutoBackup(repository, settings, KeystoreSeal(), TreeAccess(appContext.contentResolver))
     /** Optional support purchase: Google Play in Play builds, none in F-Droid builds. */
-    val supporter: Supporter by lazy { createSupporter(appContext) }
+    val supporter: Supporter by lazy { createSupporter(appContext, settings, applicationScope) }
 
     fun observeReminders() {
         notifications.createChannel()

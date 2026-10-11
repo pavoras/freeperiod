@@ -42,6 +42,8 @@ data class AppSettings(
     val autoBackupFailed: Boolean = false,
     /** Today opens on the cycle ring instead of the calendar (the last view the user swiped to). */
     val homeRing: Boolean = false,
+    /** The user has bought a support product at least once (purchases are consumed, so Play forgets them). */
+    val supported: Boolean = false,
 )
 
 class SettingsStore internal constructor(private val store: DataStore<Preferences>) {
@@ -76,6 +78,7 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
             prefs.set(autoBackupLast, value.autoBackupLast?.toString())
             prefs[autoBackupFailed] = value.autoBackupFailed
             prefs[homeRing] = value.homeRing
+            prefs[supported] = value.supported
         }
     }
 
@@ -124,6 +127,7 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         autoBackupLast = prefs[autoBackupLast]?.let(LocalDate::parse),
         autoBackupFailed = prefs[autoBackupFailed] ?: false,
         homeRing = prefs[homeRing] ?: false,
+        supported = prefs[supported] ?: false,
     )
 
     private fun MutablePreferences.set(key: Preferences.Key<String>, value: String?) {
@@ -149,5 +153,6 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         val autoBackupLast = stringPreferencesKey("auto_backup_last")
         val autoBackupFailed = booleanPreferencesKey("auto_backup_failed")
         val homeRing = booleanPreferencesKey("home_ring")
+        val supported = booleanPreferencesKey("supported")
     }
 }
