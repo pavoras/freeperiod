@@ -37,7 +37,11 @@ permission, no analytics/crash SDKs. Not a medical device, not contraception. GP
 ## 3. Release state
 
 - v1.0.0 **versionCode 2** submitted for production review on 2026-10-09 (100 %, managed publishing
-  optional). Internal test track has versionCode 1 (same content minus plural fixes) – tested OK by owner.
+  optional).
+- v1.1.0 **versionCode 3** on the internal test track since 2026-10-11 (uploaded via the Play Developer API
+  with the JaySay service account, which now has access to FreePeriod; the key stays on the JaySay server –
+  same mechanism as `JaySay/aufpasser/play-upload.ps1`, package `org.freeperiod.app`). Open: create the
+  one-time products `support_small` 4.99 € / `support_large` 9.99 €, then test purchase/restore/refund.
 - Every new upload needs a higher `versionCode` (`app/build.gradle.kts`).
 - Play Console answers used: see `docs/release.md` and `store/data-safety.md` (no data collected/shared,
   health app: menstrual tracking, audience 13+, no ads, category Health & Fitness).
@@ -68,7 +72,7 @@ Robolectric 4.16.1, Roborazzi 1.50.0, compileSdk/targetSdk 36, minSdk 26. Offlin
 | signed AAB | `gradle -q --offline -Pfreeperiod.signing="$USERPROFILE/dev-tools/keys/freeperiod-signing.properties" :app:bundlePlayRelease` → `app/build/outputs/bundle/playRelease/app-play-release.aab`; verify with `jarsigner -verify` and that the manifest has no INTERNET |
 | debug APK for the owner | `app/build/outputs/apk/play/debug/app-play-debug.apk` (built by `-Voll`), send with SendUserFile |
 
-Last full gate: 592 tests green (2026-10-11). 74 screenshot references.
+Last full gate: 598 tests green (2026-10-11). 74 screenshot references.
 
 Working habits that matter here:
 - Long runs (gate, recording) in the background **with a watcher** (progress every ≤ 5–15 min,

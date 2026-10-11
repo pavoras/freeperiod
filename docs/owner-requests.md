@@ -33,6 +33,10 @@ Newest round on top. Decisions that change the product also go into the spec/han
       Owner 2026-10-11: license tester added ("2 done"). Upload the AAB to the internal track with the JaySay
       Play service account (publishing rights; key stays on the server). GPL §7 note for the billing library:
       "einfügen falls notwendig" → [x] added to the README.
+      Owner: permission for the upload via the JaySay server granted; the one-time products are not created yet.
+      Access check: Play API 403 – the service account had no access to FreePeriod yet; owner granted it.
+      [x] 1.1.0 (versionCode 3) uploaded to the internal track via the API. Products: none yet (owner creates
+      them or lets Claude do it via the API).
 
 ## Round 2026-10-10 (late, after testing dev.51) – done
 
