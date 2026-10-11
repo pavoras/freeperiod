@@ -1,0 +1,6 @@
+- **Changed:** Added [SampleBackupTest.kt](</C:/Users/kempe/Desktop/Projekte/Period Tracker/engine/src/test/kotlin/org/freeperiod/engine/backup/SampleBackupTest.kt>). **Net +265 lines**, nothing removed; no existing files changed.
+- **Backup:** [freeperiod-sample.fpbackup](</C:/Users/kempe/Desktop/Projekte/Period Tracker/engine/build/sample/freeperiod-sample.fpbackup>), 95,250 bytes. Password: `freeperiod`.
+- **Checked:** `powershell -NoProfile -ExecutionPolicy Bypass -File tools\check.ps1 -Schnell`, exit **0**. 142 engine tests passed; app compilation passed. Gate aggregate: 600 tests, zero failures.
+- **Test summary:** `Sample backup: 16 periods, 367 logged days, 83 notes, 2025-07-21 to 2026-10-10`
+- **Screenshot tests:** None added or changed.
+- **Open points:** No uncertainty about app conventions. Phone restore remains untested.

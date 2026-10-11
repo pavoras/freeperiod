@@ -7,7 +7,7 @@ FreePeriod is a period calendar and daily diary in one. Free and open source, wi
 • Optional: days with a higher chance of pregnancy, shown as a plain calendar estimate.
 • Daily diary: mood, flow, pain, symptoms, discharge, tags and notes; optionally appetite, sex drive, medication and a pain diary. Rename, reorder or hide anything and add your own categories and icons.
 • History with averages, logged symptoms and charts over a week, a month, 3 months or a year.
-• A PDF summary of your entries, for example for an appointment.
+• A PDF summary of your entries, for example for a doctor’s appointment.
 • Reminders for your period, a pill or anything personal.
 • Life phases: during pregnancy, after birth and in menopause the estimates pause and your diary stays.
 • Six accent colours, light and dark mode, English and German.

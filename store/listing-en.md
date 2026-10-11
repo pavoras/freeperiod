@@ -19,7 +19,7 @@ FreePeriod is a period calendar and daily diary in one. Free and open source, wi
 • Optional: days with a higher chance of pregnancy, shown as a plain calendar estimate.
 • Daily diary: mood, flow, pain, symptoms, discharge, tags and notes. Switch on appetite, sex drive, a medication log ("log what you take") or a pain diary. Rename, reorder or hide anything and add your own categories and icons.
 • History with averages, logged symptoms and charts over a week, a month, 3 months or a year.
-• A PDF summary of your entries, for example for an appointment.
+• A PDF summary of your entries, for example for a doctor’s appointment.
 • Reminders for your period, a pill or anything personal.
 • Life phases: during pregnancy, after birth and in menopause the estimates pause and your diary stays.
 • Six accent colours, light and dark mode, English and German.
@@ -52,7 +52,7 @@ Contact: support@jaysay.it
 |---|---:|---:|
 | Title | 27 | 30 |
 | Short description | 71 | 80 |
-| Full description | 1825 | 4000 |
+| Full description | 1833 | 4000 |
 | Release notes | 401 | 500 |
 
 Copy only the field content above, not the Markdown headings or this table. Counts use Unicode characters and LF line breaks, excluding the outer blank lines. Title changed for 1.1: "FreePeriod" without the dot (owner rule for running text, 2026-10-11) – confirm before publishing.

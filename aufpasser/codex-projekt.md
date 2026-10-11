@@ -53,6 +53,8 @@ Fixed rules for Codex live in `AGENTS.md` (created in M0; do not repeat them in 
 | 24 | – cancelled | – | Design polish done by Claude instead (Codex quota 39 % on day 2; owner: Codex only for what it does better) |
 | 25 | gpt-6.1-sol/high fresh | (see runde-25.jsonl) | 1.1 "Customize everything" Stage A+B: own items as tags in `builtin:<field>` marker categories, `EntrySelection`/`EntryAppearance`/`EntryCsv`, Room 3, backup schema 3, CSV diary import (+1,457 lines; 7.3 M input, quota 88 → 90 %). Claude fixed 5 tests the sandbox couldn't run (Robolectric NATIVE graphics), icons only where meaningful, symptom order, one-row item editor; commit c1baa6a |
 
+| 26 | gpt-6.1-sol/high fresh | (see runde-26.jsonl) | Sample backup for owner testing: `engine/src/test/.../SampleBackupTest.kt` writes `engine/build/sample/freeperiod-sample.fpbackup` (password `freeperiod`, 14 months relative to today; +265 lines; Codex weekly quota 13 % after reset) |
+
 Automatic backup (local folder, Keystore-sealed password, WorkManager) was built by Claude in parallel on
 branch `auto-backup` and merged after round 25.
 

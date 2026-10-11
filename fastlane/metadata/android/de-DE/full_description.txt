@@ -7,7 +7,7 @@ FreePeriod ist Periodenkalender und Tagebuch in einem. Kostenlos und Open Source
 • Optional: Tage mit erhöhter Chance auf Schwangerschaft, als reine Kalenderschätzung.
 • Tagebuch: Stimmung, Blutung, Schmerzen, Symptome, Ausfluss, Tags und Notizen; optional Appetit, Libido, Medikamente und ein Schmerztagebuch. Alles umbenennen, umsortieren oder ausblenden, eigene Kategorien und Symbole ergänzen.
 • Verlauf mit Durchschnittswerten, eingetragenen Symptomen und Graphen über eine Woche, einen Monat, 3 Monate oder ein Jahr.
-• Eine PDF-Zusammenfassung deiner Einträge, zum Beispiel für einen Termin.
+• Eine PDF-Zusammenfassung deiner Einträge, zum Beispiel für einen Arzttermin.
 • Erinnerungen für deine Periode, eine Pille oder etwas Persönliches.
 • Lebensphasen: In der Schwangerschaft, nach der Geburt und in der Menopause pausieren die Schätzungen, dein Tagebuch bleibt.
 • Sechs Akzentfarben, hell und dunkel, Deutsch und Englisch.

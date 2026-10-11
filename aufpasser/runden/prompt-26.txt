@@ -1,0 +1,41 @@
+Round 26 – realistic sample backup for owner testing. Rules: AGENTS.md. Scope: only engine/src/test/ (new files);
+no production code changes.
+
+Context: the owner wants a backup file with realistic app data that he can import on his phone (Settings › Backup ›
+Restore) to test 1.1 (History charts, summary PDF, day entry) and later the 1.2 diary list. The backup format is
+BackupCodec + BackupData (schema 3) in engine/src/main/kotlin/org/freeperiod/engine/backup/. App-side conventions for
+built-in items as tags (`builtin:<field>` marker categories), item sets (medication log, pain diary "Effect on your
+day"), overrides (hidden/sortOrder/chart) and reminders are in app/src/main/java/org/freeperiod/app/ (read
+data/Repository.kt, ui/settings/ItemSets.kt, ui/day/EntryCustomization.kt) – the sample must look exactly like data
+the app itself writes, otherwise the restore or the UI shows it wrong.
+
+Requirements
+1. A JUnit test `SampleBackupTest` (engine/src/test/kotlin/org/freeperiod/engine/backup/) that builds the data with a
+   seeded java.util.Random (deterministic for a given "today"), encodes it with password `freeperiod`, writes it to
+   `engine/build/sample/freeperiod-sample.fpbackup` and asserts that BackupCodec.decode(...) returns Ok with the same
+   data. "today" = LocalDate.now(); the last logged day is yesterday, so the file always looks current.
+2. Content (German texts, the owner uses the app in German):
+   - 14 months of periods: cycles mostly 26–31 days, one longer cycle (~38 days, note mentions stress/travel), period
+     length 4–6 days; the latest period started 8–20 days before today and has an end date.
+   - Flow per period day: medium/heavy on days 1–2, then medium, light, spotting at the end.
+   - Mood most logged days (more LOW/BAD in the 2–3 days before a period); pain on period days 1–2 (sometimes severe),
+     mild otherwise rarely; symptoms (cramps, headache, bloating, breast tenderness, acne, tiredness – use the real
+     Symptom enum) clustered before and at the start of a period.
+   - Discharge: EGG_WHITE/WATERY around the middle of the cycle, CREAMY/STICKY otherwise, some days unlogged.
+   - Sex a few times a month (mostly PROTECTED). Appetite and libido turned on (overrides as the app writes them when the
+     user turns them on) and logged on many days (HIGH appetite before the period, HIGH libido mid-cycle).
+   - Medication log turned on with 2–3 items (e.g. Ibuprofen, Magnesium) logged on pain days; pain diary turned on with
+     its "Effect on your day" items logged on bad pain days.
+   - 5–6 own tags (Sport, Stress, Reise, Alkohol, Gut geschlafen, …) on realistic days; one own counted category
+     ("Wasser" glasses, counted, chart on) and one own pick-one category ("Schlaf": schlecht / okay / gut / sehr gut,
+     chart on) logged most days.
+   - Notes on ~1 in 5 logged days: mostly one short line, some 3–6 lines (good for testing a collapsed note).
+   - About 15–20 % of days have no entry at all (people forget days); fewer gaps in the last month.
+   - A period reminder (2 days before) and a daily diary reminder at 21:00, both enabled.
+   - Situation: default (no contraception phase that pauses predictions).
+3. Print a short summary in the test output (number of periods, logged days, notes, date range).
+
+Non-goals: no change to BackupCodec, BackupData, validation, app code or existing tests. No real personal data.
+
+Verify: `powershell -NoProfile -ExecutionPolicy Bypass -File tools\check.ps1 -Schnell` green and the file exists.
+Answer: files added, net lines, the summary printed by the test, anything in the app conventions you were unsure about.

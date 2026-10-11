@@ -11,6 +11,16 @@ Newest round on top. Decisions that change the product also go into the spec/han
       again – a button is enough, but large and easy to see ("Wenn Leute schon spenden wollen sollte das
       wenigstens einfach und schnell gehen!"). → consumable products, local "supported" flag.
 - [ ] Owner asked for the exact support texts before and after a purchase (answered in chat).
+- [ ] A realistic set of app data as a backup file the owner can import for testing.
+- [ ] A short thank-you animation after a successful purchase that "rewards" the user: wholesome and nice, make
+      donating fun, don't go overboard.
+- [x] Owner asked: does "replace all data" also remove entries on days the backup has none? → yes (answered).
+- [ ] Hearts need a thin outline, otherwise they have no contrast over the buttons.
+- [x] Owner asked whether the replace-all restore is intended and good → yes, explained; suggestion for 1.2:
+      warn when the backup is older than the newest entry on the phone.
+- [ ] Tapping "Settings" in the bottom bar while on a settings sub-page goes back to the settings overview.
+- [ ] Found by Claude: "FreePeriod" is still hyphenated ("Free-Period") in running text, e.g. the summary footer
+      (DE dark) – avoid it app-wide, not only in the thank-you card.
 - [ ] Prices are 5 € and 10 € (not 4.99/9.99) and differ per country/currency: show Play's exact price and
       currency (the app already shows Play's formatted price; fix the screenshot fixture and the docs).
 - [ ] Summary: "zum Beispiel für einen Termin" → "für einen Arzttermin"? (app, store texts)
@@ -22,6 +32,7 @@ Newest round on top. Decisions that change the product also go into the spec/han
   - [ ] 1.2: Backups without a password, with a clear warning when someone leaves it empty. No format change
         (owner): an empty password means the default password "freeperiod" when creating; restore tries it first
         and asks only if it fails.
+  - Owner (later): 1 only if it is little effort; 2 (default password) is a good solution.
   - Recovery code: not worth it ("Handy und Passwort gleichzeitig verlieren wäre schon sehr blöd").
 
 ## Round 2026-10-11 (after testing dev.54)
