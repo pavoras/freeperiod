@@ -12,8 +12,9 @@ plugins {
 
 // Tests/lint never open signing files. The gate may assemble an unsigned release APK.
 val requestedTasks = gradle.startParameter.taskNames.map { it.substringAfterLast(':').lowercase() }
-val releaseBundleRequested = requestedTasks.any { it == "bundlerelease" || it == "bundle" }
-val releasePackagingRequested = releaseBundleRequested || requestedTasks.any { it == "assemblerelease" || it == "assemble" }
+// Store flavors: bundlePlayRelease, assembleFdroidRelease, … count like bundleRelease / assembleRelease.
+val releaseBundleRequested = requestedTasks.any { it == "bundle" || it.startsWith("bundle") && it.endsWith("release") }
+val releasePackagingRequested = releaseBundleRequested || requestedTasks.any { it == "assemble" || it.startsWith("assemble") && it.endsWith("release") }
 val releaseSigning = if (releasePackagingRequested) {
     val path = providers.gradleProperty("freeperiod.signing").orNull
         ?: providers.environmentVariable("FREEPERIOD_SIGNING_PROPERTIES").orNull

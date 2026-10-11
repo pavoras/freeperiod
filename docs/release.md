@@ -55,7 +55,7 @@ dependencies only, no purchase). Same package `org.freeperiod.app`, versionCode 
       purchase, "FreePeriod" without the dot). **Apply on release day only**: `git apply docs/release-1.1/site-privacy.patch`,
       set "Effective"/"Gültig ab" to the release date, push (the site deploys on push).
 - [x] Data safety notes in `store/data-safety.md` (1.1 section).
-- [ ] Signed AAB: `:app:bundlePlayRelease` with `-Pfreeperiod.signing=<properties path>` →
+- [x] Signed AAB (built 2026-10-11 from 14b0190 + signing fix, jarsigner verified, no INTERNET, BILLING present): `:app:bundlePlayRelease` with `-Pfreeperiod.signing=<properties path>` →
       `app/build/outputs/bundle/playRelease/app-play-release.aab`; check versionCode 3 and that the merged
       manifest has no INTERNET (the gate checks both release manifests).
 
