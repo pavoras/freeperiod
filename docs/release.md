@@ -40,8 +40,8 @@ dependencies only, no purchase). Same package `org.freeperiod.app`, versionCode 
 
 ### Owner – Play Console, before the upload
 - [x] Payments profile and EU trader details (done for the jaysay account).
-- [ ] Monetize → Products → One-time products: create **`support_small`** (4.99 €) and **`support_large`**
-      (9.99 €), not consumable, names e.g. "Support FreePeriod" / "FreePeriod unterstützen", then activate.
+- [ ] Monetize → Products → One-time products: create **`support_small`** (5 €) and **`support_large`**
+      (10 €; the app consumes purchases so people can support again), names e.g. "Support FreePeriod" / "FreePeriod unterstützen", then activate.
       The ids must match exactly (`supportProductIds` in `app/src/main/java/org/freeperiod/app/support/`).
 - [ ] License testing: add your Google account as a license tester (Settings → License testing) so test
       purchases cost nothing.
@@ -61,7 +61,7 @@ dependencies only, no purchase). Same package `org.freeperiod.app`, versionCode 
 
 ### Together – internal test track (purchase without INTERNET)
 - [ ] Owner uploads the AAB to **Internal testing**, installs from Play on the phone.
-- [ ] Settings shows "Support FreePeriod" with both prices → buy 4.99 € with the license tester → "Thank you!"
+- [ ] Settings shows "Support FreePeriod" with both prices → buy 5 € with the license tester → "Thank you!"
       appears; reopen the app → still "Thank you!" (restored from Play); Play Console → Order management →
       refund → after a while the thank-you is gone.
 - [ ] No crash in the app or in Play Console → Android vitals after the purchase (the telemetry component runs

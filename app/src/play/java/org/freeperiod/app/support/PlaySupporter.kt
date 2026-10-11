@@ -5,19 +5,27 @@ import android.content.Context
 import com.android.billingclient.api.*
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingClient.ProductType
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.freeperiod.app.R
+import org.freeperiod.app.data.SettingsStore
 
 /**
  * Google Play's billing: the library talks to the Play Store app on the phone, which handles payment and network.
- * Nothing is unlocked, so a purchase is trusted as Play reports it (no server). Purchases are acknowledged, or
- * Play refunds them after three days.
+ * Nothing is unlocked, so a purchase is trusted as Play reports it (no server). Every purchase is consumed so
+ * people can support again; the thank-you is remembered in the settings instead.
  */
-class PlaySupporter(context: Context) : Supporter, PurchasesUpdatedListener {
-    private val mutable = MutableStateFlow(SupportState())
-    override val state: StateFlow<SupportState> = mutable.asStateFlow()
+class PlaySupporter(context: Context, private val settings: SettingsStore, private val scope: CoroutineScope) :
+    Supporter, PurchasesUpdatedListener {
+    private val store = MutableStateFlow(SupportState())
+    override val state: StateFlow<SupportState> = combine(store, settings.settings) { s, device ->
+        supportState(s.products.associate { it.id to it.price }, s.supported || device.supported, s.pending)
+    }.stateIn(scope, SharingStarted.Eagerly, SupportState())
     override val libraryNotice: Int = R.string.about_billing_library
     private val client = BillingClient.newBuilder(context).setListener(this)
         .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
@@ -59,11 +67,16 @@ class PlaySupporter(context: Context) : Supporter, PurchasesUpdatedListener {
 
     private fun show(purchases: List<Purchase>) {
         val ours = purchases.filter { purchase -> purchase.products.any { it in supportProductIds } }
-        ours.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED && !it.isAcknowledged }.forEach { purchase ->
-            client.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(purchase.purchaseToken).build()) {}
+        val bought = ours.filter { it.purchaseState == Purchase.PurchaseState.PURCHASED }
+        // Remember first, then consume (which also acknowledges); a consumed product can be bought again.
+        if (bought.isNotEmpty()) scope.launch {
+            settings.update { it.copy(supported = true) }
+            bought.forEach { purchase ->
+                client.consumeAsync(ConsumeParams.newBuilder().setPurchaseToken(purchase.purchaseToken).build()) { _, _ -> }
+            }
         }
         val prices = details.mapNotNull { (id, product) -> product.oneTimePurchaseOfferDetails?.formattedPrice?.let { id to it } }.toMap()
-        mutable.value = supportState(prices, supported = ours.any { it.purchaseState == Purchase.PurchaseState.PURCHASED },
+        store.value = supportState(prices, supported = bought.isNotEmpty(),
             pending = ours.any { it.purchaseState == Purchase.PurchaseState.PENDING })
     }
 

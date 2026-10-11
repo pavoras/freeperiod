@@ -49,7 +49,7 @@ support.google.com/googleplay/android-developer/answer/10787469 (Data safety),
 …/answer/10840893 (contact information), f-droid.org/docs/Inclusion_Policy.
 
 ## Status 2026-10-11 – built for 1.1
-Owner decisions: thank-you only, two products (`support_small` 4.99 €, `support_large` 9.99 €), payments profile
+Owner decisions: thank-you only, two products (`support_small` 5 €, `support_large` 10 €; owner 2026-10-11, prices per country come from Play), payments profile
 and trader details set up (jaysay), download of Play Billing approved, INTERNET removed from the Play build.
 Code: `app/src/main/java/org/freeperiod/app/support/` (interface, `NoSupporter`, product ids), `app/src/play/`
 (`PlaySupporter`, manifest removing INTERNET), `app/src/fdroid/` (no purchase). UI: Settings › "Support FreePeriod"

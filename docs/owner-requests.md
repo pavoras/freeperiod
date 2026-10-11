@@ -4,6 +4,26 @@ Every idea or request Marvin writes goes here right away, before working on it, 
 while something else is in progress. Status: `[ ]` open · `[~]` in progress · `[x]` done (with commit).
 Newest round on top. Decisions that change the product also go into the spec/handover.
 
+## Round 2026-10-11 (internal track 1.1.0, purchase test)
+
+- [x] Test purchase works on the internal track (owner).
+- [ ] Support more than once: after a purchase the page shows only the thank-you; there must be a way to support
+      again – a button is enough, but large and easy to see ("Wenn Leute schon spenden wollen sollte das
+      wenigstens einfach und schnell gehen!"). → consumable products, local "supported" flag.
+- [ ] Owner asked for the exact support texts before and after a purchase (answered in chat).
+- [ ] Prices are 5 € and 10 € (not 4.99/9.99) and differ per country/currency: show Play's exact price and
+      currency (the app already shows Play's formatted price; fix the screenshot fixture and the docs).
+- [ ] Summary: "zum Beispiel für einen Termin" → "für einen Arzttermin"? (app, store texts)
+- [ ] Backups: the password is a hurdle (owner forgot his own while testing). Idea: developers decrypt on request
+      when someone forgot the password – allowed? can we make sure it is the person's own data? (discussed in chat)
+      Answer: no developer master key (would read everyone's health data; ownership can't be checked). Owner chose:
+  - [ ] 1.2: Show the backup password in the app after unlocking with the phone lock ("phone lock sollte
+        sicher genug sein"); also remember the password of manual backups (Keystore-sealed like the automatic one).
+  - [ ] 1.2: Backups without a password, with a clear warning when someone leaves it empty. No format change
+        (owner): an empty password means the default password "freeperiod" when creating; restore tries it first
+        and asks only if it fails.
+  - Recovery code: not worth it ("Handy und Passwort gleichzeitig verlieren wäre schon sehr blöd").
+
 ## Round 2026-10-11 (after testing dev.54)
 
 - [x] Pain diary: "Effect on your day" (Alltag) off by default when the pain diary is turned on.
@@ -26,7 +46,7 @@ Newest round on top. Decisions that change the product also go into the spec/han
 - [ ] F-Droid and the supporter purchase in 1.1 if feasible; then prepare everything and finish the release
       (owner, 2026-10-11).
       Owner decisions: download of Play Billing OK; supporters get only a thank-you (nothing locked); two one-time
-      products 4.99 € and 9.99 €; payments profile and EU trader details are already set up (jaysay).
+      products (owner set them to 5 € and 10 €); payments profile and EU trader details are already set up (jaysay).
       Found: Play Billing 9.1.0 brings INTERNET via Google's telemetry transport (datatransport). Owner: remove
       the permission in the Play build; verify purchase/restore/refund on the internal track with a license tester
       before release; if it fails, the purchase leaves 1.1.

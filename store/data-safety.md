@@ -70,8 +70,8 @@ A 13+ audience selection is not a blanket statement about minors' consent under 
 
 ## 1.1 additions (2026-10-11)
 
-- **Supporter purchase (Play build only):** two optional one-time products (`support_small` 4.99 €,
-  `support_large` 9.99 €) that unlock nothing. Google Play handles purchase and payment; the app uses the Google
+- **Supporter purchase (Play build only):** two optional one-time products (`support_small` 5 €,
+  `support_large` 10 €) that unlock nothing. Google Play handles purchase and payment; the app uses the Google
   Play Billing Library, which talks to the Play Store app on the phone over IPC. The app reads only whether a
   purchase exists, on the phone, and sends nothing anywhere. Proposed Data safety answer: unchanged, "no data
   collected or shared" – per Google's help, payment data collected by the payment service itself need not be

@@ -27,7 +27,7 @@ class SupportScreenshotTest : SettingsScreenshotFixture() {
         SupportScreen(offer.copy(supported = true), {}, {})
     }
 
-    @Test fun buyingPassesTheProductAndThanksHideTheButtons() {
+    @Test fun buyingPassesTheProductAndSupportersCanSupportAgain() {
         var bought: String? = null
         var state by androidx.compose.runtime.mutableStateOf(offer)
         compose.setContent { org.freeperiod.app.ui.theme.FreePeriodTheme { SupportScreen(state, {}, { bought = it }) } }
@@ -35,6 +35,9 @@ class SupportScreenshotTest : SettingsScreenshotFixture() {
         assertEquals("support_large", bought)
         state = offer.copy(supported = true)
         compose.onNodeWithText("Thank you for supporting FreePeriod!").assertExists()
+        compose.onNodeWithText("Support with €4.99").performClick()
+        assertEquals("support_small", bought)
+        state = offer.copy(pending = true)
         compose.onAllNodesWithText("Support with", substring = true).assertCountEquals(0)
     }
 
