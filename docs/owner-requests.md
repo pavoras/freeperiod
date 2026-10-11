@@ -19,11 +19,16 @@ Newest round on top. Decisions that change the product also go into the spec/han
 - [x] Owner asked whether the replace-all restore is intended and good → yes, explained; suggestion for 1.2:
       warn when the backup is older than the newest entry on the phone.
 - [x] Owner tested versionCode 5: purchase works (1), the 1.1 smoke test passes (2).
-- [ ] Upload the 1.1 store texts and screenshots via the API (the service account should have the rights) and send
+- [x] Upload the 1.1 store texts and screenshots via the API (the service account should have the rights) and send
       1.1 for review "wenn du dir sicher bist, dass alles stimmt". Content rating: now 14 because of in-app
       purchases (owner); health declaration unchanged (owner handles both).
-- [ ] Play Console recommendations on v1.0.0: edge-to-edge (deprecated setStatusBarColor/setNavigationBarColor/
+      Done 2026-10-11: ages 14+ in store texts, site and privacy pages (owner: no AAB rebuild needed); privacy pages
+      published (effective 2026-10-11); listing EN/DE + 6 screenshots each uploaded; production 1.1.0 (versionCode 5,
+      100 %) sent for review via the API. Title now "FreePeriod – Period Tracker".
+- [ ] 1.2: Play Console recommendations on v1.0.0: edge-to-edge (deprecated setStatusBarColor/setNavigationBarColor/
       LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES), R8 optimized resource shrinking / AGP 9 → check.
+      Checked: the app already calls enableEdgeToEdge(); the deprecated calls come from AndroidX internals (obfuscated
+      b.o.b etc.), not our code – a recommendation, no blocker. R8 optimized resource shrinking: try with an AGP update.
 - [x] Tapping "Settings" in the bottom bar while on a settings sub-page goes back to the settings overview.
 - [x] Found by Claude: "FreePeriod" is still hyphenated ("Free-Period") in running text, e.g. the summary footer
       (DE dark) – avoid it app-wide, not only in the thank-you card.
