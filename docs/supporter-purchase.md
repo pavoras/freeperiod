@@ -56,10 +56,10 @@ Code: `app/src/main/java/org/freeperiod/app/support/` (interface, `NoSupporter`,
 (only when Play returns products or a purchase exists), About lists the billing library, the in-app privacy
 page mentions the purchase in the Play build. Release steps and the internal-track test: `docs/release.md`.
 
-### Licence note – owner decision still open
+### Licence note – added to the README (owner, 2026-10-11)
 The Play build links the proprietary Google Play Billing Library into a GPL-3.0-only app. As copyright holder
-the owner may distribute that; to make it explicit for everyone (also future contributors), add this to the
-README's licence section (GPL-3.0 section 7 additional permission):
+the owner may distribute that; to make it explicit for everyone (also future contributors), the README's
+licence section carries this GPL-3.0 section 7 additional permission:
 
 > Additional permission under GNU GPL version 3 section 7: If you modify this program, or any covered work, by
 > linking or combining it with the Google Play Billing Library (com.android.billingclient), containing parts

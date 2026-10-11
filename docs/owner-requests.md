@@ -30,6 +30,9 @@ Newest round on top. Decisions that change the product also go into the spec/han
       Found: Play Billing 9.1.0 brings INTERNET via Google's telemetry transport (datatransport). Owner: remove
       the permission in the Play build; verify purchase/restore/refund on the internal track with a license tester
       before release; if it fails, the purchase leaves 1.1.
+      Owner 2026-10-11: license tester added ("2 done"). Upload the AAB to the internal track with the JaySay
+      Play service account (publishing rights; key stays on the server). GPL §7 note for the billing library:
+      "einfügen falls notwendig" → [x] added to the README.
 
 ## Round 2026-10-10 (late, after testing dev.51) – done
 
