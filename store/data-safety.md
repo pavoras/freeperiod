@@ -67,3 +67,19 @@ A 13+ audience selection is not a blanket statement about minors' consent under 
 2. Host `site/` with a public, accessible policy at both language URLs. Proposed GitHub Pages URLs: `https://pavoras.github.io/freeperiod/privacy/` and `https://pavoras.github.io/freeperiod/privacy/de/`.
 3. Compare these answers with the final manifest, dependencies, file-picker flows, backup rules and actual Google Play diagnostic setup. Final review of legal wording and Console declarations belongs to the publishing organisation.
 4. Submit the current questionnaires and keep the answers consistent with each shipped update. No declaration has been submitted by this round.
+
+## 1.1 additions (2026-10-11)
+
+- **Supporter purchase (Play build only):** two optional one-time products (`support_small` 4.99 €,
+  `support_large` 9.99 €) that unlock nothing. Google Play handles purchase and payment; the app uses the Google
+  Play Billing Library, which talks to the Play Store app on the phone over IPC. The app reads only whether a
+  purchase exists, on the phone, and sends nothing anywhere. Proposed Data safety answer: unchanged, "no data
+  collected or shared" – per Google's help, payment data collected by the payment service itself need not be
+  declared when the app never accesses it. Re-check the live form wording for "purchase history".
+- **No INTERNET:** Play Billing 9.1.0 brings Google's telemetry transport (`com.google.android.datatransport`),
+  which requests `android.permission.INTERNET`. The Play build removes that permission in its manifest
+  (`app/src/play/AndroidManifest.xml`, `tools:node="remove"`); the gate fails if INTERNET ever reaches a
+  release manifest. The telemetry component stays in the APK but cannot reach the network.
+- **Content rating:** answer "yes" to in-app/digital purchases.
+- **F-Droid build:** no billing library, no purchase, no Google components.
+- **Automatic backup:** already described above (encrypted file into a user-chosen folder; no network access).

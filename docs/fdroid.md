@@ -10,8 +10,8 @@ Status 2026-10-11: repo prepared, submission open (owner decision: prepare soon)
 - Gradle wrapper (`gradlew`, `gradle/wrapper/`, Gradle 8.11.1 over https). Our own gate keeps using the local
   Gradle; F-Droid's build server reads the wrapper version.
 - `dependenciesInfo` off: no Google-signed dependency blob in APK/AAB (F-Droid's scanner rejects it).
-- All dependencies are FOSS (AndroidX, Kotlin, kotlinx, Room, WorkManager, Biometric); no Play Services, no
-  Firebase, no network. Unsigned release build works without the signing properties (F-Droid signs itself).
+- The `fdroid` flavor's dependencies are all FOSS (AndroidX, Kotlin, kotlinx, Room, WorkManager, Biometric); no
+  Play Services, no Firebase, no network. Unsigned release build works without the signing properties (F-Droid signs itself).
 
 ## Still to do
 1. Tag releases: `v1.0.0` on `83fa0dc` (after Google's approval, see handover) and `v1.1.0` on the 1.1 release
@@ -23,8 +23,9 @@ Status 2026-10-11: repo prepared, submission open (owner decision: prepare soon)
 3. Signing: F-Droid signs with its own key, so Play and F-Droid installs can't update each other (same
    package name, different signature; switching needs backup → uninstall → install → restore). Optional later:
    reproducible builds so F-Droid ships our signature.
-4. A supporter purchase (if it comes) must stay out of the F-Droid build: product flavors `play` (with Play
-   Billing) and `fdroid` (without; `Builds: gradle: [fdroid]`). See `docs/supporter-purchase.md`.
+4. Flavors (since 1.1): `play` contains the supporter purchase (Play Billing, proprietary), `fdroid` has only
+   free dependencies and no purchase. F-Droid builds `gradle: [fdroid]`; the gate builds `assembleFdroidRelease`
+   and checks its manifest. The scanner should find no Google libraries in that variant.
 
 ## Draft metadata (`metadata/org.freeperiod.app.yml` in fdroiddata)
 ```yaml
@@ -48,7 +49,7 @@ Builds:
     commit: v1.1.0
     subdir: app
     gradle:
-      - yes
+      - fdroid
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags

@@ -73,6 +73,14 @@ android {
         }
     }
 
+    // Google Play builds can sell the optional supporter purchase (Play Billing talks to the Play Store app on
+    // the phone, no INTERNET permission); F-Droid builds keep only free dependencies and have no purchase.
+    flavorDimensions += "store"
+    productFlavors {
+        create("play") { dimension = "store" }
+        create("fdroid") { dimension = "store" }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -143,6 +151,7 @@ dependencies {
     implementation(libs.androidx.fragment.ktx)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.android)
+    "playImplementation"(libs.billing)
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 

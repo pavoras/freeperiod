@@ -16,6 +16,8 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.freeperiod.app.reminders.*
+import org.freeperiod.app.support.Supporter
+import org.freeperiod.app.support.createSupporter
 import org.freeperiod.engine.predictionMode
 
 class AppContainer(context: Context) {
@@ -34,6 +36,8 @@ class AppContainer(context: Context) {
     val reminderScheduler by lazy { ReminderScheduler(WorkManager.getInstance(context.applicationContext)) }
     val reminderDelivery = ReminderDelivery(repository, settings, notifications, clock)
     val autoBackup = AutoBackup(repository, settings, KeystoreSeal(), TreeAccess(appContext.contentResolver))
+    /** Optional support purchase: Google Play in Play builds, none in F-Droid builds. */
+    val supporter: Supporter by lazy { createSupporter(appContext) }
 
     fun observeReminders() {
         notifications.createChannel()

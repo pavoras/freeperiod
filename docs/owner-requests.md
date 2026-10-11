@@ -25,6 +25,11 @@ Newest round on top. Decisions that change the product also go into the spec/han
       then "more", tap opens the day, month headers; search on top later).
 - [ ] F-Droid and the supporter purchase in 1.1 if feasible; then prepare everything and finish the release
       (owner, 2026-10-11).
+      Owner decisions: download of Play Billing OK; supporters get only a thank-you (nothing locked); two one-time
+      products 4.99 € and 9.99 €; payments profile and EU trader details are already set up (jaysay).
+      Found: Play Billing 9.1.0 brings INTERNET via Google's telemetry transport (datatransport). Owner: remove
+      the permission in the Play build; verify purchase/restore/refund on the internal track with a license tester
+      before release; if it fails, the purchase leaves 1.1.
 
 ## Round 2026-10-10 (late, after testing dev.51) – done
 

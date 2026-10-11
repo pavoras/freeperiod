@@ -29,7 +29,7 @@ permission, no analytics/crash SDKs. Not a medical device, not contraception. GP
 | Release checklist | `docs/release.md` |
 | Owner requests | `docs/owner-requests.md` – every idea/request of the owner, recorded at once, with status |
 | F-Droid | `docs/fdroid.md` (prepared: fastlane metadata, Gradle wrapper, draft fdroiddata YAML; submission open) |
-| Supporter purchase | `docs/supporter-purchase.md` (research only, owner decides; trader status is the main consequence) |
+| Supporter purchase | `docs/supporter-purchase.md` (research) + code in `support/` (main: interface, `play`: `PlaySupporter`, `fdroid`: none); 1.1 release steps in `docs/release.md` |
 | Design reference | `docs/design/drafts/draft-5.png` (final), Daylight palette in `ui/theme/` |
 | Codex rounds | `aufpasser/runden/prompt-N.txt`, `runde-N.md` (jsonl/log git-ignored) |
 | Signing | upload key + properties under `%USERPROFILE%\dev-tools\keys\` – **never read or print**; pass only the path |
@@ -65,8 +65,8 @@ Robolectric 4.16.1, Roborazzi 1.50.0, compileSdk/targetSdk 36, minSdk 26. Offlin
 | `… -Voll` | + Roborazzi compare, lint, release build, INTERNET check (~15 min). Required before every commit of app code |
 | `… -Aufnehmen [-Tests 'org.freeperiod.app.ui.today.*']` | re-record screenshot references (Claude only), then **look at the changed PNGs** |
 | engine only | `JAVA_HOME=~/dev-tools/jdk17 GRADLE_USER_HOME=~/dev-tools/gradle-home ~/dev-tools/gradle-8.11.1/bin/gradle -q --offline :engine:test` |
-| signed AAB | `gradle -q --offline -Pfreeperiod.signing="$USERPROFILE/dev-tools/keys/freeperiod-signing.properties" :app:bundleRelease` → `app/build/outputs/bundle/release/app-release.aab`; verify with `jarsigner -verify` and that the manifest has no INTERNET |
-| debug APK for the owner | `app/build/outputs/apk/debug/app-debug.apk` (built by `-Voll`), send with SendUserFile |
+| signed AAB | `gradle -q --offline -Pfreeperiod.signing="$USERPROFILE/dev-tools/keys/freeperiod-signing.properties" :app:bundlePlayRelease` → `app/build/outputs/bundle/playRelease/app-play-release.aab`; verify with `jarsigner -verify` and that the manifest has no INTERNET |
+| debug APK for the owner | `app/build/outputs/apk/play/debug/app-play-debug.apk` (built by `-Voll`), send with SendUserFile |
 
 Last full gate: 592 tests green (2026-10-11). 74 screenshot references.
 
@@ -143,6 +143,11 @@ Working habits that matter here:
   drive collapsible; History charts per category switch (`UiOverride.chart`, Room 6): pick-one = levels in
   the user's item order (Customize lists them highest first, day entry lowest first), counted = number per
   day, hidden category = no chart; "FreePeriod" without the dot in running text (wordmark keeps it).
+  2026-10-11: "Effect on your day" starts off; ovulation-test switch matches the day entry; F-Droid prepared
+  (`docs/fdroid.md`); flavors `play`/`fdroid`; supporter purchase in the Play build (two one-time products, thank-you
+  only, Play Billing 9.1.0 with its INTERNET permission removed – must be verified on the internal track);
+  store texts/screenshots for 1.1; privacy patch for release day (`docs/release-1.1/`). Next feature: diary list
+  in History (1.2). Release steps: `docs/release.md` › v1.1.
   **Next:** owner tests the APK; then release prep: privacy pages, store
   texts (mention medication log, pain diary, PDF, charts, ring), Play health declaration check (`docs/release.md`).
 - Known cosmetic: store screenshots show a half calendar row above the legend (real app rendering);

@@ -47,3 +47,21 @@ switching anything on. A business address or a PO box avoids publishing a home a
 Sources: developer.android.com/google/play/billing/integrate, …/billing/release-notes,
 support.google.com/googleplay/android-developer/answer/10787469 (Data safety),
 …/answer/10840893 (contact information), f-droid.org/docs/Inclusion_Policy.
+
+## Status 2026-10-11 – built for 1.1
+Owner decisions: thank-you only, two products (`support_small` 4.99 €, `support_large` 9.99 €), payments profile
+and trader details set up (jaysay), download of Play Billing approved, INTERNET removed from the Play build.
+Code: `app/src/main/java/org/freeperiod/app/support/` (interface, `NoSupporter`, product ids), `app/src/play/`
+(`PlaySupporter`, manifest removing INTERNET), `app/src/fdroid/` (no purchase). UI: Settings › "Support FreePeriod"
+(only when Play returns products or a purchase exists), About lists the billing library, the in-app privacy
+page mentions the purchase in the Play build. Release steps and the internal-track test: `docs/release.md`.
+
+### Licence note – owner decision still open
+The Play build links the proprietary Google Play Billing Library into a GPL-3.0-only app. As copyright holder
+the owner may distribute that; to make it explicit for everyone (also future contributors), add this to the
+README's licence section (GPL-3.0 section 7 additional permission):
+
+> Additional permission under GNU GPL version 3 section 7: If you modify this program, or any covered work, by
+> linking or combining it with the Google Play Billing Library (com.android.billingclient), containing parts
+> covered by the terms of the Android Software Development Kit License Agreement, the licensors of this
+> program grant you additional permission to convey the resulting work.

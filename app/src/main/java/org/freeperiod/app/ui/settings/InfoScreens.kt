@@ -8,8 +8,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.R
+import org.freeperiod.app.support.SupportState
 import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.ui.theme.*
 
@@ -19,13 +21,14 @@ object AppLinks {
 }
 
 @Composable
-fun PrivacyScreen(onBack: () -> Unit, onPolicyLink: () -> Unit) {
+fun PrivacyScreen(onBack: () -> Unit, onPolicyLink: () -> Unit, purchases: Boolean = false) {
     Column(Modifier.fillMaxSize().background(LocalDaylight.current.background).verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(20.dp)) {
         SettingsPageHeader(R.string.privacy_policy, onBack)
         FpCard { MedicalDisclaimer(Modifier.padding(16.dp)) }
         FpCard { Text(stringResource(R.string.privacy_storage), Modifier.padding(16.dp)) }
         Text(stringResource(R.string.privacy_offline))
+        if (purchases) Text(stringResource(R.string.privacy_purchases))
         Text(stringResource(R.string.privacy_files))
         Text(stringResource(R.string.privacy_delete))
         Text(stringResource(R.string.privacy_contact))
@@ -34,7 +37,7 @@ fun PrivacyScreen(onBack: () -> Unit, onPolicyLink: () -> Unit) {
 }
 
 @Composable
-fun AboutScreen(version: String, onBack: () -> Unit, onSourceLink: () -> Unit) {
+fun AboutScreen(version: String, onBack: () -> Unit, onSourceLink: () -> Unit, storeLibrary: Int? = null) {
     Column(Modifier.fillMaxSize().background(LocalDaylight.current.background).verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(20.dp)) {
         SettingsPageHeader(R.string.about, onBack)
@@ -45,6 +48,30 @@ fun AboutScreen(version: String, onBack: () -> Unit, onSourceLink: () -> Unit) {
         MedicalDisclaimer()
         Text(stringResource(R.string.about_open_source), style = MaterialTheme.typography.titleLarge)
         Text(stringResource(R.string.about_libraries))
+        storeLibrary?.let { Text(stringResource(it)) }
+    }
+}
+
+/** The optional one-time support purchase (Play builds only); it unlocks nothing. */
+@Composable
+fun SupportScreen(support: SupportState, onBack: () -> Unit, onBuy: (String) -> Unit) {
+    val t = LocalDaylight.current
+    Column(Modifier.fillMaxSize().background(t.background).verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
+        verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        SettingsPageHeader(R.string.support_title, onBack)
+        if (support.supported) FpCard {
+            // Never split the name across lines ("Free-Period").
+            Text(stringResource(R.string.support_thanks), Modifier.padding(16.dp),
+                style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.None))
+        }
+        Text(stringResource(R.string.support_body))
+        if (support.pending) Text(stringResource(R.string.support_pending), color = t.muted)
+        if (!support.supported && !support.pending) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            support.products.forEach { product ->
+                FpButton({ onBuy(product.id) }, Modifier.fillMaxWidth()) { Text(stringResource(R.string.support_button, product.price)) }
+            }
+        }
+        Text(stringResource(R.string.support_privacy), style = MaterialTheme.typography.bodySmall, color = t.muted)
     }
 }
 

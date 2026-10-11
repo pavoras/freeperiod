@@ -4,7 +4,7 @@
   -Voll      + app unit/Robolectric tests (Roborazzi compare), lint, release manifest INTERNET check
   -Aufnehmen record Roborazzi references instead of comparing (Claude only)
   -Online    allow Gradle network access (Claude only, to fill the shared cache)
-  -Tests     optional Gradle --tests filter for :app:testDebugUnitTest
+  -Tests     optional Gradle --tests filter for :app:testPlayDebugUnitTest
   Exit code 0 = green. Full log in .tools/check-<mode>.log
 #>
 param(
@@ -28,14 +28,15 @@ $mode = if ($Aufnehmen) { 'aufnehmen' } elseif ($Voll) { 'voll' } else { 'schnel
 if ($mode -eq 'schnell') { $env:ANDROID_USER_HOME = Join-Path $repo '.tools\android-user-home' }
 
 # Quick mode compiles only: packaging needs the debug key in ~/.android, outside the Codex sandbox.
-$tasks = @(':engine:test', ':app:compileDebugKotlin', ':app:compileDebugUnitTestKotlin')
+$tasks = @(':engine:test', ':app:compilePlayDebugKotlin', ':app:compileFdroidDebugKotlin', ':app:compilePlayDebugUnitTestKotlin')
 $extra = @()
 if ($Voll -or $Aufnehmen) {
-    $tasks += ':app:testDebugUnitTest'
-    if ($Voll) { $tasks += @(':app:assembleDebug', ':app:lintDebug', ':app:assembleRelease') }
+    $tasks += ':app:testPlayDebugUnitTest'
+    # Both stores: Play (with the supporter purchase) and F-Droid (free dependencies only).
+    if ($Voll) { $tasks += @(':app:assemblePlayDebug', ':app:lintPlayDebug', ':app:assemblePlayRelease', ':app:assembleFdroidRelease') }
     $extra += if ($Aufnehmen) { '-Proborazzi.test.record=true' } else { '-Proborazzi.test.compare=true' }
     # A filter applies to the task right before it, so run only the unit tests then.
-    if ($Tests) { $tasks = @(':app:testDebugUnitTest', '--tests', $Tests) }
+    if ($Tests) { $tasks = @(':app:testPlayDebugUnitTest', '--tests', $Tests) }
 }
 $gargs = @('--console=plain', '-Porg.gradle.java.installations.auto-download=false') + $extra + $tasks
 if (-not $Online) { $gargs = @('--offline') + $gargs }
@@ -54,12 +55,12 @@ Remove-Item "$log.err" -ErrorAction SilentlyContinue
 
 if ($code -eq 0 -and $Voll) {
     $manifests = Get-ChildItem (Join-Path $repo 'app\build\intermediates') -Recurse -Filter AndroidManifest.xml |
-        Where-Object { $_.FullName -match 'merged_manifest\\release' }
-    if (-not $manifests) { Write-Output 'FAIL: merged release manifest not found'; exit 2 }
+        Where-Object { $_.FullName -match 'merged_manifest\\(play|fdroid)Release' }
+    if (@($manifests).Count -lt 2) { Write-Output 'FAIL: merged release manifests (play, fdroid) not found'; exit 2 }
     if ($manifests | Select-String -SimpleMatch 'android.permission.INTERNET') {
         Write-Output 'FAIL: release manifest contains android.permission.INTERNET'; exit 3
     }
-    Write-Output 'OK: no INTERNET permission in release manifest'
+    Write-Output 'OK: no INTERNET permission in the release manifests (play, fdroid)'
 }
 
 $results = Get-ChildItem $repo -Recurse -Filter 'TEST-*.xml' -ErrorAction SilentlyContinue |

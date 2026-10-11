@@ -33,11 +33,51 @@ Owner = Marvin (Play Console, keys, e-mail). Claude prepares everything else.
 Fertile window (regulatory, spec rev 2 §11) · Clue/Flo import (waiting for example files) ·
 widget/tile/PDF/Health Connect/auto backup (v1.1) · supporter purchase (later).
 
-## v1.1 (open items before upload)
-- [ ] versionCode 3, versionName 1.1.0.
-- [ ] Privacy pages EN/DE §4 (`site/privacy/`): add the optional automatic backup (encrypted file on a
-      daily/weekly schedule into a user-chosen folder; a cloud app syncing that folder uploads it; the app
-      has no network access). Publish together with the release, not before.
-- [ ] Store texts: medication log in neutral words ("log what you take"), no disease names (1.1 spec §1).
-- [ ] Play health-apps declaration: check whether medication logging needs ticking; data safety stays
-      "no data collected" (`store/data-safety.md` already describes automatic backup).
+## v1.1 – release checklist (prepared 2026-10-11)
+
+Two builds since 1.1: `play` (Google Play, with the optional supporter purchase) and `fdroid` (F-Droid, free
+dependencies only, no purchase). Same package `org.freeperiod.app`, versionCode 3, versionName 1.1.0.
+
+### Owner – Play Console, before the upload
+- [x] Payments profile and EU trader details (done for the jaysay account).
+- [ ] Monetize → Products → One-time products: create **`support_small`** (4.99 €) and **`support_large`**
+      (9.99 €), not consumable, names e.g. "Support FreePeriod" / "FreePeriod unterstützen", then activate.
+      The ids must match exactly (`supportProductIds` in `app/src/main/java/org/freeperiod/app/support/`).
+- [ ] License testing: add your Google account as a license tester (Settings → License testing) so test
+      purchases cost nothing.
+
+### Claude – build and texts
+- [x] versionCode 3, versionName 1.1.0.
+- [x] Store texts EN/DE `store/listing-*.md` (title without the dot – owner confirms), release notes 1.1.
+- [x] Store screenshots re-rendered (ring and charts instead of "period" and the old history shot) and copied
+      to `fastlane/` for F-Droid.
+- [x] Privacy pages EN/DE prepared as `docs/release-1.1/site-privacy.patch` (automatic backup, supporter
+      purchase, "FreePeriod" without the dot). **Apply on release day only**: `git apply docs/release-1.1/site-privacy.patch`,
+      set "Effective"/"Gültig ab" to the release date, push (the site deploys on push).
+- [x] Data safety notes in `store/data-safety.md` (1.1 section).
+- [ ] Signed AAB: `:app:bundlePlayRelease` with `-Pfreeperiod.signing=<properties path>` →
+      `app/build/outputs/bundle/playRelease/app-play-release.aab`; check versionCode 3 and that the merged
+      manifest has no INTERNET (the gate checks both release manifests).
+
+### Together – internal test track (purchase without INTERNET)
+- [ ] Owner uploads the AAB to **Internal testing**, installs from Play on the phone.
+- [ ] Settings shows "Support FreePeriod" with both prices → buy 4.99 € with the license tester → "Thank you!"
+      appears; reopen the app → still "Thank you!" (restored from Play); Play Console → Order management →
+      refund → after a while the thank-you is gone.
+- [ ] No crash in the app or in Play Console → Android vitals after the purchase (the telemetry component runs
+      without network permission).
+- [ ] Smoke test of the rest: onboarding, log, ring, charts, backup/restore, reminder, lock.
+- If the purchase fails or crashes: remove the purchase from 1.1 (flavor stays, product list empty) and ship.
+
+### Play Console – app content for 1.1
+- [ ] Data safety: stays "no data collected/shared" (purchase handled by Google Play, the app only reads
+      "purchased yes/no" on the phone). Re-read the form's wording for in-app purchases when filling it in.
+- [ ] Content rating questionnaire: answer "yes" to digital purchases / in-app purchases.
+- [ ] Health apps declaration: medication logging is a diary entry ("log what you take"); tick it if the form
+      lists medication tracking.
+- [ ] Store listing: texts from `store/listing-*.md`, screenshots `store/png/`.
+- [ ] Production rollout after the internal test; then tag `v1.1.0`, apply the privacy patch, F-Droid (below).
+
+### F-Droid (see `docs/fdroid.md`)
+- [ ] Tag `v1.1.0` (and `v1.0.0` on `83fa0dc` once Google approved 1.0).
+- [ ] Owner: GitLab account → merge request to fdroiddata with the draft YAML (Claude prepares it).
