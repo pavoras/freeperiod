@@ -8,7 +8,7 @@ permission – your data stays on your phone.
 - Cycle history, reminders, optional app lock, encrypted backups and CSV export/import
 - English and German, light and dark, six accent colours
 
-FreePeriod. is not a medical device and not a method of contraception.
+FreePeriod is not a medical device and not a method of contraception.
 
 Website: https://pavoras.github.io/freeperiod/ · Privacy: https://pavoras.github.io/freeperiod/privacy/
 
@@ -20,4 +20,13 @@ Website: https://pavoras.github.io/freeperiod/ · Privacy: https://pavoras.githu
 - Build/check: `powershell -File tools\check.ps1 -Schnell` (or `-Voll`)
 - Store artwork: `python tools/render-store.py` (renders `store/*.html` to `store/png/`)
 
-Licence: GPL-3.0-only (see `LICENSE`).
+## Licence
+
+GPL-3.0-only (see `LICENSE`).
+
+Additional permission under GNU GPL version 3 section 7: If you modify this program, or any covered work, by
+linking or combining it with the Google Play Billing Library (com.android.billingclient), containing parts
+covered by the terms of the Android Software Development Kit License Agreement, the licensors of this
+program grant you additional permission to convey the resulting work.
+
+The Google Play build contains this library for the optional support purchase; the F-Droid build does not.
