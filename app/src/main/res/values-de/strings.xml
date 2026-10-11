@@ -664,7 +664,7 @@
     <string name="symptom_low_libido">Wenig Lust auf Sex</string>
     <string name="menopause_bleeding_note">Eine Blutung nach einem Jahr ohne Periode ist ein guter Grund, sie ärztlich anzusprechen.</string>
     <string name="summary_screen">Zusammenfassung als PDF</string>
-    <string name="summary_intro">Eine übersichtliche Zusammenfassung deiner Einträge, zum Beispiel für einen Termin. Du wählst, wo sie gespeichert wird; FreePeriod verschickt sie nicht.</string>
+    <string name="summary_intro">Eine übersichtliche Zusammenfassung deiner Einträge, zum Beispiel für einen Arzttermin. Du wählst, wo sie gespeichert wird; FreePeriod verschickt sie nicht.</string>
     <string name="summary_range">Zeitraum</string>
     <string name="summary_all">Alles</string>
     <string name="summary_notes">Notizen einbeziehen</string>

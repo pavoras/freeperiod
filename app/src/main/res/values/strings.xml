@@ -664,7 +664,7 @@
     <string name="symptom_low_libido">Low sex drive</string>
     <string name="menopause_bleeding_note">Bleeding after a year without periods is worth mentioning to a doctor.</string>
     <string name="summary_screen">Summary as PDF</string>
-    <string name="summary_intro">A clear overview of your entries, for example for an appointment. You choose where it is saved; FreePeriod sends it nowhere.</string>
+    <string name="summary_intro">A clear overview of your entries, for example for a doctor’s appointment. You choose where it is saved; FreePeriod sends it nowhere.</string>
     <string name="summary_range">Time span</string>
     <string name="summary_all">Everything</string>
     <string name="summary_notes">Include notes</string>

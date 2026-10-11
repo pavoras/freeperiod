@@ -24,7 +24,7 @@ class PlaySupporter(context: Context, private val settings: SettingsStore, priva
     Supporter, PurchasesUpdatedListener {
     private val store = MutableStateFlow(SupportState())
     override val state: StateFlow<SupportState> = combine(store, settings.settings) { s, device ->
-        supportState(s.products.associate { it.id to it.price }, s.supported || device.supported, s.pending)
+        supportState(s.products.associate { it.id to it.price }, s.supported || device.supported, s.pending, s.celebration)
     }.stateIn(scope, SharingStarted.Eagerly, SupportState())
     override val libraryNotice: Int = R.string.about_billing_library
     private val client = BillingClient.newBuilder(context).setListener(this)
@@ -33,6 +33,8 @@ class PlaySupporter(context: Context, private val settings: SettingsStore, priva
         .build()
     @Volatile private var details: Map<String, ProductDetails> = emptyMap()
     @Volatile private var connecting = false
+    /** Set when Play reports a fresh purchase; the next load celebrates it. */
+    @Volatile private var celebrate = false
 
     override fun refresh() {
         if (client.connectionState == BillingClient.ConnectionState.CONNECTED) load()
@@ -62,7 +64,11 @@ class PlaySupporter(context: Context, private val settings: SettingsStore, priva
 
     override fun onPurchasesUpdated(result: BillingResult, purchases: MutableList<Purchase>?) {
         // A new purchase only lists itself; reload so earlier ones count too.
-        if (result.responseCode == BillingResponseCode.OK) load()
+        if (result.responseCode != BillingResponseCode.OK) return
+        if (purchases.orEmpty().any { p -> p.purchaseState == Purchase.PurchaseState.PURCHASED && p.products.any { it in supportProductIds } }) {
+            celebrate = true
+        }
+        load()
     }
 
     private fun show(purchases: List<Purchase>) {
@@ -76,8 +82,10 @@ class PlaySupporter(context: Context, private val settings: SettingsStore, priva
             }
         }
         val prices = details.mapNotNull { (id, product) -> product.oneTimePurchaseOfferDetails?.formattedPrice?.let { id to it } }.toMap()
+        val celebration = store.value.celebration + if (celebrate && bought.isNotEmpty()) 1 else 0
+        if (bought.isNotEmpty()) celebrate = false
         store.value = supportState(prices, supported = bought.isNotEmpty(),
-            pending = ours.any { it.purchaseState == Purchase.PurchaseState.PENDING })
+            pending = ours.any { it.purchaseState == Purchase.PurchaseState.PENDING }, celebration = celebration)
     }
 
     override fun buy(activity: Activity, productId: String) {

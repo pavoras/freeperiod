@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.asStateFlow
 data class SupportProduct(val id: String, val price: String)
 
 /** Settings show the support page only when there is something to buy or the user already supports. */
-data class SupportState(val products: List<SupportProduct> = emptyList(), val supported: Boolean = false, val pending: Boolean = false) {
+data class SupportState(val products: List<SupportProduct> = emptyList(), val supported: Boolean = false, val pending: Boolean = false,
+    /** Counts purchases completed in this app session; each new one plays the thank-you. */
+    val celebration: Int = 0) {
     val shown get() = products.isNotEmpty() || supported || pending
 }
 
@@ -34,5 +36,5 @@ object NoSupporter : Supporter {
 val supportProductIds = listOf("support_small", "support_large")
 
 /** Products in [supportProductIds] order; ids the store doesn't know are left out. */
-fun supportState(prices: Map<String, String>, supported: Boolean, pending: Boolean) =
-    SupportState(supportProductIds.mapNotNull { id -> prices[id]?.let { SupportProduct(id, it) } }, supported, pending && !supported)
+fun supportState(prices: Map<String, String>, supported: Boolean, pending: Boolean, celebration: Int = 0) =
+    SupportState(supportProductIds.mapNotNull { id -> prices[id]?.let { SupportProduct(id, it) } }, supported, pending && !supported, celebration)

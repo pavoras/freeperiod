@@ -1,12 +1,21 @@
 package org.freeperiod.app.ui.settings
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.unit.dp
@@ -56,25 +65,41 @@ fun AboutScreen(version: String, onBack: () -> Unit, onSourceLink: () -> Unit, s
 @Composable
 fun SupportScreen(support: SupportState, onBack: () -> Unit, onBuy: (String) -> Unit) {
     val t = LocalDaylight.current
-    Column(Modifier.fillMaxSize().background(t.background).verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
-        verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        SettingsPageHeader(R.string.support_title, onBack)
-        if (support.supported) FpCard {
-            // Never split the name across lines ("Free-Period").
-            Text(stringResource(R.string.support_thanks), Modifier.padding(16.dp),
-                style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.None))
-        }
-        Text(stringResource(R.string.support_body))
-        if (support.pending) Text(stringResource(R.string.support_pending), color = t.muted)
-        // Supporting again stays one big tap away (owner, 2026-10-11).
-        if (!support.pending) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            support.products.forEach { product ->
-                FpButton({ onBuy(product.id) }, Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
-                    Text(stringResource(R.string.support_button, product.price), style = MaterialTheme.typography.titleMedium)
+    val haptics = LocalHapticFeedback.current
+    val hearts = remember { Animatable(0f) }
+    val pop = remember { Animatable(1f) }
+    // Only a purchase made while the page is open celebrates, not reopening the page afterwards.
+    var celebrated by rememberSaveable { mutableIntStateOf(support.celebration) }
+    LaunchedEffect(support.celebration) {
+        if (support.celebration <= celebrated) return@LaunchedEffect
+        celebrated = support.celebration
+        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+        launch { pop.snapTo(0.88f); pop.animateTo(1f, spring(dampingRatio = 0.4f, stiffness = Spring.StiffnessLow)) }
+        hearts.playThankYou()
+    }
+    Box(Modifier.fillMaxSize().background(t.background)) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
+            verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            SettingsPageHeader(R.string.support_title, onBack)
+            if (support.supported) FpCard(Modifier.graphicsLayer { scaleX = pop.value; scaleY = pop.value }) {
+                // Never split the name across lines ("Free-Period").
+                Text(stringResource(R.string.support_thanks), Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleMedium.copy(hyphens = Hyphens.None))
+            }
+            Text(stringResource(R.string.support_body))
+            if (support.pending) Text(stringResource(R.string.support_pending), color = t.muted)
+            // Supporting again stays one big tap away (owner, 2026-10-11).
+            if (!support.pending) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                support.products.forEach { product ->
+                    FpButton({ onBuy(product.id) }, Modifier.fillMaxWidth().heightIn(min = 64.dp)) {
+                        Text(stringResource(R.string.support_button, product.price), style = MaterialTheme.typography.titleMedium)
+                    }
                 }
             }
+            Text(stringResource(R.string.support_privacy), style = MaterialTheme.typography.bodySmall, color = t.muted)
         }
-        Text(stringResource(R.string.support_privacy), style = MaterialTheme.typography.bodySmall, color = t.muted)
+        ThankYouHearts(hearts.value, support.celebration, listOf(t.accent.accent, lerp(t.accent.accent, t.accent.periodBorder, 0.35f), lerp(t.accent.accent, t.accent.periodBorder, 0.6f)),
+            Modifier.matchParentSize())
     }
 }
 
