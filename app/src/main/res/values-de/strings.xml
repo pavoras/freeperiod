@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- "Free&#8288;Period": the word joiner (U+2060) keeps Android from hyphenating the name ("Free-Period"). -->
     <string name="app_name" translatable="false">FreePeriod.</string>
     <string name="nav_today">Heute</string>
     <string name="nav_history">Verlauf</string>
@@ -181,7 +182,7 @@
     <string name="restore_read">Backup lesen</string>
     <string name="restore_replace">Alle Daten ersetzen</string>
     <string name="restore_replace_warning">Die Wiederherstellung ersetzt alle Perioden, Tageseinträge, Tags und Zykluseinstellungen auf diesem Handy. Das kann nicht rückgängig gemacht werden.</string>
-    <string name="restore_not_backup">Diese Datei ist kein FreePeriod-Backup.</string>
+    <string name="restore_not_backup">Diese Datei ist kein Free&#8288;Period-Backup.</string>
     <string name="restore_unsupported">Dieses Backup verwendet eine Version, die diese App nicht unterstützt.</string>
     <string name="restore_password_or_corrupt">Das Passwort ist falsch oder das Backup ist beschädigt. Deine Daten wurden nicht geändert.</string>
     <string name="restore_invalid">Das Backup enthält ungültige oder unvollständige Daten. Deine Daten wurden nicht geändert.</string>
@@ -189,10 +190,10 @@
     <string name="restore_done">Backup wiederhergestellt. Daten und Zykluseinstellungen ersetzt.</string>
     <string name="csv_warning">CSV-Dateien sind nicht verschlüsselt. Wer Zugriff darauf hat, kann deine Einträge lesen. Du bekommst eine Datei mit einer Zeile pro Tag, lesbar in jeder Tabellen-App.</string>
     <string name="csv_saved">Beide CSV-Dateien gespeichert.</string>
-    <string name="privacy_storage">Deine Perioden, Tageseinträge, Symptome, Stimmungen, Notizen, Tags und Einstellungen werden nur auf diesem Handy gespeichert. FreePeriod hat kein Konto und keinen Server.</string>
-    <string name="privacy_offline">FreePeriod hat keine Internetberechtigung, keine Analysefunktionen und keine Werbung. Die App versendet deine Trackingdaten nicht.</string>
+    <string name="privacy_storage">Deine Perioden, Tageseinträge, Symptome, Stimmungen, Notizen, Tags und Einstellungen werden nur auf diesem Handy gespeichert. Free&#8288;Period hat kein Konto und keinen Server.</string>
+    <string name="privacy_offline">Free&#8288;Period hat keine Internetberechtigung, keine Analysefunktionen und keine Werbung. Die App versendet deine Trackingdaten nicht.</string>
     <string name="privacy_files">Backups sind verschlüsselte Dateien; CSV-Exporte sind nicht verschlüsselt. Du bestimmst, wo diese Dateien gespeichert werden. Wenn du in der Dateiauswahl einen Cloud-Ordner wählst, lädt die jeweilige App die Datei in ihren Cloud-Dienst hoch.</string>
-    <string name="privacy_delete">Um alles zu löschen, was FreePeriod speichert, deinstalliere die App. Um alle Trackingdaten zu löschen und die Zykluseinstellungen zurückzusetzen, nutze „Alle Daten löschen“ in den Einstellungen. Lösche Backup- oder Exportdateien separat in der App, in der du sie gespeichert hast.</string>
+    <string name="privacy_delete">Um alles zu löschen, was Free&#8288;Period speichert, deinstalliere die App. Um alle Trackingdaten zu löschen und die Zykluseinstellungen zurückzusetzen, nutze „Alle Daten löschen“ in den Einstellungen. Lösche Backup- oder Exportdateien separat in der App, in der du sie gespeichert hast.</string>
     <string name="privacy_contact">Kontakt: siehe Store-Eintrag</string>
     <string name="privacy_web_link">Datenschutzerklärung im Browser öffnen</string>
     <string name="about_version">Version %1$s</string>
@@ -200,14 +201,14 @@
     <string name="about_source">Quellcode</string>
     <string name="about_open_source">Open-Source-Lizenzen</string>
     <string name="about_billing_library">Google Play Billing Library (nur Google-Play-Version): Android Software Development Kit License</string>
-    <string name="support_title">FreePeriod unterstützen</string>
-    <string name="support_body">FreePeriod bleibt kostenlos: ohne Werbung, Abo oder Konto. Wenn dir die App gefällt und du ihre Entwicklung unterstützen möchtest, geht das mit einem einmaligen Kauf über Google Play. Er schaltet nichts frei – du hast schon alles.</string>
+    <string name="support_title">Free&#8288;Period unterstützen</string>
+    <string name="support_body">Free&#8288;Period bleibt kostenlos: ohne Werbung, Abo oder Konto. Wenn dir die App gefällt und du ihre Entwicklung unterstützen möchtest, geht das mit einem einmaligen Kauf über Google Play. Er schaltet nichts frei – du hast schon alles.</string>
     <string name="support_button">Mit %1$s unterstützen</string>
     <string name="support_pending">Google Play bearbeitet deinen Kauf noch.</string>
-    <string name="support_thanks">Danke, dass du FreePeriod unterstützt!</string>
+    <string name="support_thanks">Danke, dass du Free&#8288;Period unterstützt!</string>
     <string name="support_thanks_short">Danke!</string>
-    <string name="support_privacy">Die Zahlung läuft über Google Play. FreePeriod erfährt nur, ob du unterstützt hast.</string>
-    <string name="privacy_purchases">In der Google-Play-Version kannst du FreePeriod mit einem einmaligen Kauf unterstützen. Das wickelt Google Play nach Googles Datenschutzerklärung ab; FreePeriod erfährt nur, ob du unterstützt hast, und hat weiterhin keine Internetberechtigung.</string>
+    <string name="support_privacy">Die Zahlung läuft über Google Play. Free&#8288;Period erfährt nur, ob du unterstützt hast.</string>
+    <string name="privacy_purchases">In der Google-Play-Version kannst du Free&#8288;Period mit einem einmaligen Kauf unterstützen. Das wickelt Google Play nach Googles Datenschutzerklärung ab; Free&#8288;Period erfährt nur, ob du unterstützt hast, und hat weiterhin keine Internetberechtigung.</string>
     <string name="about_libraries">AndroidX: Core, Activity, Navigation, Lifecycle, Compose UI und Material 3, Room, DataStore, WorkManager, Biometric: Apache-2.0\n\nKotlin, kotlinx.coroutines, kotlinx.serialization: Apache-2.0\n\nBuild-Werkzeuge: Android Gradle Plugin, KSP: Apache-2.0\n\nTest-Werkzeuge: JUnit 4: EPL-1.0; Robolectric, Roborazzi, AndroidX Test: Apache-2.0\n\nBricolage Grotesque, DM Sans: SIL Open Font License 1.1 (OFL-1.1)</string>
     <string name="settings_external_error">Diese Ansicht oder dieser Link konnte auf deinem Handy nicht geöffnet werden.</string>
     <string name="reminders">Erinnerungen</string>
@@ -223,7 +224,7 @@
     <string name="notifications_off">Benachrichtigungen sind in den Systemeinstellungen ausgeschaltet.</string>
     <string name="notification_settings">Benachrichtigungseinstellungen öffnen</string>
     <string name="reminder_channel">Erinnerungen</string>
-    <string name="reminder_title">Erinnerung von FreePeriod</string>
+    <string name="reminder_title">Erinnerung von Free&#8288;Period</string>
     <string name="reminder_period_neutral">Zeit zum Eintragen.</string>
     <string name="reminder_daily">Zeit für deinen täglichen Eintrag</string>
     <plurals name="reminder_period_explicit">
@@ -236,11 +237,11 @@
     <string name="lock_one_minute">1 Minute</string>
     <string name="lock_five_minutes">5 Minuten</string>
     <string name="lock_unavailable">Richte eine Bildschirmsperre auf deinem Handy ein, um die App-Sperre zu nutzen. Das Entsperren muss auf diesem Gerät verfügbar sein.</string>
-    <string name="locked_message">Entsperre, um FreePeriod zu öffnen.</string>
+    <string name="locked_message">Entsperre, um Free&#8288;Period zu öffnen.</string>
     <string name="unlock">Entsperren</string>
     <string name="lock_auth_error">Das Entsperren wurde abgebrochen oder konnte nicht abgeschlossen werden. Versuche es erneut, wenn du bereit bist.</string>
     <string name="onboarding_skip">Überspringen</string>
-    <string name="onboarding_welcome">Willkommen bei FreePeriod</string>
+    <string name="onboarding_welcome">Willkommen bei Free&#8288;Period</string>
     <string name="onboarding_promise">Kein Konto. Keine Werbung. Kein Abo.</string>
     <string name="onboarding_local">Deine Daten bleiben auf deinem Handy. Keine Internetberechtigung.</string>
     <string name="onboarding_optional">Alles hier ist optional. Du kannst Angaben später ergänzen oder ändern.</string>
@@ -271,9 +272,9 @@
     <string name="history_cycle_label">Zykluslänge</string>
     <string name="history_period_label">Periodenlänge</string>
     <string name="history_days_unit">Tage</string>
-    <string name="app_estimates">FreePeriod ist kein Medizinprodukt. Die App ist keine Verhütungsmethode, hilft dir nicht dabei, schwanger zu werden, und gibt keine medizinischen Ratschläge, Diagnosen oder Behandlungen. Alle Datumsangaben sind Kalenderschätzungen aus deinen eigenen Einträgen. Sie können falsch sein und sind nicht verlässlich. Jeder Zyklus ist anders: Eine Schwangerschaft ist an jedem Tag möglich, auch außerhalb der Tage mit erhöhter Chance. Bei Fragen zu Verhütung, Schwangerschaft oder Gesundheit sprich mit deiner Arztpraxis oder Apotheke.</string>
+    <string name="app_estimates">Free&#8288;Period ist kein Medizinprodukt. Die App ist keine Verhütungsmethode, hilft dir nicht dabei, schwanger zu werden, und gibt keine medizinischen Ratschläge, Diagnosen oder Behandlungen. Alle Datumsangaben sind Kalenderschätzungen aus deinen eigenen Einträgen. Sie können falsch sein und sind nicht verlässlich. Jeder Zyklus ist anders: Eine Schwangerschaft ist an jedem Tag möglich, auch außerhalb der Tage mit erhöhter Chance. Bei Fragen zu Verhütung, Schwangerschaft oder Gesundheit sprich mit deiner Arztpraxis oder Apotheke.</string>
     <string name="medical_disclaimer_title">Kein Medizinprodukt</string>
-    <string name="medical_disclaimer_note">Diese Kalenderschätzungen können falsch sein und sind nicht verlässlich. FreePeriod dient weder zur Verhütung noch dazu, schwanger zu werden, und gibt keine medizinischen Ratschläge.</string>
+    <string name="medical_disclaimer_note">Diese Kalenderschätzungen können falsch sein und sind nicht verlässlich. Free&#8288;Period dient weder zur Verhütung noch dazu, schwanger zu werden, und gibt keine medizinischen Ratschläge.</string>
     <string name="pregnancy_chance_info">Über diese Kalenderschätzung</string>
     <string name="calendar_pregnancy_chance">erhöhte Chance auf Schwangerschaft, Kalenderschätzung</string>
     <string name="show_pregnancy_chance">Tage mit erhöhter Chance auf Schwangerschaft anzeigen</string>
@@ -316,11 +317,11 @@
     <string name="timeline_range_across_months">%1$s bis %2$s</string>
     <string name="calendar_possible">Periode möglich</string>
     <string name="calendar_scheduled_break">geplante Pause</string>
-    <string name="wordmark_name">FreePeriod</string>
+    <string name="wordmark_name">Free&#8288;Period</string>
     <string name="wordmark_stop">.</string>
     <string name="my_situation">Meine Situation</string>
     <string name="situation_intro">Wähle die Ansicht, die zu deiner Situation passt. Du kannst sie jederzeit ändern.</string>
-    <string name="situation_disclosure">FreePeriod speichert deine Einträge und zeigt Kalenderschätzungen. Die App stellt keine Diagnosen und empfiehlt keine Behandlung.</string>
+    <string name="situation_disclosure">Free&#8288;Period speichert deine Einträge und zeigt Kalenderschätzungen. Die App stellt keine Diagnosen und empfiehlt keine Behandlung.</string>
     <string name="life_phase">Lebensphase</string>
     <string name="tracking_method">Methode</string>
     <string name="phase_regular">Reguläres Tracking</string>
@@ -364,7 +365,7 @@
     <string name="pill_reminder">Pillenerinnerung</string>
     <string name="method_reminder">Methodenerinnerung</string>
     <string name="custom_reminder">Eigene Erinnerung</string>
-    <string name="reminder_general">Du hast eine Erinnerung in FreePeriod.</string>
+    <string name="reminder_general">Du hast eine Erinnerung in Free&#8288;Period.</string>
     <string name="recurrence_daily">Täglich</string>
     <string name="recurrence_days">Alle N Tage</string>
     <string name="recurrence_weekly">Wöchentlich</string>
@@ -441,9 +442,9 @@
     </plurals>
     <string name="import_title">Importieren</string>
     <string name="import_from_app">Aus einer anderen App importieren</string>
-    <string name="import_intro">Wähle eine CSV mit bisherigen Perioden und Einträgen oder stelle ein FreePeriod-Backup wieder her.</string>
+    <string name="import_intro">Wähle eine CSV mit bisherigen Perioden und Einträgen oder stelle ein Free&#8288;Period-Backup wieder her.</string>
     <string name="import_csv">CSV-Datei wählen</string>
-    <string name="import_backup">FreePeriod-Backup</string>
+    <string name="import_backup">Free&#8288;Period-Backup</string>
     <string name="import_coming_soon">Clue- und Flo-Exporte kommen bald.</string>
     <string name="import_choose_format">Wähle das Datumsformat dieser Datei.</string>
     <string name="import_format_iso">Jahr/Monat/Tag (2026-04-12)</string>
@@ -466,7 +467,7 @@
     <string name="onboarding_track_later">Jederzeit änderbar: Einstellungen › Tageseintrag anpassen oder über das Zahnrad im Tageseintrag.</string>
     <string name="feedback">Feedback senden</string>
     <string name="feedback_subject">Feedback zu FreePeriod</string>
-    <string name="feedback_text">Öffnet deine E-Mail-App mit einer Nachricht an uns. Du siehst alles, bevor du sie sendest. FreePeriod hängt nie deine Perioden, Einträge oder Notizen an.</string>
+    <string name="feedback_text">Öffnet deine E-Mail-App mit einer Nachricht an uns. Du siehst alles, bevor du sie sendest. Free&#8288;Period hängt nie deine Perioden, Einträge oder Notizen an.</string>
     <string name="feedback_include_info">Technische Infos anhängen (App- und Android-Version, Gerätemodell, Sprache)</string>
     <string name="feedback_open">E-Mail öffnen</string>
     <string name="feedback_no_app">Keine E-Mail-App gefunden. Du kannst an %1$s schreiben.</string>
@@ -572,11 +573,11 @@
     <!-- Settings clarity: measured cycle, lock intro, archived categories -->
     <string name="lock_ten_minutes">10 Minuten</string>
     <string name="lock_fifteen_minutes">15 Minuten</string>
-    <string name="lock_summary">Fragt beim Öffnen von FreePeriod nach der Displaysperre deines Handys.</string>
+    <string name="lock_summary">Fragt beim Öffnen von Free&#8288;Period nach der Displaysperre deines Handys.</string>
     <string name="lock_intro_title">App-Sperre einschalten?</string>
-    <string name="lock_intro_body">Beim Öffnen fragt FreePeriod nach der Displaysperre deines Handys – Fingerabdruck, Gesicht, PIN, Muster oder Passwort – und wieder nach der Zeit, die du auswählst. Dein Handy prüft das, FreePeriod sieht davon nichts. Solange die Sperre an ist, ist die App in der Übersicht verborgen und Screenshots sind blockiert.</string>
+    <string name="lock_intro_body">Beim Öffnen fragt Free&#8288;Period nach der Displaysperre deines Handys – Fingerabdruck, Gesicht, PIN, Muster oder Passwort – und wieder nach der Zeit, die du auswählst. Dein Handy prüft das, Free&#8288;Period sieht davon nichts. Solange die Sperre an ist, ist die App in der Übersicht verborgen und Screenshots sind blockiert.</string>
     <string name="lock_turn_on">Einschalten</string>
-    <string name="typical_length_fallback">Wird nur genutzt, bis dein erster vollständiger Zyklus eingetragen ist. Danach rechnet FreePeriod mit deinen eigenen Einträgen.</string>
+    <string name="typical_length_fallback">Wird nur genutzt, bis dein erster vollständiger Zyklus eingetragen ist. Danach rechnet Free&#8288;Period mit deinen eigenen Einträgen.</string>
     <string name="archived_categories">Archiviert</string>
     <string name="archived_categories_hint">Archivierte Kategorien erscheinen nicht mehr im Tageseintrag. Deine früheren Einträge behalten sie.</string>
     <string name="restore_category">Wiederherstellen</string>
@@ -620,7 +621,7 @@
         <item quantity="other">%d Tageseinträge importiert.</item>
     </plurals>
     <string name="entry_medication">Medikamente</string>
-    <string name="medication_hint">Notiere, was du genommen hast. FreePeriod gibt keine Hinweise zu Medikamenten.</string>
+    <string name="medication_hint">Notiere, was du genommen hast. Free&#8288;Period gibt keine Hinweise zu Medikamenten.</string>
     <string name="entry_appetite">Appetit</string>
     <string name="appetite_low">Wenig</string>
     <string name="appetite_normal">Normal</string>
@@ -664,7 +665,7 @@
     <string name="symptom_low_libido">Wenig Lust auf Sex</string>
     <string name="menopause_bleeding_note">Eine Blutung nach einem Jahr ohne Periode ist ein guter Grund, sie ärztlich anzusprechen.</string>
     <string name="summary_screen">Zusammenfassung als PDF</string>
-    <string name="summary_intro">Eine übersichtliche Zusammenfassung deiner Einträge, zum Beispiel für einen Arzttermin. Du wählst, wo sie gespeichert wird; FreePeriod verschickt sie nicht.</string>
+    <string name="summary_intro">Eine übersichtliche Zusammenfassung deiner Einträge, zum Beispiel für einen Arzttermin. Du wählst, wo sie gespeichert wird; Free&#8288;Period verschickt sie nicht.</string>
     <string name="summary_range">Zeitraum</string>
     <string name="summary_all">Alles</string>
     <string name="summary_notes">Notizen einbeziehen</string>
@@ -672,7 +673,7 @@
     <string name="summary_create">PDF erstellen</string>
     <string name="summary_saved">Zusammenfassung gespeichert.</string>
     <string name="summary_title">Zusammenfassung deiner Einträge</string>
-    <string name="summary_created">Erstellt am %1$s mit FreePeriod.</string>
+    <string name="summary_created">Erstellt am %1$s mit Free&#8288;Period.</string>
     <string name="summary_periods">Perioden</string>
     <string name="summary_no_periods">Keine Perioden in diesem Zeitraum.</string>
     <string name="summary_start">Beginn</string>
@@ -687,7 +688,7 @@
     <string name="summary_other">Weitere Einträge</string>
     <string name="summary_period_day">Periode</string>
     <string name="summary_note">Notiz: %1$s</string>
-    <string name="summary_footer">Aus deinen eigenen Tagebucheinträgen. FreePeriod ist kein Medizinprodukt und bewertet sie nicht.</string>
+    <string name="summary_footer">Aus deinen eigenen Tagebucheinträgen. Free&#8288;Period ist kein Medizinprodukt und bewertet sie nicht.</string>
     <string name="summary_page">Seite %1$d</string>
     <plurals name="summary_months">
         <item quantity="one">Letzter %1$d Monat</item>

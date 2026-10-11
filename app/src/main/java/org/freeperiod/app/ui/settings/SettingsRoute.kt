@@ -35,7 +35,7 @@ import kotlinx.serialization.json.Json
 private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SUPPORT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY, IMPORT, SUMMARY }
 
 @Composable
-fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit: () -> Unit = {}) {
+fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, home: Int = 0, onExit: () -> Unit = {}) {
     val context = LocalContext.current
     val appContext = context.applicationContext
     val model: SettingsViewModel = viewModel(factory = viewModelFactory {
@@ -69,6 +69,11 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit
         tracking.reminder(value)
     }
     BackHandler(page != SettingsPage.MAIN || dayEntryOnly, onBack = back)
+    // Each new [home] (Settings tapped again in the bottom bar) returns to the overview; coming back to the tab doesn't.
+    var homeSeen by rememberSaveable { mutableIntStateOf(home) }
+    LaunchedEffect(home) {
+        if (home != homeSeen) { homeSeen = home; page = SettingsPage.MAIN; backup.cancelRestore() }
+    }
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/octet-stream")) { backup.createdDocument(it) }
     val createCsv = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { backup.createdDocument(it) }
     val createPdf = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/pdf")) { backup.createdDocument(it) }

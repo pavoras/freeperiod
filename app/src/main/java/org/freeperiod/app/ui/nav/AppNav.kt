@@ -50,11 +50,14 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
         val navigation = rememberNavController()
         val entry by navigation.currentBackStackEntryAsState()
         val route = entry?.destination?.route
+        var settingsHome by remember { mutableIntStateOf(0) }
         Scaffold(bottomBar = {
             if (onboardingDone && route != "day/{epochDay}" && route != "settings/day-entry") {
                 FpNavBar(route) { destination ->
                     // Today again while on Today: the calendar goes back to today.
                     if (destination == "today" && route == "today") return@FpNavBar todayViewModel.jumpToToday()
+                    // Settings again while in Settings: back to the overview.
+                    if (destination == "settings" && route == "settings") return@FpNavBar run { settingsHome++ }
                     navigation.navigate(destination) {
                         popUpTo(navigation.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
@@ -114,7 +117,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     ResumeAndMidnightEffect(model::onResume)
                     HistoryScreen(state, onInclude = { id, included -> model.setCycleIncluded(id, included) }, onDismissHint = { model.dismissLongCycleHint(it) })
                 }
-                composable("settings") { SettingsRoute(container) }
+                composable("settings") { SettingsRoute(container, home = settingsHome) }
                 composable("settings/day-entry") { SettingsRoute(container, dayEntryOnly = true) { navigation.popBackStack() } }
                 composable("day/{epochDay}", arguments = listOf(navArgument("epochDay") { type = NavType.LongType })) { day ->
                     // One sheet stays open; the arrows slide the next or previous day in from the side they point to.

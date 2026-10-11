@@ -23,10 +23,10 @@ class SupportScreenshotTest : SettingsScreenshotFixture() {
     private val offer = SupportState(listOf(SupportProduct("support_small", "€5.00"), SupportProduct("support_large", "€10.00")))
     private val offerDe = SupportState(listOf(SupportProduct("support_small", "5,00 €"), SupportProduct("support_large", "10,00 €")))
 
-    @Test fun support_enLight() = capture("settings/support_enLight", "Support FreePeriod") { SupportScreen(offer, {}, {}) }
+    @Test fun support_enLight() = capture("settings/support_enLight", "Support Free\u2060Period") { SupportScreen(offer, {}, {}) }
 
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
-    fun supportThanks_deDark() = capture("settings/supportThanks_deDark", "FreePeriod unterstützen", Locale.GERMANY, dark = true) {
+    fun supportThanks_deDark() = capture("settings/supportThanks_deDark", "Free\u2060Period unterstützen", Locale.GERMANY, dark = true) {
         SupportScreen(offerDe.copy(supported = true), {}, {})
     }
 
@@ -37,7 +37,7 @@ class SupportScreenshotTest : SettingsScreenshotFixture() {
         compose.onNodeWithText("Support with €10.00").performClick()
         assertEquals("support_large", bought)
         state = offer.copy(supported = true)
-        compose.onNodeWithText("Thank you for supporting FreePeriod!").assertExists()
+        compose.onNodeWithText("Thank you for supporting Free\u2060Period!").assertExists()
         compose.onNodeWithText("Support with €5.00").performClick()
         assertEquals("support_small", bought)
         state = offer.copy(pending = true)
@@ -79,10 +79,10 @@ class SupportScreenshotTest : SettingsScreenshotFixture() {
         compose.setContent { org.freeperiod.app.ui.theme.FreePeriodTheme {
             SettingsScreen(SettingsUiState(28, loading = false), SettingsActions(), support = state)
         } }
-        compose.onAllNodesWithText("Support FreePeriod").assertCountEquals(0)
+        compose.onAllNodesWithText("Support Free\u2060Period").assertCountEquals(0)
         state = offer
-        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Support FreePeriod"))
-        compose.onNodeWithText("Support FreePeriod").assertExists()
+        compose.onNode(hasScrollAction()).performScrollToNode(hasText("Support Free\u2060Period"))
+        compose.onNodeWithText("Support Free\u2060Period").assertExists()
     }
 
     @Test fun storeProductsKeepTheirOrderAndUnknownOnesAreLeftOut() {

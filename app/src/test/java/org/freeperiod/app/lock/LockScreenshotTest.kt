@@ -11,5 +11,5 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
 class LockScreenshotTest : SettingsScreenshotFixture() {
-    @Test fun locked_enLight() = capture("lock/locked_enLight", "Unlock to open FreePeriod.") { LockedScreen({}) }
+    @Test fun locked_enLight() = capture("lock/locked_enLight", "Unlock to open Free\u2060Period.") { LockedScreen({}) }
 }

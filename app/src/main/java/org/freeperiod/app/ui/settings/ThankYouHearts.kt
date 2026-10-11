@@ -10,7 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -41,7 +43,7 @@ suspend fun Animatable<Float, *>.playThankYou() {
 
 /** A small, calm burst of hearts rising from the buttons after a purchase; [progress] runs from 0 to 1. */
 @Composable
-fun ThankYouHearts(progress: Float, seed: Int, colors: List<Color>, modifier: Modifier = Modifier) {
+fun ThankYouHearts(progress: Float, seed: Int, colors: List<Color>, outline: Color, modifier: Modifier = Modifier) {
     val hearts = remember(seed) { Random(seed).let { random -> List(16) { Heart(random) } } }
     if (progress <= 0f || progress >= 1f) return
     Canvas(modifier.testTag("thank-you-hearts")) {
@@ -56,7 +58,8 @@ fun ThankYouHearts(progress: Float, seed: Int, colors: List<Color>, modifier: Mo
                 size.height * (heart.start - heart.rise * easeOut(local)),
             )
             rotate(heart.tilt * (1f - local), center) {
-                drawHeart(center, heart.size.dp.toPx() * grow, colors[heart.tone % colors.size].copy(alpha = alpha))
+                drawHeart(center, heart.size.dp.toPx() * grow, colors[heart.tone % colors.size].copy(alpha = alpha),
+                    outline.copy(alpha = alpha))
             }
         }
     }
@@ -64,8 +67,8 @@ fun ThankYouHearts(progress: Float, seed: Int, colors: List<Color>, modifier: Mo
 
 private fun easeOut(x: Float) = 1f - (1f - x) * (1f - x)
 
-/** A heart of width [width] centred on [center]. */
-private fun DrawScope.drawHeart(center: Offset, width: Float, color: Color) {
+/** A heart of width [width] centred on [center], with a thin [outline] so it stands out on the buttons too. */
+private fun DrawScope.drawHeart(center: Offset, width: Float, color: Color, outline: Color) {
     val w = width / 2f
     val path = Path().apply {
         moveTo(center.x, center.y + w * 0.9f)
@@ -73,5 +76,6 @@ private fun DrawScope.drawHeart(center: Offset, width: Float, color: Color) {
         cubicTo(center.x + w * 1.0f, center.y - w * 0.95f, center.x + w * 1.2f, center.y + w * 0.1f, center.x, center.y + w * 0.9f)
         close()
     }
+    drawPath(path, outline, style = Stroke(width = 3.dp.toPx(), join = StrokeJoin.Round))
     drawPath(path, color)
 }
