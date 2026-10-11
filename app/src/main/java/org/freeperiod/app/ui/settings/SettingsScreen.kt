@@ -23,6 +23,7 @@ import org.freeperiod.app.backup.AutoBackupInterval
 import org.freeperiod.app.ui.theme.*
 import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.data.LockTimeout
+import org.freeperiod.app.support.SupportState
 
 data class SettingsActions(
     val typicalLength: (Int?) -> Unit = {},
@@ -37,13 +38,14 @@ data class SettingsActions(
     val summary: () -> Unit = {},
     val privacy: () -> Unit = {},
     val about: () -> Unit = {},
+    val support: () -> Unit = {},
     val deleteAll: () -> Unit = {},
     val lockEnabled: (Boolean) -> Unit = {},
     val lockTimeout: (LockTimeout) -> Unit = {},
 )
 
 @Composable
-fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false) {
+fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBusy: Boolean = false, support: SupportState = SupportState()) {
     var lengthDialog by rememberSaveable { mutableStateOf(false) }
     var csvDialog by rememberSaveable { mutableStateOf(false) }
     var deleteDialog by rememberSaveable { mutableStateOf(false) }
@@ -94,6 +96,9 @@ fun SettingsScreen(state: SettingsUiState, actions: SettingsActions, recoveryBus
         item { SettingsRow(R.string.summary_screen, enabled, actions.summary) }
         item { SettingsRow(R.string.privacy_policy, enabled, actions.privacy) }
         item { SettingsRow(R.string.feedback, enabled, { feedbackDialog = true }) }
+        if (support.shown) item {
+            SettingsRow(R.string.support_title, enabled, actions.support, if (support.supported) stringResource(R.string.support_thanks_short) else null)
+        }
         item { SettingsRow(R.string.about, enabled, actions.about) }
         item {
             TextButton(onClick = { deleteDialog = true }, enabled = enabled, modifier = Modifier.heightIn(min = 48.dp)) {
@@ -147,6 +152,7 @@ internal fun SettingsRow(label: Int, enabled: Boolean, onClick: () -> Unit, deta
         R.string.summary_screen -> R.drawable.ic_fp_history
         R.string.privacy_policy -> R.drawable.ic_fp_privacy
         R.string.about -> R.drawable.ic_fp_about
+        R.string.support_title -> R.drawable.ic_item_gift
         R.string.lock_timeout, R.string.daily_reminder_time -> R.drawable.ic_fp_clock
         R.string.reminder_days_before -> R.drawable.ic_fp_reminder
         else -> R.drawable.ic_fp_settings

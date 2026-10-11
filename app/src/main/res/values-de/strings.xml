@@ -199,6 +199,15 @@
     <string name="about_license">Lizenz: GPL-3.0</string>
     <string name="about_source">Quellcode</string>
     <string name="about_open_source">Open-Source-Lizenzen</string>
+    <string name="about_billing_library">Google Play Billing Library (nur Google-Play-Version): Android Software Development Kit License</string>
+    <string name="support_title">FreePeriod unterstützen</string>
+    <string name="support_body">FreePeriod bleibt kostenlos: ohne Werbung, Abo oder Konto. Wenn dir die App gefällt und du ihre Entwicklung unterstützen möchtest, geht das mit einem einmaligen Kauf über Google Play. Er schaltet nichts frei – du hast schon alles.</string>
+    <string name="support_button">Mit %1$s unterstützen</string>
+    <string name="support_pending">Google Play bearbeitet deinen Kauf noch.</string>
+    <string name="support_thanks">Danke, dass du FreePeriod unterstützt!</string>
+    <string name="support_thanks_short">Danke!</string>
+    <string name="support_privacy">Die Zahlung läuft über Google Play. FreePeriod erfährt nur, ob du unterstützt hast.</string>
+    <string name="privacy_purchases">In der Google-Play-Version kannst du FreePeriod mit einem einmaligen Kauf unterstützen. Das wickelt Google Play nach Googles Datenschutzerklärung ab; FreePeriod erfährt nur, ob du unterstützt hast, und hat weiterhin keine Internetberechtigung.</string>
     <string name="about_libraries">AndroidX: Core, Activity, Navigation, Lifecycle, Compose UI und Material 3, Room, DataStore, WorkManager, Biometric: Apache-2.0\n\nKotlin, kotlinx.coroutines, kotlinx.serialization: Apache-2.0\n\nBuild-Werkzeuge: Android Gradle Plugin, KSP: Apache-2.0\n\nTest-Werkzeuge: JUnit 4: EPL-1.0; Robolectric, Roborazzi, AndroidX Test: Apache-2.0\n\nBricolage Grotesque, DM Sans: SIL Open Font License 1.1 (OFL-1.1)</string>
     <string name="settings_external_error">Diese Ansicht oder dieser Link konnte auf deinem Handy nicht geöffnet werden.</string>
     <string name="reminders">Erinnerungen</string>

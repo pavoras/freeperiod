@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -31,7 +32,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
-private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY, IMPORT, SUMMARY }
+private enum class SettingsPage { MAIN, APPEARANCE, BACKUP, PRIVACY, ABOUT, SUPPORT, SITUATION, REMINDERS, REMINDER_EDITOR, DAY_ENTRY, IMPORT, SUMMARY }
 
 @Composable
 fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit: () -> Unit = {}) {
@@ -56,6 +57,8 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit
     fun editReminder(value: org.freeperiod.engine.Reminder) { editingReminderJson = Json.encodeToString(value) }
     val settings by model.state.collectAsStateWithLifecycle()
     val recovery by backup.state.collectAsStateWithLifecycle()
+    val support by container.supporter.state.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
     val reminderAccess = rememberReminderAccess(container.notifications)
     // Opened from the day entry: only Customize day entry, and back returns there.
     var page by rememberSaveable { mutableStateOf(if (dayEntryOnly) SettingsPage.DAY_ENTRY else SettingsPage.MAIN) }
@@ -118,9 +121,11 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit
                             }
                         }, backup = { page = SettingsPage.BACKUP }, csv = { backup.exportCsv() }, summary = { page = SettingsPage.SUMMARY },
                         privacy = { page = SettingsPage.PRIVACY }, about = { page = SettingsPage.ABOUT },
-                        deleteAll = { model.deleteAllData() },
+                        support = { page = SettingsPage.SUPPORT }, deleteAll = { model.deleteAllData() },
                         lockEnabled = { model.setLockEnabled(it) }, lockTimeout = { model.setLockTimeout(it) }),
-                        recovery.busy || recovery.awaitingDocument)
+                        recovery.busy || recovery.awaitingDocument, support)
+                    // Earlier purchases count on every phone; Play needs a moment, so ask whenever Settings opens.
+                    LaunchedEffect(Unit) { container.supporter.refresh() }
                 }
                 SettingsPage.SITUATION -> SituationScreen(trackingState.data.situation, container.clock(), { tracking.situation(it) }, back,
                     onOfferReminder = { editReminder(it); page = SettingsPage.REMINDER_EDITOR },
@@ -159,8 +164,11 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, onExit
                         SummaryPdf.render(facts, summaryRows(facts, data, context::getString, notes), context::getString, to, locale)
                     }
                 }, back)
-                SettingsPage.PRIVACY -> PrivacyScreen(back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.PRIVACY_URL))) }
-                SettingsPage.ABOUT -> AboutScreen(version, back) { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.SOURCE_URL))) }
+                SettingsPage.PRIVACY -> PrivacyScreen(back, { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.PRIVACY_URL))) },
+                    purchases = container.supporter.libraryNotice != null)
+                SettingsPage.ABOUT -> AboutScreen(version, back, { openExternal(Intent(Intent.ACTION_VIEW, Uri.parse(AppLinks.SOURCE_URL))) },
+                    container.supporter.libraryNotice)
+                SettingsPage.SUPPORT -> SupportScreen(support, back) { id -> activity?.let { container.supporter.buy(it, id) } }
             }
         }
     }
