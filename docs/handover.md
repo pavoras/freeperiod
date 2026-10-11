@@ -73,7 +73,7 @@ Robolectric 4.16.1, Roborazzi 1.50.0, compileSdk/targetSdk 36, minSdk 26. Offlin
 | signed AAB | `gradle -q --offline -Pfreeperiod.signing="$USERPROFILE/dev-tools/keys/freeperiod-signing.properties" :app:bundlePlayRelease` → `app/build/outputs/bundle/playRelease/app-play-release.aab`; verify with `jarsigner -verify` and that the manifest has no INTERNET |
 | debug APK for the owner | `app/build/outputs/apk/play/debug/app-play-debug.apk` (built by `-Voll`), send with SendUserFile |
 
-Last full gate: 599 tests green (2026-10-11). 74 screenshot references.
+Last full gate: 602 tests green (2026-10-11). 74 screenshot references.
 
 Working habits that matter here:
 - Long runs (gate, recording) in the background **with a watcher** (progress every ≤ 5–15 min,

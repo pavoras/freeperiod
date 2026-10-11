@@ -98,8 +98,9 @@ fun SupportScreen(support: SupportState, onBack: () -> Unit, onBuy: (String) -> 
             }
             Text(stringResource(R.string.support_privacy), style = MaterialTheme.typography.bodySmall, color = t.muted)
         }
-        ThankYouHearts(hearts.value, support.celebration, listOf(t.accent.accent, lerp(t.accent.accent, t.accent.periodBorder, 0.35f), lerp(t.accent.accent, t.accent.periodBorder, 0.6f)),
-            Modifier.matchParentSize())
+        ThankYouHearts(hearts.value, support.celebration,
+            listOf(t.accent.accent, lerp(t.accent.accent, t.accent.periodBorder, 0.35f), lerp(t.accent.accent, t.accent.periodBorder, 0.6f)),
+            t.background, Modifier.matchParentSize())
     }
 }
 

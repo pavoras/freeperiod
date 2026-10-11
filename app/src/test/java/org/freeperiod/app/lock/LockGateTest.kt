@@ -36,7 +36,7 @@ class LockGateTest {
             lock.resume(true, LockTimeout.IMMEDIATELY, 1)
         }
         compose.waitForIdle()
-        compose.onNodeWithText("Unlock to open FreePeriod.").assertExists()
+        compose.onNodeWithText("Unlock to open Free\u2060Period.").assertExists()
         compose.onNodeWithText("Today").assertDoesNotExist()
         compose.onNodeWithText("Typical cycle length").assertDoesNotExist()
         assertTrue(compose.activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0)
@@ -46,7 +46,7 @@ class LockGateTest {
         runBlocking { settings.update { it.copy(lockEnabled = false) } }
         compose.waitUntil(10_000) { compose.activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE == 0 }
         compose.waitForIdle()
-        compose.onNodeWithText("Unlock to open FreePeriod.").assertDoesNotExist()
+        compose.onNodeWithText("Unlock to open Free\u2060Period.").assertDoesNotExist()
         assertEquals(0, compose.activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE)
     }
 }

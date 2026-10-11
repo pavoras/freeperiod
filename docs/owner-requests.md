@@ -7,23 +7,23 @@ Newest round on top. Decisions that change the product also go into the spec/han
 ## Round 2026-10-11 (internal track 1.1.0, purchase test)
 
 - [x] Test purchase works on the internal track (owner).
-- [ ] Support more than once: after a purchase the page shows only the thank-you; there must be a way to support
+- [x] Support more than once: after a purchase the page shows only the thank-you; there must be a way to support
       again – a button is enough, but large and easy to see ("Wenn Leute schon spenden wollen sollte das
       wenigstens einfach und schnell gehen!"). → consumable products, local "supported" flag.
-- [ ] Owner asked for the exact support texts before and after a purchase (answered in chat).
-- [ ] A realistic set of app data as a backup file the owner can import for testing.
-- [ ] A short thank-you animation after a successful purchase that "rewards" the user: wholesome and nice, make
+- [x] Owner asked for the exact support texts before and after a purchase (answered in chat).
+- [x] A realistic set of app data as a backup file the owner can import for testing.
+- [x] A short thank-you animation after a successful purchase that "rewards" the user: wholesome and nice, make
       donating fun, don't go overboard.
 - [x] Owner asked: does "replace all data" also remove entries on days the backup has none? → yes (answered).
-- [ ] Hearts need a thin outline, otherwise they have no contrast over the buttons.
+- [x] Hearts need a thin outline, otherwise they have no contrast over the buttons.
 - [x] Owner asked whether the replace-all restore is intended and good → yes, explained; suggestion for 1.2:
       warn when the backup is older than the newest entry on the phone.
-- [ ] Tapping "Settings" in the bottom bar while on a settings sub-page goes back to the settings overview.
-- [ ] Found by Claude: "FreePeriod" is still hyphenated ("Free-Period") in running text, e.g. the summary footer
+- [x] Tapping "Settings" in the bottom bar while on a settings sub-page goes back to the settings overview.
+- [x] Found by Claude: "FreePeriod" is still hyphenated ("Free-Period") in running text, e.g. the summary footer
       (DE dark) – avoid it app-wide, not only in the thank-you card.
-- [ ] Prices are 5 € and 10 € (not 4.99/9.99) and differ per country/currency: show Play's exact price and
+- [x] Prices are 5 € and 10 € (not 4.99/9.99) and differ per country/currency: show Play's exact price and
       currency (the app already shows Play's formatted price; fix the screenshot fixture and the docs).
-- [ ] Summary: "zum Beispiel für einen Termin" → "für einen Arzttermin"? (app, store texts)
+- [x] Summary: "zum Beispiel für einen Termin" → "für einen Arzttermin"? (app, store texts)
 - [ ] Backups: the password is a hurdle (owner forgot his own while testing). Idea: developers decrypt on request
       when someone forgot the password – allowed? can we make sure it is the person's own data? (discussed in chat)
       Answer: no developer master key (would read everyone's health data; ownership can't be checked). Owner chose:
