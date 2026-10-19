@@ -1,6 +1,6 @@
-Your cycle, your space.
+Your cycle, your space – on your phone only.
 
-FreePeriod is a period calendar and daily diary in one. Free and open source, with no ads, no subscription and no account.
+FreePeriod is a period calendar and daily diary in one. It has no internet permission, so the app itself can't send anything online – anyone can check that in the open source code. Free, with no ads, no subscription and no account.
 
 • Log your period with a tap and see your cycle day at a glance – as a calendar or as a cycle ring.
 • Calendar estimates for your next two periods, based on your own entries.

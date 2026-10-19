@@ -1,6 +1,6 @@
-Dein Zyklus, dein Raum.
+Dein Zyklus, dein Raum – nur auf deinem Handy.
 
-FreePeriod ist Periodenkalender und Tagebuch in einem. Kostenlos und Open Source, ohne Werbung, Abo oder Konto.
+FreePeriod ist Periodenkalender und Tagebuch in einem. Die App hat keine Internet-Berechtigung: Sie selbst kann nichts ins Internet senden – nachprüfbar im offenen Quellcode. Kostenlos, ohne Werbung, Abo oder Konto.
 
 • Trage deine Periode mit einem Tipp ein und sieh deinen Zyklustag auf einen Blick – als Kalender oder als Zykluskreis.
 • Kalenderschätzungen für deine nächsten zwei Perioden, aus deinen eigenen Einträgen.
