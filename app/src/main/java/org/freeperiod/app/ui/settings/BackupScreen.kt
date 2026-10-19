@@ -145,7 +145,7 @@ internal fun intervalLabel(value: AutoBackupInterval) = when (value) {
 }
 
 @Composable
-private fun PasswordField(value: String, onChange: (String) -> Unit, label: Int, enabled: Boolean) {
+internal fun PasswordField(value: String, onChange: (String) -> Unit, label: Int, enabled: Boolean) {
     OutlinedTextField(value, onChange, enabled = enabled, singleLine = true, modifier = Modifier.fillMaxWidth(),
         label = { Text(stringResource(label)) }, visualTransformation = PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password))

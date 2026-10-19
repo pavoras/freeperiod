@@ -27,6 +27,8 @@ data class ImportUiState(
     val imported: Int? = null,
     val skipped: Int = 0,
     val dayLogs: List<DayLog> = emptyList(),
+    /** A Flo ZIP was chosen and needs the password from Flo's e-mail. */
+    val floPassword: Boolean = false,
 )
 
 class ImportViewModel(private val repository: Repository, private val io: DocumentIo,
@@ -35,15 +37,59 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
     val state = mutable.asStateFlow()
     private var text: String? = null
     private var selectedFormat: CsvDateFormat? = null
+    /** The chosen Flo file while it waits for its password; cleared after reading. */
+    private var floBytes: ByteArray? = null
+    private var fromFlo = false
 
     fun read(uri: Uri?): Job = operation(R.string.file_read_error) {
         if (uri == null) return@operation
+        clearFlo()
         text = null
         selectedFormat = null
         mutable.value = ImportUiState(busy = true)
         val bytes = io.read(uri)
         text = try { bytes.toString(Charsets.UTF_8) } finally { bytes.fill(0) }
         parse(null)
+    }
+
+    /** Flo's export: the password-protected ZIP from Flo's support, or the JSON inside it. */
+    fun readFlo(uri: Uri?): Job = operation(R.string.file_read_error) {
+        if (uri == null) return@operation
+        clearFlo()
+        text = null
+        mutable.value = ImportUiState(busy = true)
+        floBytes = io.read(uri)
+        fromFlo = true
+        parseFlo(null)
+    }
+
+    fun unlockFlo(password: String): Job = operation(R.string.import_flo_invalid) {
+        if (password.isEmpty() || floBytes == null) return@operation
+        val secret = password.toCharArray()
+        try { parseFlo(secret) } finally { secret.fill('\u0000') }
+    }
+
+    private suspend fun parseFlo(password: CharArray?) {
+        val bytes = floBytes ?: return
+        val result = withContext(Dispatchers.Default) { FloImport.parse(bytes, password, clock()) }
+        if (result != FloImportResult.NeedsPassword && result != FloImportResult.WrongPassword) {
+            bytes.fill(0)
+            floBytes = null
+        }
+        mutable.update {
+            when (result) {
+                is FloImportResult.Parsed -> it.copy(periods = result.periods, floPassword = false)
+                FloImportResult.NeedsPassword -> it.copy(floPassword = true)
+                FloImportResult.WrongPassword -> it.copy(floPassword = true, error = R.string.import_flo_wrong_password)
+                FloImportResult.Invalid -> it.copy(floPassword = false, error = R.string.import_flo_invalid)
+            }
+        }
+    }
+
+    private fun clearFlo() {
+        floBytes?.fill(0)
+        floBytes = null
+        fromFlo = false
     }
 
     fun chooseFormat(format: CsvDateFormat): Job = operation(R.string.import_invalid) { parse(format) }
@@ -69,14 +115,18 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
         return operation(R.string.error_storage) {
             val periods = state.value.periods
             if ((periods.isEmpty() && state.value.dayLogs.isEmpty()) || state.value.imported != null) return@operation
-            val (imported, skipped) = repository.importCsv(requireNotNull(text), selectedFormat)
+            val (imported, skipped) = if (fromFlo) repository.importPeriods(periods)
+                else repository.importCsv(requireNotNull(text), selectedFormat)
             text = null
+            fromFlo = false
             selectedFormat = null
             mutable.update { it.copy(imported = imported, skipped = skipped) }
         }
     }
 
     fun documentUnavailable() { mutable.update { it.copy(error = R.string.file_read_error) } }
+
+    override fun onCleared() { clearFlo() }
 
     private fun operation(failure: Int, action: suspend () -> Unit): Job = viewModelScope.launch {
         if (state.value.busy) return@launch

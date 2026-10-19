@@ -28,6 +28,7 @@ fun ImportRoute(container: AppContainer, onRestored: () -> Unit = {}, onBack: ()
     val recovery by backup.state.collectAsStateWithLifecycle()
     var restoring by rememberSaveable { mutableStateOf(false) }
     val csv = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { model.read(it) }
+    val flo = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { model.readFlo(it) }
     // "Backup" opens the file picker at once; cancelling it returns to the import choices.
     val restore = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
         backup.restoreDocument(it)
@@ -51,5 +52,9 @@ fun ImportRoute(container: AppContainer, onRestored: () -> Unit = {}, onBack: ()
         try { csv.launch(arrayOf("text/csv", "text/comma-separated-values", "text/plain", "*/*")) }
         catch (_: ActivityNotFoundException) { model.documentUnavailable() }
         catch (_: SecurityException) { model.documentUnavailable() }
-    }, { restoring = true; backup.openRestore() }, { model.chooseFormat(it) }, { model.confirm() }, onBack)
+    }, { restoring = true; backup.openRestore() }, { model.chooseFormat(it) }, { model.confirm() }, onBack, {
+        try { flo.launch(arrayOf("application/zip", "application/json", "application/octet-stream", "*/*")) }
+        catch (_: ActivityNotFoundException) { model.documentUnavailable() }
+        catch (_: SecurityException) { model.documentUnavailable() }
+    }, { model.unlockFlo(it) })
 }

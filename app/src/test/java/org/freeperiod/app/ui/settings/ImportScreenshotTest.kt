@@ -19,4 +19,8 @@ class ImportScreenshotTest : SettingsScreenshotFixture() {
         }
         ImportScreen(ImportUiState(periods = periods), {}, {}, {}, {}, {})
     }
+
+    @Test fun floPassword_enLight() = capture("import/floPassword_enLight", "Enter the password from Flo's e-mail.") {
+        ImportScreen(ImportUiState(floPassword = true), {}, {}, {}, {}, {})
+    }
 }

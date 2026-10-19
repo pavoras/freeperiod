@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
@@ -19,7 +19,10 @@ import org.freeperiod.engine.importing.CsvDateFormat
 
 @Composable
 fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
-    onFormat: (CsvDateFormat) -> Unit, onConfirm: () -> Unit, onBack: () -> Unit) {
+    onFormat: (CsvDateFormat) -> Unit, onConfirm: () -> Unit, onBack: () -> Unit,
+    onFlo: () -> Unit = {}, onFloPassword: (String) -> Unit = {}) {
+    // The Flo password deliberately does not enter saved instance state.
+    var floPassword by remember { mutableStateOf("") }
     val tones = LocalDaylight.current
     val dates = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(LocalConfiguration.current.locales[0])
     Column(Modifier.fillMaxSize().background(tones.background).verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
@@ -27,8 +30,16 @@ fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
         FpTopBar(stringResource(R.string.import_title), onBack)
         Text(stringResource(R.string.import_intro))
         FpButton(onCsv, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_csv)) }
+        FpButton(onFlo, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_flo)) }
         FpButton(onBackup, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_backup)) }
         Text(stringResource(R.string.import_coming_soon), style = MaterialTheme.typography.bodySmall, color = tones.muted)
+        if (state.floPassword) {
+            Text(stringResource(R.string.import_flo_password), style = MaterialTheme.typography.titleMedium)
+            PasswordField(floPassword, { floPassword = it }, R.string.backup_password, !state.busy)
+            FpButton(onClick = { onFloPassword(floPassword); floPassword = "" }, enabled = !state.busy && floPassword.isNotEmpty()) {
+                Text(stringResource(R.string.import_flo_open))
+            }
+        }
         if (state.formats.isNotEmpty()) {
             Text(stringResource(R.string.import_choose_format), style = MaterialTheme.typography.titleMedium)
             state.formats.forEach { format ->

@@ -449,10 +449,15 @@
     </plurals>
     <string name="import_title">Import</string>
     <string name="import_from_app">Import from another app</string>
-    <string name="import_intro">Choose a CSV with past periods and entries or restore a Free&#8288;Period backup.</string>
+    <string name="import_intro">Choose a CSV with past periods and entries, the export you got from Flo, or a Free&#8288;Period backup.</string>
     <string name="import_csv">Choose CSV file</string>
     <string name="import_backup">Free&#8288;Period backup</string>
-    <string name="import_coming_soon">Clue and Flo exports coming soon.</string>
+    <string name="import_coming_soon">Clue exports coming soon.</string>
+    <string name="import_flo">Flo export (ZIP or JSON)</string>
+    <string name="import_flo_password">Enter the password from Flo\'s e-mail.</string>
+    <string name="import_flo_open">Open</string>
+    <string name="import_flo_wrong_password">The password is wrong, or the file is damaged. Nothing was changed.</string>
+    <string name="import_flo_invalid">No periods found. Choose the ZIP or JSON file you got from Flo.</string>
     <string name="import_choose_format">Choose the date format used in this file.</string>
     <string name="import_format_iso">Year/month/day (2026-04-12)</string>
     <string name="import_format_dmy">Day/month/year (12/04/2026)</string>

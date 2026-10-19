@@ -87,6 +87,12 @@ class Repository(
         parsed.periods.size - skipped to skipped
     }
 
+    /** Periods from another app's export; overlapping ones are skipped. Returns imported to skipped. */
+    suspend fun importPeriods(periods: List<Period>): Pair<Int, Int> = write {
+        val skipped = insertPeriods(periods).size
+        periods.size - skipped to skipped
+    }
+
     suspend fun addPeriod(start: LocalDate, end: LocalDate?): Result<Period> = periodResult {
         write {
             val candidate = Period(0, start, end)
