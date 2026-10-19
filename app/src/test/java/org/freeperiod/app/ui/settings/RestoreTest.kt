@@ -46,16 +46,45 @@ class RestoreTest : DatabaseTest() {
         assertEquals(before, repository.snapshot())
     }
 
-    @Test fun emptyPasswordIsNotReportedAsWrong() = runTest {
+    @Test fun emptyPasswordMeansTheDefaultBothWays() = runTest {
+        repository.addPeriod(today.minusDays(10), today.minusDays(6)).getOrThrow()
+        val vm = model()
+        vm.createBackup("", "").join()
+        assertTrue(vm.state.value.awaitingDocument)
+        vm.createdDocument(uri).join()
+        assertEquals(R.string.backup_saved, vm.state.value.message)
+        io.bytes = io.written
+        assertTrue(BackupCodec.decode(io.bytes, "freeperiod".toCharArray()) { today } is DecodeResult.Ok)
+        // Restoring tries the default first, with an empty field or whatever was typed.
+        for (typed in listOf("", "something else")) {
+            vm.openRestore()
+            vm.restoreDocument(uri).join()
+            vm.decodeRestore(typed).join()
+            assertEquals(BackupSummary(1, 0), vm.state.value.summary)
+            vm.cancelRestore()
+        }
+    }
+
+    @Test fun ownPasswordIsAskedForOnlyWhenTheDefaultFails() = runTest {
         io.bytes = BackupCodec.encode(repository.snapshot(), password.toCharArray(), iterations = 100_000)
         val vm = model()
         vm.openRestore()
         vm.restoreDocument(uri).join()
         vm.decodeRestore("").join()
-        assertNull(vm.state.value.message)
-        assertTrue(vm.state.value.restoreFileSelected)
+        assertEquals(R.string.restore_password_needed, vm.state.value.message)
+        vm.decodeRestore("wrong password").join()
+        assertEquals(R.string.restore_password_or_corrupt, vm.state.value.message)
         vm.decodeRestore(password).join()
         assertNotNull(vm.state.value.summary)
+    }
+
+    @Test fun ownPasswordStillNeedsEightCharactersAndConfirmation() = runTest {
+        val vm = model()
+        vm.createBackup("", "something").join()
+        assertEquals(R.string.backup_password_short, vm.state.value.message)
+        vm.createBackup("long enough", "").join()
+        assertEquals(R.string.backup_password_mismatch, vm.state.value.message)
+        assertEquals(0, io.writes)
     }
 
     @Test fun cancelledPickerIsNotAnError() = runTest {
@@ -156,12 +185,14 @@ class RestoreTest : DatabaseTest() {
 private class FakeDocumentIo : DocumentIo {
     var bytes = byteArrayOf()
     var writes = 0
+    var written = byteArrayOf()
     var failWrite = false
     val contents = mutableListOf<String>()
     override suspend fun read(uri: Uri): ByteArray = bytes.copyOf()
     override suspend fun write(uri: Uri, bytes: ByteArray) {
         if (failWrite) throw java.io.IOException("Test failure")
         writes++
+        written = bytes.copyOf()
         contents += bytes.toString(Charsets.UTF_8)
     }
 }

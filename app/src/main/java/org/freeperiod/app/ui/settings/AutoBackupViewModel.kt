@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import org.freeperiod.app.R
 import org.freeperiod.app.backup.AutoBackup
 import org.freeperiod.app.backup.AutoBackupInterval
+import org.freeperiod.app.backup.BackupPassword
 import org.freeperiod.app.data.SettingsStore
 
 data class AutoBackupUiState(
@@ -40,15 +41,14 @@ class AutoBackupViewModel(private val backup: AutoBackup, settings: SettingsStor
 
     /** Checks the password first, so the folder picker only opens for a setup that can succeed. */
     fun start(password: String, confirm: String) {
-        when {
-            password.length < 8 -> message(R.string.backup_password_short, true)
-            password != confirm -> message(R.string.backup_password_mismatch, true)
-            else -> {
+        when (val problem = BackupPassword.problem(password, confirm)) {
+            null -> {
                 clearPassword()
-                this.password = password.toCharArray()
+                this.password = BackupPassword.effective(password)
                 local.update { it.copy(message = null, error = false) }
                 requests.trySend(Unit)
             }
+            else -> message(problem, true)
         }
     }
 

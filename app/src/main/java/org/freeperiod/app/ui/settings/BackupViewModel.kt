@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.freeperiod.app.R
+import org.freeperiod.app.backup.BackupPassword
 import org.freeperiod.app.backup.BackupTooLargeException
 import org.freeperiod.app.backup.DocumentIo
 import org.freeperiod.app.data.Repository
@@ -60,12 +61,10 @@ class BackupViewModel(
     private var saved = R.string.backup_saved
 
     fun createBackup(password: String, confirm: String): Job = operation(R.string.file_write_error) {
-        when {
-            password.length < 8 -> message(R.string.backup_password_short, true)
-            password != confirm -> message(R.string.backup_password_mismatch, true)
-            else -> {
+        when (val problem = BackupPassword.problem(password, confirm)) {
+            null -> {
                 val snapshot = repository.snapshot()
-                val secret = password.toCharArray()
+                val secret = BackupPassword.effective(password)
                 val bytes = try {
                     withContext(Dispatchers.Default) { BackupCodec.encode(snapshot, secret) }
                 } finally { secret.fill('\u0000') }
@@ -73,6 +72,7 @@ class BackupViewModel(
                 outputs = listOf(Output("freeperiod-${clock()}.fpbackup", "application/octet-stream", bytes))
                 requestOutput()
             }
+            else -> message(problem, true)
         }
     }
 
@@ -101,14 +101,25 @@ class BackupViewModel(
     }
 
     fun decodeRestore(password: String): Job = operation(R.string.restore_invalid) {
-        if (password.isEmpty()) return@operation
         val bytes = restoreBytes ?: return@operation
         replacement = null
         mutableState.update { it.copy(summary = null) }
-        val secret = password.toCharArray()
-        val decoded = try {
-            withContext(Dispatchers.Default) { BackupCodec.decode(bytes, secret, clock) }
-        } finally { secret.fill('\u0000') }
+        // The default password first (backups made with an empty field), then what was typed.
+        var decoded: DecodeResult = DecodeResult.WrongPasswordOrCorrupt
+        for (candidate in BackupPassword.candidates(password)) {
+            val secret = candidate.toCharArray()
+            decoded = try {
+                withContext(Dispatchers.Default) { BackupCodec.decode(bytes, secret, clock) }
+            } finally { secret.fill('\u0000') }
+            if (decoded != DecodeResult.WrongPasswordOrCorrupt) break
+        }
+        when {
+            decoded == DecodeResult.WrongPasswordOrCorrupt && password.isEmpty() -> message(R.string.restore_password_needed, true)
+            else -> showDecoded(decoded)
+        }
+    }
+
+    private fun showDecoded(decoded: DecodeResult) {
         when (decoded) {
             is DecodeResult.Ok -> {
                 replacement = decoded.data

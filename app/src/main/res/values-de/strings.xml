@@ -151,7 +151,7 @@
     <string name="delete_all_warning">Alle Perioden, Tageseinträge, Notizen und Tags löschen und deine Zykluseinstellungen zurücksetzen? Das kann nicht rückgängig gemacht werden. Außerhalb der App gespeicherte Dateien bleiben erhalten.</string>
     <string name="data_deleted">Alle Trackingdaten gelöscht. Zykluseinstellungen zurückgesetzt.</string>
     <string name="create_backup">Backup erstellen</string>
-    <string name="backup_forgotten_warning">Wähle ein Passwort mit mindestens 8 Zeichen. Wenn du es vergisst, kann dein Backup nicht wiederhergestellt werden.</string>
+    <string name="backup_forgotten_warning">Du kannst das Passwort leer lassen: Dann kann jede Person mit der Backup-Datei sie mit Free&#8288;Period öffnen. Wählst du ein eigenes Passwort (mindestens 8 Zeichen) und vergisst es, lässt sich das Backup nicht wiederherstellen.</string>
     <string name="backup_password">Passwort</string>
     <string name="backup_confirm_password">Passwort bestätigen</string>
     <string name="backup_password_short">Verwende ein Passwort mit mindestens 8 Zeichen.</string>
@@ -185,6 +185,8 @@
     <string name="restore_not_backup">Diese Datei ist kein Free&#8288;Period-Backup.</string>
     <string name="restore_unsupported">Dieses Backup verwendet eine Version, die diese App nicht unterstützt.</string>
     <string name="restore_password_or_corrupt">Das Passwort ist falsch oder das Backup ist beschädigt. Deine Daten wurden nicht geändert.</string>
+    <string name="restore_password_needed">Dieses Backup hat ein eigenes Passwort. Gib es ein und tippe noch einmal auf Backup lesen.</string>
+    <string name="restore_password_optional">Passwort (falls du eins gewählt hast)</string>
     <string name="restore_invalid">Das Backup enthält ungültige oder unvollständige Daten. Deine Daten wurden nicht geändert.</string>
     <string name="restore_too_large">Das Backup ist zu groß. Die Dateigrenze liegt bei 20 MB.</string>
     <string name="restore_done">Backup wiederhergestellt. Daten und Zykluseinstellungen ersetzt.</string>

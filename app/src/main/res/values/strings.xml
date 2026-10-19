@@ -151,7 +151,7 @@
     <string name="delete_all_warning">Delete all periods, day entries, notes and tags, and reset your cycle settings? This cannot be undone. Files you saved outside the app will remain.</string>
     <string name="data_deleted">All tracking data deleted. Cycle settings reset.</string>
     <string name="create_backup">Create backup</string>
-    <string name="backup_forgotten_warning">Choose a password with at least 8 characters. If you forget it, your backup cannot be recovered.</string>
+    <string name="backup_forgotten_warning">You can leave the password empty: then anyone who has the backup file can open it with Free&#8288;Period. If you choose your own password (at least 8 characters) and forget it, the backup cannot be recovered.</string>
     <string name="backup_password">Password</string>
     <string name="backup_confirm_password">Confirm password</string>
     <string name="backup_password_short">Use a password with at least 8 characters.</string>
@@ -185,6 +185,8 @@
     <string name="restore_not_backup">This is not a Free&#8288;Period backup file.</string>
     <string name="restore_unsupported">This backup uses a version that this app does not support.</string>
     <string name="restore_password_or_corrupt">The password is incorrect or the backup is damaged. Your data has not changed.</string>
+    <string name="restore_password_needed">This backup has its own password. Enter it and tap Read backup again.</string>
+    <string name="restore_password_optional">Password (if you chose one)</string>
     <string name="restore_invalid">The backup contains invalid or incomplete data. Your data has not changed.</string>
     <string name="restore_too_large">The backup is too large. The file limit is 20 MB.</string>
     <string name="restore_done">Backup restored. Data and cycle settings replaced.</string>
