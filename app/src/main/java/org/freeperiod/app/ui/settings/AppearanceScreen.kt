@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -31,15 +30,22 @@ import org.freeperiod.app.ui.day.builtInEntryItems
 import org.freeperiod.engine.UiOverride
 
 @Composable
-fun AppearanceScreen(accent: Accent, onAccent: (Accent) -> Unit, onBack: () -> Unit, overrides: List<UiOverride> = emptyList()) {
+fun AppearanceScreen(accent: Accent, onAccent: (Accent) -> Unit, onBack: () -> Unit, overrides: List<UiOverride> = emptyList(),
+    themeMode: ThemeMode = ThemeMode.SYSTEM, onThemeMode: (ThemeMode) -> Unit = {}) {
     var preview by remember(accent) { mutableStateOf(accent) }
-    val dark = isSystemInDarkTheme()
+    val dark = themeMode.isDark()
     FreePeriodTheme(darkTheme = dark, accent = preview) {
         Surface(color = LocalDaylight.current.background) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
                 verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 FpTopBar(stringResource(R.string.appearance), onBack)
                 Text(stringResource(R.string.accent_colour_intro), style = MaterialTheme.typography.bodyMedium, color = LocalDaylight.current.muted)
+                Text(stringResource(R.string.theme_mode), style = MaterialTheme.typography.titleMedium)
+                Row(Modifier.selectableGroup(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ThemeMode.entries.forEach { mode ->
+                        FpChip(themeMode == mode, { onThemeMode(mode) }, stringResource(themeModeLabel(mode)), Modifier.weight(1f))
+                    }
+                }
                 Text(stringResource(R.string.accent_colour), style = MaterialTheme.typography.titleMedium)
                 Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Accent.entries.chunked(if (LocalDensity.current.fontScale >= 1.3f) 2 else 3).forEach { row ->
@@ -70,6 +76,12 @@ fun AppearanceScreen(accent: Accent, onAccent: (Accent) -> Unit, onBack: () -> U
     }
 }
 
+internal fun themeModeLabel(mode: ThemeMode): Int = when (mode) {
+    ThemeMode.SYSTEM -> R.string.theme_system
+    ThemeMode.LIGHT -> R.string.theme_light
+    ThemeMode.DARK -> R.string.theme_dark
+}
+
 internal fun accentLabel(accent: Accent): Int = when (accent) {
     Accent.CORAL -> R.string.accent_coral
     Accent.PLUM -> R.string.accent_plum
@@ -77,6 +89,9 @@ internal fun accentLabel(accent: Accent): Int = when (accent) {
     Accent.OCEAN -> R.string.accent_ocean
     Accent.OCHRE -> R.string.accent_ochre
     Accent.INK -> R.string.accent_ink
+    Accent.FOREST -> R.string.accent_forest
+    Accent.COBALT -> R.string.accent_cobalt
+    Accent.RUST -> R.string.accent_rust
 }
 
 /** A small, clearly labelled sample (not a working screen): it ignores touches and shows the accent at a glance. */

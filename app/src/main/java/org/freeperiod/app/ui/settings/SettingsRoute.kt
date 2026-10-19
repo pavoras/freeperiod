@@ -158,7 +158,8 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, home: 
                     archive = ArchiveActions({ tracking.deleteCategory(it) }, { tracking.restoreItem(it) },
                         { tracking.deleteItemForever(it) }, { tracking.resetCustomization() }),
                     onChart = { category, on -> tracking.chart(category, on) })
-                SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back, trackingState.data.overrides)
+                SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back, trackingState.data.overrides,
+                    settings.device.themeMode, { model.setThemeMode(it) })
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
                     backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { page = SettingsPage.IMPORT },
                     auto = autoState, autoActions = AutoBackupActions(auto::choose, auto::start, auto::backUpNow, auto::turnOff))

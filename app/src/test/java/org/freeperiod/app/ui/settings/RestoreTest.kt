@@ -46,6 +46,27 @@ class RestoreTest : DatabaseTest() {
         assertEquals(before, repository.snapshot())
     }
 
+    @Test fun emptyPasswordIsNotReportedAsWrong() = runTest {
+        io.bytes = BackupCodec.encode(repository.snapshot(), password.toCharArray(), iterations = 100_000)
+        val vm = model()
+        vm.openRestore()
+        vm.restoreDocument(uri).join()
+        vm.decodeRestore("").join()
+        assertNull(vm.state.value.message)
+        assertTrue(vm.state.value.restoreFileSelected)
+        vm.decodeRestore(password).join()
+        assertNotNull(vm.state.value.summary)
+    }
+
+    @Test fun cancelledPickerIsNotAnError() = runTest {
+        val vm = model()
+        vm.openRestore()
+        vm.restoreDocument(null).join()
+        assertNull(vm.state.value.message)
+        assertFalse(vm.state.value.awaitingDocument)
+        assertFalse(vm.state.value.restoreFileSelected)
+    }
+
     @Test fun restoreReplacesDataAndSettings() = runTest {
         repository.addPeriod(today.minusDays(30), today.minusDays(26)).getOrThrow()
         val replacement = BackupData(periods = listOf(Period(8, today.minusDays(8), today.minusDays(4))),

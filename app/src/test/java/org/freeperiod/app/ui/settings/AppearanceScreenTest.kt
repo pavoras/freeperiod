@@ -26,4 +26,16 @@ class AppearanceScreenTest {
         compose.onNodeWithText("Ocean").assertIsSelected()
         compose.onNodeWithText("Coral").assertIsNotSelected()
     }
+
+    @Test fun choosingThemeModeCallsSetting() {
+        var mode by mutableStateOf(ThemeMode.SYSTEM)
+        compose.setContent { FreePeriodTheme { AppearanceScreen(Accent.CORAL, {}, {}, themeMode = mode, onThemeMode = { mode = it }) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("System").assertIsSelected()
+        compose.onNodeWithText("Dark").performClick()
+        compose.waitForIdle()
+        assertEquals(ThemeMode.DARK, mode)
+        compose.onNodeWithText("Dark").assertIsSelected()
+        compose.onNodeWithText("System").assertIsNotSelected()
+    }
 }

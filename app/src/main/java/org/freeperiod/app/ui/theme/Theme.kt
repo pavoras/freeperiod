@@ -7,6 +7,16 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 
+/** Stable names are persisted, never ordinal positions. */
+enum class ThemeMode { SYSTEM, LIGHT, DARK }
+
+@Composable
+fun ThemeMode.isDark(): Boolean = when (this) {
+    ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
+}
+
 @Composable
 fun FreePeriodTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),

@@ -63,12 +63,29 @@ class AccentScreenshotTest {
         compose.onRoot().captureRoboImage("src/test/screenshots/settings/settingsAppearance_inkDark.png")
     }
 
+    // Store screenshots: the Appearance page in dark mode with Cobalt.
+    @Test fun settingsAppearanceCobalt_enDark() = appearanceDark("settingsAppearanceCobalt_enDark", "Cobalt")
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun settingsAppearanceCobalt_deDark() { Locale.setDefault(Locale.GERMANY); appearanceDark("settingsAppearanceCobalt_deDark", "Kobalt") }
+
+    private fun appearanceDark(name: String, label: String) {
+        compose.setContent { FreePeriodTheme(darkTheme = true, accent = Accent.COBALT) {
+            AppearanceScreen(Accent.COBALT, {}, {}, themeMode = ThemeMode.DARK)
+        } }
+        compose.waitForIdle()
+        compose.onNodeWithText(label).assertIsSelected()
+        compose.onRoot().captureRoboImage("src/test/screenshots/settings/$name.png")
+    }
+
     @Test fun dayEntry_coral_enLight() = day(Accent.CORAL)
     @Test fun dayEntry_plum_enLight() = day(Accent.PLUM)
     @Test fun dayEntry_sage_enLight() = day(Accent.SAGE)
     @Test fun dayEntry_ocean_enLight() = day(Accent.OCEAN)
     @Test fun dayEntry_ochre_enLight() = day(Accent.OCHRE)
     @Test fun dayEntry_ink_enLight() = day(Accent.INK)
+    @Test fun dayEntry_forest_enLight() = day(Accent.FOREST)
+    @Test fun dayEntry_cobalt_enLight() = day(Accent.COBALT)
+    @Test fun dayEntry_rust_enLight() = day(Accent.RUST)
 
     private fun day(accent: Accent) {
         val today = clock()

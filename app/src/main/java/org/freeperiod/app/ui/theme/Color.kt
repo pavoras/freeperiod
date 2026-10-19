@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 
 /** Stable names are persisted, never ordinal positions. */
-enum class Accent { CORAL, PLUM, SAGE, OCEAN, OCHRE, INK }
+enum class Accent { CORAL, PLUM, SAGE, OCEAN, OCHRE, INK, FOREST, COBALT, RUST }
 
 data class AccentColors(
     val accent: Color,
@@ -28,6 +28,10 @@ internal fun accentColors(accent: Accent, dark: Boolean): AccentColors {
         Accent.OCHRE -> listOf(0xFFE3C17F, 0xFFF3E5C7, 0xFF79612F)
         // Ink is the dark, non-pastel alternative: near-black slate with light text on it.
         Accent.INK -> listOf(0xFF2F3440, 0xFFE4E5EA, 0xFF1E222B)
+        // Forest, Cobalt and Rust are strong, saturated colours for people who want less pastel.
+        Accent.FOREST -> listOf(0xFF2F6B4F, 0xFFDCE9E1, 0xFF1F4A36)
+        Accent.COBALT -> listOf(0xFF3456A6, 0xFFDDE4F4, 0xFF223A75)
+        Accent.RUST -> listOf(0xFFB24A22, 0xFFF5DDD2, 0xFF7E3215)
     }
     val night = when (accent) {
         Accent.CORAL -> listOf(0xFFEFAC93, 0xFF604034)
@@ -36,6 +40,9 @@ internal fun accentColors(accent: Accent, dark: Boolean): AccentColors {
         Accent.OCEAN -> listOf(0xFFA5CBDF, 0xFF2E4554)
         Accent.OCHRE -> listOf(0xFFE3C17F, 0xFF534324)
         Accent.INK -> listOf(0xFF9A9EA6, 0xFF34363B)
+        Accent.FOREST -> listOf(0xFF7DBF9C, 0xFF23402F)
+        Accent.COBALT -> listOf(0xFF94ADE6, 0xFF263459)
+        Accent.RUST -> listOf(0xFFE89470, 0xFF55301F)
     }
     val fill = Color(if (dark) night[0] else light[0])
     val container = Color(if (dark) night[1] else light[1])

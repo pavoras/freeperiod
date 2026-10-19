@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.Density
 import com.github.takahirom.roborazzi.captureRoboImage
 import java.time.LocalDate
 import java.util.Locale
+import org.freeperiod.app.ui.theme.Accent
 import org.freeperiod.app.ui.theme.FreePeriodTheme
 import org.freeperiod.app.R
 import org.freeperiod.engine.*
@@ -79,8 +80,12 @@ class DayEntryScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun filled_deDark() = capture("filled_deDark", Locale.GERMANY, dark = true)
     @Test fun empty_enLarge() = capture("empty_enLarge", Locale.US, empty = true, fontScale = 1.5f)
+    @Test fun filledCobalt_enDark() = capture("filledCobalt_enDark", Locale.US, dark = true, accent = Accent.COBALT)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun filledCobalt_deDark() = capture("filledCobalt_deDark", Locale.GERMANY, dark = true, accent = Accent.COBALT)
 
-    private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false, fontScale: Float = 1f, menopause: Boolean = false) {
+    private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false, fontScale: Float = 1f, menopause: Boolean = false,
+        accent: Accent = Accent.CORAL) {
         Locale.setDefault(locale)
         val today = clock()
         val log = DayLog(today, FlowLevel.MEDIUM, Mood.GOOD, setOf(Symptom.CRAMPS, Symptom.FATIGUE),
@@ -92,7 +97,7 @@ class DayEntryScreenshotTest {
         val state = dayEntryState(data, today, today)
         compose.setContent {
             CompositionLocalProvider(LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
-                FreePeriodTheme(darkTheme = dark) {
+                FreePeriodTheme(darkTheme = dark, accent = accent) {
                     Surface { DayEntrySheet(state, DayEntryActions(), {}, {}) }
                 }
             }

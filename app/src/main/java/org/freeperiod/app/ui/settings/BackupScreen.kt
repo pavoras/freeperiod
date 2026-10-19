@@ -71,7 +71,7 @@ fun BackupScreen(
             if (state.restoreFileSelected) {
                 Text(stringResource(R.string.restore_file_selected), style = MaterialTheme.typography.bodySmall)
                 PasswordField(restorePassword, { restorePassword = it }, R.string.backup_password, enabled)
-                FpButton(onClick = { onDecode(restorePassword); restorePassword = "" }, enabled = enabled) {
+                FpButton(onClick = { onDecode(restorePassword); restorePassword = "" }, enabled = enabled && restorePassword.isNotEmpty()) {
                     Text(stringResource(R.string.restore_read))
                 }
             }

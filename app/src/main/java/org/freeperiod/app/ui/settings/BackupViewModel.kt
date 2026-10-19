@@ -91,10 +91,9 @@ class BackupViewModel(
         }
         reading = false
         mutableState.update { it.copy(awaitingDocument = false) }
+        // A cancelled picker (null) is not an error: nothing was chosen.
         return operation(R.string.file_read_error) {
-            if (uri == null) {
-                message(R.string.file_read_error, true)
-            } else {
+            if (uri != null) {
                 restoreBytes = io.read(uri)
                 mutableState.update { it.copy(restoreFileSelected = true) }
             }
@@ -102,6 +101,7 @@ class BackupViewModel(
     }
 
     fun decodeRestore(password: String): Job = operation(R.string.restore_invalid) {
+        if (password.isEmpty()) return@operation
         val bytes = restoreBytes ?: return@operation
         replacement = null
         mutableState.update { it.copy(summary = null) }

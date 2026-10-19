@@ -17,6 +17,7 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import java.time.LocalDate
 import java.util.Locale
 import org.freeperiod.app.ui.components.FpNavBar
+import org.freeperiod.app.ui.theme.Accent
 import org.freeperiod.app.ui.theme.FreePeriodTheme
 import org.junit.After
 import org.junit.Rule
@@ -59,6 +60,14 @@ class TodayScreenshotTest {
     fun ring_deLarge() = capture("ring_deLarge", "ongoing", Locale.GERMANY, fontScale = 1.5f, ring = true)
     @Test fun ringScheduledBreak_enLight() = capture("ringScheduledBreak_enLight", "scheduledBreak", ring = true)
     @Test fun ringMenopause_enLight() = capture("ringMenopause_enLight", "menopause", ring = true)
+    // Store screenshots: light Coral next to dark Cobalt, in both languages.
+    @Test fun regularCobalt_enDark() = capture("regularCobalt_enDark", "regular", dark = true, accent = Accent.COBALT)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun regularCobalt_deDark() = capture("regularCobalt_deDark", "regular", Locale.GERMANY, dark = true, accent = Accent.COBALT)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun regular_deLight() = capture("regular_deLight", "regular", Locale.GERMANY)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun ring_deLight() = capture("ring_deLight", "regular", Locale.GERMANY, ring = true)
 
     @Test fun calendarPredicted_enLight() {
         Locale.setDefault(Locale.US)
@@ -78,14 +87,14 @@ class TodayScreenshotTest {
     }
 
     private fun capture(name: String, scenario: String, locale: Locale = Locale.US, dark: Boolean = false,
-        fontScale: Float = 1f, disclaimer: Boolean = false, ring: Boolean = false) {
+        fontScale: Float = 1f, disclaimer: Boolean = false, ring: Boolean = false, accent: Accent = Accent.CORAL) {
         Locale.setDefault(locale)
         val state = todayFixture(scenario, clock()).copy(ring = ring)
         compose.setContent {
             val config = Configuration(LocalConfiguration.current).apply { setLocales(LocaleList(locale)); this.fontScale = fontScale }
             CompositionLocalProvider(LocalConfiguration provides config,
                 LocalDensity provides Density(LocalDensity.current.density, fontScale)) {
-                FreePeriodTheme(darkTheme = dark) {
+                FreePeriodTheme(darkTheme = dark, accent = accent) {
                     Scaffold(bottomBar = { FpNavBar("today", {}) }) { padding ->
                         TodayScreen(state, {}, {}, {}, {}, {}, {}, Modifier.padding(padding))
                     }

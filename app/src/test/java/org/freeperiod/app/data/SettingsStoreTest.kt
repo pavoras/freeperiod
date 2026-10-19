@@ -2,6 +2,7 @@ package org.freeperiod.app.data
 
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import org.freeperiod.app.ui.theme.Accent
+import org.freeperiod.app.ui.theme.ThemeMode
 import java.io.File
 import java.time.LocalTime
 import kotlinx.coroutines.*
@@ -61,6 +62,16 @@ class SettingsStoreTest {
             scope.coroutineContext[Job]!!.cancelAndJoin()
             settingsStore = openStore()
             assertEquals(accent, settingsStore.settings.first().accent)
+        }
+    }
+
+    @Test fun themeModeDefaultsToSystemAndPersists() = runBlocking {
+        assertEquals(ThemeMode.SYSTEM, settingsStore.settings.first().themeMode)
+        for (mode in ThemeMode.entries) {
+            settingsStore.update { it.copy(themeMode = mode) }
+            scope.coroutineContext[Job]!!.cancelAndJoin()
+            settingsStore = openStore()
+            assertEquals(mode, settingsStore.settings.first().themeMode)
         }
     }
 

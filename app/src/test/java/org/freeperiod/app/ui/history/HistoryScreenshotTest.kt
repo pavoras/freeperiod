@@ -35,6 +35,8 @@ class HistoryScreenshotTest {
     @Test fun charts_enLight() = captureLevels("charts_enLight", Locale.US)
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-night-xxhdpi")
     fun charts_deDark() = captureLevels("charts_deDark", Locale.GERMANY, dark = true)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun charts_deLight() = captureLevels("charts_deLight", Locale.GERMANY)
     @Test fun chartsYear_enLight() = captureLevels("chartsYear_enLight", Locale.US, range = "Year")
     @Test fun chartsWeek_enLight() = captureLevels("chartsWeek_enLight", Locale.US, range = "Week")
     private fun captureLevels(name: String, locale: Locale, dark: Boolean = false, range: String? = null) {

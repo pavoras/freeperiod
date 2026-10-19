@@ -20,6 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import org.freeperiod.app.ui.theme.Accent
 import org.freeperiod.app.ui.theme.FreePeriodTheme
+import org.freeperiod.app.ui.theme.ThemeMode
+import org.freeperiod.app.ui.theme.isDark
+import android.graphics.Color
+import androidx.activity.SystemBarStyle
+import androidx.compose.runtime.LaunchedEffect
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -76,7 +81,13 @@ class MainActivity : FragmentActivity() {
             val settings = deviceSettings
             val locked by appLock.locked.collectAsStateWithLifecycle()
             val navigationState = rememberSaveableStateHolder()
-            FreePeriodTheme(accent = settings?.accent ?: Accent.CORAL) {
+            val dark = (settings?.themeMode ?: ThemeMode.SYSTEM).isDark()
+            // The bar icons follow the chosen mode, not only the system one.
+            LaunchedEffect(dark) {
+                enableEdgeToEdge(SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT) { dark },
+                    SystemBarStyle.auto(LIGHT_SCRIM, DARK_SCRIM) { dark })
+            }
+            FreePeriodTheme(darkTheme = dark, accent = settings?.accent ?: Accent.CORAL) {
                 settings?.let {
                     if (it.lockEnabled && locked) LockedScreen(::authenticate, unlockMessage)
                     else navigationState.SaveableStateProvider("app-navigation") {
@@ -105,6 +116,10 @@ class MainActivity : FragmentActivity() {
             .setSubtitle(getString(R.string.locked_message)).setAllowedAuthenticators(AUTHENTICATORS).build())
     }
 }
+
+// The navigation-bar scrims enableEdgeToEdge() uses by default (3-button navigation).
+private val LIGHT_SCRIM = Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
+private val DARK_SCRIM = Color.argb(0x80, 0x1b, 0x1b, 0x1b)
 
 @Composable
 fun Placeholder() {

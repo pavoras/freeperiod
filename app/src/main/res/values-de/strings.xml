@@ -251,6 +251,10 @@
     <string name="onboarding_save_error">Deine Auswahl konnte nicht gespeichert werden. Prüfe die Daten und versuche es erneut.</string>
     <string name="appearance">Darstellung</string>
     <string name="accent_colour">Akzentfarbe</string>
+    <string name="theme_mode">Hell oder dunkel</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
     <string name="appearance_preview">Vorschau</string>
     <string name="accent_coral">Koralle</string>
     <string name="accent_plum">Pflaume</string>
@@ -258,6 +262,9 @@
     <string name="accent_ocean">Ozean</string>
     <string name="accent_ochre">Ocker</string>
     <string name="accent_ink">Tinte</string>
+    <string name="accent_forest">Wald</string>
+    <string name="accent_cobalt">Kobalt</string>
+    <string name="accent_rust">Rost</string>
     <string name="section_expanded">Ausgeklappt</string>
     <string name="section_collapsed">Eingeklappt</string>
     <string name="entry_more">Mehr</string>

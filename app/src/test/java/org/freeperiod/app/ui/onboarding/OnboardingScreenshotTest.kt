@@ -30,6 +30,10 @@ class OnboardingScreenshotTest : SettingsScreenshotFixture() {
     fun pastPeriods_deDark() = capture("onboarding/pastPeriods_deDark", "Bisherige Perioden", Locale.GERMANY, dark = true) {
         OnboardingScreen(pastPeriods(), OnboardingActions())
     }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun pastPeriods_deLight() = capture("onboarding/pastPeriods_deLight", "Bisherige Perioden", Locale.GERMANY) {
+        OnboardingScreen(pastPeriods(), OnboardingActions())
+    }
     @Test fun reminders_enLight() = capture("onboarding/reminders_enLight", "Reminders") {
         OnboardingScreen(OnboardingUiState(page = 6, today = clock()), OnboardingActions())
     }

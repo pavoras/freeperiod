@@ -43,3 +43,21 @@ body.artwork { margin: 0; padding: 48px; width: max-content; }
   .screenshot-board { display: block; }
   .shot { break-after: page; }
 }
+/* Dark-mode panels (app dark background, Cobalt container), so the board shows both looks at a glance. */
+.shot.dark { background: #211e1c; color: #fbf2e9; }
+.shot.dark::before { background: #263459; }
+.shot.dark .phone-frame { border-color: #51463f; background: #211e1c; box-shadow: 0 18px 40px #00000060; }
+.shot.dark footer { color: #c6b5a9; }
+.shot.dark .wordmark { color: #fbf2e9; }
+.shot.dark .stop { color: #94ade6; }
+/* First shot: light Coral and dark Cobalt side by side. */
+.shot.duo::before { inset: 370px 540px 110px 56px; border-radius: 4px 0 0 96px; }
+.shot.duo::after { content: ""; position: absolute; inset: 370px 56px 110px 540px; background: #211e1c; border-radius: 0 96px 4px 0; }
+.shot.duo .phone-frame { z-index: 1; left: auto; transform: none; width: 462px; height: 1027px; border-width: 7px; }
+.shot.duo .phone-frame.light { left: 64px; top: 420px; }
+.shot.duo .phone-frame.dark { right: 64px; top: 420px; border-color: #51463f; background: #211e1c; }
+.shot.duo .mode-label { position: absolute; z-index: 1; top: 1490px; width: 476px; text-align: center; font-size: 36px; font-weight: 600; }
+.shot.duo .mode-label.light { left: 59px; color: var(--ink); }
+.shot.duo .mode-label.dark { right: 59px; color: #fbf2e9; }
+.shot.duo .swatches { position: absolute; z-index: 1; top: 1620px; left: 0; right: 0; display: flex; justify-content: center; gap: 22px; margin: 0; padding: 0; list-style: none; }
+.shot.duo .swatches li { width: 70px; height: 70px; border-radius: 50%; border: 5px solid #fffdf9; box-shadow: 0 6px 14px #30292330; }

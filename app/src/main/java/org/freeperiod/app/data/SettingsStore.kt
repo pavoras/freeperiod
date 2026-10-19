@@ -8,6 +8,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import org.freeperiod.app.backup.AutoBackupInterval
 import org.freeperiod.app.ui.theme.Accent
+import org.freeperiod.app.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.first
@@ -44,6 +45,8 @@ data class AppSettings(
     val homeRing: Boolean = false,
     /** The user has bought a support product at least once (purchases are consumed, so Play forgets them). */
     val supported: Boolean = false,
+    /** Light, dark or follow the system. */
+    val themeMode: ThemeMode = ThemeMode.SYSTEM,
 )
 
 class SettingsStore internal constructor(private val store: DataStore<Preferences>) {
@@ -79,6 +82,7 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
             prefs[autoBackupFailed] = value.autoBackupFailed
             prefs[homeRing] = value.homeRing
             prefs[supported] = value.supported
+            prefs[themeMode] = value.themeMode.name
         }
     }
 
@@ -128,6 +132,7 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         autoBackupFailed = prefs[autoBackupFailed] ?: false,
         homeRing = prefs[homeRing] ?: false,
         supported = prefs[supported] ?: false,
+        themeMode = ThemeMode.entries.firstOrNull { it.name == prefs[themeMode] } ?: ThemeMode.SYSTEM,
     )
 
     private fun MutablePreferences.set(key: Preferences.Key<String>, value: String?) {
@@ -154,5 +159,6 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         val autoBackupFailed = booleanPreferencesKey("auto_backup_failed")
         val homeRing = booleanPreferencesKey("home_ring")
         val supported = booleanPreferencesKey("supported")
+        val themeMode = stringPreferencesKey("theme_mode")
     }
 }

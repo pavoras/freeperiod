@@ -251,6 +251,10 @@
     <string name="onboarding_save_error">Your choices could not be saved. Check the dates and try again.</string>
     <string name="appearance">Appearance</string>
     <string name="accent_colour">Accent colour</string>
+    <string name="theme_mode">Light or dark</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
     <string name="appearance_preview">Preview</string>
     <string name="accent_coral">Coral</string>
     <string name="accent_plum">Plum</string>
@@ -258,6 +262,9 @@
     <string name="accent_ocean">Ocean</string>
     <string name="accent_ochre">Ochre</string>
     <string name="accent_ink">Ink</string>
+    <string name="accent_forest">Forest</string>
+    <string name="accent_cobalt">Cobalt</string>
+    <string name="accent_rust">Rust</string>
     <string name="section_expanded">Expanded</string>
     <string name="section_collapsed">Collapsed</string>
     <string name="entry_more">More</string>
