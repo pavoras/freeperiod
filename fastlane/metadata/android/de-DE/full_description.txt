@@ -10,7 +10,8 @@ FreePeriod ist Periodenkalender und Tagebuch in einem. Die App hat keine Interne
 • Eine PDF-Zusammenfassung deiner Einträge, zum Beispiel für einen Arzttermin.
 • Erinnerungen für deine Periode, eine Pille oder etwas Persönliches.
 • Lebensphasen: In der Schwangerschaft, nach der Geburt und in der Menopause pausieren die Schätzungen, dein Tagebuch bleibt.
-• Sechs Akzentfarben, hell und dunkel, Deutsch und Englisch.
+• Wechsel von einer anderen App? Übernimm deine bisherigen Perioden aus deren Export-Datei, einer CSV-Datei oder einem FreePeriod-Backup.
+• Neun Akzentfarben, von sanften Pastelltönen bis dunkel und schlicht; hell, dunkel oder wie dein Handy. Deutsch und Englisch.
 
 Privat von Anfang an
 FreePeriod hat keine Internet-Berechtigung und keine Nutzungsanalyse. Deine Einträge bleiben auf deinem Handy. Optionale App-Sperre, verschlüsselte Backups (auch automatisch, in einen Ordner deiner Wahl) und CSV-Export – du entscheidest, wo Dateien landen.

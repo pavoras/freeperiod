@@ -80,9 +80,9 @@ class DayEntryScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun filled_deDark() = capture("filled_deDark", Locale.GERMANY, dark = true)
     @Test fun empty_enLarge() = capture("empty_enLarge", Locale.US, empty = true, fontScale = 1.5f)
-    @Test fun filledCobalt_enDark() = capture("filledCobalt_enDark", Locale.US, dark = true, accent = Accent.COBALT)
+    @Test fun filledInk_enDark() = capture("filledInk_enDark", Locale.US, dark = true, accent = Accent.INK)
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
-    fun filledCobalt_deDark() = capture("filledCobalt_deDark", Locale.GERMANY, dark = true, accent = Accent.COBALT)
+    fun filledInk_deDark() = capture("filledInk_deDark", Locale.GERMANY, dark = true, accent = Accent.INK)
 
     private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false, fontScale: Float = 1f, menopause: Boolean = false,
         accent: Accent = Accent.CORAL) {

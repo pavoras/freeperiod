@@ -10,7 +10,8 @@ FreePeriod is a period calendar and daily diary in one. It has no internet permi
 • A PDF summary of your entries, for example for a doctor’s appointment.
 • Reminders for your period, a pill or anything personal.
 • Life phases: during pregnancy, after birth and in menopause the estimates pause and your diary stays.
-• Six accent colours, light and dark mode, English and German.
+• Moving from another app? Import your past periods from its export file, a CSV file or a FreePeriod backup.
+• Nine accent colours, from soft pastels to dark and plain; light, dark or like your phone. English and German.
 
 Private by design
 FreePeriod has no internet permission and no analytics. Your entries stay on your phone. Optional app lock, encrypted backup files (also automatic, to a folder you choose) and CSV export – you decide where files go.

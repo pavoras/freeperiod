@@ -1,0 +1,5 @@
+• Perioden mitnehmen: die Export-Datei einer anderen Perioden-App importieren (ZIP oder JSON).
+• Hell, dunkel oder wie dein Handy – wählbar unter „Darstellung“.
+• Drei kräftigere Akzentfarben: Wald, Kobalt und Rost.
+• Das Backup-Passwort ist jetzt freiwillig.
+• Backup-Import öffnet die Dateiauswahl sofort.

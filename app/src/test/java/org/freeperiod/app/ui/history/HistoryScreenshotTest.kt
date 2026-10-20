@@ -8,6 +8,7 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import java.time.LocalDate
 import java.util.Locale
 import org.freeperiod.app.R
+import org.freeperiod.app.ui.theme.Accent
 import org.freeperiod.app.ui.theme.FreePeriodTheme
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.*
@@ -36,10 +37,11 @@ class HistoryScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-night-xxhdpi")
     fun charts_deDark() = captureLevels("charts_deDark", Locale.GERMANY, dark = true)
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
-    fun charts_deLight() = captureLevels("charts_deLight", Locale.GERMANY)
+    fun chartsSage_deLight() = captureLevels("chartsSage_deLight", Locale.GERMANY, accent = Accent.SAGE)
+    @Test fun chartsSage_enLight() = captureLevels("chartsSage_enLight", Locale.US, accent = Accent.SAGE)
     @Test fun chartsYear_enLight() = captureLevels("chartsYear_enLight", Locale.US, range = "Year")
     @Test fun chartsWeek_enLight() = captureLevels("chartsWeek_enLight", Locale.US, range = "Week")
-    private fun captureLevels(name: String, locale: Locale, dark: Boolean = false, range: String? = null) {
+    private fun captureLevels(name: String, locale: Locale, dark: Boolean = false, range: String? = null, accent: Accent = Accent.CORAL) {
         Locale.setDefault(locale)
         val today = clock()
         val moods = listOf(Mood.GOOD, Mood.OKAY, Mood.LOW, Mood.LOW, Mood.OKAY, Mood.GREAT, Mood.GOOD)
@@ -54,7 +56,7 @@ class HistoryScreenshotTest {
         // Appetite starts hidden; turned on, it gets its chart.
         val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = emptyList(), settings = BackupSettings(null, false),
             overrides = listOf(UiOverride("category:appetite", false, 4))), today)
-        compose.setContent { FreePeriodTheme(darkTheme = dark) { Surface { HistoryScreen(state, { _, _ -> }) } } }
+        compose.setContent { FreePeriodTheme(darkTheme = dark, accent = accent) { Surface { HistoryScreen(state, { _, _ -> }) } } }
         compose.waitForIdle()
         range?.let {
             compose.onNodeWithTag("history-list").performScrollToNode(hasText(it))

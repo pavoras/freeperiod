@@ -60,14 +60,15 @@ class TodayScreenshotTest {
     fun ring_deLarge() = capture("ring_deLarge", "ongoing", Locale.GERMANY, fontScale = 1.5f, ring = true)
     @Test fun ringScheduledBreak_enLight() = capture("ringScheduledBreak_enLight", "scheduledBreak", ring = true)
     @Test fun ringMenopause_enLight() = capture("ringMenopause_enLight", "menopause", ring = true)
-    // Store screenshots: light Coral next to dark Cobalt, in both languages.
-    @Test fun regularCobalt_enDark() = capture("regularCobalt_enDark", "regular", dark = true, accent = Accent.COBALT)
+    // Store screenshots: light Coral next to dark Ink, the ring in light Plum, in both languages.
+    @Test fun regularInk_enDark() = capture("regularInk_enDark", "regular", dark = true, accent = Accent.INK)
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
-    fun regularCobalt_deDark() = capture("regularCobalt_deDark", "regular", Locale.GERMANY, dark = true, accent = Accent.COBALT)
+    fun regularInk_deDark() = capture("regularInk_deDark", "regular", Locale.GERMANY, dark = true, accent = Accent.INK)
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun regular_deLight() = capture("regular_deLight", "regular", Locale.GERMANY)
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
-    fun ring_deLight() = capture("ring_deLight", "regular", Locale.GERMANY, ring = true)
+    fun ringPlum_deLight() = capture("ringPlum_deLight", "regular", Locale.GERMANY, ring = true, accent = Accent.PLUM)
+    @Test fun ringPlum_enLight() = capture("ringPlum_enLight", "regular", ring = true, accent = Accent.PLUM)
 
     @Test fun calendarPredicted_enLight() {
         Locale.setDefault(Locale.US)

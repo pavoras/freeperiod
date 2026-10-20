@@ -17,7 +17,7 @@
   </header>
   <main id="main" class="policy shell">
     <h1>Privacy policy<span class="stop">.</span></h1>
-    <p class="quiet">Effective: 2026-10-11</p>
+    <p class="quiet">Effective: 2026-10-20</p>
     <div class="summary">
       <p class="lead">Your diary stays on your phone.</p>
       <p>FreePeriod has no account, ads, subscription, analytics SDK or crash-reporting SDK. It has no Android <code>INTERNET</code> permission. The developer does not receive your entries through the app. The Google Play version offers an optional one-time purchase to support the app; Google Play handles it.</p>
@@ -41,7 +41,8 @@
     <p>The Google Play version lets you support FreePeriod with an optional one-time purchase that unlocks nothing. Google Play handles the purchase and the payment under <a href="https://policies.google.com/privacy">Google’s privacy policy</a>. For this the app contains the Google Play Billing Library, which talks to the Play Store app on your phone; FreePeriod only learns whether you have supported it. The library would bring a network permission for Google’s own diagnostics; FreePeriod removes it, so the app still has no internet access. The F-Droid version contains no purchase and no Google library.</p>
     <p>Opening a website or choosing a file provider uses other apps on your device. Those apps may have internet access even though FreePeriod does not.</p>
     <h2>4. Backups, CSV files and moving to another phone</h2>
-    <p>You can create or open encrypted backup files and export or import CSV files through Android’s system file picker. You choose the file and location. Backup files are protected with the password you choose; keep that password safe because the developer cannot recover it. CSV files are readable text and are not encrypted by FreePeriod.</p>
+    <p>You can create or open encrypted backup files and export or import CSV files through Android’s system file picker. You choose the file and location. Backup files are protected with the password you choose; keep that password safe because the developer cannot recover it. If you leave the password empty, FreePeriod uses a fixed default password that is published in its source code, so anyone who gets such a file can open it. CSV files are readable text and are not encrypted by FreePeriod.</p>
+    <p>You can also import your period dates from an export file of another period app (for example a ZIP file that app sent you, with the password from its e-mail). FreePeriod opens and reads that file on your phone only; nothing is sent anywhere.</p>
     <p>You can also turn on automatic backups: daily or weekly, FreePeriod writes an encrypted backup file into a folder you chose in Android’s folder picker and keeps the five newest. So that this can run in the background, the backup password is kept on your phone, sealed with a key from the Android Keystore. Turning automatic backups off removes it.</p>
     <p>If you select a cloud folder, its provider app may upload or download the file under that provider’s terms and privacy policy. This transfer is handled by that app, not a FreePeriod server. Files you share with someone else are under their control after sharing.</p>
     <p>The app’s Android backup rules exclude automatic cloud backup. On supported Android versions, Android can copy app data directly to a replacement phone during device setup. This is a system-managed device transfer; the developer does not receive the data.</p>

@@ -1,0 +1,5 @@
+• Bring your periods along: import the export file of another period app (ZIP or JSON).
+• Light, dark or like your phone – choose it in Appearance.
+• Three bolder accent colours: Forest, Cobalt and Rust.
+• The backup password is optional now.
+• Importing a backup opens the file picker right away.
