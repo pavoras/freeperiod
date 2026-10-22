@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FreePeriod. | README hero, 1280 × 640</title>
+  <link rel="stylesheet" href="../../site/styles.css">
+  <style>
+    /* Render: python tools/render-readme.py (headless Edge, 2x) -> docs/readme/hero.png */
+    html, body { margin: 0; background: var(--cream); }
+    .rh { position: relative; width: 1280px; height: 640px; overflow: hidden; background: var(--cream); color: var(--ink); }
+    .rh::before { content: ""; position: absolute; left: 560px; top: 0; right: 0; bottom: 0;
+      background: linear-gradient(90deg, #f9ded3 0 34%, #211e1c 34% 67%, #eeddee 67% 100%); border-radius: 120px 0 0 0; }
+    .rh-copy { position: absolute; left: 64px; top: 70px; width: 470px; }
+    .rh-copy .wordmark { font-size: 64px; }
+    .rh-copy h1 { font-size: 40px; line-height: 1.12; margin: 26px 0 18px; letter-spacing: -.3px; }
+    .rh-copy p { font-size: 22px; line-height: 1.4; margin: 0 0 30px; color: var(--muted); }
+    .chips { display: flex; flex-wrap: wrap; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .chips li { font-size: 17px; font-weight: 600; padding: 7px 14px; border-radius: 999px; background: var(--paper);
+      border: 1.5px solid var(--line); }
+    .chips li.key { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+    .phone { position: absolute; top: 58px; width: 216px; height: 480px; border: 7px solid var(--ink); border-radius: 30px;
+      overflow: hidden; background: var(--paper); box-shadow: 0 22px 44px #30292338; }
+    .phone img { display: block; width: 100%; height: 100%; object-fit: cover; }
+    .phone.dark { border-color: #51463f; background: #211e1c; box-shadow: 0 22px 44px #00000070; }
+    .p1 { left: 588px; } .p2 { left: 818px; top: 88px; } .p3 { left: 1048px; top: 58px; }
+    .labels { position: absolute; top: 576px; left: 574px; width: 704px; display: grid; grid-template-columns: repeat(3, 1fr);
+      text-align: center; font-size: 17px; font-weight: 600; }
+    .labels span:nth-child(2) { color: #fbf2e9; }
+  </style>
+</head>
+<body>
+  <div id="hero" class="rh">
+    <div class="rh-copy">
+      <div class="wordmark">FreePeriod<span class="stop">.</span></div>
+      <h1>A private period tracker for Android – free, open source, offline.</h1>
+      <p>Period calendar and daily diary in one. Your entries never leave your phone.</p>
+      <ul class="chips">
+        <li class="key">No internet permission</li><li>No account</li><li>No ads</li><li>GPL-3.0</li><li>EN · DE</li>
+      </ul>
+    </div>
+    <div class="phone p1"><img src="../../app/src/test/screenshots/today/regular_enLight.png" alt=""></div>
+    <div class="phone dark p2"><img src="../../app/src/test/screenshots/day/filledInk_enDark.png" alt=""></div>
+    <div class="phone p3"><img src="../../app/src/test/screenshots/today/ringPlum_enLight.png" alt=""></div>
+    <div class="labels"><span>Light · Coral</span><span>Dark · Ink</span><span>Light · Plum</span></div>
+  </div>
+</body>
+</html>
