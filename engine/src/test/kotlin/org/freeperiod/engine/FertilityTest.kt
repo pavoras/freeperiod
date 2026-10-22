@@ -16,7 +16,7 @@ class FertilityTest {
     }
 
     @Test fun wideRangeStaysAtMostEightDaysAroundTheMiddle() {
-        // Owner's phone: next period likely Nov 1–7 gave 12 days; now the middle (Nov 4) decides.
+        // Next period likely Nov 1–7 used to give 12 days; now the middle (Nov 4) decides.
         val wide = range.copy(earliest = LocalDate.of(2026, 11, 1), latest = LocalDate.of(2026, 11, 7))
         assertEquals(LocalDate.of(2026, 10, 15)..LocalDate.of(2026, 10, 22), fertileWindow(wide, enabled))
     }

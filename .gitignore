@@ -10,3 +10,14 @@ keystore.properties
 .idea/
 *.iml
 .tools/
+
+# Private notes, plans and agent instructions: local only, never in the public repo
+/AGENTS.md
+/CLAUDE.md
+/CLAUDE.local.md
+/aufpasser/
+/docs/*
+!/docs/readme/
+/store/README.md
+/store/data-safety.md
+/store/listing-*.md

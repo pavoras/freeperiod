@@ -96,11 +96,8 @@ Requirements: JDK 17, Android SDK 36.
 ```
 
 The full local gate (tests, screenshot comparison, lint, release builds, `INTERNET` check) is
-`powershell -File tools\check.ps1 -Voll`. Store artwork: `py tools/render-store.py`; README banner:
-`py tools/render-readme.py` (banner and architecture image).
-
-Project notes: [`docs/handover.md`](docs/handover.md) (state and decisions), [`docs/superpowers/specs/`](docs/superpowers/specs)
-(product specs). `AGENTS.md` and `CLAUDE.md` hold the coding rules for the AI agents used during development.
+`powershell -File tools\check.ps1 -Voll`. Store artwork: `py tools/render-store.py`; README images:
+`py tools/render-readme.py`.
 
 ## Licence
 

@@ -19,7 +19,7 @@ import org.robolectric.annotation.GraphicsMode
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(sdk = [35], qualifiers = "en-rUS-w360dp-h800dp-xxhdpi")
 class SupportScreenshotTest : SettingsScreenshotFixture() {
-    // Play formats the price per country; the owner's products are 5 € and 10 €.
+    // Play formats the price per country; the products are 5 € and 10 €.
     private val offer = SupportState(listOf(SupportProduct("support_small", "€5.00"), SupportProduct("support_large", "€10.00")))
     private val offerDe = SupportState(listOf(SupportProduct("support_small", "5,00 €"), SupportProduct("support_large", "10,00 €")))
 

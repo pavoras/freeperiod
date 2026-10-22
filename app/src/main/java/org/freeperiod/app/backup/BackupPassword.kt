@@ -3,7 +3,7 @@ package org.freeperiod.app.backup
 import org.freeperiod.app.R
 
 /**
- * Backups are always encrypted, but nobody has to make up a password (owner decision): an empty one
+ * Backups are always encrypted, but nobody has to make up a password: an empty one
  * silently means [DEFAULT], and restoring always tries [DEFAULT] first. The app never shows it.
  */
 object BackupPassword {

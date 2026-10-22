@@ -32,7 +32,7 @@ private fun body(size: Int, height: Int, weight: FontWeight = FontWeight.Normal)
 val FpTypography = Typography(
     displayLarge = heading(72, 76), displayMedium = heading(40, 46), displaySmall = heading(38, 44),
     headlineLarge = heading(34, 40), headlineMedium = heading(30, 36), headlineSmall = heading(25, 32),
-    // Readability first (owner feedback): body text 16–17 sp, nothing below 13 sp.
+    // Readability first: body text 16–17 sp, nothing below 13 sp.
     titleLarge = heading(22, 28), titleMedium = heading(18, 24), titleSmall = heading(16, 22),
     bodyLarge = body(17, 24), bodyMedium = body(16, 23), bodySmall = body(14, 20),
     labelLarge = body(16, 22, FontWeight.Medium), labelMedium = body(14, 20, FontWeight.Medium),

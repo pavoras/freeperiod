@@ -57,7 +57,7 @@ private fun Density.ringGeometry(side: Float, days: Int): RingGeometry {
 internal fun CycleRingPage(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
     onDayClick: (LocalDate) -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onShowToday: () -> Unit = {}) {
     // The ring takes the free space, centred with a clear margin; the actions sit below it, stacked
-    // (owner's choice after trying them on top).
+    // (they read better there than on top).
     Column(modifier.fillMaxSize()) {
         BoxWithConstraints(Modifier.weight(1f).fillMaxWidth().padding(24.dp),
             contentAlignment = Alignment.Center) {

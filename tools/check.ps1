@@ -1,9 +1,9 @@
 <#
   FreePeriod. gate.
-  -Schnell   engine tests + app compile (offline; safe inside the Codex sandbox)
+  -Schnell   engine tests + app compile (offline, no debug key needed)
   -Voll      + app unit/Robolectric tests (Roborazzi compare), lint, release manifest INTERNET check
-  -Aufnehmen record Roborazzi references instead of comparing (Claude only)
-  -Online    allow Gradle network access (Claude only, to fill the shared cache)
+  -Aufnehmen record Roborazzi references instead of comparing
+  -Online    allow Gradle network access (to fill the shared cache)
   -Tests     optional Gradle --tests filter for :app:testPlayDebugUnitTest
   Exit code 0 = green. Full log in .tools/check-<mode>.log
 #>
@@ -24,10 +24,10 @@ $gradle = Join-Path $tools 'gradle-8.11.1\bin\gradle.bat'
 
 if (-not ($Schnell -or $Voll -or $Aufnehmen)) { $Schnell = $true }
 $mode = if ($Aufnehmen) { 'aufnehmen' } elseif ($Voll) { 'voll' } else { 'schnell' }
-# Quick mode runs inside the Codex sandbox: keep AGP's user dir inside the repo (no debug key needed).
+# Quick mode may run in a sandbox: keep AGP's user dir inside the repo (no debug key needed).
 if ($mode -eq 'schnell') { $env:ANDROID_USER_HOME = Join-Path $repo '.tools\android-user-home' }
 
-# Quick mode compiles only: packaging needs the debug key in ~/.android, outside the Codex sandbox.
+# Quick mode compiles only: packaging needs the debug key in ~/.android, outside a sandbox.
 $tasks = @(':engine:test', ':app:compilePlayDebugKotlin', ':app:compileFdroidDebugKotlin', ':app:compilePlayDebugUnitTestKotlin')
 $extra = @()
 if ($Voll -or $Aufnehmen) {

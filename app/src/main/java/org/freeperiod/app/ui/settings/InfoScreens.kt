@@ -88,7 +88,7 @@ fun SupportScreen(support: SupportState, onBack: () -> Unit, onBuy: (String) -> 
             }
             Text(stringResource(R.string.support_body))
             if (support.pending) Text(stringResource(R.string.support_pending), color = t.muted)
-            // Supporting again stays one big tap away (owner, 2026-10-11).
+            // Supporting again stays one big tap away.
             if (!support.pending) Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 support.products.forEach { product ->
                     FpButton({ onBuy(product.id) }, Modifier.fillMaxWidth().heightIn(min = 64.dp)) {

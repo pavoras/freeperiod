@@ -8,7 +8,7 @@ import java.time.temporal.ChronoUnit
  * compatible situation. Estimated ovulation = middle of the predicted next-period range − 14 days;
  * the window is the five days before plus that day, widened by one day on each side when the
  * prediction spans three days or more. So it is 6–8 days, never the whole spread of a wide range
- * (owner feedback: Nov 1–7 gave a 12-day window that helped nobody).
+ * (Nov 1–7 used to give a 12-day window that helped nobody).
  */
 fun fertileWindow(state: PredictionState, situation: Situation): ClosedRange<LocalDate>? {
     if (state !is PredictionState.Range || !situation.fertileWindowAllowed()) return null

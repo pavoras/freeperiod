@@ -53,7 +53,7 @@ private fun calendarRows(months: List<YearMonth>, locale: Locale): List<Calendar
 }
 
 /**
- * Free vertical scrolling through months (owner: "scroll instead of click, no snapping to whole
+ * Free vertical scrolling through months ("scroll instead of click, no snapping to whole
  * months"). A fling settles so that a row (week or month title) sits at the top edge. Opens on [month].
  */
 /** Weekday header, a month title and three week rows: below this the Today screen scrolls instead. */
