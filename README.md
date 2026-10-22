@@ -71,23 +71,7 @@ FreePeriod is a diary, not a medical device, and not a method of contraception.
 
 ## Under the hood
 
-```mermaid
-flowchart LR
-  subgraph app [":app – Android, Jetpack Compose + Material 3"]
-    UI["Screens<br/>today · day · history · settings · onboarding"] --> DI["AppContainer<br/>(manual DI)"]
-    DI --> DB[("Room database<br/>tested migrations")]
-    DI --> DS[("DataStore<br/>settings")]
-    DI --> WM["WorkManager<br/>reminders · auto backup"]
-    DI --> KS["Keystore · BiometricPrompt<br/>app lock · sealed password"]
-  end
-  subgraph engine [":engine – pure Kotlin, no Android"]
-    PR["Prediction<br/>normal model of the next start"]
-    ST["Stats · Timeline · Summary"]
-    BK["Backup codec<br/>AES-GCM · versioned schema"]
-    IO["CSV export/import<br/>ZIP reader for app exports"]
-  end
-  app --> engine
-```
+<p align="center"><img src="docs/readme/architecture.png" alt="Architecture: the Android module :app (Compose screens, Room, DataStore, WorkManager, Keystore, manual DI) uses the pure-Kotlin module :engine (prediction, stats, backup codec, import/export)." width="100%"></p>
 
 - **Kotlin 2.2, Jetpack Compose, Material 3, Room, DataStore, WorkManager**, minSdk 26, targetSdk 36.
 - **`:engine` is pure Kotlin** – prediction, statistics, backup format and import/export are plain JVM code with
@@ -113,7 +97,7 @@ Requirements: JDK 17, Android SDK 36.
 
 The full local gate (tests, screenshot comparison, lint, release builds, `INTERNET` check) is
 `powershell -File tools\check.ps1 -Voll`. Store artwork: `py tools/render-store.py`; README banner:
-`py tools/render-readme.py`.
+`py tools/render-readme.py` (banner and architecture image).
 
 Project notes: [`docs/handover.md`](docs/handover.md) (state and decisions), [`docs/superpowers/specs/`](docs/superpowers/specs)
 (product specs). `AGENTS.md` and `CLAUDE.md` hold the coding rules for the AI agents used during development.

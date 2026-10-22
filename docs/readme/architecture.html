@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FreePeriod. | README architecture, 1280 × 630</title>
+  <link rel="stylesheet" href="../../site/styles.css">
+  <style>
+    /* Render: py tools/render-readme.py -> docs/readme/architecture.png */
+    html, body { margin: 0; background: var(--cream); }
+    .arch { position: relative; width: 1280px; height: 630px; background: var(--cream); color: var(--ink); font-family: var(--body); }
+    .mod { position: absolute; top: 40px; bottom: 40px; border-radius: 4px 48px 4px 48px; padding: 28px 30px; }
+    .mod h3 { font-size: 30px; margin: 0 0 4px; }
+    .mod .sub { font-size: 18px; color: var(--muted); margin: 0 0 22px; }
+    .app { left: 40px; width: 640px; background: #f9ded3; }
+    .engine { left: 800px; width: 440px; background: #e0e9d8; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .engine .grid { grid-template-columns: 1fr; }
+    .box { background: var(--paper); border: 1.5px solid #30292322; border-radius: 14px; padding: 12px 16px; }
+    .box b { display: block; font-size: 19px; font-weight: 700; }
+    .box span { font-size: 16px; color: var(--muted); line-height: 1.35; display: block; margin-top: 2px; }
+    .box.wide { grid-column: 1 / -1; }
+    .arrow { position: absolute; left: 690px; top: 280px; width: 100px; text-align: center; font-size: 16px; font-weight: 600; color: var(--muted); }
+    .arrow svg { display: block; margin: 6px auto 0; }
+  </style>
+</head>
+<body>
+  <div id="arch" class="arch">
+    <section class="mod app">
+      <h3>:app</h3>
+      <p class="sub">Android · Jetpack Compose · Material 3</p>
+      <div class="grid">
+        <div class="box wide"><b>Screens</b><span>Today (calendar + ring) · Day entry · History + charts · Settings · Onboarding</span></div>
+        <div class="box"><b>Room database</b><span>versioned, every migration tested</span></div>
+        <div class="box"><b>DataStore</b><span>settings and preferences</span></div>
+        <div class="box"><b>WorkManager</b><span>reminders, automatic backups</span></div>
+        <div class="box"><b>Keystore + Biometric</b><span>app lock, sealed backup password</span></div>
+        <div class="box wide"><b>AppContainer</b><span>manual dependency injection – no framework, no network stack</span></div>
+      </div>
+    </section>
+    <div class="arrow">uses
+      <svg width="90" height="24" viewBox="0 0 90 24"><path d="M4 12h76" stroke="#6e6159" stroke-width="3" fill="none"/><path d="M72 4l12 8-12 8" stroke="#6e6159" stroke-width="3" fill="none"/></svg>
+    </div>
+    <section class="mod engine">
+      <h3>:engine</h3>
+      <p class="sub">pure Kotlin · no Android · fast JVM tests</p>
+      <div class="grid">
+        <div class="box"><b>Prediction</b><span>normal model of the next start from your own cycles</span></div>
+        <div class="box"><b>Stats · Timeline · Summary</b><span>averages, charts, PDF data</span></div>
+        <div class="box"><b>Backup codec</b><span>AES-256-GCM, PBKDF2, versioned schema</span></div>
+        <div class="box"><b>Import / export</b><span>CSV, ZIP reader for other apps' exports</span></div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
