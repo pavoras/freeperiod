@@ -29,14 +29,14 @@
 
 <table>
   <tr>
-    <td width="33%"><img src="store/png/01-modes-en.png" alt="Light or dark, soft or bold: light Coral next to dark Ink, nine accent colours"></td>
-    <td width="33%"><img src="store/png/02-period-en.png" alt="Your cycle as a ring, in light Plum"></td>
-    <td width="33%"><img src="store/png/03-diary-en.png" alt="Day entry in dark Ink: mood, flow, pain, symptoms"></td>
+    <td width="33%"><img src="store/png/01-privacy-en.png" alt="Your cycle stays on your phone: no internet permission, no account, no ads, no tracking, open source"></td>
+    <td width="33%"><img src="store/png/02-today-en.png" alt="Your next period at a glance: calendar in light Coral"></td>
+    <td width="33%"><img src="store/png/03-diary-en.png" alt="Track only what matters to you: day entry in dark Ink"></td>
   </tr>
   <tr>
-    <td width="33%"><img src="store/png/04-history-en.png" alt="History charts in light Sage, from a week to a year"></td>
-    <td width="33%"><img src="store/png/05-settings-en.png" alt="Appearance settings in dark Cobalt: system, light or dark and nine accent colours"></td>
-    <td width="33%"><img src="store/png/06-setup-en.png" alt="Setup: add past periods or import them from another app"></td>
+    <td width="33%"><img src="store/png/04-history-en.png" alt="See your patterns: history charts in light Sage"></td>
+    <td width="33%"><img src="store/png/05-modes-en.png" alt="Soft or bold, light or dark: nine accent colours"></td>
+    <td width="33%"><img src="store/png/06-ring-en.png" alt="Your cycle as a ring, in light Plum"></td>
   </tr>
 </table>
 

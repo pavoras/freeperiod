@@ -12,7 +12,7 @@ for locale, lang in (("en-US", "en"), ("de-DE", "de")):
     shots = images / "phoneScreenshots"
     shots.mkdir(parents=True, exist_ok=True)
     shutil.copy(STORE / "icon-512.png", images / "icon.png")
-    shutil.copy(STORE / "feature-graphic.png", images / "featureGraphic.png")
+    shutil.copy(STORE / ("feature-graphic-de.png" if lang == "de" else "feature-graphic.png"), images / "featureGraphic.png")
     for old in shots.glob("*.png"):
         old.unlink()
     for index, shot in enumerate(sorted(STORE.glob(f"[0-9][0-9]-*-{lang}.png")), 1):

@@ -1,8 +1,10 @@
 """Render store artwork to store/png with headless Edge: python tools/render-store.py"""
 import subprocess, os, pathlib, sys
 store = pathlib.Path(sys.argv[1]) if len(sys.argv) > 1 else pathlib.Path(__file__).resolve().parent.parent / "store"; edge = r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"
-jobs = [("feature-graphic.html", "feature-graphic", "feature-graphic.png", 1024, 500)]
-names = ["modes","period","diary","history","settings","setup"]
+jobs = [("feature-graphic.html", "feature-graphic", "feature-graphic.png", 1024, 500),
+        ("feature-graphic-de.html", "feature-graphic", "feature-graphic-de.png", 1024, 500)]
+names = ["privacy","today","diary","history","modes","ring","switch"]
+for old in (store/"png").glob("0[0-9]-*.png"): old.unlink()
 for lang, src in [("en","screenshots.html"),("de","screenshots-de.html")]:
     for i,n in enumerate(names,1): jobs.append((src, f"shot-{n}", f"{i:02d}-{n}-{lang}.png", 1080, 1920))
 for src, el, out, w, h in jobs:

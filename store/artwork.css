@@ -1,70 +1,80 @@
-/* Fixed export sizes. Site CSS supplies the same local fonts and palette. */
+/* Store artwork (written by tools/store-boards.py, rendered by tools/render-store.py). Fonts and palette from site CSS.
+   Screenshots: 1080 × 1920. Big headlines so they read in Play's small thumbnails. */
 html { background: #e9e5df; }
 body.artwork { margin: 0; padding: 48px; width: max-content; }
-.feature {
-  position: relative; width: 1024px; height: 500px; overflow: hidden;
-  background: var(--cream); color: var(--ink);
-}
-.feature::before {
-  content: ""; position: absolute; right: 0; top: 0; width: 370px; height: 500px;
-  background: var(--coral); border-radius: 80px 0 0 4px;
-}
-.feature-copy { position: absolute; left: 56px; top: 40px; width: 580px; }
-.feature .wordmark { font-size: 38px; }
-.feature h1 { font-size: 66px; line-height: 1.06; letter-spacing: -0.6px; margin: 30px 0 18px; }
-.feature p { font-size: 30px; line-height: 1.3; max-width: 560px; }
-.feature .feature-foot { position: absolute; bottom: 28px; left: 56px; margin: 0; font-size: 30px; }
-.feature-phone {
-  position: absolute; right: 85px; top: 24px; width: 198px; height: 440px;
-  box-sizing: content-box; border: 6px solid var(--ink); border-radius: 26px;
-  overflow: hidden; background: var(--cream); box-shadow: 0 12px 24px #30292320;
-}
-.feature-phone img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.screenshot-board { display: grid; grid-template-columns: repeat(3, 1080px); gap: 48px; width: max-content; }
+.screenshot-board { display: grid; grid-template-columns: repeat(4, 1080px); gap: 48px; }
+
 .shot { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--cream); color: var(--ink); }
-.shot:nth-child(even) { background: var(--paper); }
-.shot::before { content: ""; position: absolute; inset: 370px 56px 26px; background: #f9ded3; border-radius: 4px 96px 4px 96px; }
-.shot header { position: absolute; top: 56px; left: 72px; right: 72px; }
-.shot .wordmark { font-size: 32px; }
-.shot h2 { font-size: 64px; line-height: 1.06; letter-spacing: -0.6px; margin: 24px 0 14px; }
-.shot .caption { font-size: 40px; line-height: 1.25; max-width: 860px; margin: 0; }
-.phone-frame {
-  position: absolute; top: 406px; left: 50%; transform: translateX(-50%);
-  width: 648px; height: 1440px; box-sizing: content-box; border: 8px solid var(--ink);
-  border-radius: 34px; overflow: hidden; background: var(--cream);
-  box-shadow: 0 18px 40px #30292320;
-}
-.phone-frame img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.shot footer { position: absolute; bottom: 12px; width: 100%; text-align: center; color: var(--muted); font-size: 30px; }
-.language-note { float: right; padding: 5px 12px; border: 1px solid var(--muted); border-radius: 4px; font-size: 18px; }
-@media print {
-  html { background: white; }
-  body.artwork { padding: 0; }
-  .screenshot-board { display: block; }
-  .shot { break-after: page; }
-}
-/* Dark-mode panels (app dark background, Cobalt container unless another accent class is set), so the board shows both looks at a glance. */
-.shot.dark { background: #211e1c; color: #fbf2e9; }
-.shot.dark::before { background: #263459; }
-.shot.dark .phone-frame { border-color: #51463f; background: #211e1c; box-shadow: 0 18px 40px #00000060; }
-.shot.dark footer { color: #c6b5a9; }
-.shot.dark .wordmark { color: #fbf2e9; }
-.shot.dark .stop { color: #94ade6; }
-/* Per-shot accents (container colour behind the phone, accent dot in the wordmark), matching the app screenshot. */
+.shot header { position: absolute; top: 88px; left: 84px; right: 84px; z-index: 2; }
+.shot .wordmark { font-size: 40px; }
+.shot h2 { font-size: 96px; line-height: 1.02; letter-spacing: -1.4px; margin: 26px 0 22px; font-weight: 700;
+  font-variation-settings: "opsz" 48, "wdth" 100; }
+.shot .caption { font-size: 42px; line-height: 1.25; margin: 0; color: var(--muted); }
+.shot footer { position: absolute; z-index: 3; right: 40px; bottom: 26px; font-size: 24px; color: var(--muted);
+  background: var(--paper); padding: 4px 14px; border-radius: 999px; opacity: .9; }
+
+/* Accent panel behind the phone: the accent's container colour, cut off at the bottom. */
+.shot::before { content: ""; position: absolute; left: 44px; right: 44px; top: 760px; bottom: -40px;
+  border-radius: 120px 120px 0 0; background: #f9ded3; }
 .shot.plum::before { background: #eeddee; }
 .shot.plum .stop { color: #b98fb9; }
 .shot.sage::before { background: #e0e9d8; }
 .shot.sage .stop { color: #8fae7f; }
-.shot.dark.ink::before { background: #34363b; }
-.shot.dark.ink .stop { color: #9a9ea6; }
-/* First shot: light Coral and dark Ink side by side. */
-.shot.duo::before { inset: 370px 540px 110px 56px; border-radius: 4px 0 0 96px; }
-.shot.duo::after { content: ""; position: absolute; inset: 370px 56px 110px 540px; background: #211e1c; border-radius: 0 96px 4px 0; }
-.shot.duo .phone-frame { z-index: 1; left: auto; transform: none; width: 462px; height: 1027px; border-width: 7px; }
-.shot.duo .phone-frame.light { left: 64px; top: 420px; }
-.shot.duo .phone-frame.dark { right: 64px; top: 420px; border-color: #51463f; background: #211e1c; }
-.shot.duo .mode-label { position: absolute; z-index: 1; top: 1490px; width: 476px; text-align: center; font-size: 36px; font-weight: 600; }
-.shot.duo .mode-label.light { left: 59px; color: var(--ink); }
-.shot.duo .mode-label.dark { right: 59px; color: #fbf2e9; }
-.shot.duo .swatches { position: absolute; z-index: 1; top: 1620px; left: 0; right: 0; display: flex; justify-content: center; gap: 22px; margin: 0; padding: 0; list-style: none; }
-.shot.duo .swatches li { width: 70px; height: 70px; border-radius: 50%; border: 5px solid #fffdf9; box-shadow: 0 6px 14px #30292330; }
+.shot.dark { background: #211e1c; color: #fbf2e9; }
+.shot.dark .caption { color: #c6b5a9; }
+.shot.dark::before { background: #34363b; }
+.shot.dark .stop { color: #9a9ea6; }
+.shot.dark .wordmark { color: #fbf2e9; }
+.shot.dark footer { background: #34363b; color: #c6b5a9; }
+
+/* One big phone, cropped at the bottom so the app's text is large. */
+.phone { position: absolute; z-index: 1; left: 50%; top: 640px; transform: translateX(-50%); width: 820px; height: 1822px;
+  border: 16px solid var(--ink); border-radius: 72px; overflow: hidden; background: var(--paper);
+  box-shadow: 0 30px 70px #30292333; }
+.phone img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.shot.dark .phone { border-color: #51463f; background: #211e1c; box-shadow: 0 30px 70px #00000080; }
+
+/* Light and dark side by side. */
+.shot.duo::before { left: 44px; right: 540px; border-radius: 120px 0 0 0; }
+.shot.duo::after { content: ""; position: absolute; left: 540px; right: 44px; top: 760px; bottom: -40px;
+  background: #211e1c; border-radius: 0 120px 0 0; }
+.shot.duo .phone { width: 452px; height: 1004px; border-width: 11px; border-radius: 46px; top: 880px; transform: none; z-index: 2; }
+.shot.duo .phone.light { left: 66px; }
+.shot.duo .phone.dark { left: 562px; border-color: #51463f; background: #211e1c; }
+.shot.duo .mode { position: absolute; z-index: 3; top: 790px; width: 474px; text-align: center; font-size: 38px; font-weight: 700; margin: 0; }
+.shot.duo .mode.light { left: 55px; }
+.shot.duo .mode.dark { left: 551px; color: #fbf2e9; }
+.shot.duo .swatches { position: absolute; z-index: 3; top: 620px; left: 0; right: 0; display: flex; justify-content: center; gap: 20px;
+  margin: 0; padding: 0; list-style: none; }
+.shot.duo .swatches li { width: 76px; height: 76px; border-radius: 50%; border: 5px solid #fffdf9; box-shadow: 0 6px 14px #30292330; }
+
+/* First shot: the privacy promise, no phone, filling the whole height. */
+.shot.privacy { background: #f3b6a4; padding: 120px 72px 96px; box-sizing: border-box; display: flex; flex-direction: column; gap: 64px; }
+.shot.privacy::before { display: none; }
+.shot.privacy .wordmark { font-size: 52px; }
+.shot.privacy .stop { color: #fffdf9; }
+.shot.privacy h2 { font-size: 132px; line-height: 1; margin: 44px 0 0; }
+.checks { list-style: none; margin: auto 0 0; padding: 0; display: grid; gap: 30px; }
+.checks li { display: flex; align-items: center; gap: 44px; background: #fffdf9; border-radius: 48px; padding: 40px 48px; }
+.checks .ico { flex: none; width: 132px; height: 132px; border-radius: 50%; background: var(--ink); color: #fffdf9;
+  display: grid; place-items: center; }
+.checks .ico svg { width: 72px; height: 72px; }
+.checks b { display: block; font-family: var(--heading); font-size: 56px; line-height: 1.05; font-weight: 700; }
+.checks small { display: block; font-size: 38px; line-height: 1.28; color: var(--muted); margin-top: 10px; }
+
+/* Feature graphic 1024 × 500: everything important inside a wide safe zone, nothing in the corners. */
+.feature { position: relative; width: 1024px; height: 500px; overflow: hidden; background: var(--cream); color: var(--ink); }
+.feature::before { content: ""; position: absolute; left: 640px; top: 0; right: 0; bottom: 0; background: #f3b6a4;
+  border-radius: 140px 0 0 140px; }
+.feature-copy { position: absolute; left: 96px; top: 64px; width: 520px; }
+.feature .wordmark { font-size: 34px; }
+.feature h1 { font-size: 54px; line-height: 1.04; letter-spacing: -.6px; margin: 22px 0 14px; font-weight: 700; }
+.feature p { font-size: 22px; line-height: 1.35; margin: 0 0 24px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.chips li { font-size: 17px; font-weight: 600; padding: 6px 13px; border-radius: 999px; background: var(--paper); border: 1.5px solid var(--line); }
+.chips li.key { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.feature-phone { position: absolute; left: 700px; top: 52px; width: 176px; height: 391px; border: 7px solid var(--ink);
+  border-radius: 28px; overflow: hidden; background: var(--paper); box-shadow: 0 16px 34px #30292340; }
+.feature-phone img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+@media print { html { background: white; } body.artwork { padding: 0; } .screenshot-board { display: block; } .shot { break-after: page; } }
