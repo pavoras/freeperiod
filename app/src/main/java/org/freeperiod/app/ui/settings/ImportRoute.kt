@@ -19,7 +19,7 @@ import org.freeperiod.app.R
 fun ImportRoute(container: AppContainer, onRestored: () -> Unit = {}, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val model: ImportViewModel = viewModel(key = "csv-import", factory = viewModelFactory {
-        initializer { ImportViewModel(container.repository, container.backupIo, container.clock) }
+        initializer { ImportViewModel(container.repository, container.backupIo, container.clock, container.bluemoonReader) }
     })
     val backup: BackupViewModel = viewModel(key = "import-backup", factory = viewModelFactory {
         initializer { BackupViewModel(container.repository, container.backupIo, container.clock) }
@@ -28,7 +28,7 @@ fun ImportRoute(container: AppContainer, onRestored: () -> Unit = {}, onBack: ()
     val recovery by backup.state.collectAsStateWithLifecycle()
     var restoring by rememberSaveable { mutableStateOf(false) }
     val csv = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { model.read(it) }
-    val flo = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { model.readFlo(it) }
+    val app = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { model.readApp(it) }
     // "Backup" opens the file picker at once; cancelling it returns to the import choices.
     val restore = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
         backup.restoreDocument(it)
@@ -53,7 +53,8 @@ fun ImportRoute(container: AppContainer, onRestored: () -> Unit = {}, onBack: ()
         catch (_: ActivityNotFoundException) { model.documentUnavailable() }
         catch (_: SecurityException) { model.documentUnavailable() }
     }, { restoring = true; backup.openRestore() }, { model.chooseFormat(it) }, { model.confirm() }, onBack, {
-        try { flo.launch(arrayOf("application/zip", "application/json", "application/octet-stream", "*/*")) }
+        try { app.launch(arrayOf("application/zip", "application/json", "application/vnd.sqlite3", "application/x-sqlite3",
+            "application/octet-stream", "*/*")) }
         catch (_: ActivityNotFoundException) { model.documentUnavailable() }
         catch (_: SecurityException) { model.documentUnavailable() }
     }, { model.unlockFlo(it) })

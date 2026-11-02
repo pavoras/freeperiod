@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.freeperiod.app.R
+import org.freeperiod.app.backup.BluemoonReader
 import org.freeperiod.app.backup.DocumentIo
 import org.freeperiod.app.data.Repository
 import org.freeperiod.engine.Period
@@ -32,7 +33,7 @@ data class ImportUiState(
 )
 
 class ImportViewModel(private val repository: Repository, private val io: DocumentIo,
-    private val clock: () -> LocalDate) : ViewModel() {
+    private val clock: () -> LocalDate, private val bluemoon: BluemoonReader? = null) : ViewModel() {
     private val mutable = MutableStateFlow(ImportUiState())
     val state = mutable.asStateFlow()
     private var text: String? = null
@@ -40,6 +41,8 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
     /** The chosen Flo file while it waits for its password; cleared after reading. */
     private var floBytes: ByteArray? = null
     private var fromFlo = false
+    /** Periods and days read from Clue or Bluemoon, waiting for confirmation. */
+    private var fromApp: AppImport? = null
 
     fun read(uri: Uri?): Job = operation(R.string.file_read_error) {
         if (uri == null) return@operation
@@ -52,18 +55,35 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
         parse(null)
     }
 
-    /** Flo's export: the password-protected ZIP from Flo's support, or the JSON inside it. */
-    fun readFlo(uri: Uri?): Job = operation(R.string.file_read_error) {
+    /**
+     * Another app's file, told apart by its content: Bluemoon's SQLite backup, Clue's backup (JSON with day
+     * entries), or Flo's export (the password-protected ZIP from Flo's support, or the JSON inside it).
+     */
+    fun readApp(uri: Uri?): Job = operation(R.string.file_read_error) {
         if (uri == null) return@operation
         clearFlo()
         text = null
         mutable.value = ImportUiState(busy = true)
-        floBytes = io.read(uri)
+        val bytes = io.read(uri)
+        val today = clock()
+        val other = withContext(Dispatchers.IO) {
+            if (BluemoonReader.isSqlite(bytes)) bluemoon?.read(bytes, today) else ClueImport.parse(bytes, today)
+        }
+        if (other != null || BluemoonReader.isSqlite(bytes)) {
+            bytes.fill(0)
+            fromApp = other
+            // Days with only Clue tags count as entries too.
+            val days = other?.let { data -> data.dayLogs + (data.tagNames.keys - data.dayLogs.map { it.date }.toSet()).map { DayLog(it) } }
+            mutable.update { it.copy(periods = other?.periods.orEmpty(), dayLogs = days.orEmpty().sortedBy { it.date },
+                error = if (other == null) R.string.import_app_invalid else null) }
+            return@operation
+        }
+        floBytes = bytes
         fromFlo = true
         parseFlo(null)
     }
 
-    fun unlockFlo(password: String): Job = operation(R.string.import_flo_invalid) {
+    fun unlockFlo(password: String): Job = operation(R.string.import_app_invalid) {
         if (password.isEmpty() || floBytes == null) return@operation
         val secret = password.toCharArray()
         try { parseFlo(secret) } finally { secret.fill('\u0000') }
@@ -81,7 +101,7 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
                 is FloImportResult.Parsed -> it.copy(periods = result.periods, floPassword = false)
                 FloImportResult.NeedsPassword -> it.copy(floPassword = true)
                 FloImportResult.WrongPassword -> it.copy(floPassword = true, error = R.string.import_flo_wrong_password)
-                FloImportResult.Invalid -> it.copy(floPassword = false, error = R.string.import_flo_invalid)
+                FloImportResult.Invalid -> it.copy(floPassword = false, error = R.string.import_app_invalid)
             }
         }
     }
@@ -90,6 +110,7 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
         floBytes?.fill(0)
         floBytes = null
         fromFlo = false
+        fromApp = null
     }
 
     fun chooseFormat(format: CsvDateFormat): Job = operation(R.string.import_invalid) { parse(format) }
@@ -115,10 +136,13 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
         return operation(R.string.error_storage) {
             val periods = state.value.periods
             if ((periods.isEmpty() && state.value.dayLogs.isEmpty()) || state.value.imported != null) return@operation
-            val (imported, skipped) = if (fromFlo) repository.importPeriods(periods)
+            val app = fromApp
+            val (imported, skipped) = if (app != null) repository.importApp(app)
+                else if (fromFlo) repository.importPeriods(periods)
                 else repository.importCsv(requireNotNull(text), selectedFormat)
             text = null
             fromFlo = false
+            fromApp = null
             selectedFormat = null
             mutable.update { it.copy(imported = imported, skipped = skipped) }
         }

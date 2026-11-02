@@ -93,6 +93,32 @@ class Repository(
         periods.size - skipped to skipped
     }
 
+    /**
+     * Periods and diary days from another app (Clue, Bluemoon). Overlapping periods are skipped; days you
+     * already logged keep their values and only gain what is missing. Returns imported to skipped periods.
+     */
+    suspend fun importApp(data: AppImport): Pair<Int, Int> = write {
+        require(data.dayLogs.all { it.date <= clock() } && data.tagNames.keys.all { it <= clock() })
+        val skipped = insertPeriods(data.periods).size
+        val tags = tagsDao.getAll().map { it.domain() }.toMutableList()
+        val categories = categoriesDao.getAll().map { it.domain() }
+        val logs = data.dayLogs.associateBy { it.date }.toMutableMap()
+        data.tagNames.forEach { (date, names) ->
+            val ids = names.map { name ->
+                BleedingDays.tagNamed(tags, name)?.id ?: Tag(0, name.trim()).let { tag ->
+                    tag.copy(id = tagsDao.insert(tag.entity())).also { tags += it }.id
+                }
+            }
+            logs[date] = (logs[date] ?: DayLog(date)).let { it.copy(tagIds = it.tagIds + ids) }
+        }
+        val existing = logsDao.getWithTags().map { it.domain() }.associateBy { it.date }
+        logs.values.forEach { log ->
+            val merged = BleedingDays.merge(existing[log.date], log, tags, categories)
+            if (!merged.isEmpty()) saveLog(merged)
+        }
+        data.periods.size - skipped to skipped
+    }
+
     suspend fun addPeriod(start: LocalDate, end: LocalDate?): Result<Period> = periodResult {
         write {
             val candidate = Period(0, start, end)

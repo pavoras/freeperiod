@@ -20,7 +20,7 @@ import org.freeperiod.engine.importing.CsvDateFormat
 @Composable
 fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
     onFormat: (CsvDateFormat) -> Unit, onConfirm: () -> Unit, onBack: () -> Unit,
-    onFlo: () -> Unit = {}, onFloPassword: (String) -> Unit = {}) {
+    onApp: () -> Unit = {}, onFloPassword: (String) -> Unit = {}) {
     // The Flo password deliberately does not enter saved instance state.
     var floPassword by remember { mutableStateOf("") }
     val tones = LocalDaylight.current
@@ -30,9 +30,8 @@ fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
         FpTopBar(stringResource(R.string.import_title), onBack)
         Text(stringResource(R.string.import_intro))
         FpButton(onCsv, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_csv)) }
-        FpButton(onFlo, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_flo)) }
+        FpButton(onApp, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_app)) }
         FpButton(onBackup, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_backup)) }
-        Text(stringResource(R.string.import_coming_soon), style = MaterialTheme.typography.bodySmall, color = tones.muted)
         if (state.floPassword) {
             Text(stringResource(R.string.import_flo_password), style = MaterialTheme.typography.titleMedium)
             PasswordField(floPassword, { floPassword = it }, R.string.backup_password, !state.busy)
