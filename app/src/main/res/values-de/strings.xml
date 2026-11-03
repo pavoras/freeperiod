@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- "Free&#8288;Period": the word joiner (U+2060) keeps Android from hyphenating the name ("Free-Period"). -->
-    <string name="app_name" translatable="false">FreePeriod.</string>
     <string name="nav_today">Heute</string>
     <string name="nav_history">Verlauf</string>
     <string name="nav_settings">Einstellungen</string>
@@ -43,7 +42,7 @@
     <string name="history_averages">Deine Durchschnittswerte</string>
     <string name="history_need_period">Noch keine abgeschlossenen Perioden.</string>
     <plurals name="history_period_basis">
-        <item quantity="one">basierend auf %1$d abgeschlossenen Periode</item>
+        <item quantity="one">basierend auf %1$d abgeschlossener Periode</item>
         <item quantity="other">basierend auf %1$d abgeschlossenen Perioden</item>
     </plurals>
     <string name="history_empty">Trage deine Perioden ein, um deinen Zyklusverlauf zu sehen.</string>
@@ -200,7 +199,7 @@
     <string name="restore_too_large">Das Backup ist zu groß. Die Dateigrenze liegt bei 20 MB.</string>
     <string name="restore_done">Backup wiederhergestellt. Daten und Zykluseinstellungen ersetzt.</string>
     <string name="csv_warning">CSV-Dateien sind nicht verschlüsselt. Wer Zugriff darauf hat, kann deine Einträge lesen. Du bekommst eine Datei mit einer Zeile pro Tag, lesbar in jeder Tabellen-App.</string>
-    <string name="csv_saved">Beide CSV-Dateien gespeichert.</string>
+    <string name="csv_saved">CSV-Datei gespeichert.</string>
     <string name="privacy_storage">Deine Perioden, Tageseinträge, Symptome, Stimmungen, Notizen, Tags und Einstellungen werden nur auf diesem Handy gespeichert. Free&#8288;Period hat kein Konto und keinen Server.</string>
     <string name="privacy_offline">Free&#8288;Period hat keine Internetberechtigung, keine Analysefunktionen und keine Werbung. Die App versendet deine Trackingdaten nicht.</string>
     <string name="privacy_files">Backups sind verschlüsselte Dateien; CSV-Exporte sind nicht verschlüsselt. Du bestimmst, wo diese Dateien gespeichert werden. Wenn du in der Dateiauswahl einen Cloud-Ordner wählst, lädt die jeweilige App die Datei in ihren Cloud-Dienst hoch.</string>

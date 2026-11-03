@@ -200,7 +200,7 @@
     <string name="restore_too_large">The backup is too large. The file limit is 20 MB.</string>
     <string name="restore_done">Backup restored. Data and cycle settings replaced.</string>
     <string name="csv_warning">CSV files are not encrypted. Anyone with access to them can read your entries. You get one file with a row per day, readable in any spreadsheet app.</string>
-    <string name="csv_saved">Both CSV files saved.</string>
+    <string name="csv_saved">CSV file saved.</string>
     <string name="privacy_storage">Your periods, day entries, symptoms, moods, notes, tags and settings are stored on this phone only. Free&#8288;Period has no account or server.</string>
     <string name="privacy_offline">Free&#8288;Period has no internet permission, analytics or ads. The app does not send your tracking data anywhere.</string>
     <string name="privacy_files">Backups are encrypted files; CSV exports are not encrypted. You control these files and where they are saved. If you choose a cloud folder in the file picker, that app uploads the file to its cloud service.</string>

@@ -1,0 +1,20 @@
+Seu ciclo, seu espaço – só no seu celular.
+
+O FreePeriod reúne um calendário menstrual e um diário. Não tem permissão de internet, então o próprio app não pode enviar nada para a rede – qualquer pessoa pode conferir isso no código aberto. Grátis, sem anúncios, assinatura ou conta.
+
+• Registre sua menstruação com um toque e veja o dia do ciclo de relance – em um calendário ou em um anel do ciclo.
+• Estimativas de calendário para suas próximas duas menstruações, baseadas nos seus próprios registros.
+• Opcional: dias com maior chance de gravidez, mostrados como uma simples estimativa de calendário.
+• Diário: humor, fluxo, dor, sintomas, corrimento, marcadores e notas; opcionalmente apetite, desejo sexual, medicamentos e um diário de dor. Renomeie, reordene ou oculte o que quiser e adicione suas próprias categorias e ícones.
+• Histórico com médias, sintomas registrados e gráficos de uma semana, um mês, 3 meses ou um ano.
+• Um resumo em PDF dos seus registros, por exemplo, para uma consulta médica.
+• Lembretes da menstruação, da pílula ou de algo pessoal.
+• Fases da vida: durante a gravidez, após o parto e na menopausa, as estimativas pausam e seu diário continua.
+• Mudando de app? Importe suas menstruações e registros anteriores do arquivo de exportação ou backup de outro app, de um CSV ou de um backup do FreePeriod.
+• Nove cores de destaque, de tons pastéis suaves a tons escuros e discretos; tema claro, escuro ou igual ao do celular. Inglês, alemão e português do Brasil.
+
+Privacidade desde o início
+O FreePeriod não tem permissão de internet nem análise de uso. Seus registros ficam no seu celular. Bloqueio opcional do app, arquivos de backup criptografados (também automáticos, em uma pasta escolhida por você) e exportação CSV – você decide para onde os arquivos vão.
+
+Limites claros
+O FreePeriod não é um dispositivo médico, um método contraceptivo nem uma ferramenta para ajudar a engravidar. Todas as datas são estimativas baseadas nos seus próprios registros e podem estar erradas. Para dúvidas sobre contracepção, gravidez ou saúde, converse com um médico ou farmacêutico.

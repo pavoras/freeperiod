@@ -34,7 +34,7 @@ fun CycleTimelineView(timeline: CycleTimeline, modifier: Modifier = Modifier, pa
     val colors = remember(t) { todayFillColors(t) }
     val locale = LocalConfiguration.current.locales[0]
     val description = timelineDescription(timeline, LocalContext.current, locale, pack)
-    val dateFormat = DateTimeFormatter.ofPattern(if (locale.language == "de") "d. MMM" else "MMM d", locale)
+    val dateFormat = DateTimeFormatter.ofPattern(dayMonthPattern(locale), locale)
     val bracket = timeline.bracket
     Column(modifier.clearAndSetSemantics { contentDescription = description }) {
         // Today has its own label lane: day 1 and day 3 remain readable on a full-cycle axis.

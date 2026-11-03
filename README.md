@@ -20,7 +20,8 @@
   <a href="https://pavoras.github.io/freeperiod/">Website</a> ·
   <a href="https://pavoras.github.io/freeperiod/privacy/">Privacy policy</a> ·
   <a href="#screenshots">Screenshots</a> ·
-  <a href="#under-the-hood">Under the hood</a>
+  <a href="#under-the-hood">Under the hood</a> ·
+  <a href="https://github.com/pavoras/freeperiod/issues">Issues</a>
 </p>
 
 ---
@@ -49,13 +50,13 @@ Real app screens with example data (rendered by the screenshot tests). German ve
 | **Calendar & cycle ring** | Log a period with one tap, see your cycle day at a glance – as a calendar or as a ring. |
 | **Honest estimates** | The next two periods as calendar estimates from your own history, shown as *likely* / *possible* ranges. Optional days with a higher chance of pregnancy, always labelled as an estimate. |
 | **Daily diary** | Mood, flow, pain, symptoms, discharge, notes and tags. Switch on appetite, sex drive, a medication log or a pain diary. Rename, reorder, hide anything; add your own categories and icons. |
-| **History & charts** | Averages, logged symptoms and charts over a week, a month, 3 months or a year. |
+| **History & diary** | Averages, logged symptoms and charts over a week, a month, 3 months or a year – and a list of every logged day with mood, entries and notes; tap a day to open it. |
 | **PDF summary** | A clean summary of your entries, e.g. for a doctor's appointment. |
 | **Life phases & methods** | Pill with pack rhythm, copper IUD, pregnancy, after birth, menopause – estimates adapt or pause, the diary stays. |
 | **Reminders** | Period, pill or anything personal – scheduled on the phone. |
 | **Your look** | System, light or dark; nine accent colours from soft pastels to dark and neutral. |
-| **Your data, your files** | App lock (phone screen lock), encrypted backups (also automatic, into a folder you choose), CSV export/import, import from another period app's export. |
-| **Languages** | English and German. |
+| **Your data, your files** | App lock (phone screen lock), encrypted backups (also automatic, into a folder you choose), CSV export/import, import from the export or backup file of several other period apps. |
+| **Languages** | English, German and Portuguese (Brazil) – more on the way. |
 
 FreePeriod is a diary, not a medical device, and not a method of contraception.
 
@@ -66,8 +67,9 @@ FreePeriod is a diary, not a medical device, and not a method of contraception.
 - **No account, no server, no analytics or crash SDKs.** Everything is computed on the phone.
 - **Backups** are encrypted with AES-256-GCM, key from PBKDF2-HMAC-SHA256 (600 000 iterations).
   The automatic-backup password is sealed with the Android Keystore.
-- **Two builds**: `play` (with an optional one-time "support" purchase that unlocks nothing) and `fdroid`
-  (free dependencies only, no Google libraries).
+- **Two builds**: `play` (with an optional one-time "support" purchase that unlocks nothing, and Google Play's own
+  rating card shown rarely – both run through the Play Store app) and `fdroid` (free dependencies only, no Google
+  libraries, no purchase, no rating prompt).
 
 ## Under the hood
 
@@ -78,8 +80,8 @@ FreePeriod is a diary, not a medical device, and not a method of contraception.
   fast unit tests and no Android dependency.
 - **Prediction**: the next start is modelled as a normal distribution (centre and spread from your cycle history);
   a day counts as *likely* from 60 % and *possible* from 30 %. No black box, no cloud.
-- **~500 tests**: engine unit tests, Robolectric UI tests and **100+ Roborazzi screenshot references** in light, dark,
-  large font and both languages. The store screenshots above are rendered from those same references.
+- **~520 tests**: engine unit tests, Robolectric UI tests and **110+ Roborazzi screenshot references** in light, dark,
+  large font and every shipped language. The store screenshots above are rendered from those same references.
 - **Data compatibility is a rule**: every stored format only grows – each Room version has a tested migration, the
   backup format keeps readers for all older schemas, CSV stays re-importable.
 - **No unnecessary dependencies**: the password-protected ZIP import (ZipCrypto) is a small reader in `:engine`
@@ -92,12 +94,23 @@ Requirements: JDK 17, Android SDK 36.
 ```bash
 ./gradlew :engine:test :app:testPlayDebugUnitTest   # tests
 ./gradlew :app:assembleFdroidDebug                   # F-Droid flavor debug APK
+./gradlew :app:assembleFdroidRelease                 # F-Droid flavor release APK (unsigned; F-Droid signs it)
 ./gradlew :app:assemblePlayDebug                     # Play flavor debug APK
 ```
+
+Release builds work without any signing setup; the Play upload key is only passed in for Play releases. Every
+release is tagged `vX.Y.Z` on the commit that built it.
 
 The full local gate (tests, screenshot comparison, lint, release builds, `INTERNET` check) is
 `powershell -File tools\check.ps1 -Voll`. Store artwork: `py tools/render-store.py`; README images:
 `py tools/render-readme.py`.
+
+## Feedback, bugs and translations
+
+- Bugs and ideas: [GitHub issues](https://github.com/pavoras/freeperiod/issues), or e-mail support@jaysay.it.
+- The in-app "Send feedback" opens your mail app with a draft you can read first; it never attaches your entries.
+- Translations: the app texts live in `app/src/main/res/values*/strings.xml`; `py -I tools/translation-check.py <lang>`
+  checks a translation offline (keys, placeholders, plurals).
 
 ## Licence
 
@@ -105,7 +118,10 @@ GPL-3.0-only (see [`LICENSE`](LICENSE)).
 
 Additional permission under GNU GPL version 3 section 7: If you modify this program, or any covered work, by
 linking or combining it with the Google Play Billing Library (com.android.billingclient), containing parts
-covered by the terms of the Android Software Development Kit License Agreement, the licensors of this
-program grant you additional permission to convey the resulting work.
+covered by the terms of the Android Software Development Kit License Agreement, or with the Google Play In-App
+Review Library (com.google.android.play:review), containing parts covered by the terms of the Play Core
+Software Development Kit Terms of Service, the licensors of this program grant you additional permission to
+convey the resulting work.
 
-The Google Play build contains this library for the optional support purchase; the F-Droid build does not.
+The Google Play build contains these libraries for the optional support purchase and the rating card; the F-Droid
+build contains neither.

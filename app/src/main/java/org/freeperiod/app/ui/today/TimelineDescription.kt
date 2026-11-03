@@ -29,5 +29,5 @@ internal fun timelineDescription(timeline: CycleTimeline, context: Context, loca
 }
 
 internal fun formatSpokenDate(date: LocalDate, today: LocalDate, locale: Locale): String =
-    date.format(DateTimeFormatter.ofPattern((if (locale.language == "de") "d. MMMM" else "d MMMM") +
-        if (date.year == today.year) "" else " yyyy", locale))
+    date.format(DateTimeFormatter.ofPattern((if (locale.language == "en") "d MMMM" else dayMonthPattern(locale, long = true)) +
+        if (date.year == today.year) "" else if (locale.language in setOf("pt", "es")) " 'de' yyyy" else " yyyy", locale))
