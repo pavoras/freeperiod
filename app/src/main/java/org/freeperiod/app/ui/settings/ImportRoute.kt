@@ -19,7 +19,7 @@ import org.freeperiod.app.R
 fun ImportRoute(container: AppContainer, onRestored: () -> Unit = {}, onBack: () -> Unit) {
     val scope = rememberCoroutineScope()
     val model: ImportViewModel = viewModel(key = "csv-import", factory = viewModelFactory {
-        initializer { ImportViewModel(container.repository, container.backupIo, container.clock, container.bluemoonReader) }
+        initializer { ImportViewModel(container.repository, container.backupIo, container.clock, container.appDatabaseReader) }
     })
     val backup: BackupViewModel = viewModel(key = "import-backup", factory = viewModelFactory {
         initializer { BackupViewModel(container.repository, container.backupIo, container.clock) }

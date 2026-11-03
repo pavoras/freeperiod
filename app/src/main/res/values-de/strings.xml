@@ -452,14 +452,14 @@
     </plurals>
     <string name="import_title">Importieren</string>
     <string name="import_from_app">Aus einer anderen App importieren</string>
-    <string name="import_intro">Wähle eine CSV mit bisherigen Perioden und Einträgen, eine Datei, die du aus Flo, Clue oder Bluemoon exportiert hast, oder ein Free&#8288;Period-Backup.</string>
+    <string name="import_intro">Wähle eine CSV mit bisherigen Perioden und Einträgen, eine Datei, die du aus Flo, Clue, Periodenkalender oder Bluemoon exportiert hast, oder ein Free&#8288;Period-Backup.</string>
     <string name="import_csv">CSV-Datei wählen</string>
     <string name="import_backup">Free&#8288;Period-Backup</string>
-    <string name="import_app">Datei aus Flo, Clue oder Bluemoon</string>
+    <string name="import_app">Datei aus einer anderen App</string>
     <string name="import_flo_password">Gib das Passwort aus der E-Mail von Flo ein.</string>
     <string name="import_flo_open">Öffnen</string>
     <string name="import_flo_wrong_password">Das Passwort ist falsch oder die Datei ist beschädigt. Es wurde nichts geändert.</string>
-    <string name="import_app_invalid">Nichts zum Importieren gefunden. Wähle die ZIP- oder JSON-Datei von Flo, das .cluedata-Backup von Clue oder das Backup von Bluemoon.</string>
+    <string name="import_app_invalid">Nichts zum Importieren gefunden. Wähle die Export- oder Backup-Datei aus Flo, Clue, Periodenkalender oder Bluemoon.</string>
     <string name="import_choose_format">Wähle das Datumsformat dieser Datei.</string>
     <string name="import_format_iso">Jahr/Monat/Tag (2026-04-12)</string>
     <string name="import_format_dmy">Tag/Monat/Jahr (12/04/2026)</string>

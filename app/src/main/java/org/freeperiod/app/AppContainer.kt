@@ -31,7 +31,7 @@ class AppContainer(context: Context) {
         reminderScheduler.reconcile(repository, force = true)
     }, clock = clock)
     val backupIo = BackupIo(context.applicationContext.contentResolver)
-    val bluemoonReader = BluemoonReader(java.io.File(appContext.cacheDir, "import"))
+    val appDatabaseReader = AppDatabaseReader(java.io.File(appContext.cacheDir, "import"))
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     val notifications = Notifications(context.applicationContext)
     val reminderScheduler by lazy { ReminderScheduler(WorkManager.getInstance(context.applicationContext)) }

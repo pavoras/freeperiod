@@ -7,7 +7,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.*
 import android.database.sqlite.SQLiteDatabase
 import java.io.File
-import org.freeperiod.app.backup.BluemoonReader
+import org.freeperiod.app.backup.AppDatabaseReader
 import org.freeperiod.app.backup.DocumentIo
 import org.freeperiod.app.data.DatabaseTest
 import org.freeperiod.engine.*
@@ -34,7 +34,7 @@ class ImportTest : DatabaseTest() {
     @After fun cleanup() { models.clear(); Dispatchers.resetMain() }
     @get:Rule val folder = org.junit.rules.TemporaryFolder()
     private val scratch by lazy { folder.newFolder("import") }
-    private fun model() = ImportViewModel(repository, io, { today }, BluemoonReader(scratch)).also { models.put("import", it) }
+    private fun model() = ImportViewModel(repository, io, { today }, AppDatabaseReader(scratch)).also { models.put("import", it) }
     private fun day(month: Int, day: Int) = today.withMonth(month).withDayOfMonth(day)
 
     @Test fun csvWithoutSituationKeepsDefaultOnAndRespectsAnExistingOptOut() = runTest {
@@ -158,6 +158,30 @@ class ImportTest : DatabaseTest() {
         assertNull(logs[day(3, 3)])
         assertEquals(Sex.PROTECTED, logs.getValue(day(3, 15)).sex)
         assertEquals(Sex.UNPROTECTED, logs.getValue(day(3, 16)).sex)
+    }
+
+    @Test fun periodCalendarBackupImports() = runTest {
+        val database = sqlite { db ->
+            db.execSQL("CREATE TABLE Period (_id INTEGER PRIMARY KEY, date INTEGER, period INTEGER, cycle INTEGER)")
+            db.execSQL("CREATE TABLE Note (_id INTEGER PRIMARY KEY, date INTEGER, note TEXT, symptom TEXT, mood TEXT)")
+            db.execSQL("INSERT INTO Period (date, period, cycle) VALUES (20260302, 5, 28), (20260330, -4, 28)")
+            db.execSQL("INSERT INTO Note (date, note) VALUES (20260303, 'tired'), (20260304, '')")
+        }
+        // Wrapped like the app's .pc file: Java data blocks around a ZIP that holds cloud.db.
+        val zip = java.io.ByteArrayOutputStream().also { out ->
+            java.util.zip.ZipOutputStream(out).use { z -> z.putNextEntry(java.util.zip.ZipEntry("cloud.db")); z.write(database); z.closeEntry() }
+        }.toByteArray()
+        bytes = java.io.ByteArrayOutputStream().also { out ->
+            java.io.ObjectOutputStream(out).use { o -> o.writeInt(-1); o.writeInt(1); o.writeInt(0); o.write(zip) }
+        }.toByteArray()
+        val model = model()
+        model.readApp(Uri.parse("content://test/pc")).join()
+        assertNull(model.state.value.error)
+        assertEquals(listOf(Period(0, day(3, 2), day(3, 6)), Period(0, day(3, 30), day(4, 2))), model.state.value.periods)
+        model.confirm().join()
+        assertEquals(2, model.state.value.imported)
+        assertEquals(listOf(DayLog(day(3, 3), note = "tired")), repository.snapshot().dayLogs)
+        assertTrue(scratch.listFiles().orEmpty().isEmpty())
     }
 
     @Test fun otherSqliteFilesAreNotImported() = runTest {

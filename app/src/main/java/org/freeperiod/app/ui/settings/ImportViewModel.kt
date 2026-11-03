@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.freeperiod.app.R
-import org.freeperiod.app.backup.BluemoonReader
+import org.freeperiod.app.backup.AppDatabaseReader
 import org.freeperiod.app.backup.DocumentIo
 import org.freeperiod.app.data.Repository
 import org.freeperiod.engine.Period
@@ -33,7 +33,7 @@ data class ImportUiState(
 )
 
 class ImportViewModel(private val repository: Repository, private val io: DocumentIo,
-    private val clock: () -> LocalDate, private val bluemoon: BluemoonReader? = null) : ViewModel() {
+    private val clock: () -> LocalDate, private val databases: AppDatabaseReader? = null) : ViewModel() {
     private val mutable = MutableStateFlow(ImportUiState())
     val state = mutable.asStateFlow()
     private var text: String? = null
@@ -56,8 +56,9 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
     }
 
     /**
-     * Another app's file, told apart by its content: Bluemoon's SQLite backup, Clue's backup (JSON with day
-     * entries), or Flo's export (the password-protected ZIP from Flo's support, or the JSON inside it).
+     * Another app's file, told apart by its content: Bluemoon's SQLite backup, Period Calendar's backup (.pc),
+     * Clue's backup (JSON with day entries), or Flo's export (the password-protected ZIP from Flo's support, or
+     * the JSON inside it).
      */
     fun readApp(uri: Uri?): Job = operation(R.string.file_read_error) {
         if (uri == null) return@operation
@@ -66,10 +67,13 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
         mutable.value = ImportUiState(busy = true)
         val bytes = io.read(uri)
         val today = clock()
+        val database = if (PeriodCalendarImport.isBackup(bytes)) PeriodCalendarImport.database(bytes) ?: ByteArray(0)
+            else bytes.takeIf { AppDatabaseReader.isSqlite(it) }
         val other = withContext(Dispatchers.IO) {
-            if (BluemoonReader.isSqlite(bytes)) bluemoon?.read(bytes, today) else ClueImport.parse(bytes, today)
+            if (database != null) databases?.read(database, today) else ClueImport.parse(bytes, today)
         }
-        if (other != null || BluemoonReader.isSqlite(bytes)) {
+        if (database != null && database !== bytes) database.fill(0)
+        if (other != null || database != null) {
             bytes.fill(0)
             fromApp = other
             // Days with only Clue tags count as entries too.
