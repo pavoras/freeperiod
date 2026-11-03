@@ -11,14 +11,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.freeperiod.app.ui.theme.*
 
 /** Compose animations inherit the platform animator duration scale, including zero. */
 @Composable
 fun FpChip(selected: Boolean, onClick: () -> Unit, label: String, modifier: Modifier = Modifier,
-    enabled: Boolean = true, stacked: Boolean = false, icon: (@Composable () -> Unit)? = null) {
+    enabled: Boolean = true, stacked: Boolean = false, labelStyle: TextStyle = MaterialTheme.typography.labelMedium,
+    horizontalPadding: Dp = 6.dp, icon: (@Composable () -> Unit)? = null) {
     val t = LocalDaylight.current
     val background by animateColorAsState(if (selected) t.accent.selectedChipBackground else t.surface,
         tween(120), label = "chipFill")
@@ -28,9 +31,9 @@ fun FpChip(selected: Boolean, onClick: () -> Unit, label: String, modifier: Modi
         border = BorderStroke(if (selected) 2.dp else 1.dp,
             if (selected) t.accent.selectedChipBorder else t.control)) {
         val target = Modifier.selectable(selected, enabled = enabled, role = Role.Checkbox, onClick = onClick)
-            .heightIn(min = if (stacked) 64.dp else 48.dp).padding(horizontal = 6.dp, vertical = 8.dp)
+            .heightIn(min = if (stacked) 64.dp else 48.dp).padding(horizontal = horizontalPadding, vertical = 8.dp)
         val text: @Composable () -> Unit = {
-            Text(label, style = MaterialTheme.typography.labelMedium,
+            Text(label, style = labelStyle,
                 fontWeight = if (selected) FontWeight.Medium else FontWeight.Normal, textAlign = TextAlign.Center)
         }
         if (stacked) Column(target, horizontalAlignment = Alignment.CenterHorizontally,

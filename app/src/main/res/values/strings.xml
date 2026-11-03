@@ -71,6 +71,7 @@
     <string name="close">Close</string>
     <string name="previous_day">Previous day</string>
     <string name="next_day">Next day</string>
+    <string name="day_saved_automatically">Saved automatically</string>
     <string name="day_read_only">You can view future days. Log them when the day arrives.</string>
     <string name="day_period_heading">Period</string>
     <string name="period_start_day">Period started on this day</string>

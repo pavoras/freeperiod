@@ -35,17 +35,26 @@ data class DayEntryUiState(
     val overrides: List<UiOverride> = emptyList(),
     /** Inside a logged period (also its ongoing days up to today). */
     val periodDay: Boolean = false,
+    /** Days with an entry and period days within a week either side, for the week strip. */
+    val entryDays: Set<LocalDate> = emptySet(),
+    val periodDays: Set<LocalDate> = emptySet(),
 ) {
     val readOnly: Boolean get() = date > today
 }
 
-internal fun dayEntryState(data: BackupData, date: LocalDate, today: LocalDate) = DayEntryUiState(
-    date, today, log = data.dayLogs.find { it.date == date } ?: DayLog(date), tags = data.tags,
-    periodStart = data.periods.any { it.start == date }, periodEnd = data.periods.any { it.end == date },
-    canEndPeriod = data.periods.any { it.start <= date }, loading = false,
-    situation = data.situation, customCategories = data.customCategories, overrides = data.overrides,
-    periodDay = PeriodRules.periodOn(data.periods.filter { it.start <= today }.sortedBy { it.start }, date, today) != null,
-)
+internal fun dayEntryState(data: BackupData, date: LocalDate, today: LocalDate): DayEntryUiState {
+    val started = data.periods.filter { it.start <= today }.sortedBy { it.start }
+    val near = (-7L..7L).map { date.plusDays(it) }
+    return DayEntryUiState(
+        date, today, log = data.dayLogs.find { it.date == date } ?: DayLog(date), tags = data.tags,
+        periodStart = data.periods.any { it.start == date }, periodEnd = data.periods.any { it.end == date },
+        canEndPeriod = data.periods.any { it.start <= date }, loading = false,
+        situation = data.situation, customCategories = data.customCategories, overrides = data.overrides,
+        periodDay = PeriodRules.periodOn(started, date, today) != null,
+        entryDays = data.dayLogs.filter { !it.isEmpty() && it.date in near }.map { it.date }.toSet(),
+        periodDays = near.filter { PeriodRules.periodOn(started, it, today) != null }.toSet(),
+    )
+}
 
 class DayEntryViewModel(
     private val date: LocalDate,

@@ -14,7 +14,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
@@ -141,7 +143,13 @@ fun DayEntrySheet(
                             Icon(painterResource(R.drawable.ic_fp_close), stringResource(R.string.close))
                         }
                     }
+                    WeekStrip(state.date, state.today, state.entryDays, state.periodDays, onDateChange)
                     if (state.readOnly) Text(stringResource(R.string.day_read_only), style = MaterialTheme.typography.bodyMedium)
+                    else Row(Modifier.fillMaxWidth().padding(top = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(painterResource(R.drawable.ic_item_check), null, Modifier.size(14.dp), tint = tones.muted)
+                        Text(stringResource(R.string.day_saved_automatically), style = MaterialTheme.typography.labelSmall, color = tones.muted)
+                    }
                 }
                 if (state.loading) item { CircularProgressIndicator() }
                 state.error?.let { error ->
@@ -253,20 +261,21 @@ fun DayEntrySheetFrame(onDismiss: () -> Unit, content: @Composable () -> Unit) {
  * label decides. Large fonts and long German words get fewer, wider chips instead of broken letters.
  */
 @Composable
-private fun <T> ChoiceGrid(values: List<T>, labels: List<String>, maxColumns: Int, inlineIcon: Boolean = false, content: @Composable (T) -> Unit) {
+private fun <T> ChoiceGrid(values: List<T>, labels: List<String>, maxColumns: Int, inlineIcon: Boolean = false,
+    style: TextStyle = MaterialTheme.typography.labelMedium, chipPadding: Dp = 6.dp, content: @Composable (T) -> Unit) {
     val measurer = rememberTextMeasurer()
-    val style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium)
+    val measured = style.copy(fontWeight = FontWeight.Medium)
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val parts = labels.flatMap { it.split(' ') }.flatMap { word ->
             word.split('­').let { pieces -> pieces.mapIndexed { i, piece -> if (i < pieces.lastIndex) "$piece-" else piece } }
         }
-        val longest = parts.maxOfOrNull { measurer.measure(it, style, softWrap = false).size.width } ?: 0
+        val longest = parts.maxOfOrNull { measurer.measure(it, measured, softWrap = false).size.width } ?: 0
         val gap = 4.dp
-        val needed = with(LocalDensity.current) { longest.toDp() } + 16.dp + if (inlineIcon) 24.dp else 0.dp // padding, borders and icon
+        val needed = with(LocalDensity.current) { longest.toDp() } + chipPadding * 2 + 4.dp + if (inlineIcon) 24.dp else 0.dp // padding, borders and icon
         val columns = ((maxWidth + gap) / (needed + gap)).toInt().coerceIn(1, maxOf(1, maxColumns))
-        // Balance the rows (5 items in 4 columns become 3 + 2, not 4 + 1).
+        // Balance the rows (5 items in 4 columns become 3 + 2, not 4 + 1); a single row fills the width.
         val rows = (values.size + columns - 1) / columns
-        val balanced = if (rows > 1) (values.size + rows - 1) / rows else columns
+        val balanced = if (rows > 1) (values.size + rows - 1) / rows else minOf(columns, values.size)
         ChoiceRows(values, balanced, content)
     }
 }
@@ -297,16 +306,21 @@ private fun EntryChoices(category: EntryCategory, state: DayEntryUiState, action
     val symptoms = state.visibleSymptoms(moreSymptoms).map { it.name }.toSet()
     val items = state.entryItems(category).filter { category.key != "symptoms" || it.tag != null || it.name in symptoms }
     val appearances = items.map { it.appearance(state) }
-    // Scales and plain choices stay text-only unless the user picked an icon; one repeated icon adds nothing.
-    val iconFields = setOf("mood", "symptoms")
-    val showIcon = items.map { item -> category.key in iconFields || item.tag != null ||
-        state.overrides.any { it.key == item.key && it.iconKey != null } }
+    // Plain choices stay text-only unless the user picked an icon; one repeated icon adds nothing. Flow and pain
+    // show their level as a glyph (a filling period dot, rising bars), unless the user picked an icon.
+    val levels = category.key in setOf("flow", "pain")
+    val iconFields = setOf("mood", "symptoms", "flow", "pain")
+    val ownIcon = items.map { item -> item.tag != null || state.overrides.any { it.key == item.key && it.iconKey != null } }
+    val showIcon = items.mapIndexed { i, _ -> category.key in iconFields || ownIcon[i] }
     val moreLabel = stringResource(if (moreSymptoms) R.string.entry_less else R.string.entry_more)
     // No bleeding is the usual answer outside a period: shown as chosen until something else is picked (nothing is saved).
     val impliedNone = category.key == "flow" && state.log.flow == null && !state.periodDay && !state.readOnly
     val values = if (onMore != null) items + null else items
     val labels = appearances.map { it.label } + if (onMore != null) listOf(moreLabel) else emptyList()
-    ChoiceGrid(values, labels, if (category.key == "symptoms") 4 else 5, inlineIcon = category.key !in iconFields && showIcon.any { it }) { item ->
+    val labelStyle = if (levels) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium
+    val chipPadding = if (levels) 0.dp else 6.dp
+    ChoiceGrid(values, labels, if (category.key == "symptoms") 4 else 5, inlineIcon = category.key !in iconFields && showIcon.any { it },
+        style = labelStyle, chipPadding = chipPadding) { item ->
         if (item == null) FpChip(moreSymptoms, { onMore?.invoke() }, moreLabel, Modifier.fillMaxWidth(), stacked = true,
             icon = { Icon(painterResource(R.drawable.ic_fp_more), null, Modifier.size(20.dp)) })
         else {
@@ -325,8 +339,13 @@ private fun EntryChoices(category: EntryCategory, state: DayEntryUiState, action
                     "symptoms" -> actions.symptom(Symptom.valueOf(requireNotNull(item.name)))
                 }
             } }, appearance.label, Modifier.fillMaxWidth().fillMaxHeight(), enabled,
-                stacked = category.key in setOf("mood", "symptoms"),
-                icon = if (!showIcon[items.indexOf(item)]) null else { { Icon(painterResource(appearance.icon), null,
+                stacked = category.key in iconFields, labelStyle = labelStyle, horizontalPadding = chipPadding,
+                icon = if (!showIcon[items.indexOf(item)]) null
+                else if (levels && !ownIcon[items.indexOf(item)]) { {
+                    if (category.key == "flow") FlowGlyph(FlowLevel.valueOf(requireNotNull(item.name)), Modifier.testTag("entry-icon-${item.key}"))
+                    else PainGlyph(Pain.valueOf(requireNotNull(item.name)), Modifier.testTag("entry-icon-${item.key}"))
+                } }
+                else { { Icon(painterResource(appearance.icon), null,
                     Modifier.size(if (category.key == "mood") 27.dp else 20.dp)
                         .testTag(if (category.key == "mood" && item.tag == null) "mood-icon-${item.name}" else "entry-icon-${item.key}")) } })
         }

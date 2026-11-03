@@ -71,6 +71,7 @@
     <string name="close">Schließen</string>
     <string name="previous_day">Vorheriger Tag</string>
     <string name="next_day">Nächster Tag</string>
+    <string name="day_saved_automatically">Wird automatisch gespeichert</string>
     <string name="day_read_only">Du kannst zukünftige Tage ansehen und sie eintragen, sobald der Tag da ist.</string>
     <string name="day_period_heading">Periode</string>
     <string name="period_start_day">Periode an diesem Tag begonnen</string>

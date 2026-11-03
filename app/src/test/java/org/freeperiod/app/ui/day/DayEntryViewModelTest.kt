@@ -48,6 +48,16 @@ class DayEntryViewModelTest : DatabaseTest() {
         assertEquals(Mood.GOOD, repository.snapshot().dayLogs.single().mood)
     }
 
+    @Test fun weekStripKnowsNearbyEntriesAndPeriodDays() = runTest {
+        repository.addPeriod(today.minusDays(3), today.minusDays(2)).getOrThrow()
+        repository.saveDayLog(DayLog(today.minusDays(1), mood = Mood.GOOD))
+        repository.saveDayLog(DayLog(today.minusDays(20), mood = Mood.GOOD))
+        val vm = viewModel()
+        vm.refresh().join()
+        assertEquals(setOf(today.minusDays(1)), vm.state.value.entryDays)
+        assertEquals(setOf(today.minusDays(3), today.minusDays(2)), vm.state.value.periodDays)
+    }
+
     @Test fun clearDayUndoRestores() = runTest {
         val tag = repository.addTag("Travel")
         val log = DayLog(today, flow = FlowLevel.NONE, mood = Mood.GOOD,
