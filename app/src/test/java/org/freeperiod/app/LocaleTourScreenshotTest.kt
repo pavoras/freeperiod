@@ -58,6 +58,9 @@ class LocaleTourScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "pt-rBR-w360dp-h800dp-xxhdpi")
     fun ptBR() = tour("pt-BR")
 
+    @Test @Config(sdk = [35], qualifiers = "es-rES-w360dp-h800dp-xxhdpi")
+    fun es() = tour("es-ES")
+
     private enum class Screen { TODAY, RING, DAY, HISTORY, SETTINGS, IMPORT, ONBOARDING, LOCK, DISCLAIMER }
 
     private fun tour(languageTag: String) {

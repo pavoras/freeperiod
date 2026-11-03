@@ -118,7 +118,7 @@ android {
 
     androidResources {
         // Only the languages we ship; keeps library translations out of the APK.
-        localeFilters += listOf("en", "de", "pt-rBR")
+        localeFilters += listOf("en", "de", "pt-rBR", "es")
     }
 
     lint {

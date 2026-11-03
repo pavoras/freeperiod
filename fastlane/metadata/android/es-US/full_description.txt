@@ -1,0 +1,20 @@
+Tu ciclo, tu espacio, solo en tu teléfono.
+
+FreePeriod combina un calendario del periodo y un diario. No tiene permiso de internet, así que la propia app no puede enviar nada a internet. Cualquiera puede comprobarlo en su código abierto. Gratis, sin anuncios, suscripción ni cuenta.
+
+• Registra tu periodo con un toque y consulta tu día del ciclo de un vistazo, en un calendario o un anillo del ciclo.
+• Estimaciones del calendario para tus próximos dos periodos, basadas en tus propios registros.
+• Opcional: días con mayor probabilidad de embarazo, mostrados como una simple estimación del calendario.
+• Diario: ánimo, sangrado, dolor, síntomas, flujo vaginal, etiquetas y notas; opcionalmente apetito, deseo sexual, medicamentos y un diario del dolor. Cambia nombres, ordena u oculta lo que quieras y agrega tus propias categorías e iconos.
+• Historial con promedios, síntomas registrados y gráficos de una semana, un mes, 3 meses o un año.
+• Un resumen en PDF de tus registros, por ejemplo, para una consulta médica.
+• Recordatorios para tu periodo, la píldora o algo personal.
+• Etapas de la vida: durante el embarazo, después del parto y en la menopausia, las estimaciones se pausan y tu diario continúa.
+• ¿Vienes de otra app? Importa tus periodos y registros anteriores desde su archivo de exportación o copia de seguridad, un archivo CSV o una copia de seguridad de FreePeriod.
+• Nueve colores de acento, desde tonos pastel suaves hasta oscuros y sencillos; tema claro, oscuro o como el de tu teléfono. Inglés, alemán, portugués de Brasil y español.
+
+Privacidad desde el diseño
+FreePeriod no tiene permiso de internet ni análisis de uso. Tus registros se quedan en tu teléfono. Bloqueo opcional de la app, copias de seguridad cifradas (también automáticas, en una carpeta que elijas) y exportación CSV: tú decides dónde se guardan los archivos.
+
+Límites claros
+FreePeriod no es un dispositivo médico, ni un método anticonceptivo, ni una herramienta para ayudarte a conseguir un embarazo. Todas las fechas son estimaciones basadas en tus propios registros y pueden ser incorrectas. Si tienes dudas sobre anticoncepción, embarazo o tu salud, consulta a un profesional de medicina o farmacia.
