@@ -1,0 +1,3 @@
+• Bring more along: backups and exports of more period apps now also bring your diary entries – what you already logged stays.
+• Day entry: flow as filling circles, pain as bars, and a week strip to jump between days.
+• Everything you tap is saved right away – now the day entry says so.
