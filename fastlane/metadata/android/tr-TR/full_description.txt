@@ -11,7 +11,7 @@ FreePeriod, regl takvimi ve günlük bir arada. İnternet izni yok, bu yüzden u
 • Reglin, bir hap veya kişisel bir şey için hatırlatıcılar.
 • Yaşam dönemleri: hamilelikte, doğum sonrasında ve menopozda tahminler duraklar, günlüğün kalır.
 • Başka bir uygulamadan mı geliyorsun? Geçmiş regl dönemlerini ve kayıtlarını o uygulamanın dışa aktarım veya yedek dosyasından, bir CSV dosyasından ya da FreePeriod yedeğinden içe aktar.
-• Yumuşak pastellerden koyu ve sade tonlara dokuz vurgu rengi; açık, koyu veya telefonunla aynı tema. İngilizce, Almanca, Brezilya Portekizcesi, İspanyolca, Endonezce ve Türkçe.
+• Yumuşak pastellerden koyu ve sade tonlara dokuz vurgu rengi; açık, koyu veya telefonunla aynı tema. İngilizce, Almanca, Brezilya Portekizcesi, İspanyolca, Endonezce, Türkçe ve Fransızca.
 
 Gizlilik temelimiz
 FreePeriod internet izni veya analiz içermez. Kayıtların telefonunda kalır. İsteğe bağlı uygulama kilidi, şifrelenmiş yedek dosyaları (seçtiğin klasöre otomatik yedekleme de dâhil) ve CSV dışa aktarımı: dosyaların nereye gideceğine sen karar verirsin.

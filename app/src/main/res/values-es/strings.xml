@@ -498,7 +498,7 @@
     <string name="home_view_ring">Anillo del ciclo</string>
     <string name="jump_to_today">Mostrar hoy en el calendario</string>
     <string name="onboarding_track_title">¿Qué quieres registrar?</string>
-    <string name="onboarding_track_intro">Tu periodo y sangrado siempre están presentes. Elige qué más te importa.</string>
+    <string name="onboarding_track_intro">Periodo y sangrado siempre aparecen en tu registro. Elige qué más te importa.</string>
     <string name="onboarding_track_later">Puedes cambiarlo cuando quieras: Ajustes › Personalizar registro del día, o el engranaje del registro del día.</string>
     <string name="feedback">Enviar comentarios</string>
     <string name="feedback_subject">Comentarios sobre FreePeriod</string>

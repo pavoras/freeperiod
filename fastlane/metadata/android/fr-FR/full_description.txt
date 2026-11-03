@@ -1,0 +1,20 @@
+Ton cycle, ton espace – uniquement sur ton téléphone.
+
+FreePeriod réunit un calendrier des règles et un journal du jour. Elle n’a aucune autorisation d’accès à Internet : l’appli elle-même ne peut donc rien envoyer en ligne. Tout le monde peut le vérifier dans son code source ouvert. Gratuite, sans publicité, sans abonnement et sans compte.
+
+• Note le début de tes règles d’un geste et vois le jour de ton cycle en un coup d’œil, dans un calendrier ou un anneau du cycle.
+• Des estimations du calendrier pour tes deux prochaines règles, à partir de tes propres entrées.
+• En option : les jours à probabilité de grossesse plus élevée, présentés comme une simple estimation du calendrier.
+• Journal du jour : humeur, flux, douleur, symptômes, pertes, étiquettes et notes ; en option, appétit, désir sexuel, médicaments et journal des douleurs. Renomme, réorganise ou masque les éléments, et ajoute tes propres catégories et icônes.
+• Historique avec moyennes, symptômes notés et graphiques sur une semaine, un mois, 3 mois ou un an.
+• Un résumé PDF de tes entrées, par exemple pour un rendez-vous médical.
+• Des rappels pour tes règles, ta pilule ou un sujet personnel.
+• Phases de vie : pendant la grossesse, après la naissance et à la ménopause, les estimations se mettent en pause et ton journal reste.
+• Tu viens d’une autre appli ? Importe tes anciennes règles et entrées depuis son fichier d’export ou de sauvegarde, un fichier CSV ou une sauvegarde FreePeriod.
+• Neuf couleurs d’accent, des pastels doux aux tons sombres et sobres ; thème clair, sombre ou comme ton téléphone. Anglais, allemand, portugais du Brésil, espagnol, indonésien, turc et français.
+
+La confidentialité dès le départ
+FreePeriod n’a ni autorisation d’accès à Internet ni analyse d’utilisation. Tes entrées restent sur ton téléphone. Verrouillage de l’appli en option, sauvegardes chiffrées (aussi automatiques, dans un dossier de ton choix) et export CSV : tu décides où vont les fichiers.
+
+Des limites claires
+FreePeriod n’est pas un dispositif médical, ni une méthode de contraception, ni un outil pour t’aider à concevoir. Toutes les dates sont des estimations à partir de tes propres entrées et peuvent être fausses. Pour tes questions sur la contraception, la grossesse ou ta santé, parles-en à un médecin ou à un pharmacien.

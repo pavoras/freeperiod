@@ -472,7 +472,7 @@
     <string name="home_view_ring">Lingkaran siklus</string>
     <string name="jump_to_today">Tampilkan hari ini di kalender</string>
     <string name="onboarding_track_title">Apa yang ingin kamu catat?</string>
-    <string name="onboarding_track_intro">Haid dan perdarahan kamu selalu ada. Pilih hal lain yang penting buat kamu.</string>
+    <string name="onboarding_track_intro">Haid dan perdarahan selalu ada di catatan harian. Pilih hal lain yang penting buat kamu.</string>
     <string name="onboarding_track_later">Kamu bisa mengubahnya kapan saja: Setelan › Sesuaikan catatan harian, atau ikon roda gigi di catatan harian.</string>
     <string name="feedback">Kirim masukan</string>
     <string name="feedback_subject">Masukan FreePeriod</string>

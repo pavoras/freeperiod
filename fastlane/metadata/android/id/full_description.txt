@@ -11,7 +11,7 @@ FreePeriod menggabungkan kalender haid dan catatan harian. Aplikasi ini tidak pu
 • Pengingat untuk haid, pil atau hal pribadi lainnya.
 • Fase kehidupan: selama kehamilan, setelah melahirkan dan saat menopause, perkiraan dijeda dan catatan harian kamu tetap ada.
 • Pindah dari aplikasi lain? Impor haid dan catatan sebelumnya dari file ekspor atau cadangan aplikasi tersebut, file CSV atau cadangan FreePeriod.
-• Sembilan warna aksen, dari pastel lembut hingga gelap dan sederhana; tema terang, gelap atau mengikuti ponsel kamu. Bahasa Inggris, Jerman, Portugis Brasil, Spanyol, Indonesia dan Turki.
+• Sembilan warna aksen, dari pastel lembut hingga gelap dan sederhana; tema terang, gelap atau mengikuti ponsel kamu. Bahasa Inggris, Jerman, Portugis Brasil, Spanyol, Indonesia, Turki dan Prancis.
 
 Privasi sejak awal
 FreePeriod tidak punya izin internet atau analitik. Catatan kamu tetap di ponsel kamu. Kunci aplikasi opsional, file cadangan terenkripsi (juga otomatis, ke folder pilihan kamu) dan ekspor CSV – kamu menentukan tujuan file.

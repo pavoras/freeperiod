@@ -484,7 +484,7 @@
     <string name="home_view_ring">Döngü halkası</string>
     <string name="jump_to_today">Takvimde bugünü göster</string>
     <string name="onboarding_track_title">Neleri kaydetmek istersin?</string>
-    <string name="onboarding_track_intro">Reglin ve kanama her zaman yer alır. Senin için önemli olan diğer şeyleri seç.</string>
+    <string name="onboarding_track_intro">Regl ve kanama, günlük kayıtta her zaman yer alır. Senin için önemli olan diğer şeyleri seç.</string>
     <string name="onboarding_track_later">Bunu istediğin zaman değiştirebilirsin: Ayarlar › Günlük kaydı özelleştir veya günlük kaydındaki dişli simgesi.</string>
     <string name="feedback">Geri bildirim gönder</string>
     <string name="feedback_subject">FreePeriod geri bildirimi</string>
