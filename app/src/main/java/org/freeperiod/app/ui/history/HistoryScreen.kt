@@ -3,6 +3,8 @@ package org.freeperiod.app.ui.history
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
@@ -22,6 +24,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import kotlinx.coroutines.launch
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.components.*
 import org.freeperiod.app.ui.theme.*
@@ -30,17 +33,45 @@ import org.freeperiod.engine.*
 
 @Composable
 fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, modifier: Modifier = Modifier,
-    onDismissHint: (Long) -> Unit = {}) {
+    onDismissHint: (Long) -> Unit = {}, onOpenDay: (LocalDate) -> Unit = {}) {
     var selectedId by rememberSaveable { mutableStateOf<Long?>(null) }
     var visibleIds by remember(state.cycles.map { it.startPeriodId }) { mutableStateOf(emptySet<Long>()) }
     var range by rememberSaveable { mutableStateOf(ChartRange.MONTH) }
     val tones = LocalDaylight.current
+    // Overview and the diary side by side: swipe, or tap the switch at the top.
+    val pager = rememberPagerState { 2 }
+    val scope = rememberCoroutineScope()
+    Column(modifier.fillMaxSize().background(tones.background)) {
+        Column(Modifier.padding(start = FpSpacing.screen, end = FpSpacing.screen, top = FpSpacing.screen),
+            verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+            FpTopBar(stringResource(R.string.nav_history))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                listOf(R.string.history_tab_overview, R.string.history_tab_entries).forEachIndexed { page, label ->
+                    FpChip(pager.currentPage == page, { scope.launch { pager.animateScrollToPage(page) } }, stringResource(label),
+                        Modifier.weight(1f))
+                }
+            }
+        }
+        HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth(), key = { it }) { page ->
+            if (page == 1) DiaryList(state, onOpenDay, contentTop = FpSpacing.section)
+            else HistoryOverview(state, onInclude, onDismissHint, range, { range = it }, { selectedId = it }, visibleIds, { visibleIds = it })
+        }
+    }
+    state.cycles.find { it.startPeriodId == selectedId }?.let { cycle ->
+        CycleDetailsSheet(cycle, !state.writing, onInclude, { selectedId = null })
+    }
+}
+
+@Composable
+private fun HistoryOverview(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, onDismissHint: (Long) -> Unit,
+    range: ChartRange, onRange: (ChartRange) -> Unit, onSelect: (Long) -> Unit, visibleIds: Set<Long>, onVisible: (Set<Long>) -> Unit) {
+    val tones = LocalDaylight.current
     val locale = LocalConfiguration.current.locales[0]
     val numberFormat = NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = 1 }
     val dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-    LazyColumn(modifier.fillMaxSize().background(tones.background).testTag("history-list"), contentPadding = PaddingValues(FpSpacing.screen),
+    LazyColumn(Modifier.fillMaxSize().testTag("history-list"),
+        contentPadding = PaddingValues(FpSpacing.screen, FpSpacing.section, FpSpacing.screen, FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(FpSpacing.section)) {
-        item { FpTopBar(stringResource(R.string.nav_history)) }
         if (state.loading) item { CircularProgressIndicator() }
         else {
             if (state.phase == LifePhase.MENOPAUSE) {
@@ -71,7 +102,7 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
             else {
                 item {
                     Text(stringResource(R.string.history_cycles), style = MaterialTheme.typography.titleLarge)
-                    CycleChart(state.cycles, { selectedId = it }, { visibleIds = it })
+                    CycleChart(state.cycles, onSelect, onVisible)
                 }
                 val excluded = excludedCyclesInRange(state.cycles, visibleIds)
                 if (excluded.isNotEmpty()) item {
@@ -89,16 +120,13 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
                 } }
             }
             if (state.charts.isNotEmpty()) {
-                item { ChartRangePicker(range) { range = it } }
+                item { ChartRangePicker(range, onRange) }
                 state.charts.forEach { chart -> item(key = "chart:${chart.category.overrideKey}") { HistoryChartFor(state, chart, range.days) } }
             }
             if (state.phase in setOf(LifePhase.PERIMENOPAUSE, LifePhase.MENOPAUSE)) item { MonthlySymptoms(state) }
             else item { SymptomFrequency(state, state.symptomCounts, state.ownSymptomCounts, pluralStringResource(R.plurals.history_symptom_basis, state.symptomCycles, state.symptomCycles)) }
             if (state.error) item { Text(stringResource(R.string.error_storage), color = MaterialTheme.colorScheme.error) }
         }
-    }
-    state.cycles.find { it.startPeriodId == selectedId }?.let { cycle ->
-        CycleDetailsSheet(cycle, !state.writing, onInclude, { selectedId = null })
     }
 }
 

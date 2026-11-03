@@ -16,6 +16,8 @@ import androidx.work.WorkManager
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import org.freeperiod.app.reminders.*
+import org.freeperiod.app.rating.RatingMoments
+import org.freeperiod.app.rating.createRatingPrompt
 import org.freeperiod.app.support.Supporter
 import org.freeperiod.app.support.createSupporter
 import org.freeperiod.engine.predictionMode
@@ -39,6 +41,8 @@ class AppContainer(context: Context) {
     val autoBackup = AutoBackup(repository, settings, KeystoreSeal(), TreeAccess(appContext.contentResolver))
     /** Optional support purchase: Google Play in Play builds, none in F-Droid builds. */
     val supporter: Supporter by lazy { createSupporter(appContext, settings, applicationScope) }
+    /** Store rating card at a calm moment: Google Play's in Play builds, none in F-Droid builds. */
+    val ratingMoments by lazy { RatingMoments(settings, repository, createRatingPrompt(appContext), clock) }
 
     fun observeReminders() {
         notifications.createChannel()

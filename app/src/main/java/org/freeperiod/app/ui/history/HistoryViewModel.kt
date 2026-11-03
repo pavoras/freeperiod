@@ -38,7 +38,13 @@ data class HistoryUiState(
     /** Last [CHART_DAYS] days: one chart per shown category with the chart switched on and entries, and the period days. */
     val charts: List<HistoryChart> = emptyList(),
     val recentPeriodDays: Set<LocalDate> = emptySet(),
+    /** The diary: every day with an entry up to today, newest first. */
+    val diary: List<DiaryDay> = emptyList(),
+    val situation: Situation = Situation(),
 )
+
+/** A day in the diary list and whether it lies inside a logged period. */
+data class DiaryDay(val log: DayLog, val periodDay: Boolean)
 
 /**
  * A category over time. [levels]: its items from low (index 0, bottom row) to high, in the order the user set;
@@ -64,6 +70,7 @@ private fun charts(data: BackupData, days: List<SummaryDay>, today: LocalDate): 
 
 internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
     val periods = data.periods.filter { it.start <= today }
+    val started = periods.sortedBy { it.start }
     val cycles = PeriodRules.cycles(periods)
     val eligible = cycles.filter { it.eligible }
     val lengths = periods.mapNotNull { period ->
@@ -87,7 +94,10 @@ internal fun historyState(data: BackupData, today: LocalDate): HistoryUiState {
         ownSymptomCounts = if (window.isEmpty()) emptyMap() else ownCounts(data.dayLogs.filter { it.date >= window.first().start && it.date < window.last().nextStart }),
         monthlyOwnSymptoms = data.dayLogs.filter { it.date <= today }.groupBy { YearMonth.from(it.date) }.mapValues { (_, logs) -> ownCounts(logs) },
         charts = charts(data, recent, today),
-        recentPeriodDays = recent.filter { it.periodDay }.map { it.date }.toSet())
+        recentPeriodDays = recent.filter { it.periodDay }.map { it.date }.toSet(),
+        diary = data.dayLogs.filter { it.date <= today && !it.isEmpty() }.sortedByDescending { it.date }.map { log ->
+            DiaryDay(log, PeriodRules.periodOn(started, log.date, today) != null)
+        }, situation = data.situation)
 }
 
 class HistoryViewModel(private val repository: Repository, private val clock: () -> LocalDate = { LocalDate.now() }) : ViewModel() {

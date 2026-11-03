@@ -41,6 +41,44 @@ class HistoryScreenshotTest {
     @Test fun chartsSage_enLight() = captureLevels("chartsSage_enLight", Locale.US, accent = Accent.SAGE)
     @Test fun chartsYear_enLight() = captureLevels("chartsYear_enLight", Locale.US, range = "Year")
     @Test fun chartsWeek_enLight() = captureLevels("chartsWeek_enLight", Locale.US, range = "Week")
+    @Test fun diary_enLight() = captureDiary("diary_enLight", Locale.US)
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-night-xxhdpi")
+    fun diary_deDark() = captureDiary("diary_deDark", Locale.GERMANY, dark = true)
+    @Test fun diaryEmpty_enLight() = captureDiary("diaryEmpty_enLight", Locale.US, empty = true)
+    /** Needs real text measuring (native graphics) to know that a note is longer than three lines. */
+    @Test fun diaryLongNoteOpensWithMore() {
+        val today = clock()
+        val state = historyState(BackupData(periods = emptyList(), dayLogs = listOf(DayLog(today,
+            note = "A long walk by the river, then tea with a friend. ".repeat(6).trim())), tags = emptyList(),
+            settings = BackupSettings(null, false)), today)
+        compose.setContent { FreePeriodTheme { Surface { HistoryScreen(state, { _, _ -> }) } } }
+        compose.onNodeWithText("Entries").performClick()
+        compose.onNodeWithText("More").performClick()
+        compose.onNodeWithText("Less").assertIsDisplayed()
+    }
+    private fun captureDiary(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false) {
+        Locale.setDefault(locale)
+        val today = clock()
+        val de = locale.language == "de"
+        val walk = Tag(1, if (de) "Spaziergang" else "Long walk", iconKey = "leaf")
+        val logs = if (empty) emptyList() else listOf(
+            DayLog(today, mood = Mood.GOOD, flow = FlowLevel.LIGHT, pain = Pain.MILD, symptoms = setOf(Symptom.CRAMPS),
+                note = if (de) "Ruhiger Morgen, am Nachmittag Krämpfe. Wärmflasche hat geholfen, früh ins Bett."
+                    else "Slow morning, cramps in the afternoon. The hot water bottle helped, early night."),
+            DayLog(today.minusDays(1), mood = Mood.LOW, flow = FlowLevel.HEAVY, pain = Pain.MODERATE,
+                symptoms = setOf(Symptom.FATIGUE, Symptom.HEADACHE, Symptom.BLOATING)),
+            DayLog(today.minusDays(2), mood = Mood.OKAY, flow = FlowLevel.MEDIUM, tagIds = setOf(1),
+                note = (if (de) "Lange Runde durch den Park mit Mia. Danach Pasta gekocht und einen Film geschaut. "
+                    else "Long loop through the park with Mia. Cooked pasta afterwards and watched a film. ").repeat(3).trim()),
+            DayLog(today.minusDays(9), mood = Mood.GREAT, discharge = Discharge.CREAMY, tagIds = setOf(1)),
+            DayLog(today.minusDays(14), note = if (de) "Neue Laufschuhe gekauft." else "Bought new running shoes."))
+        val periods = listOf(Period(1, today.minusDays(2), null))
+        val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = listOf(walk), settings = BackupSettings(null, false)), today)
+        compose.setContent { FreePeriodTheme(darkTheme = dark) { Surface { HistoryScreen(state, { _, _ -> }) } } }
+        compose.onNodeWithText(if (de) "Einträge" else "Entries").performClick()
+        compose.waitForIdle()
+        compose.onRoot().captureRoboImage("src/test/screenshots/history/$name.png")
+    }
     private fun captureLevels(name: String, locale: Locale, dark: Boolean = false, range: String? = null, accent: Accent = Accent.CORAL) {
         Locale.setDefault(locale)
         val today = clock()

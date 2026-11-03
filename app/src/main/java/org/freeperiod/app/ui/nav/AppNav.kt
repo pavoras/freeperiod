@@ -115,7 +115,8 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     })
                     val state by model.state.collectAsStateWithLifecycle()
                     ResumeAndMidnightEffect(model::onResume)
-                    HistoryScreen(state, onInclude = { id, included -> model.setCycleIncluded(id, included) }, onDismissHint = { model.dismissLongCycleHint(it) })
+                    HistoryScreen(state, onInclude = { id, included -> model.setCycleIncluded(id, included) }, onDismissHint = { model.dismissLongCycleHint(it) },
+                        onOpenDay = { navigation.navigate("day/${it.toEpochDay()}") })
                 }
                 composable("settings") { SettingsRoute(container, home = settingsHome) }
                 composable("settings/day-entry") { SettingsRoute(container, dayEntryOnly = true) { navigation.popBackStack() } }
@@ -123,6 +124,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     // One sheet stays open; the arrows slide the next or previous day in from the side they point to.
                     var shown by rememberSaveable { mutableLongStateOf(requireNotNull(day.arguments).getLong("epochDay")) }
                     val dismissals = remember { mutableMapOf<Long, () -> Unit>() }
+                    val context = LocalContext.current
                     Surface(Modifier.fillMaxSize()) {
                         DayEntrySheetFrame({ dismissals[shown]?.invoke() }) {
                             AnimatedContent(shown, transitionSpec = {
@@ -148,7 +150,10 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                                     level = { field, name -> model.setLevel(field, name) },
                                     addItem = { field, category, name, icon, categoryName -> model.addItem(field, category, name, icon, categoryName) },
                                 )
-                                val dismiss = { scope.launch { model.awaitWrites(); navigation.popBackStack() }; Unit }
+                                val dismiss = { scope.launch {
+                                    model.awaitWrites(); navigation.popBackStack()
+                                    container.ratingMoments.afterDayLogged(context.findActivity(), date)
+                                }; Unit }
                                 SideEffect { dismissals[epochDay] = dismiss }
                                 DayEntrySheet(state, actions, onDateChange = { selected ->
                                     scope.launch { model.awaitWrites(); shown = selected.toEpochDay() }
@@ -162,6 +167,12 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
             }
         }
     }
+}
+
+private tailrec fun android.content.Context.findActivity(): android.app.Activity? = when (this) {
+    is android.app.Activity -> this
+    is android.content.ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
 
 @Composable

@@ -81,7 +81,7 @@ internal fun DayLog.has(item: EntryItem): Boolean = item.tag?.let { it.id in tag
 }
 
 /** Built-in pick-one fields; their items are levels from low (first) to high (last). */
-private val levelFields = setOf("mood", "flow", "pain", "sex", "discharge", "ovulation_test", "appetite", "libido")
+internal val levelFields = setOf("mood", "flow", "pain", "sex", "discharge", "ovulation_test", "appetite", "libido")
 /** Charts History shows until the user switches them off. */
 private val defaultChartFields = setOf("mood", "flow", "pain", "appetite", "libido")
 

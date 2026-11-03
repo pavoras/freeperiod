@@ -47,6 +47,11 @@ data class AppSettings(
     val supported: Boolean = false,
     /** Light, dark or follow the system. */
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    /** First day the user closed a logged day (rating prompt only, Play builds). */
+    val firstUse: LocalDate? = null,
+    /** Last time and how often the store rating card was asked for. */
+    val ratingAsked: LocalDate? = null,
+    val ratingAsks: Int = 0,
 )
 
 class SettingsStore internal constructor(private val store: DataStore<Preferences>) {
@@ -83,6 +88,9 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
             prefs[homeRing] = value.homeRing
             prefs[supported] = value.supported
             prefs[themeMode] = value.themeMode.name
+            prefs.set(firstUse, value.firstUse?.toString())
+            prefs.set(ratingAsked, value.ratingAsked?.toString())
+            prefs[ratingAsks] = value.ratingAsks
         }
     }
 
@@ -133,6 +141,9 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         homeRing = prefs[homeRing] ?: false,
         supported = prefs[supported] ?: false,
         themeMode = ThemeMode.entries.firstOrNull { it.name == prefs[themeMode] } ?: ThemeMode.SYSTEM,
+        firstUse = prefs[firstUse]?.let(LocalDate::parse),
+        ratingAsked = prefs[ratingAsked]?.let(LocalDate::parse),
+        ratingAsks = prefs[ratingAsks] ?: 0,
     )
 
     private fun MutablePreferences.set(key: Preferences.Key<String>, value: String?) {
@@ -160,5 +171,8 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         val homeRing = booleanPreferencesKey("home_ring")
         val supported = booleanPreferencesKey("supported")
         val themeMode = stringPreferencesKey("theme_mode")
+        val firstUse = stringPreferencesKey("first_use")
+        val ratingAsked = stringPreferencesKey("rating_asked")
+        val ratingAsks = intPreferencesKey("rating_asks")
     }
 }

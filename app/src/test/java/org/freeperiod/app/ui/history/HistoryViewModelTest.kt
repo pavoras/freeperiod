@@ -132,4 +132,16 @@ class HistoryViewModelTest : DatabaseTest() {
         assertFalse("category:pain" in charts(UiOverride("category:pain", true, 2, chart = true)))
         assertFalse("category:pain" in charts(UiOverride("category:pain", false, 2, chart = false)))
     }
+
+    @Test fun diaryListsLoggedDaysNewestFirst() = runTest {
+        repository.addPeriod(today.minusDays(3), today.minusDays(2)).getOrThrow()
+        repository.saveDayLog(DayLog(today.minusDays(10), note = "older"))
+        repository.saveDayLog(DayLog(today.minusDays(2), mood = Mood.GOOD))
+        repository.saveDayLog(DayLog(today.plusDays(1), note = "tomorrow"))
+        val vm = viewModel()
+        vm.refresh().join()
+        // Future days stay out; period days are marked.
+        assertEquals(listOf(today.minusDays(2) to true, today.minusDays(10) to false),
+            vm.state.value.diary.map { it.log.date to it.periodDay })
+    }
 }

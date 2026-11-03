@@ -19,9 +19,11 @@ robolectric = "4.16.1"
 roborazzi = "1.50.0"
 androidxTestCore = "1.6.1"
 billing = "9.1.0"
+playReview = "2.0.2"
 
 [libraries]
 billing = { module = "com.android.billingclient:billing", version.ref = "billing" }
+play-review = { module = "com.google.android.play:review", version.ref = "playReview" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }

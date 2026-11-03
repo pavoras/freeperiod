@@ -47,6 +47,14 @@
         <item quantity="other">based on %1$d completed periods</item>
     </plurals>
     <string name="history_empty">Log your periods to see your cycle history.</string>
+    <string name="history_tab_overview">Overview</string>
+    <string name="history_tab_entries">Entries</string>
+    <string name="diary_empty">Days you log show up here, newest first.</string>
+    <string name="diary_open_day">Open day</string>
+    <string name="diary_period_day">Period</string>
+    <string name="diary_level">%1$s: %2$s</string>
+    <string name="diary_more">More</string>
+    <string name="diary_less">Less</string>
     <string name="history_cycles">Your cycles</string>
     <string name="history_cycle_days">%1$d-day cycle</string>
     <plurals name="history_period_days">
@@ -203,7 +211,7 @@
     <string name="about_license">Licence: GPL-3.0</string>
     <string name="about_source">Source code</string>
     <string name="about_open_source">Open-source licences</string>
-    <string name="about_billing_library">Google Play Billing Library (Google Play version only): Android Software Development Kit License</string>
+    <string name="about_billing_library">Google Play Billing Library and In-App Review Library (Google Play version only): Android Software Development Kit License, Play Core Software Development Kit Terms of Service</string>
     <string name="support_title">Support Free&#8288;Period</string>
     <string name="support_body">Free&#8288;Period stays free: no ads, no subscription, no account. If you like it and want to help it grow, you can support it with a one-time purchase on Google Play. It unlocks nothing – you already have everything.</string>
     <string name="support_button">Support with %1$s</string>

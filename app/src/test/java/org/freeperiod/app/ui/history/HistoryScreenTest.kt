@@ -49,4 +49,25 @@ class HistoryScreenTest {
         compose.waitForIdle()
         compose.onNodeWithText("Cycle details").assertDoesNotExist()
     }
+
+    @Test fun entriesTabListsDaysAndOpensTheTappedOne() {
+        val today = LocalDate.of(2026, 4, 12)
+        val note = "A long walk by the river, then tea with a friend. ".repeat(6).trim()
+        val state = historyState(BackupData(periods = listOf(Period(1, today.minusDays(3), today.minusDays(1))),
+            dayLogs = listOf(DayLog(today.minusDays(2), mood = Mood.GOOD, flow = FlowLevel.MEDIUM, pain = Pain.MILD,
+                symptoms = setOf(Symptom.CRAMPS), note = note), DayLog(today.minusDays(40), note = "Quiet day")),
+            tags = emptyList(), settings = BackupSettings(null, false)), today)
+        val opened = mutableListOf<LocalDate>()
+        compose.setContent { FreePeriodTheme { HistoryScreen(state, { _, _ -> }, onOpenDay = { opened += it }) } }
+        compose.onNodeWithText("Entries").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("April 2026").assertIsDisplayed()
+        compose.onNodeWithText("Flow: Medium").assertIsDisplayed()
+        compose.onNodeWithText("Pain: Mild").assertIsDisplayed()
+        compose.onNodeWithText("Cramps").assertIsDisplayed()
+        compose.onNodeWithTag("diary-list").performScrollToNode(hasText("Quiet day"))
+        compose.onNodeWithText("March 2026").assertIsDisplayed()
+        compose.onNodeWithText("Quiet day").performClick()
+        Assert.assertEquals(listOf(today.minusDays(40)), opened)
+    }
 }

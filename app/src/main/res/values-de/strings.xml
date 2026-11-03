@@ -47,6 +47,14 @@
         <item quantity="other">basierend auf %1$d abgeschlossenen Perioden</item>
     </plurals>
     <string name="history_empty">Trage deine Perioden ein, um deinen Zyklusverlauf zu sehen.</string>
+    <string name="history_tab_overview">Übersicht</string>
+    <string name="history_tab_entries">Einträge</string>
+    <string name="diary_empty">Tage, die du einträgst, erscheinen hier – die neuesten zuerst.</string>
+    <string name="diary_open_day">Tag öffnen</string>
+    <string name="diary_period_day">Periode</string>
+    <string name="diary_level">%1$s: %2$s</string>
+    <string name="diary_more">Mehr</string>
+    <string name="diary_less">Weniger</string>
     <string name="history_cycles">Deine Zyklen</string>
     <string name="history_cycle_days">Zyklus: %1$d Tage</string>
     <plurals name="history_period_days">
@@ -203,7 +211,7 @@
     <string name="about_license">Lizenz: GPL-3.0</string>
     <string name="about_source">Quellcode</string>
     <string name="about_open_source">Open-Source-Lizenzen</string>
-    <string name="about_billing_library">Google Play Billing Library (nur Google-Play-Version): Android Software Development Kit License</string>
+    <string name="about_billing_library">Google Play Billing Library und In-App Review Library (nur Google-Play-Version): Android Software Development Kit License, Play Core Software Development Kit Terms of Service</string>
     <string name="support_title">Free&#8288;Period unterstützen</string>
     <string name="support_body">Free&#8288;Period bleibt kostenlos: ohne Werbung, Abo oder Konto. Wenn dir die App gefällt und du ihre Entwicklung unterstützen möchtest, geht das mit einem einmaligen Kauf über Google Play. Er schaltet nichts frei – du hast schon alles.</string>
     <string name="support_button">Mit %1$s unterstützen</string>
