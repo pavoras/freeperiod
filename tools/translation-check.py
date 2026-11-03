@@ -100,7 +100,9 @@ def check_locale(locale, source, errors, warnings):
     for key in sorted(target.keys() - expected.keys()):
         reason = "non-translatable key must not appear" if key in source else "extra key"
         errors.append(f"{locale}/{key}: {reason}")
-    categories = CATEGORIES.get(locale.split("-")[0])
+    # Android uses the legacy resource qualifier in for Indonesian (BCP-47 id).
+    language = locale.split("-")[0]
+    categories = CATEGORIES.get("id" if language == "in" else language)
     if categories is None:
         errors.append(f"{locale}: add reviewed CLDR cardinal categories to CATEGORIES")
     for key in expected.keys() & target.keys():

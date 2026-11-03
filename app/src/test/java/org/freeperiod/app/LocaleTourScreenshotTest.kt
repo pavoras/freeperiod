@@ -1,5 +1,6 @@
 package org.freeperiod.app
 
+import android.content.res.Configuration
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -31,6 +32,8 @@ import org.freeperiod.app.ui.today.todayFixture
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 import org.freeperiod.engine.backup.BackupSettings
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -39,6 +42,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import org.xmlpull.v1.XmlPullParser
 
 /**
  * Add one test per language: its resource qualifier in @Config (so dialogs and sheets, which open their own window,
@@ -60,6 +64,39 @@ class LocaleTourScreenshotTest {
 
     @Test @Config(sdk = [35], qualifiers = "es-rES-w360dp-h800dp-xxhdpi")
     fun es() = tour("es-ES")
+
+    @Test @Config(sdk = [35], qualifiers = "in-rID-w360dp-h800dp-xxhdpi")
+    fun id() = tour("id-ID")
+
+    @Test @Config(sdk = [35], qualifiers = "in-rID-w360dp-h800dp-xxhdpi")
+    fun idResourcesAndLanguagePicker() {
+        // Check literal translations, rather than comparing two potentially English fallback strings.
+        compose.waitForIdle()
+        val context = compose.activity
+        assertEquals("Hari ini", context.getString(R.string.nav_today))
+        for (tag in listOf("id-ID", "in-ID")) {
+            val localized = context.createConfigurationContext(Configuration(context.resources.configuration).apply {
+                setLocale(Locale.forLanguageTag(tag))
+            })
+            assertEquals("Keputihan", localized.getString(R.string.entry_discharge))
+            for (count in listOf(0, 1, 2, 7)) {
+                assertEquals("$count haid", localized.resources.getQuantityString(R.plurals.restore_periods, count, count))
+                assertEquals("Haid kamu mungkin mulai dalam $count hari",
+                    localized.resources.getQuantityString(R.plurals.reminder_period_explicit, count, count))
+            }
+        }
+        // Robolectric does not populate ApplicationInfo's localeConfigRes from the manifest.
+        // Check the actual resource referenced by android:localeConfig for the system picker.
+        val languages = mutableListOf<String>()
+        context.resources.getXml(R.xml.locales_config).use { xml ->
+            while (xml.next() != XmlPullParser.END_DOCUMENT) {
+                if (xml.eventType == XmlPullParser.START_TAG && xml.name == "locale") {
+                    languages += xml.getAttributeValue("http://schemas.android.com/apk/res/android", "name")
+                }
+            }
+        }
+        assertTrue("Indonesian must be offered in the per-app language picker", "id" in languages)
+    }
 
     private enum class Screen { TODAY, RING, DAY, HISTORY, SETTINGS, IMPORT, ONBOARDING, LOCK, DISCLAIMER }
 
