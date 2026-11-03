@@ -68,6 +68,9 @@ class LocaleTourScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "in-rID-w360dp-h800dp-xxhdpi")
     fun id() = tour("id-ID")
 
+    @Test @Config(sdk = [35], qualifiers = "tr-rTR-w360dp-h800dp-xxhdpi")
+    fun tr() = tour("tr-TR")
+
     @Test @Config(sdk = [35], qualifiers = "in-rID-w360dp-h800dp-xxhdpi")
     fun idResourcesAndLanguagePicker() {
         // Check literal translations, rather than comparing two potentially English fallback strings.

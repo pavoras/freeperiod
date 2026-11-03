@@ -11,7 +11,7 @@ FreePeriod combina un calendario del periodo y un diario. No tiene permiso de in
 • Recordatorios para tu periodo, la píldora o algo personal.
 • Etapas de la vida: durante el embarazo, después del parto y en la menopausia, las estimaciones se pausan y tu diario continúa.
 • ¿Vienes de otra app? Importa tus periodos y registros anteriores desde su archivo de exportación o copia de seguridad, un archivo CSV o una copia de seguridad de FreePeriod.
-• Nueve colores de acento, desde tonos pastel suaves hasta oscuros y sencillos; tema claro, oscuro o como el de tu teléfono. Inglés, alemán, portugués de Brasil, español e indonesio.
+• Nueve colores de acento, desde tonos pastel suaves hasta oscuros y sencillos; tema claro, oscuro o como el de tu teléfono. Inglés, alemán, portugués de Brasil, español, indonesio y turco.
 
 Privacidad desde el diseño
 FreePeriod no tiene permiso de internet ni análisis de uso. Tus registros se quedan en tu teléfono. Bloqueo opcional de la app, copias de seguridad cifradas (también automáticas, en una carpeta que elijas) y exportación CSV: tú decides dónde se guardan los archivos.

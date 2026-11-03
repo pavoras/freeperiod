@@ -1,0 +1,3 @@
+• Daha fazlasını taşı: daha fazla regl uygulamasının yedek ve dışa aktarım dosyaları artık günlük kayıtlarını da getiriyor. Önceden kaydettiklerin kalıyor.
+• Günlük kayıt: kanama dolu dairelerle, ağrı çubuklarla gösteriliyor. Gün değiştirmek için haftanın günleri bir arada.
+• Dokunduğun her şey anında kaydediliyor. Günlük kayıt artık bunu da gösteriyor.

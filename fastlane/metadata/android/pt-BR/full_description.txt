@@ -11,7 +11,7 @@ O FreePeriod reúne um calendário menstrual e um diário. Não tem permissão d
 • Lembretes da menstruação, da pílula ou de algo pessoal.
 • Fases da vida: durante a gravidez, após o parto e na menopausa, as estimativas pausam e seu diário continua.
 • Mudando de app? Importe suas menstruações e registros anteriores do arquivo de exportação ou backup de outro app, de um CSV ou de um backup do FreePeriod.
-• Nove cores de destaque, de tons pastéis suaves a tons escuros e discretos; tema claro, escuro ou igual ao do celular. Inglês, alemão, português do Brasil, espanhol e indonésio.
+• Nove cores de destaque, de tons pastéis suaves a tons escuros e discretos; tema claro, escuro ou igual ao do celular. Inglês, alemão, português do Brasil, espanhol, indonésio e turco.
 
 Privacidade desde o início
 O FreePeriod não tem permissão de internet nem análise de uso. Seus registros ficam no seu celular. Bloqueio opcional do app, arquivos de backup criptografados (também automáticos, em uma pasta escolhida por você) e exportação CSV – você decide para onde os arquivos vão.

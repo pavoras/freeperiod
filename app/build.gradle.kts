@@ -119,7 +119,7 @@ android {
     androidResources {
         // Only the languages we ship; keeps library translations out of the APK.
         // Indonesian resources use Android's legacy language code; locales_config uses BCP-47 id.
-        localeFilters += listOf("en", "de", "pt-rBR", "es", "in")
+        localeFilters += listOf("en", "de", "pt-rBR", "es", "in", "tr")
     }
 
     lint {
