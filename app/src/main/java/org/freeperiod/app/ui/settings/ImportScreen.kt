@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import org.freeperiod.app.R
@@ -49,8 +50,16 @@ fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
                 }), Modifier.fillMaxWidth(), enabled = !state.busy)
             }
         }
+        // What this file leaves out, before the import starts.
+        state.notice?.let { notice ->
+            if (state.imported == null) Surface(Modifier.fillMaxWidth(), shape = FpShapes.card, color = tones.accent.container,
+                contentColor = tones.accent.onContainer) {
+                Text(stringResource(notice), Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
+            }
+        }
         if (state.dayLogs.isNotEmpty()) Text(pluralStringResource(
-            if (state.imported == null) R.plurals.import_entry_preview else R.plurals.import_entries_imported,
+            if (state.imported != null) R.plurals.import_entries_imported
+            else if (state.merges) R.plurals.import_app_entry_preview else R.plurals.import_entry_preview,
             state.dayLogs.size, state.dayLogs.size))
         if (state.periods.isNotEmpty()) {
             val first = state.periods.minOf { it.start }

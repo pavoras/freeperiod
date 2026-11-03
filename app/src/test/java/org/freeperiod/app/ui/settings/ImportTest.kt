@@ -178,6 +178,8 @@ class ImportTest : DatabaseTest() {
         model.readApp(Uri.parse("content://test/pc")).join()
         assertNull(model.state.value.error)
         assertEquals(listOf(Period(0, day(3, 2), day(3, 6)), Period(0, day(3, 30), day(4, 2))), model.state.value.periods)
+        assertEquals(org.freeperiod.app.R.string.import_period_calendar_partial, model.state.value.notice)
+        assertTrue(model.state.value.merges)
         model.confirm().join()
         assertEquals(2, model.state.value.imported)
         assertEquals(listOf(DayLog(day(3, 3), note = "tired")), repository.snapshot().dayLogs)

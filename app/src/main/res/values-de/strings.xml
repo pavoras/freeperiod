@@ -468,6 +468,7 @@
         <item quantity="one">%1$d Periode vom %2$s bis %3$s</item>
         <item quantity="other">%1$d Perioden vom %2$s bis %3$s</item>
     </plurals>
+    <string name="import_period_calendar_partial">Aus dem Periodenkalender werden nur Perioden und Notizen übernommen. Symptome, Stimmungen und andere Einträge bleiben dort.</string>
     <string name="import_ongoing">Ein leeres Enddatum wird als laufende Periode importiert.</string>
     <string name="import_confirm">Importieren</string>
     <string name="import_invalid">Keine gültigen Perioden gefunden. Prüfe Spalten und Daten; Daten dürfen nicht in der Zukunft liegen.</string>
@@ -626,6 +627,10 @@
     <string name="delete_item_body">Es wird auch aus allen früheren Tagen entfernt. Das lässt sich nicht rückgängig machen.</string>
     <string name="restore_defaults">Standard wiederherstellen</string>
     <string name="restore_defaults_body">Namen, Symbole, Reihenfolge und Sichtbarkeit werden wie am Anfang. Deine eigenen Einträge, Kategorien und Tagesdaten bleiben.</string>
+    <plurals name="import_app_entry_preview">
+        <item quantity="one">%d Tageseintrag wird importiert. Was du an diesem Tag schon eingetragen hast, bleibt; nur Fehlendes kommt dazu.</item>
+        <item quantity="other">%d Tageseinträge werden importiert. Was du an diesen Tagen schon eingetragen hast, bleibt; nur Fehlendes kommt dazu.</item>
+    </plurals>
     <plurals name="import_entry_preview">
         <item quantity="one">%d Tageseintrag wird importiert. Vorhandene Einträge an diesen Tagen werden ersetzt.</item>
         <item quantity="other">%d Tageseinträge werden importiert. Vorhandene Einträge an diesen Tagen werden ersetzt.</item>

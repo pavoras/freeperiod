@@ -30,6 +30,10 @@ data class ImportUiState(
     val dayLogs: List<DayLog> = emptyList(),
     /** A Flo ZIP was chosen and needs the password from Flo's e-mail. */
     val floPassword: Boolean = false,
+    /** A note on what the chosen file leaves out (shown with the preview). */
+    val notice: Int? = null,
+    /** Entries from another app keep what is already logged instead of replacing it. */
+    val merges: Boolean = false,
 )
 
 class ImportViewModel(private val repository: Repository, private val io: DocumentIo,
@@ -73,13 +77,15 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
             if (database != null) databases?.read(database, today) else ClueImport.parse(bytes, today)
         }
         if (database != null && database !== bytes) database.fill(0)
+        val periodCalendar = PeriodCalendarImport.isBackup(bytes)
         if (other != null || database != null) {
             bytes.fill(0)
             fromApp = other
             // Days with only Clue tags count as entries too.
             val days = other?.let { data -> data.dayLogs + (data.tagNames.keys - data.dayLogs.map { it.date }.toSet()).map { DayLog(it) } }
             mutable.update { it.copy(periods = other?.periods.orEmpty(), dayLogs = days.orEmpty().sortedBy { it.date },
-                error = if (other == null) R.string.import_app_invalid else null) }
+                error = if (other == null) R.string.import_app_invalid else null,
+                notice = R.string.import_period_calendar_partial.takeIf { other != null && periodCalendar }, merges = other != null) }
             return@operation
         }
         floBytes = bytes

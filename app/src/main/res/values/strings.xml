@@ -468,6 +468,7 @@
         <item quantity="one">%1$d period from %2$s to %3$s</item>
         <item quantity="other">%1$d periods from %2$s to %3$s</item>
     </plurals>
+    <string name="import_period_calendar_partial">From Period Calendar, only periods and notes are imported. Symptoms, moods and other entries stay behind.</string>
     <string name="import_ongoing">An empty end date is imported as an ongoing period.</string>
     <string name="import_confirm">Import</string>
     <string name="import_invalid">No valid periods found. Check the columns and dates; dates must not be in the future.</string>
@@ -626,6 +627,10 @@
     <string name="delete_item_body">It is also removed from all past days. This can\'t be undone.</string>
     <string name="restore_defaults">Restore defaults</string>
     <string name="restore_defaults_body">Names, icons, order and visibility go back to how they were at the start. Your own items, categories and entries stay.</string>
+    <plurals name="import_app_entry_preview">
+        <item quantity="one">%d diary entry will be imported. What you already logged on that day stays; only missing values are added.</item>
+        <item quantity="other">%d diary entries will be imported. What you already logged on these days stays; only missing values are added.</item>
+    </plurals>
     <plurals name="import_entry_preview">
         <item quantity="one">%d diary entry will be imported. Existing entries on these days will be replaced.</item>
         <item quantity="other">%d diary entries will be imported. Existing entries on these days will be replaced.</item>

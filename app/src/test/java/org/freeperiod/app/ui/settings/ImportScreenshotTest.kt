@@ -20,6 +20,12 @@ class ImportScreenshotTest : SettingsScreenshotFixture() {
         ImportScreen(ImportUiState(periods = periods), {}, {}, {}, {}, {})
     }
 
+    @Test fun periodCalendar_enLight() = capture("import/periodCalendar_enLight", "File from another app") {
+        val start = LocalDate.parse("2026-03-02")
+        ImportUiState(periods = listOf(Period(0, start, start.plusDays(4))), dayLogs = listOf(org.freeperiod.engine.DayLog(start, note = "tired")),
+            notice = org.freeperiod.app.R.string.import_period_calendar_partial, merges = true).let { ImportScreen(it, {}, {}, {}, {}, {}) }
+    }
+
     @Test fun floPassword_enLight() = capture("import/floPassword_enLight", "Enter the password from Flo's e-mail.") {
         ImportScreen(ImportUiState(floPassword = true), {}, {}, {}, {}, {})
     }
