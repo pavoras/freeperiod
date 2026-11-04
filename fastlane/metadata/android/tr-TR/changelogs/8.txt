@@ -1,0 +1,3 @@
+• Geçmiş bölümünde yeni Kayıtlar görünümü: günlüğün, kaydettiğin her gün için bir kart, en yeniler en üstte; günü açmak için karta dokun.
+• FreePeriod artık Portekizce (Brezilya), İspanyolca, Endonezce, Türkçe ve Fransızca da kullanılabiliyor.
+• Tek satıra sığan daha kısa etiketler.

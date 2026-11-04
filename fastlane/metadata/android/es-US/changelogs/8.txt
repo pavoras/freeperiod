@@ -1,0 +1,3 @@
+• Historial tiene una nueva vista Registros: tu diario, una tarjeta por cada día registrado, del más reciente al más antiguo; toca una tarjeta para abrir el día.
+• FreePeriod ahora está en portugués (Brasil), español, indonesio, turco y francés.
+• Etiquetas más cortas que caben en una línea.

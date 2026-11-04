@@ -1,0 +1,3 @@
+• History has a new Entries view: your diary, one card per logged day, newest first; tap a card to open the day.
+• FreePeriod now speaks Portuguese (Brazil), Spanish, Indonesian, Turkish and French.
+• Shorter labels that fit on one line.

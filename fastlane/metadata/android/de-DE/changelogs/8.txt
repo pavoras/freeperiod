@@ -1,0 +1,3 @@
+• Verlauf hat die neue Ansicht „Einträge“: dein Tagebuch, eine Karte pro eingetragenem Tag, neueste zuerst; tippe auf eine Karte, um den Tag zu öffnen.
+• FreePeriod gibt es jetzt auch auf Portugiesisch (Brasilien), Spanisch, Indonesisch, Türkisch und Französisch.
+• Kürzere Beschriftungen, die in eine Zeile passen.
