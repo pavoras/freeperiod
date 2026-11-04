@@ -128,7 +128,8 @@ android {
 }
 
 kotlin {
-    jvmToolchain(17)
+    // No toolchain: builds with JDK 17 or 21 (F-Droid); bytecode level matches compileOptions.
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
 }
 
 room {
