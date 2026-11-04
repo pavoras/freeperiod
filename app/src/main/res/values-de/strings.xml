@@ -100,7 +100,7 @@
     <string name="entry_tags">Tags</string>
     <string name="entry_note">Notiz</string>
     <string name="entry_none">Keine</string>
-    <string name="flow_spotting">Schmier­blutung</string>
+    <string name="flow_spotting">Spotting</string>
     <string name="flow_light">Leicht</string>
     <string name="flow_medium">Mittel</string>
     <string name="flow_heavy">Stark</string>
