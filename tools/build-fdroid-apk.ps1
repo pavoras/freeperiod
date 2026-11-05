@@ -38,7 +38,7 @@ $version = $Tag.TrimStart('v')
 $signed = Join-Path $work "FreePeriod-$version-fdroid.apk"
 $env:FP_KS_PASS = $props['storePassword']
 try {
-    & (Join-Path $buildTools 'apksigner.bat') sign --ks (Join-Path $keys $props['storeFile']) --ks-key-alias $props['keyAlias'] `
+    & (Join-Path $buildTools 'apksigner.bat') sign --alignment-preserved --ks (Join-Path $keys $props['storeFile']) --ks-key-alias $props['keyAlias'] `
         --ks-pass env:FP_KS_PASS --out $signed $unsigned
     if ($LASTEXITCODE) { throw "apksigner failed" }
 } finally { Remove-Item Env:FP_KS_PASS }
