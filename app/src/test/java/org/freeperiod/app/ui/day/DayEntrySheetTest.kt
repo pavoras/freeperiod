@@ -26,6 +26,30 @@ class DayEntrySheetTest {
     @Before fun setHostTheme() { compose.activity.setTheme(R.style.Theme_FreePeriod) }
     private val today = LocalDate.of(2026, 4, 12)
 
+    @Test fun allDischargeChoicesShowAndTappingASelectedValueAfterSwitchingPicksOne() {
+        val state = mutableStateOf(DayEntryUiState(today, today, loading = false,
+            log = DayLog(today, discharge = setOf(Discharge.CREAMY, Discharge.UNUSUAL)),
+            customCategories = listOf(CustomCategory(1, "Discharge", "builtin:discharge", 0, false, singleChoice = true)),
+            overrides = listOf(UiOverride("category:discharge", false, -1))))
+        compose.setContent { FreePeriodTheme {
+            DayEntrySheet(state.value, DayEntryActions(discharge = { value ->
+                val current = state.value
+                state.value = current.copy(log = EntrySelection.builtIn(current.log, "discharge", value?.name,
+                    current.tags, current.customCategories))
+            }), {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Discharge").performClick()
+        compose.waitForIdle()
+        compose.onNode(hasText("Creamy") and isSelectable()).assertIsSelected()
+        compose.onNodeWithText("Unusual").assertIsSelected()
+        compose.onNode(hasText("Creamy") and isSelectable()).performClick()
+        compose.waitForIdle()
+        compose.onNode(hasText("Creamy") and isSelectable()).assertIsSelected()
+        compose.onNodeWithText("Unusual").assertIsNotSelected()
+        assertEquals(setOf(Discharge.CREAMY), state.value.log.discharge)
+    }
+
     @Test fun customCategoryShowsInEntry() {
         val category = CustomCategory(5, "Movement", "energetic", -1, false)
         var selected: Long? = null

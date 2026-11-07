@@ -113,7 +113,7 @@ class HistoryViewModelTest : DatabaseTest() {
     @Test fun chartsFollowTheCategoriesTheirItemsAndTheChartSwitch() {
         val categories = listOf(CustomCategory(4, "Pain", "builtin:pain", 0, false), CustomCategory(5, "Pills", "pill", 100, false, counted = true))
         val tags = listOf(Tag(9, "Very strong", categoryId = 4, iconKey = "cramps"), Tag(10, "Ibuprofen", categoryId = 5, iconKey = "pill"))
-        val logs = listOf(DayLog(today.minusDays(2), pain = Pain.MILD, sex = Sex.PROTECTED),
+        val logs = listOf(DayLog(today.minusDays(2), pain = Pain.MILD, sex = setOf(Sex.PROTECTED)),
             DayLog(today.minusDays(1), tagIds = setOf(9, 10), tagCounts = mapOf(10L to 3)))
         fun charts(vararg overrides: UiOverride) = historyState(org.freeperiod.engine.backup.BackupData(periods = emptyList(), dayLogs = logs,
             tags = tags, settings = org.freeperiod.engine.backup.BackupSettings(null, false), customCategories = categories,

@@ -95,7 +95,8 @@ class DayEntryViewModel(
     fun addItem(field: String?, categoryId: Long?, name: String, icon: String, categoryName: String): Job = mutate {
         val tag = if (field != null) repository.addBuiltInItem(field, name, icon, categoryName)
             else repository.addTag(name, categoryId, icon)
-        repository.saveDayLog(EntrySelection.setCount(currentLog(), tag.id, 1))
+        val data = repository.snapshot()
+        repository.saveDayLog(EntrySelection.tag(currentLog(), tag.id, data.tags, data.customCategories))
     }
     fun toggleTag(id: Long): Job = editLogWithData { log, data -> EntrySelection.tag(log, id, data.tags, data.customCategories) }
     private fun selectBuiltIn(field: String, name: String?): Job = editLogWithData { log, data ->

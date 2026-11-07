@@ -156,8 +156,8 @@ class ImportTest : DatabaseTest() {
         val logs = repository.snapshot().dayLogs.associateBy { it.date }
         assertEquals(FlowLevel.SPOTTING, logs.getValue(day(3, 1)).flow)
         assertNull(logs[day(3, 3)])
-        assertEquals(Sex.PROTECTED, logs.getValue(day(3, 15)).sex)
-        assertEquals(Sex.UNPROTECTED, logs.getValue(day(3, 16)).sex)
+        assertEquals(setOf(Sex.PROTECTED), logs.getValue(day(3, 15)).sex)
+        assertEquals(setOf(Sex.UNPROTECTED), logs.getValue(day(3, 16)).sex)
     }
 
     @Test fun periodCalendarBackupImports() = runTest {

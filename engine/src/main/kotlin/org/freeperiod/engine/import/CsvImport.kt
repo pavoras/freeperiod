@@ -110,7 +110,8 @@ object CsvImport {
             var uniqueName = name
             var suffix = 2
             while (categories.any { it.name.equals(uniqueName, ignoreCase = true) }) uniqueName = "$name ${suffix++}"
-            val created = CustomCategory(nextCategory++, uniqueName, field?.let { "builtin:$it" } ?: "tag", 100 + categories.size, false)
+            val created = CustomCategory(nextCategory++, uniqueName, field?.let { "builtin:$it" } ?: "tag", 100 + categories.size, false,
+                singleChoice = field == "sex")
             categories += created
             return created.id
         }
@@ -143,6 +144,16 @@ object CsvImport {
                         log = EntrySelection.builtIn(log, field, value.uppercase(Locale.ROOT), tags, categories)
                     else log = EntrySelection.tag(log, tag(value, category("builtin:$field", field)), tags, categories)
                 }
+                // Import observations directly: today's choice setting must never trim past entries.
+                for (field in configurableChoiceFields) {
+                    cell(field).split(';').filter { it.isNotBlank() }.forEach { value ->
+                        val name = value.uppercase(Locale.ROOT)
+                        log = if (name in builtInNames(field)) when (field) {
+                            "sex" -> log.copy(sex = log.sex + Sex.valueOf(name))
+                            else -> log.copy(discharge = log.discharge + Discharge.valueOf(name))
+                        } else log.copy(tagIds = log.tagIds + tag(value, category("builtin:$field", field)))
+                    }
+                }
                 val symptoms = cell("symptoms").split(';').filter { it.isNotBlank() }
                 symptoms.forEach { value ->
                     if (builtInNames("symptoms").any { it.equals(value, ignoreCase = true) })
@@ -170,6 +181,7 @@ object CsvImport {
                     note = cell("note").takeIf { it.isNotEmpty() })
             }
             require(logs.map { it.date }.distinct().size == logs.size)
+            require(logs.all { EntrySelection.valid(it, tags, categories) })
             CsvImportResult.Parsed(periods, logs.filterNot { it.isEmpty() }, tags, categories)
         } catch (_: IllegalArgumentException) { null }
     }

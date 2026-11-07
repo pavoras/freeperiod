@@ -35,6 +35,11 @@ class Converters {
     @TypeConverter fun libidoToName(value: Libido?): String? = value?.name
     @TypeConverter fun nameToLibido(value: String?): Libido? = value?.let(Libido::valueOf)
 
+    fun sexValuesToNames(value: Set<Sex>): String = Sex.entries.filter { it in value }.joinToString(";") { it.name }
+    fun namesToSexValues(value: String): Set<Sex> = value.split(';').filter { it.isNotEmpty() }.map(Sex::valueOf).toSet()
+    fun dischargeValuesToNames(value: Set<Discharge>): String = Discharge.entries.filter { it in value }.joinToString(";") { it.name }
+    fun namesToDischargeValues(value: String): Set<Discharge> = value.split(';').filter { it.isNotEmpty() }.map(Discharge::valueOf).toSet()
+
     @TypeConverter fun symptomsToNames(value: Set<Symptom>): String = value.map { it.name }.sorted().joinToString(";")
     @TypeConverter fun namesToSymptoms(value: String): Set<Symptom> = if (value.isEmpty()) emptySet()
         else value.split(';').map(Symptom::valueOf).toSet()

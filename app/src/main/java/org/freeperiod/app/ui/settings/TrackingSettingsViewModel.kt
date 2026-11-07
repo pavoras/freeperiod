@@ -68,6 +68,9 @@ class TrackingSettingsViewModel(private val repository: Repository) : ViewModel(
         repository.setUiOverride(previous.copy(hidden = hidden, sortOrder = order))
     }
     fun appearance(value: UiOverride) = write { repository.setUiOverride(value) }
+    fun choice(field: String, singleChoice: Boolean, categoryName: String) = write {
+        repository.setBuiltInChoice(field, singleChoice, categoryName)
+    }
     fun editItem(tag: Tag) = write { repository.updateTag(tag) }
     fun deleteItem(id: Long) = write { repository.deleteItem(id) }
     fun reorder(keys: List<String>) = write { writeOrder(keys) }

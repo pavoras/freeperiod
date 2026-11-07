@@ -70,7 +70,7 @@ class HistoryScreenshotTest {
             DayLog(today.minusDays(2), mood = Mood.OKAY, flow = FlowLevel.MEDIUM, tagIds = setOf(1),
                 note = (if (de) "Lange Runde durch den Park mit Mia. Danach Pasta gekocht und einen Film geschaut. "
                     else "Long loop through the park with Mia. Cooked pasta afterwards and watched a film. ").repeat(3).trim()),
-            DayLog(today.minusDays(9), mood = Mood.GREAT, discharge = Discharge.CREAMY, tagIds = setOf(1)),
+            DayLog(today.minusDays(9), mood = Mood.GREAT, discharge = setOf(Discharge.CREAMY), tagIds = setOf(1)),
             DayLog(today.minusDays(14), note = if (de) "Neue Laufschuhe gekauft." else "Bought new running shoes."))
         val periods = listOf(Period(1, today.minusDays(2), null))
         val state = historyState(BackupData(periods = periods, dayLogs = logs, tags = listOf(walk), settings = BackupSettings(null, false)), today)

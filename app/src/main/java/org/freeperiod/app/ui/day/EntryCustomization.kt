@@ -71,8 +71,8 @@ internal fun DayLog.has(item: EntryItem): Boolean = item.tag?.let { it.id in tag
     "mood" -> mood?.name == item.name
     "flow" -> flow?.name == item.name
     "pain" -> pain?.name == item.name
-    "sex" -> sex?.name == item.name
-    "discharge" -> discharge?.name == item.name
+    "sex" -> sex.any { it.name == item.name }
+    "discharge" -> discharge.any { it.name == item.name }
     "symptoms" -> symptoms.any { it.name == item.name }
     "ovulation_test" -> ovulationTest?.name == item.name
     "appetite" -> appetite?.name == item.name

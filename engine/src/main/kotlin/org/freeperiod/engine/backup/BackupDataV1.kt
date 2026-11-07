@@ -34,5 +34,5 @@ internal data class DayLogV1(
     val note: String? = null,
     val tagIds: Set<Long> = emptySet(),
 ) {
-    fun toV2(): DayLog = DayLog(date, flow, mood, symptoms, pain, sex, discharge, note, tagIds)
+    fun toV2(): DayLog = DayLog(date, flow, mood, symptoms, pain, setOfNotNull(sex), setOfNotNull(discharge), note, tagIds)
 }

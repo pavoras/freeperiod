@@ -26,6 +26,25 @@ class DayEntryViewModelTest : DatabaseTest() {
     private fun viewModel(date: java.time.LocalDate = today) = DayEntryViewModel(date, repository) { today }
         .also { models.put("day", it) }
 
+    @Test fun queuedDischargeChoicesToggleIndividuallyAndOwnItemsClearNone() = runTest {
+        val vm = viewModel()
+        vm.setDischarge(Discharge.CREAMY)
+        vm.setDischarge(Discharge.UNUSUAL).join()
+        assertEquals(setOf(Discharge.CREAMY, Discharge.UNUSUAL), repository.snapshot().dayLogs.single().discharge)
+        vm.setDischarge(Discharge.CREAMY).join()
+        assertEquals(setOf(Discharge.UNUSUAL), repository.snapshot().dayLogs.single().discharge)
+        vm.setDischarge(Discharge.NONE).join()
+        vm.addItem("discharge", null, "Own", "tag", "Discharge").join()
+        val own = repository.snapshot().tags.single()
+        assertTrue(repository.snapshot().dayLogs.single().discharge.isEmpty())
+        assertEquals(setOf(own.id), repository.snapshot().dayLogs.single().tagIds)
+        vm.setDischarge(Discharge.CREAMY).join()
+        assertEquals(setOf(own.id), repository.snapshot().dayLogs.single().tagIds)
+        vm.setDischarge(Discharge.NONE).join()
+        assertEquals(setOf(Discharge.NONE), repository.snapshot().dayLogs.single().discharge)
+        assertTrue(repository.snapshot().dayLogs.single().tagIds.isEmpty())
+    }
+
     @Test fun queuedEnumAndOwnChoicesRemainExclusive() = runTest {
         val first = repository.addBuiltInItem("mood", "Calm", "calm", "Mood")
         val second = repository.addBuiltInItem("mood", "Excited", "sparkles", "Mood")

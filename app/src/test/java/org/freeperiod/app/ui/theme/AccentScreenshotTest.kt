@@ -91,7 +91,7 @@ class AccentScreenshotTest {
         val today = clock()
         val state = DayEntryUiState(today, today, log = DayLog(today, flow = FlowLevel.NONE,
             mood = Mood.GOOD, pain = Pain.MILD, symptoms = setOf(Symptom.CRAMPS, Symptom.BLOATING),
-            sex = Sex.NONE, discharge = Discharge.CREAMY, note = "A quiet afternoon outside.", tagIds = setOf(1)),
+            sex = setOf(Sex.NONE), discharge = setOf(Discharge.CREAMY), note = "A quiet afternoon outside.", tagIds = setOf(1)),
             tags = listOf(Tag(1, "Walk")), loading = false)
         compose.setContent { FreePeriodTheme(darkTheme = false, accent = accent) {
             Surface { DayEntrySheet(state, DayEntryActions(), {}, {}) }

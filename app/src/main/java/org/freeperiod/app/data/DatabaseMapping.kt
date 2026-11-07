@@ -13,9 +13,12 @@ internal fun Period.entity() = PeriodEntity(id, start.toEpochDay(), end?.toEpoch
 internal fun TagEntity.domain() = Tag(id, name, archived, categoryId, iconKey)
 internal fun Tag.entity() = TagEntity(id, name, archived, categoryId, iconKey)
 internal fun DayLog.entity() = DayLogEntity(date.toEpochDay(), flow, mood,
-    converters.symptomsToNames(symptoms), pain, sex, discharge, note, ovulationTest, appetite, libido)
+    converters.symptomsToNames(symptoms), pain, Sex.entries.firstOrNull { it in sex }, Discharge.entries.firstOrNull { it in discharge },
+    note, ovulationTest, appetite, libido, converters.sexValuesToNames(sex), converters.dischargeValuesToNames(discharge))
 internal fun DayLogWithTags.domain() = DayLog(LocalDate.ofEpochDay(log.epochDay), log.flow,
-    log.mood, converters.namesToSymptoms(log.symptoms), log.pain, log.sex, log.discharge,
+    log.mood, converters.namesToSymptoms(log.symptoms), log.pain,
+    converters.namesToSexValues(log.sexValues).ifEmpty { setOfNotNull(log.sex) },
+    converters.namesToDischargeValues(log.dischargeValues).ifEmpty { setOfNotNull(log.discharge) },
     log.note, links.map { it.tagId }.toSet(), log.ovulationTest,
     links.filter { it.count > 1 }.associate { it.tagId to it.count }, log.appetite, log.libido)
 internal fun DomainSettingsEntity?.domain() = BackupSettings(this?.typicalCycleLength,

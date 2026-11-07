@@ -44,13 +44,18 @@ object BleedingDays {
      */
     fun merge(existing: DayLog?, imported: DayLog, tags: List<Tag>, categories: List<CustomCategory>): DayLog {
         if (existing == null) return imported
+        fun hasOwn(field: String): Boolean {
+            val marker = categories.find { it.builtInField() == field } ?: return false
+            return tags.any { it.categoryId == marker.id && it.id in existing.tagIds }
+        }
         val merged = existing.copy(
             flow = existing.flow ?: imported.flow,
             mood = existing.mood ?: imported.mood,
             symptoms = existing.symptoms + imported.symptoms,
             pain = existing.pain ?: imported.pain,
-            sex = existing.sex ?: imported.sex,
-            discharge = existing.discharge ?: imported.discharge,
+            sex = if (categories.isSingleChoice("sex") && hasOwn("sex")) existing.sex else existing.sex.ifEmpty { imported.sex },
+            discharge = if (categories.isSingleChoice("discharge") && hasOwn("discharge")) existing.discharge
+                else existing.discharge.ifEmpty { imported.discharge },
             note = existing.note ?: imported.note,
             tagIds = existing.tagIds + imported.tagIds,
             ovulationTest = existing.ovulationTest ?: imported.ovulationTest,

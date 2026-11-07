@@ -40,7 +40,8 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
     onCategory: (CustomCategory) -> Unit, onArchive: (CustomCategory) -> Unit,
     onItem: (String, String, Long?, String?) -> Unit, onRestore: (CustomCategory) -> Unit = {},
     onAppearance: (UiOverride) -> Unit = {}, onEditItem: (Tag) -> Unit = {}, onDeleteItem: (Long) -> Unit = {},
-    archive: ArchiveActions = ArchiveActions(), onChart: (EntryCategory, Boolean) -> Unit = { _, _ -> }) {
+    archive: ArchiveActions = ArchiveActions(), onChart: (EntryCategory, Boolean) -> Unit = { _, _ -> },
+    onChoice: (String, Boolean, String) -> Unit = { _, _, _ -> }) {
     val state = dayEntryState(data, today, today)
     val categories = entryCategories(state, includeHidden = true)
     var expanded by rememberSaveable { mutableStateOf("") }
@@ -184,14 +185,26 @@ fun DayEntrySettingsScreen(data: BackupData, today: LocalDate, onBack: () -> Uni
         onItem(name, icon, category.category?.id, category.key.takeIf { it in ownItemFields }); itemCategory = null
     } }
     editor?.let { editing ->
+        val field = editing.key.removePrefix("category:").takeIf { it in configurableChoiceFields }
+        val initialChoice = field?.let { data.customCategories.isSingleChoice(it) }
+        var pickOne by rememberSaveable(editing.key) { mutableStateOf(initialChoice == true) }
         RenameEntryDialog(editing.appearance.label, editing.appearance.iconKey, { editor = null }, { name, icon ->
+            if (field != null && pickOne != initialChoice) onChoice(field, pickOne, name)
             editing.tag?.let { onEditItem(it.copy(name = name, iconKey = icon)) }
                 ?: onAppearance(editing.override.copy(
                     label = name.takeUnless { editing.override.label == null && it == editing.appearance.label },
                     iconKey = icon.takeUnless { it.startsWith("default:") || editing.override.iconKey == null && it == editing.appearance.iconKey }))
             editor = null
         }, if (editing.tag == null) ({ onAppearance(editing.override.copy(label = null, iconKey = null)); editor = null }) else null,
-            editing.tag?.let { tag -> { onDeleteItem(tag.id); editor = null } })
+            editing.tag?.let { tag -> { onDeleteItem(tag.id); editor = null } },
+            choices = if (field == null) null else { {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    listOf(R.string.pick_one, R.string.pick_several).forEach { option ->
+                        FpChip(pickOne == (option == R.string.pick_one), { pickOne = option == R.string.pick_one },
+                            stringResource(option), Modifier.weight(1f))
+                    }
+                }
+            } })
     }
     if (categoryDialog) {
         var name by rememberSaveable(categoryEditor?.id) { mutableStateOf(categoryEditor?.name.orEmpty()) }
@@ -242,11 +255,13 @@ private fun MoveButtons(index: Int, keys: List<String>, title: String, onReorder
 
 @Composable
 internal fun RenameEntryDialog(initialName: String, initialIcon: String, onDismiss: () -> Unit,
-    onSave: (String, String) -> Unit, onReset: (() -> Unit)? = null, onDelete: (() -> Unit)? = null) {
+    onSave: (String, String) -> Unit, onReset: (() -> Unit)? = null, onDelete: (() -> Unit)? = null,
+    choices: (@Composable () -> Unit)? = null) {
     var name by rememberSaveable(initialName) { mutableStateOf(initialName) }
     var icon by rememberSaveable(initialIcon) { mutableStateOf(initialIcon) }
     SettingsEditorDialog(stringResource(R.string.rename_entry), onDismiss, { onSave(name.trim(), icon) }, name.isNotBlank()) {
         SettingsTextField(name, { name = it }, stringResource(R.string.item_name))
+        choices?.invoke()
         onReset?.let { TextButton(onClick = it) { Text(stringResource(R.string.reset_entry_appearance)) } }
         onDelete?.let { TextButton(onClick = it) { Text(stringResource(R.string.delete_entry_item), color = MaterialTheme.colorScheme.error) } }
         IconPicker(icon, { icon = it })

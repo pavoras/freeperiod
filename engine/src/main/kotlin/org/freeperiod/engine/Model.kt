@@ -40,15 +40,15 @@ data class UiOverride(val key: String, val hidden: Boolean, val sortOrder: Int,
     val label: String? = null, val iconKey: String? = null, val chart: Boolean? = null)
 
 /** Optional observations for one calendar day; null means not logged. */
-@Serializable
+@Serializable(with = DayLogSerializer::class)
 data class DayLog(
     val date: LocalDate,
     val flow: FlowLevel? = null,
     val mood: Mood? = null,
     val symptoms: Set<Symptom> = emptySet(),
     val pain: Pain? = null,
-    val sex: Sex? = null,
-    val discharge: Discharge? = null,
+    val sex: Set<Sex> = emptySet(),
+    val discharge: Set<Discharge> = emptySet(),
     val note: String? = null,
     val tagIds: Set<Long> = emptySet(),
     val ovulationTest: OvulationTest? = null,
@@ -59,7 +59,7 @@ data class DayLog(
 ) {
     /** Returns true when all observations are null or empty, preserving explicit NONE values. */
     fun isEmpty(): Boolean = flow == null && mood == null && symptoms.isEmpty() && pain == null &&
-        sex == null && discharge == null && note.isNullOrEmpty() && tagIds.isEmpty() && ovulationTest == null &&
+        sex.isEmpty() && discharge.isEmpty() && note.isNullOrEmpty() && tagIds.isEmpty() && ovulationTest == null &&
         appetite == null && libido == null
 }
 

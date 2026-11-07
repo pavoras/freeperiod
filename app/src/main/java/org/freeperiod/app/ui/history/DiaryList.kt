@@ -119,7 +119,12 @@ private fun diaryMarks(entry: DayEntryUiState): List<DiaryMark> = entryCategorie
     .filter { it.key != "mood" && it.key != "note" }.flatMap { category ->
         val pickOne = category.key in levelFields || category.category?.singleChoice == true
         val categoryLabel = category.appearance(entry).label
-        entry.entryItems(category).filter { entry.selected(it) }.map { item ->
+        val selected = entry.entryItems(category).filter { entry.selected(it) }
+        if (category.key in configurableChoiceFields) {
+            if (selected.isEmpty()) emptyList() else listOf(DiaryMark(
+                stringResource(R.string.diary_level, categoryLabel, selected.map { it.appearance(entry).label }.joinToString()),
+                category.appearance(entry).icon))
+        } else selected.map { item ->
             val appearance = item.appearance(entry)
             val label = item.tag?.let { countedLabel(appearance.label, entry.log.count(it.id)) } ?: appearance.label
             DiaryMark(if (pickOne) stringResource(R.string.diary_level, categoryLabel, label) else label, appearance.icon,

@@ -16,6 +16,9 @@ import org.freeperiod.app.R
 import org.freeperiod.app.ui.day.builtInCategories
 import org.freeperiod.app.ui.day.builtInEntryItems
 import org.freeperiod.app.ui.day.countedLabel
+import org.freeperiod.app.ui.day.DayEntryUiState
+import org.freeperiod.app.ui.day.entryItems
+import org.freeperiod.app.ui.day.has
 import org.freeperiod.engine.*
 import org.freeperiod.engine.backup.BackupData
 
@@ -38,13 +41,21 @@ internal fun summaryRows(summary: Summary, data: BackupData, text: (Int) -> Stri
             .map { countedLabel(it.name, log.count(it.id)) }
         fun field(field: String, vararg values: String?) =
             (values.filterNotNull() + own(field)).takeIf { it.isNotEmpty() }?.let { "${title(field)}: ${it.joinToString()}" }
+        fun choices(field: String): String? {
+            val entry = DayEntryUiState(day.date, day.date, log, data.tags,
+                customCategories = data.customCategories, overrides = data.overrides)
+            val values = entry.entryItems(builtInCategories.first { it.key == field }).filter { log.has(it) }.map { item ->
+                resolveEntryAppearance(item.key, item.tag?.name ?: text(item.label), "", data.overrides, item.tag).label
+            }
+            return values.takeIf { it.isNotEmpty() }?.let { "${title(field)}: ${it.joinToString()}" }
+        }
         val other = listOfNotNull(
             field("mood", log.mood?.let { builtIn("mood", it.name) }),
             log.appetite?.let { "${title("appetite")}: ${builtIn("appetite", it.name)}" },
             log.libido?.let { "${title("libido")}: ${builtIn("libido", it.name)}" },
             field("symptoms", *log.symptoms.sortedBy { it.ordinal }.map { builtIn("symptoms", it.name) }.toTypedArray()),
-            field("sex", log.sex?.let { builtIn("sex", it.name) }),
-            field("discharge", log.discharge?.let { builtIn("discharge", it.name) }),
+            choices("sex"),
+            choices("discharge"),
             log.ovulationTest?.let { "${title("ovulation_test")}: ${builtIn("ovulation_test", it.name)}" },
             tags.filter { it.categoryId == null }.map { it.name }.takeIf { it.isNotEmpty() }?.let { "${title("tags")}: ${it.joinToString()}" },
         ) + tags.filter { categories[it.categoryId]?.let { category -> category.builtInField() == null } == true }

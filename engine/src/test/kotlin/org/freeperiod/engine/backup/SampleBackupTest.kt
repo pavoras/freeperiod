@@ -210,13 +210,13 @@ class SampleBackupTest {
                 else -> listOf(Mood.OKAY, Mood.GOOD, Mood.GOOD, Mood.GREAT)[random.nextInt(4)]
             } else null,
             pain = pain, symptoms = symptoms,
-            sex = if (!bleeding && chance(0.13)) {
+            sex = setOfNotNull(if (!bleeding && chance(0.13)) {
                 if (chance(0.90)) Sex.PROTECTED else Sex.UNPROTECTED
-            } else null,
-            discharge = if (chance(0.72)) when {
+            } else null),
+            discharge = setOfNotNull(if (chance(0.72)) when {
                 midCycle -> if (chance(0.55)) Discharge.EGG_WHITE else Discharge.WATERY
                 else -> if (chance(0.55)) Discharge.CREAMY else Discharge.STICKY
-            } else null,
+            } else null),
             appetite = if (chance(0.86)) when {
                 beforePeriod -> Appetite.HIGH
                 pain == Pain.SEVERE -> Appetite.LOW
@@ -234,7 +234,7 @@ class SampleBackupTest {
     private fun assertSample(data: BackupData, today: LocalDate) {
         val periods = data.periods
         val logs = data.dayLogs
-        assertEquals(3, data.schemaVersion)
+        assertEquals(4, data.schemaVersion)
         assertTrue(periods.first().start <= today.minusMonths(14))
         assertTrue(DAYS.between(periods.last().start, today) in 8..20)
         assertTrue(periods.all { it.end != null && DAYS.between(it.start, it.end) + 1 in 4..6 })

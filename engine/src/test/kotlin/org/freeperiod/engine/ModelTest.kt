@@ -12,7 +12,7 @@ class ModelTest {
         val logs = listOf(
             DayLog(date, flow = FlowLevel.NONE), DayLog(date, mood = Mood.OKAY),
             DayLog(date, symptoms = setOf(Symptom.CRAMPS)), DayLog(date, pain = Pain.NONE),
-            DayLog(date, sex = Sex.NONE), DayLog(date, discharge = Discharge.NONE),
+            DayLog(date, sex = setOf(Sex.NONE)), DayLog(date, discharge = setOf(Discharge.NONE)),
             DayLog(date, note = "A note"), DayLog(date, tagIds = setOf(1)),
             DayLog(date, ovulationTest = OvulationTest.NEGATIVE),
             DayLog(date, ovulationTest = OvulationTest.POSITIVE),

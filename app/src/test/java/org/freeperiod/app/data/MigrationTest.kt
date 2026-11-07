@@ -12,6 +12,7 @@ import org.freeperiod.app.data.db.MIGRATION_2_3
 import org.freeperiod.app.data.db.MIGRATION_3_4
 import org.freeperiod.app.data.db.MIGRATION_4_5
 import org.freeperiod.app.data.db.MIGRATION_5_6
+import org.freeperiod.app.data.db.MIGRATION_6_7
 import org.freeperiod.engine.*
 import org.junit.Assert.*
 import org.junit.Test
@@ -24,32 +25,71 @@ import org.robolectric.annotation.Config
 class MigrationTest {
     private val context: Context = ApplicationProvider.getApplicationContext()
 
-    @Test fun v2ToV6KeepsCustomizationAndEntries() = runBlocking {
+    @Test fun v6ToV7PreservesAllScalarValuesAndChoiceDefaults() = runBlocking {
         val today = java.time.LocalDate.of(2026, 4, 12)
-        context.deleteDatabase("migration-v2-test")
-        val schema = JSONObject(context.assets.open("${FreePeriodDatabase::class.java.name}/2.json").bufferedReader().use { it.readText() }).getJSONObject("database")
-        val file = context.getDatabasePath("migration-v2-test").also { it.parentFile!!.mkdirs() }
-        SQLiteDatabase.openOrCreateDatabase(file, null).apply {
+        createDatabase(6, "migration-v6-test") {
+            execSQL("INSERT INTO custom_categories (id, name, iconKey, sortOrder, archived) VALUES (1, 'Sex', 'builtin:sex', 0, 0), (2, 'Discharge', 'builtin:discharge', 0, 0)")
+            for ((index, values) in Sex.entries.flatMap { sex -> Discharge.entries.map { sex to it } }.withIndex()) {
+                execSQL("INSERT INTO day_logs (epochDay, symptoms, sex, discharge) VALUES (?, '', ?, ?)",
+                    arrayOf<Any>(today.minusDays(index.toLong()).toEpochDay(), values.first.name, values.second.name))
+            }
+            execSQL("INSERT INTO day_logs (epochDay, symptoms, note) VALUES (?, '', 'Keep empty')", arrayOf(today.minusDays(30).toEpochDay()))
+        }
+        val db = Room.databaseBuilder(context, FreePeriodDatabase::class.java, "migration-v6-test")
+            .addMigrations(MIGRATION_6_7).allowMainThreadQueries().build()
+        try {
+            val repository = Repository(db) { today }
+            val data = repository.snapshot()
+            val logs = data.dayLogs.associateBy { it.date }
+            for ((index, values) in Sex.entries.flatMap { sex -> Discharge.entries.map { sex to it } }.withIndex()) {
+                val log = logs.getValue(today.minusDays(index.toLong()))
+                assertEquals(setOf(values.first), log.sex)
+                assertEquals(setOf(values.second), log.discharge)
+            }
+            assertTrue(logs.getValue(today.minusDays(30)).sex.isEmpty())
+            assertTrue(logs.getValue(today.minusDays(30)).discharge.isEmpty())
+            assertTrue(data.customCategories.isSingleChoice("sex"))
+            assertFalse(data.customCategories.isSingleChoice("discharge"))
+            val several = DayLog(today, sex = setOf(Sex.PROTECTED, Sex.UNPROTECTED),
+                discharge = setOf(Discharge.CREAMY, Discharge.UNUSUAL))
+            repository.saveDayLog(several)
+            assertEquals(several, repository.snapshot().dayLogs.last())
+        } finally { db.close() }
+    }
+
+    private fun createDatabase(version: Int, name: String, seed: SQLiteDatabase.() -> Unit) {
+        context.deleteDatabase(name)
+        val schema = JSONObject(context.assets.open("${FreePeriodDatabase::class.java.name}/$version.json")
+            .bufferedReader().use { it.readText() }).getJSONObject("database")
+        val file = context.getDatabasePath(name).also { it.parentFile!!.mkdirs() }
+        SQLiteDatabase.openOrCreateDatabase(file, null).use { db ->
             val entities = schema.getJSONArray("entities")
             for (index in 0 until entities.length()) {
                 val entity = entities.getJSONObject(index)
-                execSQL(entity.getString("createSql").replace("\${TABLE_NAME}", entity.getString("tableName")))
+                db.execSQL(entity.getString("createSql").replace("\${TABLE_NAME}", entity.getString("tableName")))
                 val indices = entity.optJSONArray("indices") ?: org.json.JSONArray()
-                for (i in 0 until indices.length()) execSQL(indices.getJSONObject(i).getString("createSql").replace("\${TABLE_NAME}", entity.getString("tableName")))
+                for (i in 0 until indices.length()) db.execSQL(indices.getJSONObject(i).getString("createSql")
+                    .replace("\${TABLE_NAME}", entity.getString("tableName")))
             }
-            execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
-            execSQL("INSERT INTO room_master_table VALUES (42, ?)", arrayOf(schema.getString("identityHash")))
-            version = 2
+            db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
+            db.execSQL("INSERT INTO room_master_table VALUES (42, ?)", arrayOf(schema.getString("identityHash")))
+            db.version = version
+            db.seed()
+        }
+    }
+
+    @Test fun v2ToV7KeepsCustomizationAndEntries() = runBlocking {
+        val today = java.time.LocalDate.of(2026, 4, 12)
+        createDatabase(2, "migration-v2-test") {
             execSQL("INSERT INTO custom_categories VALUES (4, 'My symptoms', 'builtin:symptoms', 5, 0)")
             execSQL("INSERT INTO tags VALUES (9, 'Own symptom', 0, 4, 'leaf')")
             execSQL("INSERT INTO day_logs VALUES (?, 'LIGHT', 'GOOD', 'CRAMPS', 'MILD', 'NONE', 'CREAMY', 'Keep this', 'NEGATIVE')", arrayOf(today.toEpochDay()))
             execSQL("INSERT INTO day_tags VALUES (?, 9)", arrayOf(today.toEpochDay()))
             execSQL("INSERT INTO ui_overrides VALUES ('item:mood:GOOD', 1, 8)")
             execSQL("INSERT INTO ui_overrides VALUES ('category:ovulation_test', 0, 3)")
-            close()
         }
         val db = Room.databaseBuilder(context, FreePeriodDatabase::class.java, "migration-v2-test")
-            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).allowMainThreadQueries().build()
+            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7).allowMainThreadQueries().build()
         try {
             val repository = Repository(db) { today }
             val data = repository.snapshot()
@@ -59,7 +99,7 @@ class MigrationTest {
             // Version 6: a reorder's "shown" for the ovulation test outside trying to conceive becomes hidden.
             assertTrue(data.overrides.single { it.key == "category:ovulation_test" }.hidden)
             assertEquals(DayLog(today, FlowLevel.LIGHT, Mood.GOOD, setOf(Symptom.CRAMPS), Pain.MILD,
-                Sex.NONE, Discharge.CREAMY, "Keep this", setOf(9), OvulationTest.NEGATIVE), data.dayLogs.single())
+                setOf(Sex.NONE), setOf(Discharge.CREAMY), "Keep this", setOf(9), OvulationTest.NEGATIVE), data.dayLogs.single())
             repository.setUiOverride(data.overrides.single { it.key == "item:mood:GOOD" }.copy(label = "Content", iconKey = "calm"))
             val ownCategory = repository.addCustomCategory("Activities", singleChoice = true)
             assertTrue(repository.snapshot().customCategories.single { it.id == ownCategory.id }.singleChoice)
@@ -85,35 +125,21 @@ class MigrationTest {
         } finally { db.close() }
     }
 
-    @Test fun v1ToV6KeepsData() = runBlocking {
+    @Test fun v1ToV7KeepsData() = runBlocking {
         val today = java.time.LocalDate.of(2026, 4, 12)
         val start = today.minusDays(10).toEpochDay()
         val end = start + 4
         val note = "x".repeat(2101)
-        context.deleteDatabase("migration-test")
-        val schema = JSONObject(context.assets.open("${FreePeriodDatabase::class.java.name}/1.json").bufferedReader().use { it.readText() }).getJSONObject("database")
-        val file = context.getDatabasePath("migration-test").also { it.parentFile!!.mkdirs() }
-        SQLiteDatabase.openOrCreateDatabase(file, null).apply {
-            val entities = schema.getJSONArray("entities")
-            for (index in 0 until entities.length()) {
-                val entity = entities.getJSONObject(index)
-                execSQL(entity.getString("createSql").replace("\${TABLE_NAME}", entity.getString("tableName")))
-                val indices = entity.optJSONArray("indices") ?: org.json.JSONArray()
-                for (i in 0 until indices.length()) execSQL(indices.getJSONObject(i).getString("createSql").replace("\${TABLE_NAME}", entity.getString("tableName")))
-            }
-            execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY, identity_hash TEXT)")
-            execSQL("INSERT INTO room_master_table VALUES (42, ?)", arrayOf(schema.getString("identityHash")))
-            version = 1
+        createDatabase(1, "migration-test") {
             execSQL("INSERT INTO periods VALUES (7, ?, ?, 'EXCLUDE')", arrayOf(start, end))
-            execSQL("INSERT INTO day_logs VALUES (?, 'NONE', NULL, 'HOT_FLUSHES;NIGHT_SWEATS', 'NONE', NULL, NULL, ?)", arrayOf(start, note))
+            execSQL("INSERT INTO day_logs VALUES (?, 'NONE', NULL, 'HOT_FLUSHES;NIGHT_SWEATS', 'NONE', NULL, NULL, ?)", arrayOf<Any>(start, note))
             execSQL("INSERT INTO day_logs VALUES (?, NULL, 'OKAY', '', NULL, NULL, NULL, NULL)", arrayOf(start + 1))
             execSQL("INSERT INTO tags VALUES (9, 'Walk', 1)")
             execSQL("INSERT INTO day_tags VALUES (?, 9)", arrayOf(start))
             execSQL("INSERT INTO domain_settings VALUES (0, 29, 1)")
-            close()
         }
         val db = Room.databaseBuilder(context, FreePeriodDatabase::class.java, "migration-test")
-            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6).allowMainThreadQueries().build()
+            .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7).allowMainThreadQueries().build()
         try {
             val data = Repository(db) { today }.snapshot()
             assertEquals(Period(7, today.minusDays(10), today.minusDays(6), CycleUse.EXCLUDE), data.periods.single())

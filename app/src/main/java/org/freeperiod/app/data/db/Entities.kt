@@ -32,6 +32,8 @@ data class DayLogEntity(
     val ovulationTest: OvulationTest? = null,
     val appetite: Appetite? = null,
     val libido: Libido? = null,
+    @ColumnInfo(defaultValue = "''") val sexValues: String = "",
+    @ColumnInfo(defaultValue = "''") val dischargeValues: String = "",
 )
 
 @Entity(tableName = "tags", indices = [Index("categoryId"), Index(value = ["categoryId", "name"], unique = true)],

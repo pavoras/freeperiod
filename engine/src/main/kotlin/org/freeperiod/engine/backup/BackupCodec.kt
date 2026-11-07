@@ -13,6 +13,7 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.PBEKeySpec
 import javax.crypto.spec.SecretKeySpec
+import org.freeperiod.engine.builtInField
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -109,10 +110,13 @@ object BackupCodec {
             val version = payload["schemaVersion"]?.jsonPrimitive?.intOrNull ?: return DecodeResult.InvalidContent
             val data = when (version) {
                 1 -> json.decodeFromJsonElement<BackupDataV1>(payload).toV2()
-                2, 3 -> json.decodeFromJsonElement<BackupData>(payload).copy(schemaVersion = 3)
+                2, 3, 4 -> json.decodeFromJsonElement<BackupData>(payload).copy(schemaVersion = 4)
                 else -> return DecodeResult.UnsupportedVersion
             }
-            return if (validBackup(data, today)) DecodeResult.Ok(data) else DecodeResult.InvalidContent
+            val current = if (version < 4) data.copy(customCategories = data.customCategories.map {
+                if (it.builtInField() == "sex") it.copy(singleChoice = true) else it
+            }) else data
+            return if (validBackup(current, today)) DecodeResult.Ok(current) else DecodeResult.InvalidContent
         } catch (_: SerializationException) {
             return DecodeResult.InvalidContent
         } catch (_: DateTimeException) {

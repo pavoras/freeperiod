@@ -180,8 +180,12 @@ class Repository(
         categoriesDao.delete(id)
     } }
 
-    /** Back to built-in names, icons, order and visibility; own items, categories and entries stay. */
-    suspend fun resetCustomization() { write { overridesDao.deleteAll() } }
+    /** Back to built-in names, icons, order, visibility and choice defaults; diary entries stay. */
+    suspend fun resetCustomization() { write {
+        overridesDao.deleteAll()
+        categoriesDao.getAll().map { it.domain() }.filter { it.builtInField() in configurableChoiceFields }
+            .forEach { categoriesDao.update(it.copy(singleChoice = it.builtInField() == "sex").entity()) }
+    } }
 
     private suspend fun purgeTags(ids: Set<Long>) {
         logsDao.getWithTags().map { it.domain() }.filter { log -> log.tagIds.any { it in ids } }
@@ -220,17 +224,29 @@ class Repository(
 
     /** Creates a marker and its first item in one transaction, without exposing it as a category. */
     suspend fun addBuiltInItem(field: String, name: String, icon: String, categoryName: String): Tag = write {
-        require(field in ownItemFields)
-        val categories = categoriesDao.getAll().map { it.domain() }
-        val existing = categories.find { it.builtInField() == field }
-        var uniqueName = categoryName
-        var suffix = 2
-        while (categories.any { it.name.equals(uniqueName, ignoreCase = true) }) uniqueName = "$categoryName ${suffix++}"
-        val categoryId = existing?.id ?: categoriesDao.insert(
-            CustomCategory(0, uniqueName, "builtin:$field", 0, false).entity())
+        val categoryId = builtInCategory(field, categoryName).id
         val tag = Tag(0, name.trim(), categoryId = categoryId, iconKey = icon)
         validateTag(tag)
         tag.copy(id = tagsDao.insert(tag.entity()))
+    }
+
+    /** Choice settings live in the same marker as own items; existing diary entries stay untouched. */
+    suspend fun setBuiltInChoice(field: String, singleChoice: Boolean, categoryName: String) { write {
+        require(field in configurableChoiceFields)
+        val category = builtInCategory(field, categoryName)
+        categoriesDao.update(category.copy(singleChoice = singleChoice).entity())
+    } }
+
+    private suspend fun builtInCategory(field: String, categoryName: String): CustomCategory {
+        require(field in ownItemFields)
+        val categories = categoriesDao.getAll().map { it.domain() }
+        val existing = categories.find { it.builtInField() == field }
+        if (existing != null) return existing
+        var uniqueName = categoryName
+        var suffix = 2
+        while (categories.any { it.name.equals(uniqueName, ignoreCase = true) }) uniqueName = "$categoryName ${suffix++}"
+        val category = CustomCategory(0, uniqueName, "builtin:$field", 0, false, singleChoice = field == "sex")
+        return category.copy(id = categoriesDao.insert(category.entity()))
     }
 
     suspend fun addCustomCategory(name: String, iconKey: String = "tag", sortOrder: Int = 0, singleChoice: Boolean = false,

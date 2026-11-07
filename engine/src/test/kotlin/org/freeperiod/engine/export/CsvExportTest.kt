@@ -35,7 +35,7 @@ class CsvExportTest {
 
     @Test fun csvContainsAllFieldsAndArchivedTagsInStableOrder() {
         val log = DayLog(date, FlowLevel.MEDIUM, Mood.GOOD, linkedSetOf(Symptom.HEADACHE, Symptom.CRAMPS),
-            Pain.MILD, Sex.UNPROTECTED, Discharge.EGG_WHITE, "note", linkedSetOf(2, 1))
+            Pain.MILD, setOf(Sex.UNPROTECTED), setOf(Discharge.EGG_WHITE), "note", linkedSetOf(2, 1))
         assertEquals(header + "2026-03-01,,medium,good,mild,unprotected,egg_white,cramps;headache,\"Work;\"\"Walk\"\"\",note,,,,,\r\n",
             csv(listOf(log), listOf(Tag(2, "\"Walk\"", true), Tag(1, "Work"))))
     }

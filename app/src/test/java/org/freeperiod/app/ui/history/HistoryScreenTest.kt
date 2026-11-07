@@ -19,6 +19,21 @@ import org.robolectric.annotation.Config
 class HistoryScreenTest {
     @get:Rule val compose = createAndroidComposeRule<ComponentActivity>()
     @Before fun theme() { compose.activity.setTheme(R.style.Theme_FreePeriod) }
+    @Test fun diaryShowsAllSexAndDischargeValuesInItemOrderIncludingOwnItems() {
+        val today = LocalDate.of(2026, 4, 12)
+        val data = BackupData(periods = emptyList(), settings = BackupSettings(null, false),
+            dayLogs = listOf(DayLog(today, sex = setOf(Sex.UNPROTECTED, Sex.PROTECTED),
+                discharge = setOf(Discharge.CREAMY, Discharge.UNUSUAL), tagIds = setOf(7))),
+            tags = listOf(Tag(7, "Own", archived = true, categoryId = 1)),
+            customCategories = listOf(CustomCategory(1, "Discharge", "builtin:discharge", 0, false, singleChoice = true)),
+            overrides = listOf(UiOverride("tag:7", false, -2), UiOverride("item:discharge:UNUSUAL", true, -1)))
+        compose.setContent { FreePeriodTheme { HistoryScreen(historyState(data, today), { _, _ -> }) } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Entries").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Discharge: Own, Unusual, Creamy").assertIsDisplayed()
+        compose.onNodeWithText("Sex: Protected, Unprotected").assertIsDisplayed()
+    }
     @Test fun hiddenAndArchivedSymptomsUseNamesAndItemOrder() {
         val today = LocalDate.of(2026, 4, 12)
         val state = HistoryUiState(today, loading = false, symptomCounts = mapOf(Symptom.CRAMPS to 1),

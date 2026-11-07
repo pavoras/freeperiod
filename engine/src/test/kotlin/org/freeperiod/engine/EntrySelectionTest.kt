@@ -5,13 +5,69 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class EntrySelectionTest {
+    @Test fun dischargeDefaultsToSeveralAndNoneIsExclusiveAcrossOwnItems() {
+        fun tap(log: DayLog, name: String) = EntrySelection.builtIn(log, "discharge", name, tags, categories)
+        val creamy = tap(DayLog(date), "CREAMY")
+        val several = tap(creamy, "UNUSUAL")
+        assertEquals(setOf(Discharge.CREAMY, Discharge.UNUSUAL), several.discharge)
+        val own = EntrySelection.tag(several, 8, tags, categories)
+        assertEquals(several.discharge, own.discharge)
+        assertTrue(EntrySelection.valid(own, tags, categories))
+        val none = tap(own, "NONE")
+        assertEquals(setOf(Discharge.NONE), none.discharge)
+        assertFalse(8L in none.tagIds)
+        assertEquals(setOf(Discharge.STICKY), tap(none, "STICKY").discharge)
+        assertEquals(emptySet<Discharge>(), EntrySelection.tag(none, 8, tags, categories).discharge)
+    }
+
+    @Test fun switchingToOnePreservesPastSelectionsAndNextTapReplacesThem() {
+        val several = EntrySelection.builtIn(EntrySelection.builtIn(DayLog(date), "discharge", "CREAMY", tags, categories),
+            "discharge", "UNUSUAL", tags, categories)
+        val pickOne = categories.map { if (it.builtInField() == "discharge") it.copy(singleChoice = true) else it }
+        assertEquals(setOf(Discharge.CREAMY, Discharge.UNUSUAL), several.discharge)
+        assertTrue(EntrySelection.valid(several, tags, pickOne))
+        assertEquals(setOf(Discharge.CREAMY), EntrySelection.builtIn(several, "discharge", "CREAMY", tags, pickOne).discharge)
+        val own = EntrySelection.tag(several, 8, tags, pickOne)
+        assertEquals(emptySet<Discharge>(), own.discharge)
+        assertEquals(setOf(8L), own.tagIds)
+    }
+
+    @Test fun sexDefaultsToOneAndCanPickSeveral() {
+        val protected = EntrySelection.builtIn(DayLog(date), "sex", "PROTECTED", tags, emptyList())
+        assertEquals(setOf(Sex.UNPROTECTED), EntrySelection.builtIn(protected, "sex", "UNPROTECTED", tags, emptyList()).sex)
+        val multiple = categories.map { it.copy(singleChoice = false) }
+        val several = EntrySelection.builtIn(protected, "sex", "UNPROTECTED", tags, multiple)
+        assertEquals(setOf(Sex.PROTECTED, Sex.UNPROTECTED), several.sex)
+        assertEquals(setOf(Sex.NONE), EntrySelection.builtIn(several, "sex", "NONE", tags, multiple).sex)
+        assertEquals(setOf(Sex.PROTECTED), EntrySelection.builtIn(several, "sex", "UNPROTECTED", tags, multiple).sex)
+        val none = EntrySelection.builtIn(several, "sex", "NONE", tags, multiple)
+        assertEquals(emptySet<Sex>(), EntrySelection.tag(none, 7, tags, multiple).sex)
+        assertEquals(setOf(Sex.PROTECTED), EntrySelection.builtIn(none, "sex", "PROTECTED", tags, multiple).sex)
+    }
+
+    @Test fun ownItemsFollowSeveralAndOneIncludingPreviouslySelectedItems() {
+        val moreTags = tags + Tag(9, "Another discharge", categoryId = 6)
+        val log = DayLog(date, discharge = setOf(Discharge.CREAMY), tagIds = setOf(8))
+        val several = EntrySelection.tag(log, 9, moreTags, categories)
+        assertEquals(setOf(8L, 9L), several.tagIds)
+        assertEquals(log.discharge, several.discharge)
+        val one = categories.map { if (it.builtInField() == "discharge") it.copy(singleChoice = true) else it }
+        assertTrue(EntrySelection.valid(several, moreTags, one))
+        val selected = EntrySelection.tag(several, 8, moreTags, one)
+        assertEquals(setOf(8L), selected.tagIds)
+        assertTrue(selected.discharge.isEmpty())
+        assertTrue(EntrySelection.tag(selected, 8, moreTags, one).isEmpty())
+        assertEquals(setOf(Discharge.STICKY), EntrySelection.builtIn(several, "discharge", "STICKY", moreTags, one).discharge)
+        assertTrue(EntrySelection.builtIn(several, "discharge", "STICKY", moreTags, one).tagIds.isEmpty())
+    }
+
     private val date = LocalDate.of(2026, 10, 10)
     private val categories = listOf(
         CustomCategory(1, "Mood items", "builtin:mood", 0, false),
         CustomCategory(2, "Pain items", "builtin:pain", 0, false),
         CustomCategory(3, "Activities", "tag", 10, false, singleChoice = true),
         CustomCategory(4, "Symptoms", "builtin:symptoms", 0, false),
-        CustomCategory(5, "Sex items", "builtin:sex", 0, false),
+        CustomCategory(5, "Sex items", "builtin:sex", 0, false, singleChoice = true),
         CustomCategory(6, "Discharge items", "builtin:discharge", 0, false),
     )
     private val tags = listOf(Tag(1, "Calm", categoryId = 1), Tag(2, "Excited", categoryId = 1),
@@ -51,15 +107,15 @@ class EntrySelectionTest {
     }
 
     @Test fun ownSingleChoiceReplacesEnumAndOtherOwnItems() {
-        val log = DayLog(date, mood = Mood.GREAT, pain = Pain.MILD, sex = Sex.NONE,
-            discharge = Discharge.STICKY, tagIds = setOf(1, 4, 6))
+        val log = DayLog(date, mood = Mood.GREAT, pain = Pain.MILD, sex = setOf(Sex.NONE),
+            discharge = setOf(Discharge.STICKY), tagIds = setOf(1, 4, 6))
         val selected = EntrySelection.tag(log, 2, tags, categories)
         assertNull(selected.mood)
         assertEquals(setOf(2L, 4L, 6L), selected.tagIds)
         assertEquals(setOf(4L, 6L), EntrySelection.tag(selected, 2, tags, categories).tagIds)
         assertNull(EntrySelection.tag(log, 3, tags, categories).pain)
-        assertNull(EntrySelection.tag(log, 7, tags, categories).sex)
-        assertNull(EntrySelection.tag(log, 8, tags, categories).discharge)
+        assertTrue(EntrySelection.tag(log, 7, tags, categories).sex.isEmpty())
+        assertEquals(log.discharge, EntrySelection.tag(log, 8, tags, categories).discharge)
     }
 
     @Test fun customSingleChoiceAndSymptomsKeepOtherCategories() {

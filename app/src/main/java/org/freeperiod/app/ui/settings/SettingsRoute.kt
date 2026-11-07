@@ -157,7 +157,8 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, home: 
                     onEditItem = { tracking.editItem(it) }, onDeleteItem = { tracking.deleteItem(it) },
                     archive = ArchiveActions({ tracking.deleteCategory(it) }, { tracking.restoreItem(it) },
                         { tracking.deleteItemForever(it) }, { tracking.resetCustomization() }),
-                    onChart = { category, on -> tracking.chart(category, on) })
+                    onChart = { category, on -> tracking.chart(category, on) },
+                    onChoice = { field, single, name -> tracking.choice(field, single, name) })
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back, trackingState.data.overrides,
                     settings.device.themeMode, { model.setThemeMode(it) })
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },

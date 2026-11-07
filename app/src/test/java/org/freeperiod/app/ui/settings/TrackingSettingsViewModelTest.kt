@@ -21,6 +21,28 @@ class TrackingSettingsViewModelTest : DatabaseTest() {
     @Before fun setup() { Dispatchers.setMain(UnconfinedTestDispatcher()) }
     @After fun reset() { models.clear(); Dispatchers.resetMain() }
     private fun model() = TrackingSettingsViewModel(repository).also { models.put("tracking", it) }
+    @Test fun builtInChoicePersistsWithoutChangingPastDaysAndReusesItsMarker() = runTest {
+        val vm = model()
+        assertFalse(repository.snapshot().customCategories.isSingleChoice("discharge"))
+        assertTrue(repository.snapshot().customCategories.isSingleChoice("sex"))
+        val own = repository.addBuiltInItem("discharge", "Own", "tag", "Discharge")
+        val log = DayLog(today, discharge = setOf(Discharge.CREAMY, Discharge.UNUSUAL), tagIds = setOf(own.id))
+        repository.saveDayLog(log)
+        vm.choice("discharge", true, "Discharge").join()
+        vm.choice("sex", false, "Sex").join()
+        val data = repository.snapshot()
+        assertEquals(log, data.dayLogs.single())
+        assertEquals(2, data.customCategories.size)
+        assertEquals(own.categoryId, data.customCategories.single { it.builtInField() == "discharge" }.id)
+        assertTrue(data.customCategories.isSingleChoice("discharge"))
+        assertFalse(data.customCategories.isSingleChoice("sex"))
+        assertEquals(setOf(Discharge.CREAMY), EntrySelection.builtIn(log, "discharge", "CREAMY", data.tags, data.customCategories).discharge)
+        vm.resetCustomization().join()
+        assertEquals(log, repository.snapshot().dayLogs.single())
+        assertFalse(repository.snapshot().customCategories.isSingleChoice("discharge"))
+        assertTrue(repository.snapshot().customCategories.isSingleChoice("sex"))
+    }
+
     @Test fun hideAndReorderPreserveNamesAndIcons() = runTest {
         val vm = model()
         vm.appearance(UiOverride("item:mood:GOOD", false, 3, "Content", "calm")).join()

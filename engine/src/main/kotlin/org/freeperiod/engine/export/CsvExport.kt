@@ -36,9 +36,11 @@ object CsvExport {
                 fun own(field: String) = selected.filter { markers[it.categoryId] == field }
                 fun single(field: String, value: Enum<*>?) = value?.let(::name)
                     ?: own(field).firstOrNull()?.let { csvItemName(it.name, builtInNames(field)) }.orEmpty()
+                fun several(field: String, values: Set<Enum<*>>) = (values.sortedBy { it.ordinal }.map(::name) +
+                    own(field).map { csvItemName(it.name, builtInNames(field)) }).joinToString(";")
                 appendRow(listOf(
                     date.toString(), if (date in periodDays) "yes" else "", name(log.flow), single("mood", log.mood), single("pain", log.pain),
-                    single("sex", log.sex), single("discharge", log.discharge),
+                    several("sex", log.sex), several("discharge", log.discharge),
                     (log.symptoms.sortedBy { it.name }.map(::name) + own("symptoms").map { csvItemName(it.name, builtInNames("symptoms")) }).joinToString(";"),
                     log.tagIds.sorted().mapNotNull { byId[it]?.takeIf { it.categoryId == null }?.name?.let { csvItemName(it) } }.joinToString(";"), log.note.orEmpty(),
                     name(log.ovulationTest), log.tagIds.sorted().mapNotNull { id ->

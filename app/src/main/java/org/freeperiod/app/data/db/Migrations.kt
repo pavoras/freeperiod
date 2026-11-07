@@ -3,6 +3,16 @@ package org.freeperiod.app.data.db
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
+val MIGRATION_6_7 = object : Migration(6, 7) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE day_logs ADD COLUMN sexValues TEXT NOT NULL DEFAULT ''")
+        db.execSQL("ALTER TABLE day_logs ADD COLUMN dischargeValues TEXT NOT NULL DEFAULT ''")
+        db.execSQL("UPDATE day_logs SET sexValues = COALESCE(sex, ''), dischargeValues = COALESCE(discharge, '')")
+        // Sex used to be fixed to Pick one, even when its marker had the custom-category default.
+        db.execSQL("UPDATE custom_categories SET singleChoice = 1 WHERE iconKey = 'builtin:sex'")
+    }
+}
+
 val MIGRATION_5_6 = object : Migration(5, 6) {
     override fun migrate(db: SupportSQLiteDatabase) {
         db.execSQL("ALTER TABLE ui_overrides ADD COLUMN chart INTEGER")

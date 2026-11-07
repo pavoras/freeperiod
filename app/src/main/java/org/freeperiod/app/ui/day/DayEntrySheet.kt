@@ -327,7 +327,7 @@ private fun EntryChoices(category: EntryCategory, state: DayEntryUiState, action
             val appearance = appearances[items.indexOf(item)]
             val selected = state.selected(item)
             FpChip(selected || impliedNone && item.tag == null && item.name == FlowLevel.NONE.name, { item.tag?.let { actions.tag(it.id) } ?: run {
-                val name = item.name.takeUnless { selected }
+                val name = item.name.takeUnless { selected && category.key !in configurableChoiceFields }
                 when (category.key) {
                     "mood" -> actions.mood(name?.let(Mood::valueOf))
                     "flow" -> actions.flow(name?.let(FlowLevel::valueOf))

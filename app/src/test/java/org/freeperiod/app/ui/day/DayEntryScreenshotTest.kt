@@ -89,7 +89,7 @@ class DayEntryScreenshotTest {
         Locale.setDefault(locale)
         val today = clock()
         val log = DayLog(today, FlowLevel.MEDIUM, Mood.GOOD, setOf(Symptom.CRAMPS, Symptom.FATIGUE),
-            Pain.MILD, Sex.NONE, Discharge.CREAMY, if (locale.language == "de") "Ein ruhiger Tag." else "A quiet day.", setOf(1))
+            Pain.MILD, setOf(Sex.NONE), setOf(Discharge.CREAMY), if (locale.language == "de") "Ein ruhiger Tag." else "A quiet day.", setOf(1))
         val data = BackupData(periods = if (empty) emptyList() else listOf(Period(1, today.minusDays(2), null)),
             dayLogs = if (empty) emptyList() else listOf(log),
             tags = if (empty) emptyList() else listOf(Tag(1, if (locale.language == "de") "Bewegung" else "Exercise")),

@@ -6,7 +6,7 @@ import org.freeperiod.engine.*
 
 /** Validates an entire snapshot before any restore can mutate storage. */
 fun validBackup(data: BackupData, today: LocalDate): Boolean {
-    if (data.schemaVersion !in 2..3 || data.settings.typicalCycleLength?.let { it !in 15..90 } == true) return false
+    if (data.schemaVersion !in 2..4 || data.settings.typicalCycleLength?.let { it !in 15..90 } == true) return false
     if (!uniquePositiveIds(data.periods.map { it.id }) || !uniquePositiveIds(data.tags.map { it.id }) ||
         !uniquePositiveIds(data.customCategories.map { it.id }) || !uniquePositiveIds(data.reminders.map { it.id })) return false
     if (data.dayLogs.map { it.date }.toSet().size != data.dayLogs.size) return false

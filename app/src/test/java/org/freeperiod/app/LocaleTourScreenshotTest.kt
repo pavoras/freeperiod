@@ -119,7 +119,7 @@ class LocaleTourScreenshotTest {
             DayLog(today.minusDays(1), flow = FlowLevel.HEAVY, mood = Mood.LOW, pain = Pain.MODERATE,
                 symptoms = setOf(Symptom.FATIGUE, Symptom.HEADACHE, Symptom.BLOATING)),
             DayLog(today.minusDays(2), flow = FlowLevel.MEDIUM, mood = Mood.OKAY),
-            DayLog(today.minusDays(9), mood = Mood.GREAT, discharge = Discharge.CREAMY))
+            DayLog(today.minusDays(9), mood = Mood.GREAT, discharge = setOf(Discharge.CREAMY)))
         val data = BackupData(periods = periods, dayLogs = logs, tags = emptyList(), settings = BackupSettings(null, false))
         val history = historyState(data, today)
         val day = dayEntryState(data.copy(periods = listOf(Period(1, today.minusDays(2), null))), today, today)

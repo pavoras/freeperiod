@@ -12,9 +12,21 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [35])
 class DayLogDaoTest : DatabaseTest() {
+    @Test fun setsSurviveStorageAndClearingDoesNotRestoreLegacyValues() = runBlocking {
+        val log = DayLog(today, sex = setOf(Sex.PROTECTED, Sex.UNPROTECTED),
+            discharge = setOf(Discharge.CREAMY, Discharge.UNUSUAL), note = "Keep")
+        repository.saveDayLog(log)
+        assertEquals(log, repository.snapshot().dayLogs.single())
+        val cleared = log.copy(sex = emptySet(), discharge = emptySet())
+        repository.saveDayLog(cleared)
+        assertEquals(cleared, repository.snapshot().dayLogs.single())
+        assertNull(db.dayLogDao().getAll().single().sex)
+        assertNull(db.dayLogDao().getAll().single().discharge)
+    }
+
     @Test fun datesRoundTripAsEpochDay() = runBlocking {
         val log = DayLog(today, FlowLevel.NONE, Mood.GOOD, setOf(Symptom.CRAVINGS, Symptom.HEADACHE),
-            Pain.MILD, Sex.NONE, Discharge.CREAMY, "Test note")
+            Pain.MILD, setOf(Sex.NONE), setOf(Discharge.CREAMY), "Test note")
         repository.saveDayLog(log)
         assertEquals(today.toEpochDay(), db.dayLogDao().getAll().single().epochDay)
         assertEquals(log, repository.dayLogs.first()[today])

@@ -26,6 +26,16 @@ class SummaryPdfTest {
         overrides = listOf(UiOverride("item:mood:GOOD", false, 3, label = "Content")))
     private val facts = summary(data.periods, data.dayLogs, today.minusDays(30), today)
 
+    @Test fun rowsIncludeAllSexAndDischargeValuesAndOwnItemsInItemOrder() {
+        val input = data.copy(dayLogs = listOf(DayLog(today, sex = setOf(Sex.UNPROTECTED, Sex.PROTECTED),
+            discharge = setOf(Discharge.CREAMY, Discharge.UNUSUAL), tagIds = setOf(7))),
+            tags = listOf(Tag(7, "Own", archived = true, categoryId = 3)),
+            customCategories = listOf(CustomCategory(3, "Discharge", "builtin:discharge", 0, false, singleChoice = true)),
+            overrides = listOf(UiOverride("tag:7", false, -2), UiOverride("item:discharge:UNUSUAL", true, -1)))
+        val row = summaryRows(summary(input.periods, input.dayLogs, today, today), input, context::getString, false).single()
+        assertEquals("Sex: Protected, Unprotected; Discharge: Own, Unusual, Creamy", row.other)
+    }
+
     @Test fun rowsUseTheUsersNamesAndCountsAndLeaveNotesOutUnlessAsked() {
         val rows = summaryRows(facts, data, context::getString, notes = false)
         assertEquals(listOf(today.minusDays(3), today.minusDays(2), today.minusDays(1)), rows.map { it.date })

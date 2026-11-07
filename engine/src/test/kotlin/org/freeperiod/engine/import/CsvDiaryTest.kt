@@ -8,6 +8,30 @@ import org.junit.Test
 
 class CsvDiaryTest {
     private val today = LocalDate.of(2026, 10, 10)
+    @Test fun severalBuiltInsAndEscapedOwnItemsRoundTripRegardlessOfChoiceSetting() {
+        val categories = listOf(CustomCategory(1, "Sex", "builtin:sex", 0, false, singleChoice = true),
+            CustomCategory(2, "Discharge", "builtin:discharge", 0, false, singleChoice = true))
+        val tags = listOf(Tag(1, "Protected", categoryId = 1), Tag(2, "My;fluid:50%", categoryId = 2),
+            Tag(3, "Other", categoryId = 2))
+        val log = DayLog(today, sex = setOf(Sex.UNPROTECTED, Sex.PROTECTED),
+            discharge = setOf(Discharge.UNUSUAL, Discharge.CREAMY), tagIds = setOf(1, 2, 3))
+        val csv = CsvExport.export(emptyList(), listOf(log), tags, categories, today)
+        assertTrue(csv, csv.contains("protected;unprotected;%50rotected,creamy;unusual;My%3Bfluid%3A50%25;Other"))
+        val restored = CsvImport.parse(csv, tags = tags, customCategories = categories) as CsvImportResult.Parsed
+        assertEquals(log, restored.dayLogs.single())
+        val fresh = CsvImport.parse(csv) as CsvImportResult.Parsed
+        assertEquals(log, fresh.dayLogs.single())
+        assertEquals(tags.map { it.name }, fresh.tags.map { it.name })
+        assertEquals(csv, CsvExport.export(fresh.periods, fresh.dayLogs, fresh.tags, fresh.customCategories, today))
+    }
+
+    @Test fun oldScalarColumnsBecomeOneElementSetsAndNoneConflictsAreRejected() {
+        val parsed = CsvImport.parse("date,sex,discharge\n$today,none,creamy") as CsvImportResult.Parsed
+        assertEquals(DayLog(today, sex = setOf(Sex.NONE), discharge = setOf(Discharge.CREAMY)), parsed.dayLogs.single())
+        listOf("none;protected,creamy", "protected,none;unusual", "none;Own,creamy").forEach {
+            assertEquals(CsvImportResult.Invalid, CsvImport.parse("date,sex,discharge\n$today,$it"))
+        }
+    }
     @Test fun aSingleDiaryColumnDoesNotCreateAPeriod() {
         listOf("mood", "pain", "sex", "discharge", "symptoms").forEach { field ->
             val result = CsvImport.parse("date,$field\n$today,My item") as CsvImportResult.Parsed
@@ -85,7 +109,7 @@ class CsvDiaryTest {
         val category = CustomCategory(1, "Activities", "tag", 0, false)
         val tag = Tag(1, "Walk", categoryId = 1)
         val log = DayLog(today, FlowLevel.LIGHT, Mood.GOOD, setOf(Symptom.HEADACHE), Pain.MILD,
-            Sex.PROTECTED, Discharge.CREAMY, tagIds = setOf(1), ovulationTest = OvulationTest.NEGATIVE)
+            setOf(Sex.PROTECTED), setOf(Discharge.CREAMY), tagIds = setOf(1), ovulationTest = OvulationTest.NEGATIVE)
         val csv = CsvExport.export(listOf(Period(1, today, today)), listOf(log), listOf(tag), listOf(category), today)
         val restored = CsvImport.parse(csv) as CsvImportResult.Parsed
         assertEquals(log, restored.dayLogs.single())

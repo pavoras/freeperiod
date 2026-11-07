@@ -47,17 +47,17 @@ object ClueImport {
                 symptoms = listOf("pain", "mood", "energy", "poop").flatMap { values(entry[it]) }
                     .mapNotNull { symptoms[it] }.toSet() +
                     (if (values(entry["craving"]).isNotEmpty()) setOf(Symptom.CRAVINGS) else emptySet()),
-                sex = when {
-                    "unprotected" in sex || "withdrawal" in sex -> Sex.UNPROTECTED
-                    "protected" in sex -> Sex.PROTECTED
+                sex = sex.mapNotNull { when (it) {
+                    "unprotected", "withdrawal" -> Sex.UNPROTECTED
+                    "protected" -> Sex.PROTECTED
                     else -> null
-                },
+                } }.toSet(),
                 libido = when {
                     "high_sex_drive" in sex -> Libido.HIGH
                     "low_sex_drive" in sex -> Libido.LOW
                     else -> null
                 },
-                discharge = values(entry["fluid"]).firstNotNullOfOrNull { discharges[it] })
+                discharge = values(entry["fluid"]).mapNotNull { discharges[it] }.toSet())
             logs[day] = log
             values(entry["tags"]).map { it.trim() }.filter { it.isNotEmpty() }.toSet()
                 .takeIf { it.isNotEmpty() }?.let { tags[day] = it }

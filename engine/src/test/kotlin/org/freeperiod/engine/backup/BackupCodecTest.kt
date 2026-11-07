@@ -25,8 +25,8 @@ class BackupCodecTest {
         ),
         dayLogs = listOf(DayLog(
             LocalDate.of(2026, 3, 1), FlowLevel.HEAVY, Mood.LOW,
-            setOf(Symptom.CRAMPS, Symptom.FATIGUE), Pain.MODERATE, Sex.PROTECTED,
-            Discharge.CREAMY, "A note: Ã¤, æ°´", setOf(1, 2),
+            setOf(Symptom.CRAMPS, Symptom.FATIGUE), Pain.MODERATE, setOf(Sex.PROTECTED),
+            setOf(Discharge.CREAMY), "A note: Ã¤, æ°´", setOf(1, 2),
         )),
         tags = listOf(Tag(1, "Work"), Tag(2, "Hike", archived = true)),
         settings = BackupSettings(30, false),
@@ -35,6 +35,39 @@ class BackupCodecTest {
     private fun encode(input: BackupData = data) = BackupCodec.encode(input, password, iterations = 100_000)
     private fun decode(bytes: ByteArray) = BackupCodec.decode(bytes, password, today)
     private fun assertInvalid(input: BackupData) = assertEquals(DecodeResult.InvalidContent, decode(encode(input)))
+
+    @Test fun multipleBuiltInsAndOwnItemsRoundTripEvenAfterSwitchingToOne() {
+        val input = data.copy(dayLogs = listOf(DayLog(today, sex = setOf(Sex.PROTECTED, Sex.UNPROTECTED),
+            discharge = setOf(Discharge.CREAMY, Discharge.UNUSUAL), tagIds = setOf(1, 2))),
+            customCategories = listOf(CustomCategory(1, "Sex", "builtin:sex", 0, false, singleChoice = true),
+                CustomCategory(2, "Discharge", "builtin:discharge", 0, false, singleChoice = true)),
+            tags = listOf(Tag(1, "Own sex", categoryId = 1), Tag(2, "Own discharge", categoryId = 2)))
+        assertEquals(DecodeResult.Ok(input), decode(encode(input)))
+        val several = input.copy(customCategories = input.customCategories.map { it.copy(singleChoice = false) })
+        assertEquals(DecodeResult.Ok(several), decode(encode(several)))
+        val json = Json.encodeToString(input)
+        assertTrue(json, json.contains("\"sexValues\":[\"PROTECTED\",\"UNPROTECTED\"]"))
+        assertTrue(json, json.contains("\"sex\":\"PROTECTED\""))
+    }
+
+    @Test fun allOlderSchemasReadScalarSelectionsAndKeepSexPickOne() {
+        for (version in 1..3) {
+            val extras = if (version == 1) "" else """, "customCategories":[{"id":1,"name":"Sex","iconKey":"builtin:sex","sortOrder":0,"archived":false,"singleChoice":false}]"""
+            val legacy = """{"schemaVersion":$version,"periods":[],"dayLogs":[{"date":"2026-03-01","sex":"NONE","discharge":"CREAMY"},{"date":"2026-03-02","sex":null,"discharge":null}],"tags":[],"settings":{"typicalCycleLength":null,"predictionsPaused":false}$extras}"""
+            val restored = (decode(rawBackup(legacy)) as DecodeResult.Ok).data
+            assertEquals(4, restored.schemaVersion)
+            assertEquals(setOf(Sex.NONE), restored.dayLogs[0].sex)
+            assertEquals(setOf(Discharge.CREAMY), restored.dayLogs[0].discharge)
+            assertTrue(restored.dayLogs[1].sex.isEmpty())
+            assertTrue(restored.dayLogs[1].discharge.isEmpty())
+            assertTrue(restored.customCategories.isSingleChoice("sex"))
+        }
+    }
+
+    @Test fun noneWithAnotherSelectionIsRejected() {
+        assertInvalid(data.copy(dayLogs = listOf(DayLog(today, sex = setOf(Sex.NONE, Sex.PROTECTED)))))
+        assertInvalid(data.copy(dayLogs = listOf(DayLog(today, discharge = setOf(Discharge.NONE, Discharge.CREAMY)))))
+    }
 
     @Test fun roundTripEqualsInput() {
         val bytes = BackupCodec.encode(data, password)
@@ -50,10 +83,10 @@ class BackupCodecTest {
         assertEquals(DecodeResult.Ok(customized), decode(encode(customized)))
     }
 
-    @Test fun schemaTwoWithoutNewFieldsRestoresAsThree() {
+    @Test fun schemaTwoWithoutNewFieldsRestoresAsFour() {
         val legacy = """{"schemaVersion":2,"periods":[],"dayLogs":[],"tags":[{"id":1,"name":"Walk","categoryId":1,"iconKey":"tag"}],"settings":{"typicalCycleLength":null,"predictionsPaused":false},"customCategories":[{"id":1,"name":"Activities","iconKey":"leaf","sortOrder":10,"archived":false}],"overrides":[{"key":"category:mood","hidden":true,"sortOrder":3}]}"""
         val restored = (decode(rawBackup(legacy)) as DecodeResult.Ok).data
-        assertEquals(3, restored.schemaVersion)
+        assertEquals(4, restored.schemaVersion)
         assertFalse(restored.customCategories.single().singleChoice)
         assertNull(restored.overrides.single().label)
         assertNull(restored.overrides.single().iconKey)
@@ -140,13 +173,13 @@ class BackupCodecTest {
     }
 
     @Test fun schemaVersionUnsupported() {
-        assertEquals(DecodeResult.UnsupportedVersion, decode(rawBackup("""{"schemaVersion":4,"unknownFutureField":true}""")))
+        assertEquals(DecodeResult.UnsupportedVersion, decode(rawBackup("""{"schemaVersion":5,"unknownFutureField":true}""")))
     }
 
     @Test fun decodesSchema1() {
         val legacy = """{"schemaVersion":1,"periods":[{"id":1,"start":"2026-02-01","end":"2026-02-05","cycleUse":"EXCLUDE"}],"dayLogs":[{"date":"2026-02-01","flow":"LIGHT","tagIds":[7],"note":"${"x".repeat(2001)}"}],"tags":[{"id":7,"name":"Walk","archived":true}],"settings":{"typicalCycleLength":28,"predictionsPaused":false}}"""
         val result = decode(rawBackup(legacy)) as DecodeResult.Ok
-        assertEquals(3, result.data.schemaVersion)
+        assertEquals(4, result.data.schemaVersion)
         assertEquals(listOf(Tag(7, "Walk", true)), result.data.tags)
         assertEquals(Situation(), result.data.situation)
         assertTrue(result.data.situation.fertileWindowEnabled)
