@@ -34,6 +34,26 @@ class OnboardingScreenshotTest : SettingsScreenshotFixture() {
     fun pastPeriods_deLight() = capture("onboarding/pastPeriods_deLight", "Bisherige Perioden", Locale.GERMANY) {
         OnboardingScreen(pastPeriods(), OnboardingActions())
     }
+    @Test @Config(sdk = [35], qualifiers = "pt-rBR-w360dp-h800dp-xxhdpi")
+    fun pastPeriods_ptBRLight() = capture("onboarding/pastPeriods_ptBRLight", "Menstruações anteriores", Locale.forLanguageTag("pt-BR")) {
+        OnboardingScreen(pastPeriods(), OnboardingActions())
+    }
+    @Test @Config(sdk = [35], qualifiers = "es-rES-w360dp-h800dp-xxhdpi")
+    fun pastPeriods_esLight() = capture("onboarding/pastPeriods_esLight", "Periodos anteriores", Locale.forLanguageTag("es-ES")) {
+        OnboardingScreen(pastPeriods(), OnboardingActions())
+    }
+    @Test @Config(sdk = [35], qualifiers = "in-rID-w360dp-h800dp-xxhdpi")
+    fun pastPeriods_idLight() = capture("onboarding/pastPeriods_idLight", "Haid sebelumnya", Locale.forLanguageTag("id-ID")) {
+        OnboardingScreen(pastPeriods(), OnboardingActions())
+    }
+    @Test @Config(sdk = [35], qualifiers = "tr-rTR-w360dp-h800dp-xxhdpi")
+    fun pastPeriods_trLight() = capture("onboarding/pastPeriods_trLight", "Geçmiş regl dönemleri", Locale.forLanguageTag("tr-TR")) {
+        OnboardingScreen(pastPeriods(), OnboardingActions())
+    }
+    @Test @Config(sdk = [35], qualifiers = "fr-rFR-w360dp-h800dp-xxhdpi")
+    fun pastPeriods_frLight() = capture("onboarding/pastPeriods_frLight", "Règles passées", Locale.forLanguageTag("fr-FR")) {
+        OnboardingScreen(pastPeriods(), OnboardingActions())
+    }
     @Test fun reminders_enLight() = capture("onboarding/reminders_enLight", "Reminders") {
         OnboardingScreen(OnboardingUiState(page = 6, today = clock()), OnboardingActions())
     }

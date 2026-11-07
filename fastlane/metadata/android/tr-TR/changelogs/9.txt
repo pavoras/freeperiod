@@ -1,3 +1,3 @@
-• Çoklu seçim: akıntı ve kendi kategorilerin günde birden fazla seçim tutabilir; Günlük kaydı özelleştir bölümünde her kategori için "Tek seçim" veya "Çoklu seçim"i seç.
+• Çoklu seçim: aynı gün akıntı veya kendi kategorilerin için birden fazla seçenek kaydedebilirsin; Günlük kaydı özelleştir bölümünde her kategori için "Tek seçim" veya "Çoklu seçim"i seç.
 • Geçmiş › Kayıtlar: günlüğün, kaydettiğin her gün için bir kart, en yeniler en üstte.
 • Artık Portekizce (Brezilya), İspanyolca, Endonezce, Türkçe ve Fransızca da var.

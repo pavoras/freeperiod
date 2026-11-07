@@ -1,11 +1,11 @@
 Döngün, sana ait alanın – yalnızca telefonunda.
 
-FreePeriod, regl takvimi ve günlük bir arada. İnternet izni yok, bu yüzden uygulamanın kendisi internete hiçbir şey gönderemez. Bunu açık kaynak kodundan herkes kontrol edebilir. Ücretsiz; reklam, abonelik veya hesap yok.
+FreePeriod, regl takvimini ve günlüğü bir araya getirir. İnternet izni yok, bu yüzden uygulamanın kendisi internete hiçbir şey gönderemez. Bunu açık kaynak kodundan herkes kontrol edebilir. Ücretsiz; reklam, abonelik veya hesap yok.
 
 • Reglini tek dokunuşla kaydet, döngünün kaçıncı gününde olduğunu bir bakışta gör: takvim veya döngü halkası olarak.
 • Kendi kayıtlarına göre sonraki iki reglin için takvim tahminleri.
 • İsteğe bağlı: hamilelik olasılığının daha yüksek olduğu günler, yalnızca bir takvim tahmini olarak gösterilir.
-• Günlük: ruh hâli, kanama, ağrı, belirtiler, akıntı, etiketler ve notlar; isteğe bağlı olarak iştah, cinsel istek, ilaç kaydı ve ağrı günlüğü. İstediğini yeniden adlandır, sırala veya gizle; kendi kategorilerini ve simgelerini ekle.
+• Günlük: ruh hâli, kanama, ağrı, belirtiler, akıntı, etiketler ve notlar. İstersen iştahı, cinsel isteği, ilaç kaydını ("aldıklarını kaydet") veya ağrı günlüğünü aç. İstediğini yeniden adlandır, sırala veya gizle; kendi kategorilerini ve simgelerini ekle.
 • Geçmiş bölümünde ortalamalar, kaydedilen belirtiler ve haftalık, aylık, 3 aylık veya yıllık grafikler.
 • Örneğin bir doktor randevusu için kayıtlarının PDF özeti.
 • Reglin, bir hap veya kişisel bir şey için hatırlatıcılar.
@@ -17,4 +17,4 @@ Gizlilik temelimiz
 FreePeriod internet izni veya analiz içermez. Kayıtların telefonunda kalır. İsteğe bağlı uygulama kilidi, şifrelenmiş yedek dosyaları (seçtiğin klasöre otomatik yedekleme de dâhil) ve CSV dışa aktarımı: dosyaların nereye gideceğine sen karar verirsin.
 
 Sınırlarımız açık
-FreePeriod tıbbi bir cihaz değildir, bir doğum kontrol yöntemi değildir ve hamile kalmana yardımcı olan bir araç değildir. Tüm tarihler kendi kayıtlarından hesaplanan tahminlerdir ve yanlış olabilir. Doğum kontrolü, hamilelik veya sağlığınla ilgili sorularını bir doktora veya eczacıya danış.
+FreePeriod tıbbi bir cihaz değildir, bir doğum kontrol yöntemi değildir ve hamile kalmana yardımcı olan bir araç değildir. Tüm tarihler kendi kayıtlarından hesaplanan tahminlerdir ve yanlış olabilir. Doğum kontrolü, hamilelik veya sağlığınla ilgili soruların için bir doktora veya eczacıya danış.

@@ -1,3 +1,3 @@
-• L’Historique a une nouvelle vue Entrées : ton journal, une carte par jour noté, du plus récent au plus ancien ; appuie sur une carte pour ouvrir le jour.
+• L’Historique a une nouvelle vue Entrées : ton journal, une carte par jour noté, du plus récent au plus ancien ; appuie sur une carte pour ouvrir le jour.
 • FreePeriod existe maintenant en portugais (Brésil), espagnol, indonésien, turc et français.
 • Des libellés plus courts qui tiennent sur une ligne.

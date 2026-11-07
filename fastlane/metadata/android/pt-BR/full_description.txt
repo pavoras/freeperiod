@@ -5,11 +5,11 @@ O FreePeriod reúne um calendário menstrual e um diário. Não tem permissão d
 • Registre sua menstruação com um toque e veja o dia do ciclo de relance – em um calendário ou em um anel do ciclo.
 • Estimativas de calendário para suas próximas duas menstruações, baseadas nos seus próprios registros.
 • Opcional: dias com maior chance de gravidez, mostrados como uma simples estimativa de calendário.
-• Diário: humor, fluxo, dor, sintomas, corrimento, marcadores e notas; opcionalmente apetite, desejo sexual, medicamentos e um diário de dor. Renomeie, reordene ou oculte o que quiser e adicione suas próprias categorias e ícones.
+• Diário: humor, fluxo, dor, sintomas, corrimento, marcadores e notas. Ative também apetite, desejo sexual, um registro de medicamentos ("anote o que você toma") ou um diário de dor. Renomeie, reordene ou oculte o que quiser e adicione suas próprias categorias e ícones.
 • Histórico com médias, sintomas registrados e gráficos de uma semana, um mês, 3 meses ou um ano.
 • Um resumo em PDF dos seus registros, por exemplo, para uma consulta médica.
 • Lembretes da menstruação, da pílula ou de algo pessoal.
-• Fases da vida: durante a gravidez, após o parto e na menopausa, as estimativas pausam e seu diário continua.
+• Fases da vida: durante a gravidez, após o parto e na menopausa, as estimativas ficam pausadas e seu diário continua.
 • Mudando de app? Importe suas menstruações e registros anteriores do arquivo de exportação ou backup de outro app, de um CSV ou de um backup do FreePeriod.
 • Nove cores de destaque, de tons pastéis suaves a tons escuros e discretos; tema claro, escuro ou igual ao do celular. Inglês, alemão, português do Brasil, espanhol, indonésio, turco e francês.
 

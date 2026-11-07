@@ -259,8 +259,8 @@
     <string name="unlock">Desbloquear</string>
     <string name="lock_auth_error">Se canceló el desbloqueo o no se pudo completar. Vuelve a intentarlo cuando quieras.</string>
     <string name="onboarding_skip">Omitir</string>
-    <string name="onboarding_welcome">Te damos la bienvenida a Free&#8288;Period</string>
-    <string name="onboarding_promise">Sin cuenta. Sin anuncios. Sin suscripción.</string>
+    <string name="onboarding_welcome">¡Hola! Esto es Free&#8288;Period</string>
+    <string name="onboarding_promise">Sin anuncios. Sin cuenta.\nSin suscripción.</string>
     <string name="onboarding_local">Tus datos se quedan en tu teléfono. Sin permiso de internet.</string>
     <string name="onboarding_optional">Todo aquí es opcional. Puedes agregar o cambiar detalles más adelante.</string>
     <string name="onboarding_reminders_optional">Los recordatorios están desactivados hasta que los elijas. El texto de las notificaciones es neutro de forma predeterminada.</string>
@@ -375,7 +375,7 @@
     <string name="pill_rhythm_summary">%1$d + %2$d días · empieza el %3$s</string>
     <string name="pill_rhythm_missing">Agrega el esquema del blíster para ver los descansos programados.</string>
     <string name="pill_continuous">Continuo</string>
-    <string name="pill_active_days">Días activos (1–365)</string>
+    <string name="pill_active_days">Días de toma (1–365)</string>
     <string name="pill_break_days">Días de descanso (0–30)</string>
     <string name="pack_start_date">Fecha de inicio del blíster</string>
     <string name="date_format_hint">Formato de fecha: AAAA-MM-DD</string>
@@ -506,7 +506,7 @@
     <string name="feedback_include_info">Agregar información técnica (versión de la app y de Android, modelo del dispositivo, idioma)</string>
     <string name="feedback_open">Abrir correo</string>
     <string name="feedback_no_app">No se encontró ninguna app de correo. Puedes escribir a %1$s.</string>
-    <string name="today_welcome_hint">Tus estimaciones del calendario aparecen después de tu primer periodo.</string>
+    <string name="today_welcome_hint">Tus estimaciones del calendario aparecen cuando registres tu primer periodo en la app.</string>
     <string name="appearance_preview_hint">Un ejemplo: así se ve tu color en la app.</string>
     <string name="reorder_categories">Cambiar orden</string>
     <string name="reorder_done">Listo</string>
@@ -644,12 +644,12 @@
     <string name="pick_several">Elegir varios</string>
     <string name="category_count">Contar</string>
     <string name="archived_item">Archivado</string>
-    <string name="archived_item_body">Ya no se ofrece en el registro del día. Los días anteriores lo conservan.</string>
+    <string name="archived_item_body">Ya no aparece en el registro del día. Los registros de días anteriores lo conservan.</string>
     <string name="delete_forever">Borrar</string>
     <string name="delete_forever_title">¿Borrar %1$s?</string>
     <string name="delete_category_body">La categoría y sus elementos también se borran de todos los días anteriores. No se puede deshacer.</string>
     <string name="delete_item_body">También se borra de todos los días anteriores. No se puede deshacer.</string>
-    <string name="restore_defaults">Restablecer valores predeterminados</string>
+    <string name="restore_defaults">Restablecer ajustes iniciales</string>
     <string name="restore_defaults_body">Los nombres, iconos, orden y visibilidad vuelven a su estado inicial. Tus propios elementos, categorías y registros se conservan.</string>
     <plurals name="import_app_entry_preview">
         <item quantity="one">Se importará %d registro del diario. Lo que ya registraste ese día se conserva; solo se agregan los valores que faltan.</item>
@@ -713,7 +713,7 @@
     <string name="menopause_bleeding_note">Si hay sangrado tras un año sin periodos, conviene comentarlo en una consulta médica.</string>
     <string name="summary_screen">Resumen en PDF</string>
     <string name="summary_intro">Un resumen claro de tus registros, por ejemplo, para una consulta médica. Tú eliges dónde guardarlo; Free&#8288;Period no lo envía a ningún lugar.</string>
-    <string name="summary_range">Intervalo de tiempo</string>
+    <string name="summary_range">Intervalo</string>
     <string name="summary_all">Todo</string>
     <string name="summary_notes">Incluir notas</string>
     <string name="summary_notes_detail">Desactivado de forma predeterminada porque las notas pueden ser personales.</string>

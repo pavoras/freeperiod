@@ -1,3 +1,3 @@
-• Riwayat punya tampilan baru Catatan: diari kamu, satu kartu untuk setiap hari yang dicatat, terbaru di atas; ketuk kartu untuk membuka harinya.
+• Riwayat punya tampilan baru Catatan: catatan harian kamu, satu kartu untuk setiap hari yang dicatat, terbaru di atas; ketuk kartu untuk membuka harinya.
 • FreePeriod sekarang tersedia dalam bahasa Portugis (Brasil), Spanyol, Indonesia, Turki, dan Prancis.
 • Label lebih pendek yang muat dalam satu baris.

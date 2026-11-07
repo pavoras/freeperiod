@@ -80,8 +80,8 @@
     <string name="day_saved_automatically">Otomatik kaydedildi</string>
     <string name="day_read_only">Gelecek günleri görüntüleyebilirsin. O gün geldiğinde kaydını ekle.</string>
     <string name="day_period_heading">Regl</string>
-    <string name="period_start_day">Reglim bu gün başladı</string>
-    <string name="period_end_day">Reglim bu gün bitti</string>
+    <string name="period_start_day">Reglim bu tarihte başladı</string>
+    <string name="period_end_day">Reglim bu tarihte bitti</string>
     <string name="period_end_date">Reglin ne zaman bitti?</string>
     <string name="period_still_ongoing">Hâlâ sürüyor</string>
     <string name="day_overlap">Bu, başka bir regl dönemiyle çakışıyor.</string>
@@ -199,7 +199,7 @@
     <string name="restore_done">Yedek geri yüklendi. Veriler ve döngü ayarları değiştirildi.</string>
     <string name="csv_warning">CSV dosyaları şifrelenmez. Bu dosyalara erişen herkes kayıtlarını okuyabilir. Her gün için bir satır içeren, herhangi bir hesap tablosu uygulamasında okunabilen tek bir dosya alırsın.</string>
     <string name="csv_saved">CSV dosyası kaydedildi.</string>
-    <string name="privacy_storage">Regl dönemlerin, günlük kayıtların, belirtilerin, ruh hâllerin, notların, etiketlerin ve ayarların yalnızca bu telefonda saklanır. Free&#8288;Period hesabı veya sunucusu yoktur.</string>
+    <string name="privacy_storage">Regl dönemlerin, günlük kayıtların, belirtilerin, ruh hâllerin, notların, etiketlerin ve ayarların yalnızca bu telefonda saklanır. Free&#8288;Period için hesap veya sunucu yoktur.</string>
     <string name="privacy_offline">Free&#8288;Period internet izni, analiz veya reklam içermez. Uygulama takip verilerini hiçbir yere göndermez.</string>
     <string name="privacy_files">Yedekler şifrelenmiş dosyalardır; CSV dışa aktarımları şifrelenmez. Bu dosyaları ve nereye kaydedildiklerini sen kontrol edersin. Dosya seçicide bir bulut klasörü seçersen o uygulama dosyayı kendi bulut hizmetine yükler.</string>
     <string name="privacy_delete">Free&#8288;Period tarafından saklanan her şeyi silmek için uygulamayı kaldır. Tüm takip verilerini silmek ve döngü ayarlarını sıfırlamak için Ayarlar bölümündeki “Tüm verileri sil” seçeneğini kullan. Yedek ve dışa aktarım dosyalarını kaydettiğin uygulamadan ayrıca sil.</string>
@@ -214,7 +214,7 @@
     <string name="support_body">Free&#8288;Period ücretsiz kalır: reklam, abonelik veya hesap yok. Beğendiysen ve gelişmesine katkıda bulunmak istersen Google Play üzerinden tek seferlik bir satın almayla destek olabilirsin. Ek bir özellik açılmaz; zaten hepsine sahipsin.</string>
     <string name="support_button">%1$s ile destek ol</string>
     <string name="support_pending">Google Play satın alma işlemini hâlâ işliyor.</string>
-    <string name="support_thanks">Free&#8288;Period desteğin için teşekkürler!</string>
+    <string name="support_thanks">Free&#8288;Period uygulamasını desteklediğin için teşekkürler!</string>
     <string name="support_thanks_short">Teşekkürler!</string>
     <string name="support_privacy">Ödemeyi Google Play işler. Free&#8288;Period yalnızca destek olup olmadığını öğrenir.</string>
     <string name="privacy_purchases">Google Play sürümünde Free&#8288;Period uygulamasına tek seferlik bir satın almayla destek olabilirsin. İşlemi Google, kendi gizlilik politikası kapsamında Google Play üzerinden yürütür; Free&#8288;Period yalnızca destek olup olmadığını öğrenir ve internet izni yine yoktur.</string>
@@ -288,7 +288,7 @@
     <string name="history_cycle_label">Döngü süresi</string>
     <string name="history_period_label">Regl süresi</string>
     <string name="history_days_unit">gün</string>
-    <string name="app_estimates">Free&#8288;Period tıbbi bir cihaz değildir. Bir doğum kontrol yöntemi değildir, hamile kalmana yardımcı olan bir araç değildir; tıbbi tavsiye, tanı veya tedavi sunmaz. Tüm tarihler kendi kayıtlarından hesaplanan takvim tahminleridir ve yanlış olabilir; güvenilir değildir. Her döngü farklıdır: olasılığın daha yüksek olduğu günlerin dışında da, her gün hamile kalmak mümkündür. Doğum kontrolü, hamilelik veya sağlıkla ilgili sorularını bir doktora veya eczacıya danış.</string>
+    <string name="app_estimates">Free&#8288;Period tıbbi bir cihaz değildir. Bir doğum kontrol yöntemi değildir, hamile kalmana yardımcı olan bir araç değildir; tıbbi tavsiye, tanı veya tedavi sunmaz. Tüm tarihler kendi kayıtlarından hesaplanan takvim tahminleridir ve yanlış olabilir; güvenilir değildir. Her döngü farklıdır: olasılığın daha yüksek olduğu günlerin dışında da, her gün hamile kalmak mümkündür. Doğum kontrolü, hamilelik veya sağlıkla ilgili soruların için bir doktora veya eczacıya danış.</string>
     <string name="medical_disclaimer_title">Tıbbi bir cihaz değildir</string>
     <string name="medical_disclaimer_note">Bu takvim tahminleri yanlış olabilir ve güvenilir değildir. Free&#8288;Period doğum kontrolü, hamile kalmana yardımcı olmak veya tıbbi tavsiye vermek için kullanılamaz.</string>
     <string name="pregnancy_chance_info">Bu takvim tahmini hakkında</string>
@@ -596,7 +596,7 @@
     <string name="lock_intro_title">Uygulama kilidi açılsın mı?</string>
     <string name="lock_intro_body">Free&#8288;Period uygulamasını açtığında ve seçtiğin süre dolduğunda yeniden telefonunun ekran kilidini — parmak izi, yüz, PIN, desen veya parola — ister. Doğrulamayı telefonun yapar; Free&#8288;Period bunu asla görmez. Kilit açıkken uygulama son uygulamalar ekranında gizlenir ve ekran görüntüleri engellenir.</string>
     <string name="lock_turn_on">Aç</string>
-    <string name="typical_length_fallback">Yalnızca ilk tam döngün kaydedilene kadar kullanılır. Sonrasında Free&#8288;Period kendi kayıtlarını kullanır.</string>
+    <string name="typical_length_fallback">Yalnızca ilk tam döngün kaydedilene kadar kullanılır. Sonrasında Free&#8288;Period girdiğin kayıtları kullanır.</string>
     <string name="archived_categories">Arşivlenenler</string>
     <string name="archived_categories_hint">Arşivlenen kategoriler artık günlük kayıtta görünmez. Geçmiş kayıtlarında kalır.</string>
     <string name="restore_category">Geri getir</string>
@@ -624,7 +624,7 @@
     <string name="pick_several">Çoklu seçim</string>
     <string name="category_count">Sayım</string>
     <string name="archived_item">Arşivlendi</string>
-    <string name="archived_item_body">Artık günlük kayıtta sunulmaz. Geçmiş günlerde kalır.</string>
+    <string name="archived_item_body">Artık günlük kayıtta görünmez. Geçmiş günlerdeki kayıtlarında kalır.</string>
     <string name="delete_forever">Sil</string>
     <string name="delete_forever_title">%1$s silinsin mi?</string>
     <string name="delete_category_body">Kategori ve öğeleri geçmişteki tüm günlerden de kaldırılır. Bu işlem geri alınamaz.</string>

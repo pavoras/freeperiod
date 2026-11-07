@@ -64,7 +64,7 @@
         <item quantity="many">Règles\u00A0: %1$d jours</item>
         <item quantity="other">Règles\u00A0: %1$d jours</item>
     </plurals>
-    <string name="history_excluded">Exclu par ton choix · non utilisé pour les prévisions</string>
+    <string name="history_excluded">Tu l’as exclu · non utilisé pour les prévisions</string>
     <string name="history_too_short">Inhabituellement court · non utilisé pour les prévisions</string>
     <string name="history_too_long">Inhabituellement long · non utilisé pour les prévisions</string>
     <string name="history_use_predictions">Utiliser pour les prévisions</string>
@@ -101,7 +101,7 @@
     <string name="entry_flow">Flux</string>
     <string name="entry_mood">Humeur</string>
     <string name="entry_pain">Douleur</string>
-    <string name="entry_sex">Sexualité</string>
+    <string name="entry_sex">Rapports sexuels</string>
     <string name="entry_discharge">Pertes</string>
     <string name="entry_symptoms">Symptômes</string>
     <string name="entry_tags">Étiquettes</string>
@@ -434,7 +434,7 @@
     <string name="category_move_down">Descendre %1$s</string>
     <string name="onboarding_step_of">Étape %1$d sur %2$d</string>
     <string name="onboarding_past_periods">Règles passées</string>
-    <string name="onboarding_picker_help">Appuie sur les jours pour les marquer ou les démarquer. Appuie longuement et fais glisser pour marquer une période. Fais défiler pour voir les mois précédents.</string>
+    <string name="onboarding_picker_help">Appuie sur un jour pour le sélectionner ou le désélectionner. Appuie longuement et fais glisser pour sélectionner plusieurs jours. Fais défiler pour voir les mois précédents.</string>
     <string name="onboarding_range_mode">Choisir un jour de début et de fin</string>
     <string name="onboarding_range_end">Choisis maintenant le jour de fin.</string>
     <string name="onboarding_periods_saved">Tes règles sont enregistrées.</string>
@@ -493,14 +493,14 @@
     <string name="import_period_calendar_partial">Depuis Period Calendar, seules les règles et les notes sont importées. Les symptômes, humeurs et autres entrées ne sont pas importés.</string>
     <string name="import_ongoing">Une date de fin vide est importée comme des règles en cours.</string>
     <string name="import_confirm">Importer</string>
-    <string name="import_invalid">Aucune période de règles valide trouvée. Vérifie les colonnes et les dates\u00A0; les dates ne doivent pas être dans le futur.</string>
+    <string name="import_invalid">Aucun épisode de règles valide trouvé. Vérifie les colonnes et les dates\u00A0; les dates ne doivent pas être dans le futur.</string>
     <string name="customize_day_entry">Personnaliser l’entrée du jour</string>
     <string name="customize_categories">Personnaliser les catégories</string>
     <string name="home_view_calendar">Calendrier</string>
     <string name="home_view_ring">Anneau du cycle</string>
     <string name="jump_to_today">Afficher aujourd’hui dans le calendrier</string>
     <string name="onboarding_track_title">Que veux-tu noter\u00A0?</string>
-    <string name="onboarding_track_intro">Les rubriques règles et saignements restent toujours disponibles. Choisis ce qui compte aussi pour toi.</string>
+    <string name="onboarding_track_intro">Les rubriques Règles et Flux restent toujours disponibles. Choisis ce qui compte aussi pour toi.</string>
     <string name="onboarding_track_later">Tu peux changer cela à tout moment\u00A0: Paramètres › Personnaliser l’entrée du jour, ou la roue dentée dans l’entrée du jour.</string>
     <string name="feedback">Envoyer un avis</string>
     <string name="feedback_subject">Avis sur FreePeriod</string>
@@ -508,7 +508,7 @@
     <string name="feedback_include_info">Ajouter des infos techniques (versions de l’appli et d’Android, modèle de l’appareil, langue)</string>
     <string name="feedback_open">Ouvrir la messagerie</string>
     <string name="feedback_no_app">Aucune appli de messagerie trouvée. Tu peux écrire à %1$s.</string>
-    <string name="today_welcome_hint">Les estimations du calendrier apparaissent après tes premières règles.</string>
+    <string name="today_welcome_hint">Les estimations du calendrier apparaissent après ton premier épisode de règles enregistré.</string>
     <string name="appearance_preview_hint">Un exemple\u00A0: voici ta couleur dans l’appli.</string>
     <string name="reorder_categories">Changer l’ordre</string>
     <string name="reorder_done">Terminé</string>
@@ -686,7 +686,7 @@
     </plurals>
     <string name="also_track">Noter aussi</string>
     <string name="pain_diary">Journal des douleurs</string>
-    <string name="pain_diary_detail">Ajoute où tu as mal, pendant quoi et les effets sur ta journée, avec la douleur et les médicaments dans l’entrée du jour. Tout reste modifiable.</string>
+    <string name="pain_diary_detail">Ajoute où tu as mal, pendant quelles activités et les effets sur ta journée, avec la douleur et les médicaments dans l’entrée du jour. Tout reste modifiable.</string>
     <string name="pain_diary_off">Désactiver le journal des douleurs\u00A0?</string>
     <string name="pain_diary_off_body">Tes entrées restent. Garder ses catégories dans l’entrée du jour ou les masquer\u00A0?</string>
     <string name="keep_them">Les garder</string>

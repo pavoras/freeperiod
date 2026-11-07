@@ -19,7 +19,7 @@
     <string name="today_paused">Previsões pausadas</string>
     <!-- O inglês não usa argumento em one. O histórico só mostra esta base com ciclos > 0. -->
     <plurals name="basis_history" tools:ignore="ImpliedQuantity">
-        <item quantity="one">com base no seu último ciclo</item>
+        <item quantity="one">com base no seu histórico de ciclos</item>
         <item quantity="many">com base nos seus últimos %1$d ciclos</item>
         <item quantity="other">com base nos seus últimos %1$d ciclos</item>
     </plurals>
@@ -73,7 +73,7 @@
     <string name="history_symptoms">Sintomas registrados</string>
     <!-- One inclui 0 e 1: texto neutro para o histórico vazio, com os mesmos argumentos do inglês. -->
     <plurals name="history_symptom_basis" tools:ignore="ImpliedQuantity">
-        <item quantity="one">nos ciclos concluídos</item>
+        <item quantity="one">no histórico dos seus ciclos concluídos</item>
         <item quantity="many">nos seus últimos %1$d ciclos concluídos</item>
         <item quantity="other">nos seus últimos %1$d ciclos concluídos</item>
     </plurals>
@@ -95,7 +95,7 @@
     <string name="period_still_ongoing">Ainda em andamento</string>
     <string name="day_overlap">Isso coincide com outra menstruação.</string>
     <string name="clear_day">Limpar dia</string>
-    <string name="day_cleared">Dia limpo</string>
+    <string name="day_cleared">Registros do dia apagados</string>
     <string name="undo">Desfazer</string>
     <string name="mark_period_start">Marcar como início da menstruação?</string>
     <string name="mark_start">Marcar início</string>
@@ -264,7 +264,7 @@
     <string name="lock_auth_error">O desbloqueio foi cancelado ou não pôde ser concluído. Tente de novo quando quiser.</string>
     <string name="onboarding_skip">Pular</string>
     <string name="onboarding_welcome">Boas-vindas ao Free&#8288;Period</string>
-    <string name="onboarding_promise">Sem conta. Sem anúncios. Sem assinatura.</string>
+    <string name="onboarding_promise">Sem anúncios. Sem conta.\nSem assinatura.</string>
     <string name="onboarding_local">Seus dados ficam no seu celular. Sem permissão de internet.</string>
     <string name="onboarding_optional">Tudo aqui é opcional. Você pode adicionar ou alterar os detalhes depois.</string>
     <string name="onboarding_reminders_optional">Os lembretes ficam desativados até você escolher usá-los. O texto das notificações é neutro por padrão.</string>
@@ -379,7 +379,7 @@
     <string name="pill_rhythm_summary">%1$d + %2$d dias · início em %3$s</string>
     <string name="pill_rhythm_missing">Adicione o esquema da cartela para ver as pausas programadas.</string>
     <string name="pill_continuous">Contínuo</string>
-    <string name="pill_active_days">Dias ativos (1–365)</string>
+    <string name="pill_active_days">Dias de uso (1–365)</string>
     <string name="pill_break_days">Dias de pausa (0–30)</string>
     <string name="pack_start_date">Data de início da cartela</string>
     <string name="date_format_hint">Formato da data: AAAA-MM-DD</string>
@@ -510,7 +510,7 @@
     <string name="feedback_include_info">Adicionar informações técnicas (versão do app e do Android, modelo do aparelho, idioma)</string>
     <string name="feedback_open">Abrir e-mail</string>
     <string name="feedback_no_app">Nenhum app de e-mail encontrado. Você pode escrever para %1$s.</string>
-    <string name="today_welcome_hint">Suas estimativas de calendário aparecem após a primeira menstruação.</string>
+    <string name="today_welcome_hint">Suas estimativas de calendário aparecem após registrar uma menstruação.</string>
     <string name="appearance_preview_hint">Um exemplo de como sua cor fica no app.</string>
     <string name="reorder_categories">Mudar ordem</string>
     <string name="reorder_done">Concluir</string>
@@ -648,7 +648,7 @@
     <string name="pick_several">Escolher vários</string>
     <string name="category_count">Contagem</string>
     <string name="archived_item">Arquivado</string>
-    <string name="archived_item_body">Não aparece mais no registro do dia. Os dias anteriores o mantêm.</string>
+    <string name="archived_item_body">Não aparece mais no registro do dia. Os registros anteriores mantêm esse item.</string>
     <string name="delete_forever">Excluir</string>
     <string name="delete_forever_title">Excluir %1$s?</string>
     <string name="delete_category_body">A categoria e seus itens também serão removidos de todos os dias anteriores. Isso não pode ser desfeito.</string>
@@ -690,7 +690,7 @@
     </plurals>
     <string name="also_track">Registrar também</string>
     <string name="pain_diary">Diário de dor</string>
-    <string name="pain_diary_detail">Adiciona onde dói, durante o quê e como afeta seu dia – junto com dor e medicamentos no registro do dia. Tudo continua editável.</string>
+    <string name="pain_diary_detail">Adiciona onde dói, durante quais atividades e como isso afeta seu dia – junto com dor e medicamentos no registro do dia. Tudo continua editável.</string>
     <string name="pain_diary_off">Desativar o diário de dor?</string>
     <string name="pain_diary_off_body">Seus registros serão mantidos. Manter as categorias no registro do dia ou ocultá-las?</string>
     <string name="keep_them">Manter</string>
@@ -717,7 +717,7 @@
     <string name="menopause_bleeding_note">Vale mencionar a um médico se houver sangramento após um ano sem menstruar.</string>
     <string name="summary_screen">Resumo em PDF</string>
     <string name="summary_intro">Uma visão clara dos seus registros, por exemplo, para uma consulta médica. Você escolhe onde salvar; o Free&#8288;Period não envia o arquivo para lugar nenhum.</string>
-    <string name="summary_range">Intervalo de tempo</string>
+    <string name="summary_range">Período</string>
     <string name="summary_all">Tudo</string>
     <string name="summary_notes">Incluir notas</string>
     <string name="summary_notes_detail">Desativado por padrão, pois as notas podem ser pessoais.</string>

@@ -1,11 +1,11 @@
 Siklus kamu, ruang kamu – hanya di ponsel kamu.
 
-FreePeriod menggabungkan kalender haid dan catatan harian. Aplikasi ini tidak punya izin internet, jadi aplikasi sendiri tidak bisa mengirim apa pun ke internet – siapa pun bisa memeriksanya di kode sumber terbuka. Gratis, tanpa iklan, langganan atau akun.
+FreePeriod menggabungkan kalender haid dan catatan harian. Aplikasi ini tidak punya izin internet, jadi aplikasi ini sendiri tidak bisa mengirim apa pun ke internet – siapa pun bisa memeriksanya di kode sumber terbuka. Gratis, tanpa iklan, langganan atau akun.
 
 • Catat haid dengan sekali ketuk dan lihat hari siklus kamu sekilas – sebagai kalender atau lingkaran siklus.
 • Perkiraan kalender untuk dua haid berikutnya, berdasarkan catatan kamu sendiri.
 • Opsional: hari dengan peluang hamil lebih tinggi, ditampilkan sebagai perkiraan kalender saja.
-• Catatan harian: suasana hati, darah haid, nyeri, gejala, keputihan, tag dan catatan; opsional juga nafsu makan, gairah seks, obat dan catatan nyeri. Ganti nama, atur urutan atau sembunyikan apa pun, lalu tambahkan kategori dan ikon buatan kamu.
+• Catatan harian: suasana hati, darah haid, nyeri, gejala, keputihan, tag dan catatan. Aktifkan juga nafsu makan, gairah seks, catatan obat ("catat apa yang kamu konsumsi") atau catatan nyeri. Ganti nama, atur urutan atau sembunyikan apa pun, lalu tambahkan kategori dan ikon buatan kamu.
 • Riwayat dengan rata-rata, gejala yang dicatat dan grafik selama seminggu, sebulan, 3 bulan atau setahun.
 • Ringkasan PDF dari catatan kamu, misalnya untuk kunjungan ke dokter.
 • Pengingat untuk haid, pil atau hal pribadi lainnya.
@@ -14,7 +14,7 @@ FreePeriod menggabungkan kalender haid dan catatan harian. Aplikasi ini tidak pu
 • Sembilan warna aksen, dari pastel lembut hingga gelap dan sederhana; tema terang, gelap atau mengikuti ponsel kamu. Bahasa Inggris, Jerman, Portugis Brasil, Spanyol, Indonesia, Turki dan Prancis.
 
 Privasi sejak awal
-FreePeriod tidak punya izin internet atau analitik. Catatan kamu tetap di ponsel kamu. Kunci aplikasi opsional, file cadangan terenkripsi (juga otomatis, ke folder pilihan kamu) dan ekspor CSV – kamu menentukan tujuan file.
+FreePeriod tidak punya izin internet atau analitik. Catatan kamu tetap di ponsel kamu. Kunci aplikasi opsional, file cadangan terenkripsi (juga otomatis, ke folder pilihan kamu) dan ekspor CSV – kamu menentukan tempat file disimpan.
 
 Batasan yang jelas
 FreePeriod bukan alat medis, bukan metode kontrasepsi dan bukan alat untuk membantu kamu hamil. Semua tanggal adalah perkiraan dari catatan kamu sendiri dan bisa salah. Untuk pertanyaan tentang kontrasepsi, kehamilan atau kesehatan, bicarakan dengan dokter atau apoteker.

@@ -283,7 +283,7 @@
     <string name="history_days_unit">hari</string>
     <string name="app_estimates">Free&#8288;Period bukan alat medis. Aplikasi ini bukan metode kontrasepsi, bukan alat untuk membantu kamu hamil, dan tidak memberikan saran medis, diagnosis atau pengobatan. Semua tanggal adalah perkiraan kalender dari catatan kamu sendiri dan bisa salah; perkiraan ini tidak bisa diandalkan. Setiap siklus berbeda: kehamilan bisa terjadi kapan saja, termasuk di luar hari dengan peluang lebih tinggi. Bicarakan pertanyaan tentang kontrasepsi, kehamilan atau kesehatan dengan dokter atau apoteker.</string>
     <string name="medical_disclaimer_title">Bukan alat medis</string>
-    <string name="medical_disclaimer_note">Perkiraan kalender ini bisa salah dan tidak bisa diandalkan. Free&#8288;Period tidak untuk kontrasepsi, membantu kehamilan, atau memberikan saran medis.</string>
+    <string name="medical_disclaimer_note">Perkiraan kalender ini bisa salah dan tidak bisa diandalkan. Free&#8288;Period bukan untuk kontrasepsi, membantu kamu hamil, atau memberikan saran medis.</string>
     <string name="pregnancy_chance_info">Tentang perkiraan kalender ini</string>
     <string name="calendar_pregnancy_chance">peluang hamil lebih tinggi, perkiraan kalender</string>
     <string name="show_pregnancy_chance">Tampilkan hari dengan peluang hamil lebih tinggi</string>
@@ -480,7 +480,7 @@
     <string name="feedback_include_info">Tambahkan info teknis (versi aplikasi dan Android, model perangkat, bahasa)</string>
     <string name="feedback_open">Buka email</string>
     <string name="feedback_no_app">Tidak ditemukan aplikasi email. Kamu bisa menulis ke %1$s.</string>
-    <string name="today_welcome_hint">Perkiraan kalender kamu muncul setelah haid pertama kamu.</string>
+    <string name="today_welcome_hint">Perkiraan kalender muncul setelah kamu mencatat haid pertama di aplikasi.</string>
     <string name="appearance_preview_hint">Contoh: seperti ini warna kamu di aplikasi.</string>
     <string name="reorder_categories">Ubah urutan</string>
     <string name="reorder_done">Selesai</string>
@@ -527,7 +527,7 @@
     <string name="icon_group_food">Makanan &amp; minuman</string>
     <string name="icon_glass">Air</string>
     <string name="icon_teacup">Cangkir</string>
-    <string name="icon_wine">Wine</string>
+    <string name="icon_wine">Minuman anggur</string>
     <string name="icon_apple">Apel</string>
     <string name="icon_carrot">Wortel</string>
     <string name="icon_chocolate">Cokelat</string>
@@ -576,7 +576,7 @@
     <string name="icon_bell">Lonceng</string>
     <string name="icon_check">Tanda centang</string>
     <string name="icon_plus">Tambah</string>
-    <string name="icon_bookmark">Bookmark</string>
+    <string name="icon_bookmark">Penanda buku</string>
     <string name="icon_pin">Tempat</string>
     <string name="lock_ten_minutes">10 menit</string>
     <string name="lock_fifteen_minutes">15 menit</string>
@@ -614,7 +614,7 @@
     <string name="delete_category_body">Kategori dan itemnya juga dihapus dari semua hari sebelumnya. Ini tidak bisa diurungkan.</string>
     <string name="delete_item_body">Item ini juga dihapus dari semua hari sebelumnya. Ini tidak bisa diurungkan.</string>
     <string name="restore_defaults">Pulihkan bawaan</string>
-    <string name="restore_defaults_body">Nama, ikon, urutan dan tampilan kembali seperti semula. Item, kategori dan catatan buatan kamu tetap ada.</string>
+    <string name="restore_defaults_body">Nama, ikon, urutan serta pilihan yang ditampilkan atau disembunyikan kembali seperti semula. Item, kategori dan catatan buatan kamu tetap ada.</string>
     <plurals name="import_app_entry_preview">
         <item quantity="other">%d catatan harian akan diimpor. Yang sudah kamu catat pada hari tersebut tetap ada; hanya nilai yang kosong yang ditambahkan.</item>
     </plurals>
@@ -642,7 +642,7 @@
     </plurals>
     <string name="also_track">Catat juga</string>
     <string name="pain_diary">Catatan nyeri</string>
-    <string name="pain_diary_detail">Menambahkan bagian yang sakit, saat apa, dan pengaruhnya pada hari kamu – beserta nyeri dan obat di catatan harian. Semuanya tetap bisa diedit.</string>
+    <string name="pain_diary_detail">Menambahkan bagian yang sakit, aktivitas saat nyeri muncul dan pengaruhnya pada keseharian kamu – beserta nyeri dan obat di catatan harian. Semuanya tetap bisa diedit.</string>
     <string name="pain_diary_off">Nonaktifkan catatan nyeri?</string>
     <string name="pain_diary_off_body">Catatan kamu tetap ada. Tetap tampilkan kategorinya di catatan harian, atau sembunyikan?</string>
     <string name="keep_them">Tetap tampilkan</string>
@@ -658,7 +658,7 @@
     <string name="set_sex">Seks</string>
     <string name="set_bowel">Buang air besar</string>
     <string name="set_peeing">Buang air kecil</string>
-    <string name="set_daily">Pengaruh pada hari kamu</string>
+    <string name="set_daily">Dampak pada keseharian</string>
     <string name="set_missed">Tidak masuk kerja atau sekolah</string>
     <string name="set_cancelled">Membatalkan rencana</string>
     <string name="set_rested">Beristirahat di tempat tidur</string>

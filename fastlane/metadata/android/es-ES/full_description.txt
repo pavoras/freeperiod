@@ -5,7 +5,7 @@ FreePeriod combina un calendario del periodo y un diario. No tiene permiso de in
 • Registra tu periodo con un toque y consulta tu día del ciclo de un vistazo, en un calendario o un anillo del ciclo.
 • Estimaciones del calendario para tus próximos dos periodos, basadas en tus propios registros.
 • Opcional: días con mayor probabilidad de embarazo, mostrados como una simple estimación del calendario.
-• Diario: ánimo, sangrado, dolor, síntomas, flujo vaginal, etiquetas y notas; opcionalmente apetito, deseo sexual, medicamentos y un diario del dolor. Cambia nombres, ordena u oculta lo que quieras y agrega tus propias categorías e iconos.
+• Diario: ánimo, sangrado, dolor, síntomas, flujo vaginal, etiquetas y notas. Activa también el apetito, el deseo sexual, un registro de medicamentos («anota lo que tomas») o un diario del dolor. Cambia nombres, ordena u oculta lo que quieras y agrega tus propias categorías e iconos.
 • Historial con promedios, síntomas registrados y gráficos de una semana, un mes, 3 meses o un año.
 • Un resumen en PDF de tus registros, por ejemplo, para una consulta médica.
 • Recordatorios para tu periodo, la píldora o algo personal.

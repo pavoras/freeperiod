@@ -84,15 +84,42 @@ class DayEntryScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun filledInk_deDark() = capture("filledInk_deDark", Locale.GERMANY, dark = true, accent = Accent.INK)
 
+    @Test @Config(sdk = [35], qualifiers = "pt-rBR-w360dp-h800dp-xxhdpi")
+    fun filledInk_ptBRDark() = capture("filledInk_ptBRDark", Locale.forLanguageTag("pt-BR"), dark = true, accent = Accent.INK)
+    @Test @Config(sdk = [35], qualifiers = "es-rES-w360dp-h800dp-xxhdpi")
+    fun filledInk_esDark() = capture("filledInk_esDark", Locale.forLanguageTag("es-ES"), dark = true, accent = Accent.INK)
+    @Test @Config(sdk = [35], qualifiers = "in-rID-w360dp-h800dp-xxhdpi")
+    fun filledInk_idDark() = capture("filledInk_idDark", Locale.forLanguageTag("id-ID"), dark = true, accent = Accent.INK)
+    @Test @Config(sdk = [35], qualifiers = "tr-rTR-w360dp-h800dp-xxhdpi")
+    fun filledInk_trDark() = capture("filledInk_trDark", Locale.forLanguageTag("tr-TR"), dark = true, accent = Accent.INK)
+    @Test @Config(sdk = [35], qualifiers = "fr-rFR-w360dp-h800dp-xxhdpi")
+    fun filledInk_frDark() = capture("filledInk_frDark", Locale.forLanguageTag("fr-FR"), dark = true, accent = Accent.INK)
+
     private fun capture(name: String, locale: Locale, dark: Boolean = false, empty: Boolean = false, fontScale: Float = 1f, menopause: Boolean = false,
         accent: Accent = Accent.CORAL) {
         Locale.setDefault(locale)
         val today = clock()
         val log = DayLog(today, FlowLevel.MEDIUM, Mood.GOOD, setOf(Symptom.CRAMPS, Symptom.FATIGUE),
-            Pain.MILD, setOf(Sex.NONE), setOf(Discharge.CREAMY), if (locale.language == "de") "Ein ruhiger Tag." else "A quiet day.", setOf(1))
+            Pain.MILD, setOf(Sex.NONE), setOf(Discharge.CREAMY), when (locale.language) {
+                "de" -> "Ein ruhiger Tag."
+                "pt" -> "Um dia tranquilo."
+                "es" -> "Un día tranquilo."
+                "id", "in" -> "Hari yang tenang."
+                "tr" -> "Sakin bir gün."
+                "fr" -> "Une journée calme."
+                else -> "A quiet day."
+            }, setOf(1))
         val data = BackupData(periods = if (empty) emptyList() else listOf(Period(1, today.minusDays(2), null)),
             dayLogs = if (empty) emptyList() else listOf(log),
-            tags = if (empty) emptyList() else listOf(Tag(1, if (locale.language == "de") "Bewegung" else "Exercise")),
+            tags = if (empty) emptyList() else listOf(Tag(1, when (locale.language) {
+                "de" -> "Bewegung"
+                "pt" -> "Exercício"
+                "es" -> "Ejercicio"
+                "id", "in" -> "Olahraga"
+                "tr" -> "Egzersiz"
+                "fr" -> "Activité physique"
+                else -> "Exercise"
+            })),
             settings = BackupSettings(null, false), situation = Situation(phase = if (menopause) LifePhase.MENOPAUSE else LifePhase.REGULAR))
         val state = dayEntryState(data, today, today)
         compose.setContent {
@@ -103,7 +130,7 @@ class DayEntryScreenshotTest {
             }
         }
         compose.waitForIdle()
-        compose.onNodeWithText(if (locale.language == "de") "Tageseintrag" else "Day entry").assertExists()
+        compose.onNodeWithText(compose.activity.getString(R.string.day_entry)).assertExists()
         compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/day/$name.png")
     }
 }
