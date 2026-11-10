@@ -81,8 +81,8 @@
     <string name="day_saved_automatically">Wird automatisch gespeichert</string>
     <string name="day_read_only">Du kannst zukünftige Tage ansehen und sie eintragen, sobald der Tag da ist.</string>
     <string name="day_period_heading">Periode</string>
-    <string name="period_start_day">Periode an diesem Tag begonnen</string>
-    <string name="period_end_day">Periode an diesem Tag beendet</string>
+    <string name="period_start_day">Erster Periodentag</string>
+    <string name="period_end_day">Letzter Periodentag</string>
     <string name="period_end_date">Wann ist deine Periode zu Ende gegangen?</string>
     <string name="period_still_ongoing">Noch nicht beendet</string>
     <string name="day_overlap">Das überschneidet sich mit einer anderen Periode.</string>
@@ -748,6 +748,9 @@
     <string name="card_unfold">Karte ausklappen</string>
     <string name="year_view">Jahresansicht</string>
     <string name="month_view">Monatsansicht</string>
+    <string name="view_year">Jahr</string>
+    <string name="view_month">Monat</string>
+    <string name="import_apps_info">Welche Apps werden unterstützt?</string>
     <string name="previous_year">Vorheriges Jahr</string>
     <string name="next_year">Nächstes Jahr</string>
     <string name="tips_title">Gut zu wissen</string>

@@ -723,6 +723,9 @@
     <string name="card_unfold">Tampilkan kartu</string>
     <string name="year_view">Tampilan tahun</string>
     <string name="month_view">Tampilan bulan</string>
+    <string name="view_year">Tahun</string>
+    <string name="view_month">Bulan</string>
+    <string name="import_apps_info">Aplikasi apa saja yang didukung?</string>
     <string name="previous_year">Tahun sebelumnya</string>
     <string name="next_year">Tahun berikutnya</string>
     <string name="tips_title">Perlu diketahui</string>

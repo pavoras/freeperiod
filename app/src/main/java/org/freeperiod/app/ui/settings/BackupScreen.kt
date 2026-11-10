@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -42,6 +43,7 @@ fun BackupScreen(
     var confirm by remember { mutableStateOf("") }
     var restorePassword by remember { mutableStateOf("") }
     var askRestore by rememberSaveable { mutableStateOf(false) }
+    var appsInfo by rememberSaveable { mutableStateOf(false) }
     val enabled = !state.busy && !state.awaitingDocument
     Column(Modifier.fillMaxSize().background(LocalDaylight.current.background).verticalScroll(rememberScrollState()).imePadding().padding(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -49,11 +51,22 @@ fun BackupScreen(
         if (state.summary == null) {
             // Bringing data in comes first: an own backup, a file from another app or a CSV, one tap each.
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(stringResource(if (onImport != null) R.string.import_title else R.string.restore_backup),
-                    style = MaterialTheme.typography.titleLarge)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(stringResource(if (onImport != null) R.string.import_title else R.string.restore_backup),
+                        Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
+                    // Which apps a file can come from.
+                    if (onImport != null) IconButton(onClick = { appsInfo = true }) {
+                        Icon(painterResource(R.drawable.ic_fp_about), stringResource(R.string.import_apps_info),
+                            tint = LocalDaylight.current.muted)
+                    }
+                }
                 if (onImport != null) Text(stringResource(R.string.import_section_hint), style = MaterialTheme.typography.bodyMedium,
                     color = LocalDaylight.current.muted)
             }
+            if (appsInfo) AlertDialog(onDismissRequest = { appsInfo = false }, containerColor = LocalDaylight.current.surface,
+                textContentColor = LocalDaylight.current.ink,
+                title = { Text(stringResource(R.string.import_apps_info)) }, text = { Text(stringResource(R.string.import_intro)) },
+                confirmButton = { TextButton(onClick = { appsInfo = false }) { Text(stringResource(R.string.got_it)) } })
             FpButton(primary = false, onClick = { restorePassword = ""; onOpen() }, modifier = Modifier.fillMaxWidth(), enabled = enabled) {
                 Text(stringResource(R.string.restore_choose_file))
             }

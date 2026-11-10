@@ -749,6 +749,9 @@
     <string name="card_unfold">Show card</string>
     <string name="year_view">Year view</string>
     <string name="month_view">Month view</string>
+    <string name="view_year">Year</string>
+    <string name="view_month">Month</string>
+    <string name="import_apps_info">Which apps are supported?</string>
     <string name="previous_year">Previous year</string>
     <string name="next_year">Next year</string>
     <string name="tips_title">Good to know</string>

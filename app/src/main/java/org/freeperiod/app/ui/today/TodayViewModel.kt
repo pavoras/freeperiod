@@ -79,6 +79,7 @@ class TodayViewModel(
     private val situation: (() -> Situation)? = null,
 ) : ViewModel() {
     private val mutableState = MutableStateFlow(TodayUiState(clock()))
+    private val answered = mutableSetOf<Pair<HomeQuestion, Long?>>()
     val state: StateFlow<TodayUiState> = mutableState.asStateFlow()
 
     init {
@@ -144,6 +145,8 @@ class TodayViewModel(
     /** Yes picks the last day (or the first one); no is remembered for this period. */
     fun answer(question: HomeQuestion, yes: Boolean): Job = viewModelScope.launch {
         val id = mutableState.value.questionPeriodId ?: return@launch
+        // Kept here too, so a refresh that read the settings before the write cannot bring the question back.
+        answered += question to id
         if (yes) {
             val period = repository.snapshot().periods.find { it.id == id }
             mutableState.update {
@@ -242,7 +245,10 @@ class TodayViewModel(
                 error = previous.error, endSaved = previous.endSaved, startedPeriodId = previous.startedPeriodId, ring = previous.ring,
                 todayJump = previous.todayJump, endSavedShown = previous.endSavedShown, pick = previous.pick,
                 cardFolded = previous.cardFolded, showTips = previous.showTips, yearView = previous.yearView,
-                jumpMonth = previous.jumpMonth)
+                jumpMonth = previous.jumpMonth).let { next ->
+                    val asked = next.question?.let { it to next.questionPeriodId }
+                    if (asked != null && asked in answered) next.copy(question = null) else next
+                }
         }
     }
 }
