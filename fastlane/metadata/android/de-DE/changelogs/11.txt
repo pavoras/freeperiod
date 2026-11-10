@@ -1,0 +1,5 @@
+• Jahresansicht: dein ganzes Jahr auf einen Blick.
+• Vergangene Perioden eintragen: Tag im Kalender lange drücken.
+• Die Karte auf „Heute“ lässt sich einklappen.
+• Kurze Fragen, wenn Beginn oder Ende einer Periode fehlt.
+• Tipps unter „Gut zu wissen“, überarbeitete Symbole und direkter Import von Sicherungen.

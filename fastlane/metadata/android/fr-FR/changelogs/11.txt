@@ -1,0 +1,5 @@
+• Vue annuelle : toute ton année en un coup d’œil.
+• Ajoute des règles passées : appui long sur un jour du calendrier.
+• La carte d’Aujourd’hui peut se replier.
+• Des questions courtes quand le début ou la fin des règles manque.
+• Astuces « Bon à savoir », icônes revues et import direct des sauvegardes.

@@ -1,0 +1,5 @@
+• Year view: your whole year at a glance.
+• Enter past periods: long-press a day in the calendar.
+• The card on Today can be folded away.
+• Short questions when the start or end of a period is missing.
+• “Good to know” tips, refreshed icons and direct import of backups.
