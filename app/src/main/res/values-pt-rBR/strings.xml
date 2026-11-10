@@ -771,6 +771,7 @@
     <string name="question_pick_end">Sim, escolher o último dia</string>
     <string name="question_pick_start">Sim, escolher o primeiro dia</string>
     <string name="question_not_yet">Ainda não</string>
+    <string name="pick_day">Escolher dia</string>
     <string name="card_fold">Recolher cartão</string>
     <string name="card_unfold">Mostrar cartão</string>
     <string name="year_view">Visão anual</string>

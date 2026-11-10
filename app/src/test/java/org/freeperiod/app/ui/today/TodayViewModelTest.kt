@@ -68,6 +68,20 @@ class TodayViewModelTest : DatabaseTest() {
         assertNull(vm.state.value.pick)
     }
 
+    @Test fun stillGoingOnlyForARecentStartWithNoLaterPeriod() = runTest {
+        repository.addPeriod(today.minusDays(5), today.minusDays(3)).getOrThrow()
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.longPressDay(today.minusDays(8)).join()
+        assertEquals(RangePick(today.minusDays(8)), vm.state.value.pick)
+        vm.pickSingle(ongoing = true).join()
+        assertEquals(1, repository.snapshot().periods.size)
+        vm.longPressDay(today.minusDays(1)).join()
+        assertEquals(RangePick(today.minusDays(1), canContinue = true), vm.state.value.pick)
+        vm.longPressDay(today.minusDays(20)).join()
+        assertEquals(false, vm.state.value.pick?.canContinue)
+    }
+
     @Test fun longPressInsideASavedPeriodPicksItsLastDay() = runTest {
         repository.addPeriod(today.minusDays(10), today.minusDays(8)).getOrThrow()
         val vm = viewModel()

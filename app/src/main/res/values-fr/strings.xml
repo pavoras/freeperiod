@@ -767,6 +767,7 @@
     <string name="question_pick_end">Oui, choisir le dernier jour</string>
     <string name="question_pick_start">Oui, choisir le premier jour</string>
     <string name="question_not_yet">Pas encore</string>
+    <string name="pick_day">Choisir un jour</string>
     <string name="card_fold">Replier la carte</string>
     <string name="card_unfold">Afficher la carte</string>
     <string name="year_view">Vue annuelle</string>
