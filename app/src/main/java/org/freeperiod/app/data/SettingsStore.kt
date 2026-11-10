@@ -52,6 +52,14 @@ data class AppSettings(
     /** Last time and how often the store rating card was asked for. */
     val ratingAsked: LocalDate? = null,
     val ratingAsks: Int = 0,
+    /** The cycle card on Today is folded up to just its buttons. */
+    val homeCardFolded: Boolean = false,
+    /** The short tour of Today (swipe, long press, tabs) was shown once. */
+    val tipsSeen: Boolean = false,
+    /** Period id for which "Is your period over?" was answered "Not yet"; asked once per period. */
+    val askedEndFor: Long? = null,
+    /** Last period id after which "Has your period started?" was answered "Not yet"; asked once per cycle. */
+    val askedStartAfter: Long? = null,
 )
 
 class SettingsStore internal constructor(private val store: DataStore<Preferences>) {
@@ -91,6 +99,10 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
             prefs.set(firstUse, value.firstUse?.toString())
             prefs.set(ratingAsked, value.ratingAsked?.toString())
             prefs[ratingAsks] = value.ratingAsks
+            prefs[homeCardFolded] = value.homeCardFolded
+            prefs[tipsSeen] = value.tipsSeen
+            value.askedEndFor?.let { prefs[askedEndFor] = it } ?: prefs.remove(askedEndFor)
+            value.askedStartAfter?.let { prefs[askedStartAfter] = it } ?: prefs.remove(askedStartAfter)
         }
     }
 
@@ -144,6 +156,10 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         firstUse = prefs[firstUse]?.let(LocalDate::parse),
         ratingAsked = prefs[ratingAsked]?.let(LocalDate::parse),
         ratingAsks = prefs[ratingAsks] ?: 0,
+        homeCardFolded = prefs[homeCardFolded] ?: false,
+        tipsSeen = prefs[tipsSeen] ?: false,
+        askedEndFor = prefs[askedEndFor],
+        askedStartAfter = prefs[askedStartAfter],
     )
 
     private fun MutablePreferences.set(key: Preferences.Key<String>, value: String?) {
@@ -174,5 +190,9 @@ class SettingsStore internal constructor(private val store: DataStore<Preference
         val firstUse = stringPreferencesKey("first_use")
         val ratingAsked = stringPreferencesKey("rating_asked")
         val ratingAsks = intPreferencesKey("rating_asks")
+        val homeCardFolded = booleanPreferencesKey("home_card_folded")
+        val tipsSeen = booleanPreferencesKey("tips_seen")
+        val askedEndFor = longPreferencesKey("asked_end_for")
+        val askedStartAfter = longPreferencesKey("asked_start_after")
     }
 }

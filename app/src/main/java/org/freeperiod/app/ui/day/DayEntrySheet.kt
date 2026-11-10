@@ -136,7 +136,7 @@ fun DayEntrySheet(
                         IconButton(onClick = { onDateChange(state.date.minusDays(1)) }) {
                             Icon(painterResource(R.drawable.ic_fp_previous), stringResource(R.string.previous_day))
                         }
-                        IconButton(onClick = { onDateChange(state.date.plusDays(1)) }) {
+                        IconButton(onClick = { onDateChange(state.date.plusDays(1)) }, enabled = state.date < state.today) {
                             Icon(painterResource(R.drawable.ic_fp_next), stringResource(R.string.next_day))
                         }
                         IconButton(onClick = onDismiss) {
@@ -176,7 +176,7 @@ fun DayEntrySheet(
                                 val summary = state.entryItems(category).filter { state.selected(it) }.map { it.appearance(state).label }
                                     .joinToString().ifBlank { stringResource(R.string.entry_none) }
                                 val open = when (category.key) { "sex" -> sexOpen; "discharge" -> dischargeOpen; else -> category.key in customOpen.split(',') }
-                                FpSectionRow(appearance.icon, appearance.label, summary, open) {
+                                FpSectionRow(appearance.headerIcon, appearance.label, summary, open) {
                                     when (category.key) {
                                         "sex" -> sexOpen = !sexOpen
                                         "discharge" -> dischargeOpen = !dischargeOpen
@@ -188,7 +188,7 @@ fun DayEntrySheet(
                             }
                             "note" -> {
                                 val appearance = category.appearance(state)
-                                FpSectionRow(appearance.icon, appearance.label, notePreview(note).ifBlank { stringResource(R.string.entry_none) }, noteOpen) { noteOpen = !noteOpen; focusNote = noteOpen }
+                                FpSectionRow(appearance.headerIcon, appearance.label, notePreview(note).ifBlank { stringResource(R.string.entry_none) }, noteOpen) { noteOpen = !noteOpen; focusNote = noteOpen }
                                 if (noteOpen) TextField(value = note, onValueChange = {
                                     if (it.length <= 2000 || it.length < note.length) { note = it; noteDirty = true; actions.note(it) }
                                 }, placeholder = { Text(stringResource(R.string.entry_note_placeholder)) }, enabled = editable,
@@ -216,7 +216,7 @@ fun DayEntrySheet(
                                 val tags = items.mapNotNull { it.tag }
                                 val open = if (category.key == "tags") tagsOpen else category.key in customOpen.split(',')
                                 val appearance = category.appearance(state)
-                                FpSectionRow(appearance.icon, appearance.label,
+                                FpSectionRow(appearance.headerIcon, appearance.label,
                                     items.filter { state.selected(it) }.map { it.appearance(state).label }.joinToString()
                                         .ifBlank { stringResource(R.string.entry_none) }, open) {
                                     if (category.key == "tags") tagsOpen = !tagsOpen
@@ -299,7 +299,7 @@ private fun EntryChoices(category: EntryCategory, state: DayEntryUiState, action
         val appearance = category.appearance(state)
         Row(Modifier.padding(top = 8.dp), verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(painterResource(appearance.icon), null, Modifier.size(20.dp))
+            appearance.headerIcon?.let { Icon(painterResource(it), null, Modifier.size(20.dp)) }
             Text(appearance.label, style = MaterialTheme.typography.titleMedium)
         }
     }

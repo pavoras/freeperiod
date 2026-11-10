@@ -734,4 +734,31 @@
         <item quantity="one">Logged on %1$d of %2$d days</item>
         <item quantity="other">Logged on %1$d of %2$d days</item>
     </plurals>
+    <string name="pick_period_start">Enter a period from this day</string>
+    <string name="pick_first_day">Tap the first day of your period.</string>
+    <string name="pick_last_day">First day: %1$s. Now tap the last day.</string>
+    <string name="pick_end_day">Tap the last day of this period.</string>
+    <string name="pick_only_this_day">Only this day</string>
+    <string name="pick_still_going">Still going</string>
+    <string name="question_period_over">Is your period over?</string>
+    <string name="question_period_started">Has your period started?</string>
+    <string name="question_pick_end">Yes, pick the last day</string>
+    <string name="question_pick_start">Yes, pick the first day</string>
+    <string name="question_not_yet">Not yet</string>
+    <string name="card_fold">Fold card</string>
+    <string name="card_unfold">Show card</string>
+    <string name="year_view">Year view</string>
+    <string name="month_view">Month view</string>
+    <string name="previous_year">Previous year</string>
+    <string name="next_year">Next year</string>
+    <string name="tips_title">Good to know</string>
+    <string name="tips_swipe">Swipe the calendar sideways to see your cycle as a ring.</string>
+    <string name="tips_long_press">Hold a day in the calendar to enter a past period, then tap its last day.</string>
+    <string name="tips_fold">The arrow at the bottom of the card folds it away, so the calendar gets more room.</string>
+    <string name="tips_tabs">History shows your cycles and all entries. Settings has reminders, backup and import.</string>
+    <string name="tips_retap">Tap a tab again to go back to its start: today, or the top of the list.</string>
+    <string name="scroll_to_top">Back to top</string>
+    <string name="import_section_hint">Backups and data from other apps</string>
+    <string name="icon_pain">Pain</string>
+    <string name="icon_test_strip">Test strip</string>
 </resources>

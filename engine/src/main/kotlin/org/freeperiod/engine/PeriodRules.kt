@@ -2,7 +2,9 @@ package org.freeperiod.engine
 
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
+import kotlin.math.ceil
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 /** Pure rules for period validation and derived calendar information. */
 object PeriodRules {
@@ -49,6 +51,32 @@ object PeriodRules {
         val ongoing = periods.filter { it.end == null && it.start <= today }.maxByOrNull { it.start } ?: return null
         val length = typicalPeriodLength(periods)
         return if (inclusiveLength(ongoing.start, today) > length.toLong() + 3) ongoing.start.plusDays(length.toLong() - 1) else null
+    }
+
+    /**
+     * Longest value that is still usual: mean + 2 standard deviations of [values], at least mean + 2 days so
+     * a very steady history does not ask after one extra day. Null below three values.
+     */
+    fun usualLimit(values: List<Int>): Int? {
+        if (values.size < 3) return null
+        val mean = values.average()
+        val sd = sqrt(values.sumOf { (it - mean) * (it - mean) } / (values.size - 1))
+        return ceil(mean + maxOf(2 * sd, 2.0)).toInt()
+    }
+
+    /** The ongoing period has gone on longer than usual (ten days while there are fewer than three finished ones). */
+    fun periodUnusuallyLong(periods: List<Period>, today: LocalDate): Period? {
+        val ongoing = periods.filter { it.end == null && it.start <= today }.maxByOrNull { it.start } ?: return null
+        val limit = usualLimit(periods.mapNotNull { period -> period.end?.let { inclusiveLength(period.start, it) } }.takeLast(12)) ?: 10
+        return ongoing.takeIf { inclusiveLength(it.start, today) > limit }
+    }
+
+    /** No period has started for longer than the usual cycle (needs three counted cycles); returns the last period. */
+    fun startUnusuallyFar(periods: List<Period>, today: LocalDate): Period? {
+        val last = periods.filter { it.start <= today }.maxByOrNull { it.start } ?: return null
+        if (last.end == null) return null
+        val limit = usualLimit(cycles(periods).filter { it.eligible }.takeLast(12).map { it.length }) ?: return null
+        return last.takeIf { DAYS.between(it.start, today) + 1 > limit }
     }
 
     /** Offers a start for LIGHT or heavier flow outside a period on a nonfuture day. */

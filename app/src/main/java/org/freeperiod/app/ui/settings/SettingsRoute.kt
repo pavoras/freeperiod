@@ -62,6 +62,7 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, home: 
     val reminderAccess = rememberReminderAccess(container.notifications)
     // Opened from the day entry: only Customize day entry, and back returns there.
     var page by rememberSaveable { mutableStateOf(if (dayEntryOnly) SettingsPage.DAY_ENTRY else SettingsPage.MAIN) }
+    var importStart by rememberSaveable { mutableStateOf<ImportStart?>(null) }
     var externalError by remember { mutableStateOf(false) }
     val back = { if (dayEntryOnly && page == SettingsPage.DAY_ENTRY) onExit() else page = when (page) { SettingsPage.REMINDER_EDITOR -> SettingsPage.REMINDERS; SettingsPage.IMPORT -> SettingsPage.BACKUP; else -> SettingsPage.MAIN }; backup.cancelRestore() }
     fun saveReminder(value: org.freeperiod.engine.Reminder) {
@@ -114,7 +115,8 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, home: 
             if (trackingState.error) Text(stringResource(R.string.error_storage))
             if (externalError) Text(stringResource(R.string.settings_external_error))
             when (page) {
-                SettingsPage.MAIN -> Column {
+                // Keyed by [homeSeen]: Settings tapped again also scrolls the overview back to the top.
+                SettingsPage.MAIN -> key(homeSeen) { Column {
                     RecoveryMessage(recovery)
                     SettingsScreen(settings, SettingsActions(
                         typicalLength = { model.setTypicalLength(it) }, paused = { model.setPaused(it) },
@@ -131,7 +133,7 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, home: 
                         recovery.busy || recovery.awaitingDocument, support)
                     // Earlier purchases count on every phone; Play needs a moment, so ask whenever Settings opens.
                     LaunchedEffect(Unit) { container.supporter.refresh() }
-                }
+                } }
                 SettingsPage.SITUATION -> SituationScreen(trackingState.data.situation, container.clock(), { tracking.situation(it) }, back,
                     onOfferReminder = { editReminder(it); page = SettingsPage.REMINDER_EDITOR },
                     extras = TrackingExtras(optionalCategories.filter { field ->
@@ -162,9 +164,9 @@ fun SettingsRoute(container: AppContainer, dayEntryOnly: Boolean = false, home: 
                 SettingsPage.APPEARANCE -> AppearanceScreen(settings.accent, { model.setAccent(it) }, back, trackingState.data.overrides,
                     settings.device.themeMode, { model.setThemeMode(it) })
                 SettingsPage.BACKUP -> BackupScreen(recovery, { password, confirm -> backup.createBackup(password, confirm) },
-                    backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { page = SettingsPage.IMPORT },
+                    backup::openRestore, { backup.decodeRestore(it) }, { backup.confirmRestore() }, backup::cancelRestore, back, onImport = { importStart = it; page = SettingsPage.IMPORT },
                     auto = autoState, autoActions = AutoBackupActions(auto::choose, auto::start, auto::backUpNow, auto::turnOff))
-                SettingsPage.IMPORT -> ImportRoute(container) { page = SettingsPage.BACKUP }
+                SettingsPage.IMPORT -> ImportRoute(container, start = importStart) { page = SettingsPage.BACKUP }
                 SettingsPage.SUMMARY -> SummaryScreen(recovery.busy || recovery.awaitingDocument, recovery.message, recovery.error, { months, notes ->
                     backup.exportSummary(months) { data, from, to ->
                         val facts = summary(data.periods, data.dayLogs, from, to)

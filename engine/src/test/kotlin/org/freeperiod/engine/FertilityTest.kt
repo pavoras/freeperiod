@@ -27,6 +27,14 @@ class FertilityTest {
         assertEquals(6L, java.time.temporal.ChronoUnit.DAYS.between(window.start, window.endInclusive) + 1)
     }
 
+    @Test fun peakDayIsTheMiddleOfTheRangeMinusFourteenInsideTheWindow() {
+        assertEquals(LocalDate.of(2026, 4, 9), peakDay(range, enabled))
+        val wide = range.copy(earliest = LocalDate.of(2026, 11, 1), latest = LocalDate.of(2026, 11, 7))
+        assertEquals(LocalDate.of(2026, 10, 21), peakDay(wide, enabled))
+        assertTrue(requireNotNull(peakDay(wide, enabled)) in requireNotNull(fertileWindow(wide, enabled)))
+        assertNull(peakDay(PredictionState.NoData, enabled))
+    }
+
     @Test fun enabledByDefaultAndCanBeDisabled() {
         assertTrue(Situation().fertileWindowEnabled)
         assertNotNull(fertileWindow(range, Situation()))

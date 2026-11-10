@@ -3,6 +3,8 @@ package org.freeperiod.app.ui.history
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -33,7 +35,7 @@ import org.freeperiod.engine.*
 
 @Composable
 fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, modifier: Modifier = Modifier,
-    onDismissHint: (Long) -> Unit = {}, onOpenDay: (LocalDate) -> Unit = {}) {
+    onDismissHint: (Long) -> Unit = {}, onOpenDay: (LocalDate) -> Unit = {}, top: Int = 0) {
     var selectedId by rememberSaveable { mutableStateOf<Long?>(null) }
     var visibleIds by remember(state.cycles.map { it.startPeriodId }) { mutableStateOf(emptySet<Long>()) }
     var range by rememberSaveable { mutableStateOf(ChartRange.MONTH) }
@@ -41,6 +43,15 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
     // Overview and the diary side by side: swipe, or tap the switch at the top.
     val pager = rememberPagerState { 2 }
     val scope = rememberCoroutineScope()
+    val overviewList = rememberLazyListState()
+    val diaryList = rememberLazyListState()
+    // The History tab tapped again: the open page goes back to its top.
+    var handledTop by rememberSaveable { mutableIntStateOf(top) }
+    LaunchedEffect(top) {
+        if (top == handledTop) return@LaunchedEffect
+        handledTop = top
+        (if (pager.currentPage == 1) diaryList else overviewList).animateScrollToItem(0)
+    }
     Column(modifier.fillMaxSize().background(tones.background)) {
         Column(Modifier.padding(start = FpSpacing.screen, end = FpSpacing.screen, top = FpSpacing.screen),
             verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
@@ -53,8 +64,9 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
             }
         }
         HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth(), key = { it }) { page ->
-            if (page == 1) DiaryList(state, onOpenDay, contentTop = FpSpacing.section)
-            else HistoryOverview(state, onInclude, onDismissHint, range, { range = it }, { selectedId = it }, visibleIds, { visibleIds = it })
+            if (page == 1) DiaryList(state, onOpenDay, contentTop = FpSpacing.section, list = diaryList)
+            else HistoryOverview(state, onInclude, onDismissHint, range, { range = it }, { selectedId = it }, visibleIds, { visibleIds = it },
+                overviewList)
         }
     }
     state.cycles.find { it.startPeriodId == selectedId }?.let { cycle ->
@@ -64,12 +76,13 @@ fun HistoryScreen(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, mod
 
 @Composable
 private fun HistoryOverview(state: HistoryUiState, onInclude: (Long, Boolean) -> Unit, onDismissHint: (Long) -> Unit,
-    range: ChartRange, onRange: (ChartRange) -> Unit, onSelect: (Long) -> Unit, visibleIds: Set<Long>, onVisible: (Set<Long>) -> Unit) {
+    range: ChartRange, onRange: (ChartRange) -> Unit, onSelect: (Long) -> Unit, visibleIds: Set<Long>, onVisible: (Set<Long>) -> Unit,
+    list: LazyListState) {
     val tones = LocalDaylight.current
     val locale = LocalConfiguration.current.locales[0]
     val numberFormat = NumberFormat.getNumberInstance(locale).apply { maximumFractionDigits = 1 }
     val dateFormat = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
-    LazyColumn(Modifier.fillMaxSize().testTag("history-list"),
+    LazyColumn(Modifier.fillMaxSize().testTag("history-list"), state = list,
         contentPadding = PaddingValues(FpSpacing.screen, FpSpacing.section, FpSpacing.screen, FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(FpSpacing.section)) {
         if (state.loading) item { CircularProgressIndicator() }

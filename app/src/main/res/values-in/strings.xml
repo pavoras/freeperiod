@@ -708,4 +708,31 @@
     <plurals name="history_chart_days">
         <item quantity="other">Dicatat pada %1$d dari %2$d hari</item>
     </plurals>
+    <string name="pick_period_start">Catat haid mulai hari ini</string>
+    <string name="pick_first_day">Ketuk hari pertama haidmu.</string>
+    <string name="pick_last_day">Hari pertama: %1$s. Sekarang ketuk hari terakhir.</string>
+    <string name="pick_end_day">Ketuk hari terakhir haid ini.</string>
+    <string name="pick_only_this_day">Hanya hari ini</string>
+    <string name="pick_still_going">Masih berlangsung</string>
+    <string name="question_period_over">Apakah haidmu sudah selesai?</string>
+    <string name="question_period_started">Apakah haidmu sudah mulai?</string>
+    <string name="question_pick_end">Ya, pilih hari terakhir</string>
+    <string name="question_pick_start">Ya, pilih hari pertama</string>
+    <string name="question_not_yet">Belum</string>
+    <string name="card_fold">Lipat kartu</string>
+    <string name="card_unfold">Tampilkan kartu</string>
+    <string name="year_view">Tampilan tahun</string>
+    <string name="month_view">Tampilan bulan</string>
+    <string name="previous_year">Tahun sebelumnya</string>
+    <string name="next_year">Tahun berikutnya</string>
+    <string name="tips_title">Perlu diketahui</string>
+    <string name="tips_swipe">Geser kalender ke samping untuk melihat siklusmu sebagai lingkaran.</string>
+    <string name="tips_long_press">Tekan lama satu hari di kalender untuk mencatat haid yang sudah lewat, lalu ketuk hari terakhirnya.</string>
+    <string name="tips_fold">Panah di bawah kartu melipatnya, jadi kalender punya lebih banyak ruang.</string>
+    <string name="tips_tabs">Riwayat menampilkan siklus dan semua catatanmu. Setelan berisi pengingat, cadangan, dan impor.</string>
+    <string name="tips_retap">Ketuk tab sekali lagi untuk kembali ke awal: hari ini, atau paling atas.</string>
+    <string name="scroll_to_top">Kembali ke atas</string>
+    <string name="import_section_hint">Cadangan dan data dari aplikasi lain</string>
+    <string name="icon_pain">Nyeri</string>
+    <string name="icon_test_strip">Strip tes</string>
 </resources>

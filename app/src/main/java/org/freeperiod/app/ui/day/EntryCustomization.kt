@@ -14,22 +14,25 @@ data class EntryCategory(val key: String, val label: Int, val icon: Int, val ord
 // Medication, appetite and sex drive are off until the user turns them on (Customize day entry or My situation).
 internal val builtInCategories = listOf(
     EntryCategory("mood", R.string.entry_mood, R.drawable.ic_mood_okay, 0),
-    EntryCategory("flow", R.string.entry_flow, R.drawable.ic_fp_cycle, 1),
-    EntryCategory("pain", R.string.entry_pain, R.drawable.ic_symptom_cramps, 2),
-    EntryCategory("symptoms", R.string.entry_symptoms, R.drawable.ic_symptom_fatigue, 3),
+    EntryCategory("flow", R.string.entry_flow, R.drawable.ic_item_drop, 1),
+    EntryCategory("pain", R.string.entry_pain, R.drawable.ic_item_pain, 2),
+    EntryCategory("symptoms", R.string.entry_symptoms, R.drawable.ic_item_thermometer, 3),
     EntryCategory("appetite", R.string.entry_appetite, R.drawable.ic_item_cutlery, 4, defaultHidden = true),
     EntryCategory("sex", R.string.entry_sex, R.drawable.ic_fp_sex, 5),
     EntryCategory("libido", R.string.entry_libido, R.drawable.ic_item_sparkles, 6, defaultHidden = true),
     EntryCategory("discharge", R.string.entry_discharge, R.drawable.ic_fp_discharge, 7),
     EntryCategory("note", R.string.entry_note, R.drawable.ic_fp_note, 8),
     EntryCategory("tags", R.string.entry_tags, R.drawable.ic_fp_tags, 9),
-    EntryCategory("ovulation_test", R.string.entry_ovulation_test, R.drawable.ic_fp_today, 10),
+    EntryCategory("ovulation_test", R.string.entry_ovulation_test, R.drawable.ic_item_test_strip, 10),
     EntryCategory("medication", R.string.entry_medication, R.drawable.ic_item_pill, 11, defaultHidden = true),
 )
 
 data class EntryItem(val key: String, val name: String?, val label: Int, val icon: Int,
     val tag: Tag? = null, val order: Int = 0, val hidden: Boolean = false)
-internal data class ResolvedEntryAppearance(val label: String, val icon: Int, val iconKey: String)
+/** [chosen]: the user picked this icon (or made the category), so headings show it; built-in headings stay text only. */
+internal data class ResolvedEntryAppearance(val label: String, val icon: Int, val iconKey: String, val chosen: Boolean = false) {
+    val headerIcon: Int? get() = icon.takeIf { chosen }
+}
 
 /** Android defaults feed the same pure resolver used for built-ins and own rows. */
 @Composable
@@ -38,7 +41,8 @@ internal fun entryAppearance(key: String, label: Int, icon: Int, overrides: List
     val defaultIconKey = FpIcons.byKey.entries.find { it.value == icon }?.key ?: "default:$icon"
     val resolved = resolveEntryAppearance(key, category?.name ?: stringResource(label),
         category?.iconKey ?: defaultIconKey, overrides, tag)
-    return ResolvedEntryAppearance(resolved.label, FpIcons.byKey[resolved.iconKey] ?: icon, resolved.iconKey)
+    val chosen = category != null || tag != null || overrides.any { it.key == key && it.iconKey != null }
+    return ResolvedEntryAppearance(resolved.label, FpIcons.byKey[resolved.iconKey] ?: icon, resolved.iconKey, chosen)
 }
 
 @Composable
@@ -51,7 +55,7 @@ internal fun builtInEntryItems(field: String): List<EntryItem> {
     val values: List<Triple<String, Int, Int>> = when (field) {
         "mood" -> listOf(Mood.BAD, Mood.LOW, Mood.OKAY, Mood.GOOD, Mood.GREAT).map { Triple(it.name, moodLabel(it), moodIcon(it)) }
         "flow" -> FlowLevel.entries.map { Triple(it.name, flowLabel(it), R.drawable.ic_item_drop) }
-        "pain" -> Pain.entries.map { Triple(it.name, painLabel(it), R.drawable.ic_symptom_cramps) }
+        "pain" -> Pain.entries.map { Triple(it.name, painLabel(it), R.drawable.ic_item_pain) }
         // Cramps, bloating, headache lead, as in the short list since 1.0.
         "symptoms" -> Symptom.entries.sortedBy { listOf(Symptom.CRAMPS, Symptom.BLOATING, Symptom.HEADACHE).indexOf(it).let { i -> if (i < 0) 3 else i } }.map { Triple(it.name, symptomLabel(it), symptomIcon(it)) }
         "sex" -> Sex.entries.map { Triple(it.name, sexLabel(it), R.drawable.ic_fp_sex) }

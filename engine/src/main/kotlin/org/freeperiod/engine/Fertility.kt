@@ -17,3 +17,9 @@ fun fertileWindow(state: PredictionState, situation: Situation): ClosedRange<Loc
     val pad = if (span >= 2) 1L else 0L
     return middle.minusDays(19 + pad)..middle.minusDays(14 - pad)
 }
+
+/** The single most likely day inside [fertileWindow] (middle of the predicted range âˆ’ 14 days); null when there is no window. */
+fun peakDay(state: PredictionState, situation: Situation): LocalDate? {
+    if (state !is PredictionState.Range || !situation.fertileWindowAllowed()) return null
+    return state.earliest.plusDays(ChronoUnit.DAYS.between(state.earliest, state.latest) / 2).minusDays(14)
+}

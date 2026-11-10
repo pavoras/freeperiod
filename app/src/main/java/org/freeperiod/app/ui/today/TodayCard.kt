@@ -30,7 +30,8 @@ import org.freeperiod.engine.*
 
 @Composable
 fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
-    onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onJumpToToday: () -> Unit = {}) {
+    onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onJumpToToday: () -> Unit = {},
+    onFold: (() -> Unit)? = null) {
     val locale = LocalConfiguration.current.locales[0]
     val prediction = state.prediction
     val t = LocalDaylight.current
@@ -48,7 +49,8 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
         }
     }
     FpCard(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (onFold == null) 12.dp else 0.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)) {
             if (number == null && prediction is PredictionState.NoData) EmptyCycleHeader(label)
             if (number != null) {
                 if (stackTimeline) {
@@ -68,6 +70,7 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
                 hints.forEach { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = t.muted) }
             }
             TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions)
+            onFold?.let { Box(Modifier.offset(y = (-8).dp)) { FoldHandle(folded = false, it) } }
         }
     }
 }

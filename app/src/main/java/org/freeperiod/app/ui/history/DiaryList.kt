@@ -4,6 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
@@ -35,20 +38,30 @@ private data class DiaryMark(val label: String, val icon: Int, val flow: FlowLev
 /** The diary as a list: one card per day with an entry, newest first, under month headings. A card opens its day. */
 @Composable
 internal fun DiaryList(state: HistoryUiState, onOpenDay: (LocalDate) -> Unit, modifier: Modifier = Modifier,
-    contentTop: Dp = 0.dp) {
+    contentTop: Dp = 0.dp, list: LazyListState = rememberLazyListState()) {
     val locale = LocalConfiguration.current.locales[0]
     val monthFormat = DateTimeFormatter.ofPattern("LLLL yyyy", locale)
     val months = remember(state.diary) { state.diary.groupBy { YearMonth.from(it.log.date) } }
-    LazyColumn(modifier.fillMaxSize().testTag("diary-list"),
-        contentPadding = PaddingValues(start = FpSpacing.screen, end = FpSpacing.screen, top = contentTop, bottom = FpSpacing.screen),
-        verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
-        if (state.diary.isEmpty()) item { Text(stringResource(R.string.diary_empty), style = MaterialTheme.typography.bodyLarge) }
-        months.forEach { (month, days) ->
-            item(key = "month:$month") {
-                Text(month.format(monthFormat), Modifier.padding(top = if (month == months.keys.first()) 0.dp else FpSpacing.gap),
-                    style = MaterialTheme.typography.titleMedium)
+    val scope = rememberCoroutineScope()
+    // Further down the list, one tap goes back to the newest entries.
+    val scrolled by remember(list) { derivedStateOf { list.firstVisibleItemIndex > 3 } }
+    Box(modifier.fillMaxSize()) {
+        LazyColumn(Modifier.fillMaxSize().testTag("diary-list"), state = list,
+            contentPadding = PaddingValues(start = FpSpacing.screen, end = FpSpacing.screen, top = contentTop, bottom = FpSpacing.screen),
+            verticalArrangement = Arrangement.spacedBy(FpSpacing.gap)) {
+            if (state.diary.isEmpty()) item { Text(stringResource(R.string.diary_empty), style = MaterialTheme.typography.bodyLarge) }
+            months.forEach { (month, days) ->
+                item(key = "month:$month") {
+                    Text(month.format(monthFormat), Modifier.padding(top = if (month == months.keys.first()) 0.dp else FpSpacing.gap),
+                        style = MaterialTheme.typography.titleMedium)
+                }
+                items(days, key = { it.log.date.toEpochDay() }) { day -> DiaryCard(state, day, onOpenDay) }
             }
-            items(days, key = { it.log.date.toEpochDay() }) { day -> DiaryCard(state, day, onOpenDay) }
+        }
+        if (scrolled) SmallFloatingActionButton(onClick = { scope.launch { list.animateScrollToItem(0) } },
+            Modifier.align(Alignment.BottomEnd).padding(FpSpacing.screen), containerColor = LocalDaylight.current.accent.container,
+            contentColor = LocalDaylight.current.accent.onContainer) {
+            Icon(painterResource(R.drawable.ic_fp_up), stringResource(R.string.scroll_to_top))
         }
     }
 }

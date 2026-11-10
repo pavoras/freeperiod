@@ -24,7 +24,7 @@ class LockGateTest {
     @After fun resetSettings() { runBlocking { settings.update { it.copy(lockEnabled = false, onboardingDone = false) } } }
 
     @Test fun enabledLockHidesContentAndSecuresWindow() {
-        runBlocking { settings.update { it.copy(onboardingDone = true, lockEnabled = true) } }
+        runBlocking { settings.update { it.copy(onboardingDone = true, lockEnabled = true, tipsSeen = true) } }
         compose.waitUntil(10_000) { compose.activity.window.attributes.flags and WindowManager.LayoutParams.FLAG_SECURE != 0 }
         compose.waitUntil(10_000) { compose.onAllNodesWithText("Settings").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("Settings").performClick()

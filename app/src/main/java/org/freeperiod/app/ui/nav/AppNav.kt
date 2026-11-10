@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import org.freeperiod.app.AppContainer
 import org.freeperiod.app.R
 import org.freeperiod.app.ui.components.FpNavBar
+import org.freeperiod.app.ui.today.TodayHandlers
 import org.freeperiod.app.ui.today.TodayScreen
 import org.freeperiod.app.ui.today.TodayViewModel
 import org.freeperiod.app.ui.history.HistoryScreen
@@ -51,6 +52,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
         val entry by navigation.currentBackStackEntryAsState()
         val route = entry?.destination?.route
         var settingsHome by remember { mutableIntStateOf(0) }
+        var historyTop by remember { mutableIntStateOf(0) }
         Scaffold(bottomBar = {
             if (onboardingDone && route != "day/{epochDay}" && route != "settings/day-entry") {
                 FpNavBar(route) { destination ->
@@ -58,6 +60,8 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     if (destination == "today" && route == "today") return@FpNavBar todayViewModel.jumpToToday()
                     // Settings again while in Settings: back to the overview.
                     if (destination == "settings" && route == "settings") return@FpNavBar run { settingsHome++ }
+                    // History again while in History: back to the top.
+                    if (destination == "history" && route == "history") return@FpNavBar run { historyTop++ }
                     navigation.navigate(destination) {
                         popUpTo(navigation.graph.startDestinationId) { saveState = true }
                         launchSingleTop = true
@@ -107,7 +111,13 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                         { navigation.navigate("day/${it.toEpochDay()}") }, { todayViewModel.pausePredictions() },
                         { todayViewModel.showMonth(it) }, todayViewModel::dismissError,
                         onUndoEnd = { todayViewModel.undoPeriodEnd(it) }, onRingChange = { todayViewModel.showRing(it) },
-                        onJumpToToday = { todayViewModel.jumpToToday() })
+                        onJumpToToday = { todayViewModel.jumpToToday() }, handlers = remember(todayViewModel) {
+                            TodayHandlers(onLongPressDay = { todayViewModel.longPressDay(it) }, onPickDay = { todayViewModel.pickDay(it) },
+                                onPickSingle = { todayViewModel.pickSingle(it) }, onCancelPick = todayViewModel::cancelPick,
+                                onFoldCard = { todayViewModel.foldCard(it) }, onAnswer = { question, yes -> todayViewModel.answer(question, yes) },
+                                onTipsSeen = { todayViewModel.tipsSeen() }, onEndSavedShown = todayViewModel::endSavedShown,
+                                onYearView = todayViewModel::showYear, onOpenMonth = todayViewModel::openMonth)
+                        })
                 }
                 composable("history") {
                     val model: HistoryViewModel = viewModel(factory = viewModelFactory {
@@ -116,7 +126,7 @@ fun AppNav(container: AppContainer, todayViewModel: TodayViewModel, onboardingDo
                     val state by model.state.collectAsStateWithLifecycle()
                     ResumeAndMidnightEffect(model::onResume)
                     HistoryScreen(state, onInclude = { id, included -> model.setCycleIncluded(id, included) }, onDismissHint = { model.dismissLongCycleHint(it) },
-                        onOpenDay = { navigation.navigate("day/${it.toEpochDay()}") })
+                        onOpenDay = { navigation.navigate("day/${it.toEpochDay()}") }, top = historyTop)
                 }
                 composable("settings") { SettingsRoute(container, home = settingsHome) }
                 composable("settings/day-entry") { SettingsRoute(container, dayEntryOnly = true) { navigation.popBackStack() } }

@@ -121,6 +121,14 @@ class TodayScreenTest {
         compose.onNodeWithText("Undo").assertExists()
     }
 
+    @Test fun aSavedNoticeAlreadyShownDoesNotComeBack() {
+        compose.setContent { FreePeriodTheme {
+            TodayScreen(initial.copy(endSaved = receipt, endSavedShown = true), {}, {}, {}, {}, {}, {})
+        } }
+        compose.waitForIdle()
+        compose.onNodeWithText("Undo").assertDoesNotExist()
+    }
+
     @Test fun editOpensTheSavedBleedingDay() {
         var selected: LocalDate? = null
         compose.setContent { FreePeriodTheme {

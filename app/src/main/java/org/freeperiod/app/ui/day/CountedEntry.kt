@@ -34,7 +34,7 @@ internal fun CountedEntry(category: EntryCategory, state: DayEntryUiState, actio
     var adding by rememberSaveable { mutableStateOf(false) }
     val summary = items.filter { state.selected(it) }
         .map { countedLabel(it.appearance(state).label, state.log.count(requireNotNull(it.tag).id)) }.joinToString()
-    FpSectionRow(appearance.icon, appearance.label, summary.ifBlank { stringResource(R.string.entry_none) }, open, onClick = onToggle)
+    FpSectionRow(appearance.headerIcon, appearance.label, summary.ifBlank { stringResource(R.string.entry_none) }, open, onClick = onToggle)
     if (!open) return
     Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(top = 4.dp)) {
         if (category.key == "medication") Text(stringResource(R.string.medication_hint),

@@ -101,4 +101,30 @@ class PeriodRulesTest {
         assertEquals(periods[1], PeriodRules.periodOn(periods, today(periods), today(periods)))
         assertNull(PeriodRules.periodOn(periods, today(periods).plusDays(1), today(periods)))
     }
+
+    @Test fun usualLimitIsMeanPlusTwoSigmaWithTwoDaysAtLeast() {
+        assertNull(PeriodRules.usualLimit(listOf(5, 5)))
+        assertEquals(7, PeriodRules.usualLimit(listOf(5, 5, 5)))
+        // 26, 28, 30: mean 28, sd 2 -> 32.
+        assertEquals(32, PeriodRules.usualLimit(listOf(26, 28, 30)))
+    }
+
+    @Test fun ongoingPeriodIsUnusuallyLongAfterTheLimit() {
+        val periods = listOf(p(1, "01-01", "01-05"), p(2, "02-01", "02-05"), p(3, "03-01", "03-05"), p(4, "04-01"))
+        assertNull(PeriodRules.periodUnusuallyLong(periods, d("04-07")))
+        assertEquals(periods[3], PeriodRules.periodUnusuallyLong(periods, d("04-08")))
+        // Fewer than three finished periods: ten days.
+        val few = listOf(p(1, "03-01", "03-05"), p(2, "04-01"))
+        assertNull(PeriodRules.periodUnusuallyLong(few, d("04-10")))
+        assertEquals(few[1], PeriodRules.periodUnusuallyLong(few, d("04-11")))
+    }
+
+    @Test fun startIsUnusuallyFarOnlyWithThreeCyclesAndAfterTheLimit() {
+        val periods = listOf(p(1, "01-01", "01-05"), p(2, "01-29", "02-02"), p(3, "02-26", "03-02"), p(4, "03-26", "03-30"))
+        // Cycles 28, 28, 28 -> limit 30: day 31 of the cycle asks.
+        assertNull(PeriodRules.startUnusuallyFar(periods, d("04-24")))
+        assertEquals(periods[3], PeriodRules.startUnusuallyFar(periods, d("04-25")))
+        assertNull(PeriodRules.startUnusuallyFar(periods.take(3), d("06-01")))
+        assertNull(PeriodRules.startUnusuallyFar(periods.dropLast(1) + p(4, "03-26"), d("04-25")))
+    }
 }
