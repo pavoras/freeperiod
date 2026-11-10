@@ -741,6 +741,7 @@
     <string name="question_pick_end">Evet, son günü seç</string>
     <string name="question_pick_start">Evet, ilk günü seç</string>
     <string name="question_not_yet">Henüz değil</string>
+    <string name="pick_day">Gün seç</string>
     <string name="card_fold">Kartı katla</string>
     <string name="card_unfold">Kartı göster</string>
     <string name="year_view">Yıl görünümü</string>

@@ -107,7 +107,7 @@ class TodayScreenshotTest {
     // The round of 2026-11-10: folded card, entering a past period, the home question, the year view and the tips.
     @Test fun folded_enLight() = capture("folded_enLight", "fertile") { it.copy(cardFolded = true) }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
-    fun picking_deLight() = capture("picking_deLight", "regular", Locale.GERMANY) { it.copy(pick = RangePick(LocalDate.of(2026, 4, 8))) }
+    fun picking_deLight() = capture("picking_deLight", "regular", Locale.GERMANY) { it.copy(pick = RangePick(LocalDate.of(2026, 4, 8), canContinue = true)) }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun question_deLight() = capture("question_deLight", "rangePassed", Locale.GERMANY) {
         it.copy(question = HomeQuestion.PERIOD_STARTED, questionPeriodId = 1) }

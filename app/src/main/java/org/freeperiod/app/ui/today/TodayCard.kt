@@ -31,7 +31,7 @@ import org.freeperiod.engine.*
 @Composable
 fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
     onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onJumpToToday: () -> Unit = {},
-    onFold: (() -> Unit)? = null) {
+    onFold: (() -> Unit)? = null, onPickDay: ((HomeQuestion) -> Unit)? = null) {
     val locale = LocalConfiguration.current.locales[0]
     val prediction = state.prediction
     val t = LocalDaylight.current
@@ -65,11 +65,14 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
             // A predicted range is already on the timeline (and in the calendar), so the card shows no text for it.
             val rangeOnTimeline = prediction is PredictionState.Range && state.timeline != null
             val hints = todayHints(state)
-            if (!rangeOnTimeline || hints.isNotEmpty()) Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            val question = state.question.takeIf { onPickDay != null }
+            if (!rangeOnTimeline || hints.isNotEmpty() || question != null) Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 if (!rangeOnTimeline) Text(predictionText(prediction, state.today, locale), style = MaterialTheme.typography.bodyLarge)
+                // The question sits under the message it follows from; "Pick a day" below answers it.
+                question?.let { QuestionLine(it) }
                 hints.forEach { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = t.muted) }
             }
-            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions)
+            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions, onPickDay = onPickDay)
             onFold?.let { Box(Modifier.offset(y = (-8).dp)) { FoldHandle(folded = false, it) } }
         }
     }
@@ -100,14 +103,30 @@ internal fun todayHints(state: TodayUiState): List<Int> = listOfNotNull(
     R.string.today_perimenopause.takeIf { state.situation.phase == LifePhase.PERIMENOPAUSE },
     R.string.today_irregular_method.takeIf { state.situation.method == Method.PILL_PROGESTIN && state.prediction is PredictionState.Range })
 
-/** Period started/ended and Log today, plus pausing predictions after a missed range: the same on card and ring. */
+/** Asked when the period goes on, or stays away, clearly longer than usual. */
+@Composable
+internal fun QuestionLine(question: HomeQuestion) {
+    Text(stringResource(if (question == HomeQuestion.PERIOD_OVER) R.string.question_period_over else R.string.question_period_started),
+        style = MaterialTheme.typography.bodyLarge)
+}
+
+/**
+ * Period started/ended and Log today, plus pausing predictions after a missed range: the same on card and ring.
+ * With an open question (and [onPickDay]) the first button picks the day in the calendar instead.
+ */
 @Composable
 internal fun TodayPrimaryActions(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
-    onLogToday: () -> Unit, onPausePredictions: () -> Unit, stacked: Boolean = false) {
+    onLogToday: () -> Unit, onPausePredictions: () -> Unit, stacked: Boolean = false, onPickDay: ((HomeQuestion) -> Unit)? = null) {
+    val question = state.question.takeIf { onPickDay != null }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        TodayActions(stringResource(if (state.ongoingPeriodId == null) R.string.period_started else R.string.period_ended),
-            stringResource(R.string.log_today), !state.writing,
-            { state.periodEndForToday?.let(onConfirmEnd) ?: onStartPeriod() }, onLogToday, stacked)
+        TodayActions(stringResource(when {
+            question != null -> R.string.pick_day
+            state.ongoingPeriodId == null -> R.string.period_started
+            else -> R.string.period_ended
+        }), stringResource(R.string.log_today), !state.writing, {
+            if (question != null) onPickDay?.invoke(question)
+            else state.periodEndForToday?.let(onConfirmEnd) ?: onStartPeriod()
+        }, onLogToday, stacked)
         if (state.prediction is PredictionState.RangePassed) TextButton(onClick = onPausePredictions, enabled = !state.writing) {
             Text(stringResource(R.string.pause_predictions))
         }
@@ -124,15 +143,16 @@ private fun TodayActions(primaryLabel: String, secondaryLabel: String, enabled: 
     val style = MaterialTheme.typography.labelLarge
     val primaryTextWidth = measurer.measure(AnnotatedString(primaryLabel), style, softWrap = false).size.width
     val secondaryTextWidth = measurer.measure(AnnotatedString(secondaryLabel), style, softWrap = false).size.width
-    val primaryPadding = ButtonDefaults.ContentPadding.calculateLeftPadding(LayoutDirection.Ltr) +
-        ButtonDefaults.ContentPadding.calculateRightPadding(LayoutDirection.Ltr)
-    val secondaryPadding = PaddingValues(horizontal = 12.dp)
+    // Slim side padding, so both buttons fit side by side in a row also in German.
+    val primaryContent = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    val primaryPadding = 24.dp
+    val secondaryPadding = PaddingValues(horizontal = 4.dp)
     BoxWithConstraints(Modifier.fillMaxWidth()) {
-        val secondaryWidth = maxOf(48.dp, with(density) { secondaryTextWidth.toDp() } + 24.dp)
-        val fitsSideBySide = with(density) { primaryTextWidth.toDp() } + primaryPadding + 8.dp + secondaryWidth <= maxWidth
+        val secondaryWidth = maxOf(48.dp, with(density) { secondaryTextWidth.toDp() } + 8.dp)
+        val fitsSideBySide = with(density) { primaryTextWidth.toDp() } + primaryPadding + 4.dp + secondaryWidth <= maxWidth
         val primary: @Composable (Modifier) -> Unit = { modifier ->
             FpButton(onPrimary, modifier, enabled, border = null,
-                colors = ButtonDefaults.buttonColors(containerColor = colors.fill, contentColor = colors.onFill)) {
+                colors = ButtonDefaults.buttonColors(containerColor = colors.fill, contentColor = colors.onFill), contentPadding = primaryContent) {
                 Text(primaryLabel, Modifier.fillMaxWidth(), style = style, maxLines = 1, softWrap = false, textAlign = TextAlign.Center)
             }
         }
@@ -141,7 +161,7 @@ private fun TodayActions(primaryLabel: String, secondaryLabel: String, enabled: 
                 Text(secondaryLabel, Modifier.fillMaxWidth(), style = style, maxLines = 1, softWrap = false, textAlign = TextAlign.Center)
             }
         }
-        if (fitsSideBySide && !stacked) Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+        if (fitsSideBySide && !stacked) Row(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
             primary(Modifier.weight(1f))
             secondary(Modifier.width(secondaryWidth))
         } else Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {

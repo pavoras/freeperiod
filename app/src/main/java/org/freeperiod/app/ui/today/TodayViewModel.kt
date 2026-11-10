@@ -25,8 +25,9 @@ data class DayMarks(val period: Boolean, val predicted: Boolean, val logged: Boo
 /**
  * Entering a period right in the calendar: a long press picks [start] (or, from "Has your period started?", the next
  * tap does), the next tap the last day. With [periodId] the tap sets the last day of that existing period.
+ * [canContinue]: the start is recent and no period began after it, so it may still be going on.
  */
-data class RangePick(val start: LocalDate?, val periodId: Long? = null)
+data class RangePick(val start: LocalDate?, val periodId: Long? = null, val canContinue: Boolean = false)
 
 /** A question on Today when the period goes on, or stays away, longer than usual. */
 enum class HomeQuestion { PERIOD_OVER, PERIOD_STARTED }
@@ -113,8 +114,12 @@ class TodayViewModel(
     /** Long press on a day: it becomes the first day of a period to enter; inside a saved period, its last day is picked next. */
     fun longPressDay(date: LocalDate): Job = viewModelScope.launch {
         if (date > clock() || mutableState.value.writing) return@launch
-        val period = PeriodRules.periodOn(repository.snapshot().periods, date, clock())
-        mutableState.update { it.copy(pick = period?.let { saved -> RangePick(saved.start, saved.id) } ?: RangePick(date), error = null) }
+        val periods = repository.snapshot().periods
+        val period = PeriodRules.periodOn(periods, date, clock())
+        val canContinue = date >= clock().minusDays(13) && periods.none { it.start > date }
+        mutableState.update {
+            it.copy(pick = period?.let { saved -> RangePick(saved.start, saved.id) } ?: RangePick(date, canContinue = canContinue), error = null)
+        }
     }
 
     /** A tap while picking: the first day (when none yet) or the last day, which saves. */
@@ -133,7 +138,9 @@ class TodayViewModel(
 
     /** Only the picked day, or (for a recent start) a period that is still going on. */
     fun pickSingle(ongoing: Boolean): Job {
-        val start = mutableState.value.pick?.start ?: return Job().apply { complete() }
+        val pick = mutableState.value.pick
+        val start = pick?.start ?: return Job().apply { complete() }
+        if (ongoing && !pick.canContinue) return Job().apply { complete() }
         return mutate {
             repository.addPeriod(start, if (ongoing) null else start).getOrThrow()
             mutableState.update { it.copy(pick = null) }

@@ -744,6 +744,7 @@
     <string name="question_pick_end">Ja, letzten Tag wählen</string>
     <string name="question_pick_start">Ja, ersten Tag wählen</string>
     <string name="question_not_yet">Noch nicht</string>
+    <string name="pick_day">Tag wählen</string>
     <string name="card_fold">Karte einklappen</string>
     <string name="card_unfold">Karte ausklappen</string>
     <string name="year_view">Jahresansicht</string>

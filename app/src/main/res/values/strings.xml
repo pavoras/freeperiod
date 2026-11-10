@@ -745,6 +745,7 @@
     <string name="question_pick_end">Yes, pick the last day</string>
     <string name="question_pick_start">Yes, pick the first day</string>
     <string name="question_not_yet">Not yet</string>
+    <string name="pick_day">Pick a day</string>
     <string name="card_fold">Fold card</string>
     <string name="card_unfold">Show card</string>
     <string name="year_view">Year view</string>

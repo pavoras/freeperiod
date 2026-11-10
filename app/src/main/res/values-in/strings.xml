@@ -719,6 +719,7 @@
     <string name="question_pick_end">Ya, pilih hari terakhir</string>
     <string name="question_pick_start">Ya, pilih hari pertama</string>
     <string name="question_not_yet">Belum</string>
+    <string name="pick_day">Pilih hari</string>
     <string name="card_fold">Lipat kartu</string>
     <string name="card_unfold">Tampilkan kartu</string>
     <string name="year_view">Tampilan tahun</string>

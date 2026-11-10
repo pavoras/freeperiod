@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -151,7 +152,11 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                     if (pager.settledPage != target && !pager.isScrollInProgress) pager.scrollToPage(target)
                 }
                 state.pick?.let { pick -> PickBanner(pick, state.today, locale, handlers, Modifier.padding(horizontal = 12.dp)) }
-                    ?: state.question?.let { question -> QuestionCard(question, handlers, Modifier.padding(horizontal = 12.dp)) }
+                // With large text the card starts folded, so the calendar stays in sight; it opens for this visit on request.
+                val large = LocalDensity.current.fontScale >= 1.3f
+                var openedLarge by rememberSaveable { mutableStateOf(false) }
+                val folded = state.cardFolded || (large && !openedLarge)
+                val onPickDay: (HomeQuestion) -> Unit = { handlers.onAnswer(it, true) }
                 var year by rememberSaveable { mutableIntStateOf(state.month.year) }
                 HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth(), key = { it }) { page ->
                     // One screen: only the calendar scrolls and the legend always stays visible (see OneScreenColumn).
@@ -160,11 +165,12 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                             state.pick != null -> Unit
                             // The year needs the room: only the two main buttons stay.
                             state.yearView -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) },
-                                onPausePredictions, null, Modifier.padding(horizontal = 12.dp))
-                            state.cardFolded -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) },
-                                onPausePredictions, { handlers.onFoldCard(false) }, Modifier.padding(horizontal = 12.dp))
+                                onPausePredictions, null, Modifier.padding(horizontal = 12.dp), onPickDay)
+                            folded -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,
+                                { openedLarge = true; handlers.onFoldCard(false) }, Modifier.padding(horizontal = 12.dp), onPickDay)
                             else -> TodayCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,
-                                Modifier.padding(horizontal = 12.dp), onJumpToToday, onFold = { handlers.onFoldCard(true) })
+                                Modifier.padding(horizontal = 12.dp), onJumpToToday, onFold = { openedLarge = false; handlers.onFoldCard(true) },
+                                onPickDay = onPickDay)
                         }
                     }, flex = {
                         if (state.yearView) YearCalendar(year, state.days, { year = it }, handlers.onOpenMonth,
@@ -225,8 +231,8 @@ private fun PickBanner(pick: RangePick, today: LocalDate, locale: java.util.Loca
                     Text(stringResource(R.string.cancel), color = t.muted, style = label)
                 }
                 if (pick.start != null && pick.periodId == null) {
-                    // A start in the last two weeks can still be going on.
-                    if (pick.start >= today.minusDays(13)) TextButton(onClick = { handlers.onPickSingle(true) }, contentPadding = pad) {
+                    // A recent start can still be going on, unless a later period began since.
+                    if (pick.canContinue) TextButton(onClick = { handlers.onPickSingle(true) }, contentPadding = pad) {
                         Text(stringResource(R.string.pick_still_going), style = label)
                     }
                     TextButton(onClick = { handlers.onPickSingle(false) }, contentPadding = pad) {
@@ -238,36 +244,15 @@ private fun PickBanner(pick: RangePick, today: LocalDate, locale: java.util.Loca
     }
 }
 
-/** Asked when the period goes on, or stays away, clearly longer than usual. */
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun QuestionCard(question: HomeQuestion, handlers: TodayHandlers, modifier: Modifier) {
-    val t = LocalDaylight.current
-    val over = question == HomeQuestion.PERIOD_OVER
-    FpCard(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
-            Text(stringResource(if (over) R.string.question_period_over else R.string.question_period_started),
-                style = MaterialTheme.typography.bodyLarge)
-            FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End)) {
-                TextButton(onClick = { handlers.onAnswer(question, false) }) {
-                    Text(stringResource(if (over) R.string.pick_still_going else R.string.question_not_yet), color = t.muted)
-                }
-                TextButton(onClick = { handlers.onAnswer(question, true) }) {
-                    Text(stringResource(if (over) R.string.question_pick_end else R.string.question_pick_start))
-                }
-            }
-        }
-    }
-}
-
-/** The cycle card folded up: only its buttons, so the calendar gets the screen. */
+/** The cycle card folded up: only its buttons (and the question, if any), so the calendar gets the screen. */
 @Composable
 private fun FoldedCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit, onLogToday: () -> Unit,
-    onPausePredictions: () -> Unit, onUnfold: (() -> Unit)?, modifier: Modifier) {
+    onPausePredictions: () -> Unit, onUnfold: (() -> Unit)?, modifier: Modifier, onPickDay: (HomeQuestion) -> Unit) {
     FpCard(modifier.fillMaxWidth()) {
         Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (onUnfold == null) 12.dp else 0.dp),
-            verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions)
+            verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            state.question?.let { QuestionLine(it) }
+            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions, onPickDay = onPickDay)
             onUnfold?.let { FoldHandle(folded = true, it) }
         }
     }
