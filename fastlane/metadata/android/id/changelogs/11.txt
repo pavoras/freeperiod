@@ -1,0 +1,5 @@
+• Tampilan tahun: seluruh tahunmu dalam sekali lihat.
+• Catat haid sebelumnya: tekan lama sebuah hari di kalender.
+• Kartu di Hari ini bisa dilipat.
+• Pertanyaan singkat jika awal atau akhir haid belum dicatat.
+• Tips “Perlu diketahui”, ikon baru, dan impor cadangan langsung.
