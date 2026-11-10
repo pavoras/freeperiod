@@ -32,7 +32,7 @@ fun BackupScreen(
     onRestore: () -> Unit,
     onCancelRestore: () -> Unit,
     onBack: () -> Unit,
-    onImport: (() -> Unit)? = null,
+    onImport: ((ImportStart) -> Unit)? = null,
     restoreOnly: Boolean = false,
     auto: AutoBackupUiState? = null,
     autoActions: AutoBackupActions = AutoBackupActions(),
@@ -46,26 +46,15 @@ fun BackupScreen(
     Column(Modifier.fillMaxSize().background(LocalDaylight.current.background).verticalScroll(rememberScrollState()).imePadding().padding(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(16.dp)) {
         SettingsPageHeader(R.string.backup_restore, onBack)
-        onImport?.let { action ->
-            FpButton(action, primary = false, enabled = enabled) { Text(stringResource(R.string.import_title)) }
-        }
         if (state.summary == null) {
-            if (!restoreOnly && auto != null) {
-                AutoBackupSection(auto, autoActions)
-                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+            // Bringing data in comes first: an own backup, a file from another app or a CSV, one tap each.
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(stringResource(if (onImport != null) R.string.import_title else R.string.restore_backup),
+                    style = MaterialTheme.typography.titleLarge)
+                if (onImport != null) Text(stringResource(R.string.import_section_hint), style = MaterialTheme.typography.bodyMedium,
+                    color = LocalDaylight.current.muted)
             }
-            if (!restoreOnly) {
-                Text(stringResource(R.string.create_backup), style = MaterialTheme.typography.titleLarge)
-                Text(stringResource(R.string.backup_forgotten_warning), style = MaterialTheme.typography.bodyMedium)
-                PasswordField(password, { password = it }, R.string.backup_password, enabled)
-                PasswordField(confirm, { confirm = it }, R.string.backup_confirm_password, enabled)
-                FpButton(onClick = { onBackup(password, confirm); password = ""; confirm = "" }, enabled = enabled) {
-                    Text(stringResource(R.string.create_backup))
-                }
-                HorizontalDivider(Modifier.padding(vertical = 8.dp))
-            }
-            Text(stringResource(R.string.restore_backup), style = MaterialTheme.typography.titleLarge)
-            FpButton(primary = false, onClick = { restorePassword = ""; onOpen() }, enabled = enabled) {
+            FpButton(primary = false, onClick = { restorePassword = ""; onOpen() }, modifier = Modifier.fillMaxWidth(), enabled = enabled) {
                 Text(stringResource(R.string.restore_choose_file))
             }
             if (state.restoreFileSelected) {
@@ -73,6 +62,28 @@ fun BackupScreen(
                 PasswordField(restorePassword, { restorePassword = it }, R.string.restore_password_optional, enabled)
                 FpButton(onClick = { onDecode(restorePassword); restorePassword = "" }, enabled = enabled) {
                     Text(stringResource(R.string.restore_read))
+                }
+            }
+            onImport?.let { start ->
+                FpButton({ start(ImportStart.APP) }, Modifier.fillMaxWidth(), primary = false, enabled = enabled) {
+                    Text(stringResource(R.string.import_app))
+                }
+                FpButton({ start(ImportStart.CSV) }, Modifier.fillMaxWidth(), primary = false, enabled = enabled) {
+                    Text(stringResource(R.string.import_csv))
+                }
+            }
+            if (!restoreOnly && auto != null) {
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                AutoBackupSection(auto, autoActions)
+            }
+            if (!restoreOnly) {
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                Text(stringResource(R.string.create_backup), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.backup_forgotten_warning), style = MaterialTheme.typography.bodyMedium)
+                PasswordField(password, { password = it }, R.string.backup_password, enabled)
+                PasswordField(confirm, { confirm = it }, R.string.backup_confirm_password, enabled)
+                FpButton(onClick = { onBackup(password, confirm); password = ""; confirm = "" }, enabled = enabled) {
+                    Text(stringResource(R.string.create_backup))
                 }
             }
         }
@@ -93,6 +104,9 @@ fun BackupScreen(
     if (askRestore && state.summary != null) ConfirmationDialog(R.string.restore_replace, R.string.restore_replace_warning,
         R.string.restore_replace, onDismiss = { askRestore = false }, onConfirm = { askRestore = false; onRestore() })
 }
+
+/** Which file picker the import page opens right away, chosen on the backup page. */
+enum class ImportStart { CSV, APP }
 
 class AutoBackupActions(
     val interval: (AutoBackupInterval) -> Unit = {},

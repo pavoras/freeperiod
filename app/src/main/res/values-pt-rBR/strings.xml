@@ -760,4 +760,31 @@
         <item quantity="many">Registrado em %1$d de %2$d dias</item>
         <item quantity="other">Registrado em %1$d de %2$d dias</item>
     </plurals>
+    <string name="pick_period_start">Registrar menstruação a partir deste dia</string>
+    <string name="pick_first_day">Toque no primeiro dia da sua menstruação.</string>
+    <string name="pick_last_day">Primeiro dia: %1$s. Agora toque no último dia.</string>
+    <string name="pick_end_day">Toque no último dia desta menstruação.</string>
+    <string name="pick_only_this_day">Só este dia</string>
+    <string name="pick_still_going">Ainda continua</string>
+    <string name="question_period_over">Sua menstruação já terminou?</string>
+    <string name="question_period_started">Sua menstruação já começou?</string>
+    <string name="question_pick_end">Sim, escolher o último dia</string>
+    <string name="question_pick_start">Sim, escolher o primeiro dia</string>
+    <string name="question_not_yet">Ainda não</string>
+    <string name="card_fold">Recolher cartão</string>
+    <string name="card_unfold">Mostrar cartão</string>
+    <string name="year_view">Visão anual</string>
+    <string name="month_view">Visão mensal</string>
+    <string name="previous_year">Ano anterior</string>
+    <string name="next_year">Próximo ano</string>
+    <string name="tips_title">Bom saber</string>
+    <string name="tips_swipe">Deslize o calendário para o lado para ver seu ciclo como um anel.</string>
+    <string name="tips_long_press">Toque e segure um dia no calendário para registrar uma menstruação passada e depois toque no último dia.</string>
+    <string name="tips_fold">A seta embaixo do cartão o recolhe, assim o calendário ganha mais espaço.</string>
+    <string name="tips_tabs">O Histórico mostra seus ciclos e todos os registros. Em Configurações ficam lembretes, backup e importação.</string>
+    <string name="tips_retap">Toque de novo em uma aba para voltar ao início: hoje, ou o topo da lista.</string>
+    <string name="scroll_to_top">Voltar ao topo</string>
+    <string name="import_section_hint">Backups e dados de outros apps</string>
+    <string name="icon_pain">Dor</string>
+    <string name="icon_test_strip">Tira de teste</string>
 </resources>

@@ -9,7 +9,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -74,10 +74,17 @@ fun MonthCalendar(
     modifier: Modifier = Modifier,
     locale: Locale = LocalConfiguration.current.locales[0],
     scheduledBreak: Boolean = false,
-    /** Changes when the calendar should scroll back to today. */
+    /** Changes when the calendar should scroll back to today, or to [jumpMonth]. */
     jump: Int = 0,
+    jumpMonth: YearMonth? = null,
+    /** Long press on a past day or today: enter a period from there. */
+    onDayLongClick: ((LocalDate) -> Unit)? = null,
+    /** The first day picked for a new period: shown filled until it is saved. */
+    picked: LocalDate? = null,
 ) {
     val t = LocalDaylight.current
+    // Future days have nothing to log yet, so they don't open.
+    val today = days.entries.firstOrNull { it.value.today }?.key
     val anchor = remember { month }
     val first = days.keys.minOrNull()
     val last = days.keys.maxOrNull()
@@ -97,10 +104,11 @@ fun MonthCalendar(
     LaunchedEffect(jump) {
         if (jump == handledJump) return@LaunchedEffect
         handledJump = jump
-        val today = days.entries.firstOrNull { it.value.today }?.key ?: return@LaunchedEffect
-        val month = YearMonth.from(today)
+        jumpMonth?.let { list.animateScrollToItem(titleIndex(it).coerceAtLeast(0)); return@LaunchedEffect }
+        val now = today ?: return@LaunchedEffect
+        val month = YearMonth.from(now)
         val week = rows.indexOfFirst { it is CalendarRow.Week && it.month == month &&
-            today.dayOfMonth in weekDays(month, it.index, locale) }
+            now.dayOfMonth in weekDays(month, it.index, locale) }
         // The month title stays in view unless today is far down; then two weeks before today.
         list.animateScrollToItem(maxOf(titleIndex(month), week - 2).coerceAtLeast(0))
     }
@@ -138,7 +146,7 @@ fun MonthCalendar(
                     is CalendarRow.Title -> Text(row.month.format(DateTimeFormatter.ofPattern("LLLL yyyy", locale)),
                         Modifier.fillMaxWidth().height(titleHeight).wrapContentHeight(Alignment.Bottom)
                             .padding(start = 8.dp, bottom = 6.dp).semantics { heading() }, style = MaterialTheme.typography.titleLarge)
-                    is CalendarRow.Week -> WeekRow(row, days, locale, scheduledBreak, onDayClick, cell)
+                    is CalendarRow.Week -> WeekRow(row, days, locale, scheduledBreak, onDayClick, cell, today, onDayLongClick, picked)
                 }
             }
         }
@@ -153,7 +161,8 @@ private fun weekDays(month: YearMonth, index: Int, locale: Locale): IntRange {
 
 @Composable
 private fun WeekRow(row: CalendarRow.Week, days: Map<LocalDate, DayMarks>, locale: Locale, scheduledBreak: Boolean,
-    onDayClick: (LocalDate) -> Unit, cell: androidx.compose.ui.unit.Dp) {
+    onDayClick: (LocalDate) -> Unit, cell: androidx.compose.ui.unit.Dp, today: LocalDate?,
+    onDayLongClick: ((LocalDate) -> Unit)?, picked: LocalDate?) {
     val month = row.month
     val offset = (month.atDay(1).dayOfWeek.value - WeekFields.of(locale).firstDayOfWeek.value + 7) % 7
     Row(Modifier.fillMaxWidth()) {
@@ -161,15 +170,19 @@ private fun WeekRow(row: CalendarRow.Week, days: Map<LocalDate, DayMarks>, local
             val number = row.index * 7 + column - offset + 1
             if (number in 1..month.lengthOfMonth()) {
                 val date = month.atDay(number)
-                CalendarDay(date, days[date] ?: DayMarks(false, false, false, false), locale,
-                    { onDayClick(date) }, Modifier.weight(1f), scheduledBreak)
+                val marks = days[date] ?: DayMarks(false, false, false, false)
+                val open = today == null || date <= today
+                CalendarDay(date, if (date == picked) marks.copy(period = true) else marks, locale,
+                    { onDayClick(date) }.takeIf { open }, onDayLongClick?.let { long -> { long(date) } }.takeIf { open },
+                    Modifier.weight(1f), scheduledBreak)
             } else Spacer(Modifier.weight(1f).height(cell))
         }
     }
 }
 
 @Composable
-private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClick: () -> Unit, modifier: Modifier, scheduledBreak: Boolean) {
+private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClick: (() -> Unit)?, onLongClick: (() -> Unit)?,
+    modifier: Modifier, scheduledBreak: Boolean) {
     val t = LocalDaylight.current
     val colors = remember(t) { todayFillColors(t) }
     val fill by animateColorAsState(if (marks.period) colors.fill else t.background, tween(160), label = "periodFill")
@@ -185,7 +198,9 @@ private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClic
         if (marks.logged) add(stringResource(R.string.calendar_logged))
         if (marks.today) add(stringResource(R.string.calendar_today))
     }.joinToString(", ")
-    Box(modifier.height(cellHeight).clickable(onClickLabel = stringResource(R.string.open_day), onClick = onClick)
+    val clicks = if (onClick == null) Modifier else Modifier.combinedClickable(onClickLabel = stringResource(R.string.open_day),
+        onLongClickLabel = onLongClick?.let { stringResource(R.string.pick_period_start) }, onLongClick = onLongClick, onClick = onClick)
+    Box(modifier.height(cellHeight).then(clicks)
         .semantics(mergeDescendants = true) { contentDescription = description }, contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2, size.height / 2 - 2.dp.toPx())
@@ -202,9 +217,11 @@ private fun CalendarDay(date: LocalDate, marks: DayMarks, locale: Locale, onClic
             }
             if (marks.higherChance) {
                 val y = center.y + r - 4.dp.toPx()
-                drawLine(if (marks.period) colors.onFill else t.muted,
-                    Offset(center.x - 3.dp.toPx(), y), Offset(center.x + 3.dp.toPx(), y),
-                    strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                // The most likely of these days gets a longer, bolder tick.
+                val half = if (marks.peak) 5.dp.toPx() else 3.dp.toPx()
+                drawLine(if (marks.period) colors.onFill else if (marks.peak) t.ink else t.muted,
+                    Offset(center.x - half, y), Offset(center.x + half, y),
+                    strokeWidth = if (marks.peak) 3.5.dp.toPx() else 2.dp.toPx(), cap = StrokeCap.Round)
             }
             if (marks.logged) drawCircle(t.ink, 2.dp.toPx(), Offset(center.x, size.height - 3.dp.toPx()))
         }

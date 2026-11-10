@@ -730,4 +730,31 @@
         <item quantity="one">%2$d günün %1$d gününde kaydedildi</item>
         <item quantity="other">%2$d günün %1$d gününde kaydedildi</item>
     </plurals>
+    <string name="pick_period_start">Bu günden itibaren regl gir</string>
+    <string name="pick_first_day">Reglinin ilk gününe dokun.</string>
+    <string name="pick_last_day">İlk gün: %1$s. Şimdi son güne dokun.</string>
+    <string name="pick_end_day">Bu reglin son gününe dokun.</string>
+    <string name="pick_only_this_day">Sadece bu gün</string>
+    <string name="pick_still_going">Devam ediyor</string>
+    <string name="question_period_over">Reglin bitti mi?</string>
+    <string name="question_period_started">Reglin başladı mı?</string>
+    <string name="question_pick_end">Evet, son günü seç</string>
+    <string name="question_pick_start">Evet, ilk günü seç</string>
+    <string name="question_not_yet">Henüz değil</string>
+    <string name="card_fold">Kartı katla</string>
+    <string name="card_unfold">Kartı göster</string>
+    <string name="year_view">Yıl görünümü</string>
+    <string name="month_view">Ay görünümü</string>
+    <string name="previous_year">Önceki yıl</string>
+    <string name="next_year">Sonraki yıl</string>
+    <string name="tips_title">Bilmekte fayda var</string>
+    <string name="tips_swipe">Döngünü halka olarak görmek için takvimi yana kaydır.</string>
+    <string name="tips_long_press">Geçmiş bir regli girmek için takvimde bir güne basılı tut, sonra son gününe dokun.</string>
+    <string name="tips_fold">Kartın altındaki ok kartı katlar, böylece takvime daha çok yer kalır.</string>
+    <string name="tips_tabs">Geçmiş, döngülerini ve tüm kayıtlarını gösterir. Ayarlar’da hatırlatıcılar, yedekleme ve içe aktarma var.</string>
+    <string name="tips_retap">Başlangıca dönmek için bir sekmeye tekrar dokun: bugüne ya da listenin en üstüne.</string>
+    <string name="scroll_to_top">Başa dön</string>
+    <string name="import_section_hint">Yedekler ve diğer uygulamalardan veriler</string>
+    <string name="icon_pain">Ağrı</string>
+    <string name="icon_test_strip">Test çubuğu</string>
 </resources>

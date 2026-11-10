@@ -19,6 +19,7 @@ object FpIcons {
             Icon("menstrual_cup", R.drawable.ic_item_menstrual_cup, R.string.icon_menstrual_cup),
             Icon("discharge", R.drawable.ic_fp_discharge, R.string.icon_discharge),
             Icon("cramps", R.drawable.ic_symptom_cramps, R.string.symptom_cramps),
+            Icon("pain", R.drawable.ic_item_pain, R.string.icon_pain),
             Icon("backache", R.drawable.ic_symptom_backache, R.string.symptom_backache),
             Icon("bloating", R.drawable.ic_symptom_bloating, R.string.symptom_bloating),
             Icon("breast", R.drawable.ic_symptom_breast_tenderness, R.string.symptom_breast_tenderness),
@@ -31,6 +32,7 @@ object FpIcons {
             Icon("night", R.drawable.ic_symptom_night_sweats, R.string.symptom_night_sweats))),
         Group(R.string.icon_group_health, listOf(
             Icon("thermometer", R.drawable.ic_item_thermometer, R.string.icon_thermometer),
+            Icon("test_strip", R.drawable.ic_item_test_strip, R.string.icon_test_strip),
             Icon("pill", R.drawable.ic_item_pill, R.string.icon_pill),
             Icon("stethoscope", R.drawable.ic_item_stethoscope, R.string.icon_stethoscope),
             Icon("pulse", R.drawable.ic_item_pulse, R.string.icon_pulse),

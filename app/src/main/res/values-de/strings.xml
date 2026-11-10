@@ -733,4 +733,31 @@
         <item quantity="one">An %1$d von %2$d Tagen eingetragen</item>
         <item quantity="other">An %1$d von %2$d Tagen eingetragen</item>
     </plurals>
+    <string name="pick_period_start">Periode ab diesem Tag eintragen</string>
+    <string name="pick_first_day">Tippe auf den ersten Tag deiner Periode.</string>
+    <string name="pick_last_day">Erster Tag: %1$s. Tippe jetzt auf den letzten Tag.</string>
+    <string name="pick_end_day">Tippe auf den letzten Tag dieser Periode.</string>
+    <string name="pick_only_this_day">Nur dieser Tag</string>
+    <string name="pick_still_going">Läuft noch</string>
+    <string name="question_period_over">Ist deine Periode schon vorbei?</string>
+    <string name="question_period_started">Hat deine Periode schon begonnen?</string>
+    <string name="question_pick_end">Ja, letzten Tag wählen</string>
+    <string name="question_pick_start">Ja, ersten Tag wählen</string>
+    <string name="question_not_yet">Noch nicht</string>
+    <string name="card_fold">Karte einklappen</string>
+    <string name="card_unfold">Karte ausklappen</string>
+    <string name="year_view">Jahresansicht</string>
+    <string name="month_view">Monatsansicht</string>
+    <string name="previous_year">Vorheriges Jahr</string>
+    <string name="next_year">Nächstes Jahr</string>
+    <string name="tips_title">Gut zu wissen</string>
+    <string name="tips_swipe">Wische den Kalender zur Seite, dann siehst du deinen Zyklus als Kreis.</string>
+    <string name="tips_long_press">Halte einen Tag im Kalender gedrückt, um eine vergangene Periode einzutragen, und tippe dann auf ihren letzten Tag.</string>
+    <string name="tips_fold">Mit dem Pfeil unten an der Karte klappst du sie weg, dann hat der Kalender mehr Platz.</string>
+    <string name="tips_tabs">Im Verlauf findest du deine Zyklen und alle Einträge, in den Einstellungen Erinnerungen, Backup und Import.</string>
+    <string name="tips_retap">Tippe nochmal auf einen Tab, um zu seinem Anfang zu springen: zu heute oder ganz nach oben.</string>
+    <string name="scroll_to_top">Nach oben</string>
+    <string name="import_section_hint">Backups und Daten aus anderen Apps</string>
+    <string name="icon_pain">Schmerz</string>
+    <string name="icon_test_strip">Teststreifen</string>
 </resources>

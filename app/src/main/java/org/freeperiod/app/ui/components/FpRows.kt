@@ -15,7 +15,7 @@ import org.freeperiod.app.R
 import org.freeperiod.app.ui.theme.*
 
 @Composable
-fun FpSectionRow(icon: Int, title: String, summary: String, expanded: Boolean = false,
+fun FpSectionRow(icon: Int?, title: String, summary: String, expanded: Boolean = false,
     enabled: Boolean = true, onClick: () -> Unit) {
     val t = LocalDaylight.current
     val state = stringResource(if (expanded) R.string.section_expanded else R.string.section_collapsed)
@@ -24,7 +24,7 @@ fun FpSectionRow(icon: Int, title: String, summary: String, expanded: Boolean = 
         Row(Modifier.fillMaxWidth().semantics { stateDescription = state }
             .clickable(enabled = enabled, onClick = onClick).heightIn(min = 48.dp).padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            Icon(painterResource(icon), null, Modifier.size(20.dp), tint = t.muted)
+            icon?.let { Icon(painterResource(it), null, Modifier.size(20.dp), tint = t.muted) }
             Text(title, Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
             if (summary.isNotBlank()) Text(summary, Modifier.weight(1f), style = MaterialTheme.typography.bodySmall,
                 color = t.muted, maxLines = 2, overflow = TextOverflow.Ellipsis,

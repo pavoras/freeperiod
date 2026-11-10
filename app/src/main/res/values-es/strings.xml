@@ -756,4 +756,31 @@
         <item quantity="many">Registrado en %1$d de %2$d días</item>
         <item quantity="other">Registrado en %1$d de %2$d días</item>
     </plurals>
+    <string name="pick_period_start">Anotar un periodo desde este día</string>
+    <string name="pick_first_day">Toca el primer día de tu periodo.</string>
+    <string name="pick_last_day">Primer día: %1$s. Ahora toca el último día.</string>
+    <string name="pick_end_day">Toca el último día de este periodo.</string>
+    <string name="pick_only_this_day">Solo este día</string>
+    <string name="pick_still_going">Sigue</string>
+    <string name="question_period_over">¿Ya terminó tu periodo?</string>
+    <string name="question_period_started">¿Ya empezó tu periodo?</string>
+    <string name="question_pick_end">Sí, elegir el último día</string>
+    <string name="question_pick_start">Sí, elegir el primer día</string>
+    <string name="question_not_yet">Todavía no</string>
+    <string name="card_fold">Plegar tarjeta</string>
+    <string name="card_unfold">Mostrar tarjeta</string>
+    <string name="year_view">Vista anual</string>
+    <string name="month_view">Vista mensual</string>
+    <string name="previous_year">Año anterior</string>
+    <string name="next_year">Año siguiente</string>
+    <string name="tips_title">Bueno saber</string>
+    <string name="tips_swipe">Desliza el calendario hacia un lado para ver tu ciclo como un anillo.</string>
+    <string name="tips_long_press">Mantén pulsado un día del calendario para anotar un periodo pasado y luego toca su último día.</string>
+    <string name="tips_fold">La flecha abajo en la tarjeta la pliega, así el calendario tiene más espacio.</string>
+    <string name="tips_tabs">En Historial ves tus ciclos y todas las entradas. En Ajustes están los recordatorios, la copia de seguridad y la importación.</string>
+    <string name="tips_retap">Toca otra vez una pestaña para volver a su inicio: hoy, o arriba del todo.</string>
+    <string name="scroll_to_top">Volver arriba</string>
+    <string name="import_section_hint">Copias de seguridad y datos de otras apps</string>
+    <string name="icon_pain">Dolor</string>
+    <string name="icon_test_strip">Tira de prueba</string>
 </resources>

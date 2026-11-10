@@ -21,7 +21,7 @@ import org.freeperiod.engine.importing.CsvDateFormat
 @Composable
 fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
     onFormat: (CsvDateFormat) -> Unit, onConfirm: () -> Unit, onBack: () -> Unit,
-    onApp: () -> Unit = {}, onFloPassword: (String) -> Unit = {}) {
+    onApp: () -> Unit = {}, onFloPassword: (String) -> Unit = {}, choices: Boolean = true) {
     // The Flo password deliberately does not enter saved instance state.
     var floPassword by remember { mutableStateOf("") }
     val tones = LocalDaylight.current
@@ -29,10 +29,13 @@ fun ImportScreen(state: ImportUiState, onCsv: () -> Unit, onBackup: () -> Unit,
     Column(Modifier.fillMaxSize().background(tones.background).verticalScroll(rememberScrollState()).padding(FpSpacing.screen),
         verticalArrangement = Arrangement.spacedBy(FpSpacing.section)) {
         FpTopBar(stringResource(R.string.import_title), onBack)
-        Text(stringResource(R.string.import_intro))
-        FpButton(onCsv, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_csv)) }
-        FpButton(onApp, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_app)) }
-        FpButton(onBackup, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_backup)) }
+        // Started from the backup page for one file: the picker already opened, so no second set of choices.
+        if (choices) {
+            Text(stringResource(R.string.import_intro))
+            FpButton(onCsv, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_csv)) }
+            FpButton(onApp, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_app)) }
+            FpButton(onBackup, Modifier.fillMaxWidth(), enabled = !state.busy, primary = false) { Text(stringResource(R.string.import_backup)) }
+        }
         if (state.floPassword) {
             Text(stringResource(R.string.import_flo_password), style = MaterialTheme.typography.titleMedium)
             PasswordField(floPassword, { floPassword = it }, R.string.backup_password, !state.busy)

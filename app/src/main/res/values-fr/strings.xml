@@ -756,4 +756,31 @@
         <item quantity="many">Noté %1$d jours sur %2$d</item>
         <item quantity="other">Noté %1$d jours sur %2$d</item>
     </plurals>
+    <string name="pick_period_start">Saisir des règles à partir de ce jour</string>
+    <string name="pick_first_day">Touche le premier jour de tes règles.</string>
+    <string name="pick_last_day">Premier jour : %1$s. Touche maintenant le dernier jour.</string>
+    <string name="pick_end_day">Touche le dernier jour de ces règles.</string>
+    <string name="pick_only_this_day">Seulement ce jour</string>
+    <string name="pick_still_going">Toujours en cours</string>
+    <string name="question_period_over">Tes règles sont-elles finies ?</string>
+    <string name="question_period_started">Tes règles ont-elles commencé ?</string>
+    <string name="question_pick_end">Oui, choisir le dernier jour</string>
+    <string name="question_pick_start">Oui, choisir le premier jour</string>
+    <string name="question_not_yet">Pas encore</string>
+    <string name="card_fold">Replier la carte</string>
+    <string name="card_unfold">Afficher la carte</string>
+    <string name="year_view">Vue annuelle</string>
+    <string name="month_view">Vue mensuelle</string>
+    <string name="previous_year">Année précédente</string>
+    <string name="next_year">Année suivante</string>
+    <string name="tips_title">Bon à savoir</string>
+    <string name="tips_swipe">Fais glisser le calendrier sur le côté pour voir ton cycle en anneau.</string>
+    <string name="tips_long_press">Appuie longuement sur un jour du calendrier pour saisir des règles passées, puis touche leur dernier jour.</string>
+    <string name="tips_fold">La flèche en bas de la carte la replie, le calendrier a alors plus de place.</string>
+    <string name="tips_tabs">L’historique montre tes cycles et toutes les saisies. Les paramètres contiennent les rappels, la sauvegarde et l’import.</string>
+    <string name="tips_retap">Touche à nouveau un onglet pour revenir à son début : aujourd’hui, ou tout en haut.</string>
+    <string name="scroll_to_top">Revenir en haut</string>
+    <string name="import_section_hint">Sauvegardes et données d’autres applis</string>
+    <string name="icon_pain">Douleur</string>
+    <string name="icon_test_strip">Bandelette</string>
 </resources>

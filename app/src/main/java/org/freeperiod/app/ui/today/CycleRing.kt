@@ -55,7 +55,8 @@ private fun Density.ringGeometry(side: Float, days: Int): RingGeometry {
  */
 @Composable
 internal fun CycleRingPage(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
-    onDayClick: (LocalDate) -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onShowToday: () -> Unit = {}) {
+    onDayClick: (LocalDate) -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onShowToday: () -> Unit = {},
+    onDayLongClick: (LocalDate) -> Unit = {}) {
     // The ring takes the free space, centred with a clear margin; the actions sit below it, stacked
     // (they read better there than on top).
     Column(modifier.fillMaxSize()) {
@@ -85,14 +86,15 @@ internal fun CycleRingPage(state: TodayUiState, onStartPeriod: () -> Unit, onCon
                     constraints = Constraints(maxWidth = maxWidth.roundToPx())).size.height
                 (number + height(width) <= free) to (height(maxWidth.toPx()) + label + 16.dp.toPx()).toDp()
             }
-            if (inside) CycleRing(state, onDayClick, onShowToday, Modifier.size(side))
+            if (inside) CycleRing(state, onDayClick, onShowToday, Modifier.size(side), onDayLongClick = onDayLongClick)
             else Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CycleRing(state, onDayClick, onShowToday, Modifier.size(minOf(boxWidth, boxHeight - below)), sentence = false)
+                CycleRing(state, onDayClick, onShowToday, Modifier.size(minOf(boxWidth, boxHeight - below)), sentence = false,
+                    onDayLongClick = onDayLongClick)
                 Spacer(Modifier.height(16.dp))
                 RingSentence(state, headline.number != null, label = headline.label.takeIf { headline.number != null })
             }
         }
-        Box(Modifier.padding(horizontal = 12.dp)) {
+        if (state.pick == null) Box(Modifier.padding(horizontal = 12.dp)) {
             TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions, stacked = true)
         }
     }
@@ -100,7 +102,7 @@ internal fun CycleRingPage(state: TodayUiState, onStartPeriod: () -> Unit, onCon
 
 @Composable
 private fun CycleRing(state: TodayUiState, onDayClick: (LocalDate) -> Unit, onShowToday: () -> Unit, modifier: Modifier,
-    sentence: Boolean = true) {
+    sentence: Boolean = true, onDayLongClick: (LocalDate) -> Unit = {}) {
     val t = LocalDaylight.current
     val colors = remember(t) { todayFillColors(t) }
     val locale = LocalConfiguration.current.locales[0]
@@ -121,15 +123,16 @@ private fun CycleRing(state: TodayUiState, onDayClick: (LocalDate) -> Unit, onSh
         val geometry = with(density) { ringGeometry(side, days.size) }
         Canvas(Modifier.fillMaxSize()
             .clearAndSetSemantics { description?.let { contentDescription = it } }
-            .pointerInput(days, geometry) {
-                // A tap on or near a dot opens that day, like a tap in the calendar.
-                detectTapGestures { tap ->
-                    if (days.isEmpty()) return@detectTapGestures
+            .pointerInput(days, geometry, state.today) {
+                // A tap on or near a dot opens that day, like a tap in the calendar; future days have nothing to log yet.
+                fun dayAt(tap: Offset): LocalDate? {
+                    if (days.isEmpty()) return null
                     val offset = tap - Offset(size.width / 2f, size.height / 2f)
-                    if (abs(offset.getDistance() - geometry.radius) > maxOf(24.dp.toPx(), geometry.dot * 2)) return@detectTapGestures
+                    if (abs(offset.getDistance() - geometry.radius) > maxOf(24.dp.toPx(), geometry.dot * 2)) return null
                     val angle = (atan2(offset.y, offset.x) + PI / 2 + 2 * PI) % (2 * PI)
-                    onDayClick(days[(angle / (2 * PI / days.size)).roundToInt() % days.size])
+                    return days[(angle / (2 * PI / days.size)).roundToInt() % days.size].takeIf { it <= state.today }
                 }
+                detectTapGestures(onLongPress = { tap -> dayAt(tap)?.let(onDayLongClick) }) { tap -> dayAt(tap)?.let(onDayClick) }
             }) {
             val (radius, dot, small) = geometry
             if (days.isEmpty()) {
@@ -140,7 +143,8 @@ private fun CycleRing(state: TodayUiState, onDayClick: (LocalDate) -> Unit, onSh
                 val angle = -PI / 2 + index * 2 * PI / days.size
                 fun at(r: Float) = center + Offset((cos(angle) * r).toFloat(), (sin(angle) * r).toFloat())
                 val point = at(radius)
-                val marks = state.days[date] ?: DayMarks(false, false, false, false)
+                val marks = (state.days[date] ?: DayMarks(false, false, false, false))
+                    .let { if (date == state.pick?.start) it.copy(period = true) else it }
                 when {
                     marks.period -> {
                         drawCircle(colors.fill, dot, point)
@@ -152,8 +156,10 @@ private fun CycleRing(state: TodayUiState, onDayClick: (LocalDate) -> Unit, onSh
                         style = Stroke(1.5.dp.toPx(), pathEffect = PathEffect.dashPathEffect(floatArrayOf(1.5.dp.toPx(), 4.dp.toPx()))))
                     else -> drawCircle(if (marks.logged) t.ink else if (date < state.today) t.control else t.line, small, point)
                 }
-                if (marks.higherChance) drawLine(t.muted, at(radius + dot + 4.dp.toPx()), at(radius + dot + 9.dp.toPx()),
-                    strokeWidth = 2.dp.toPx(), cap = StrokeCap.Round)
+                // The most likely of these days gets a longer, bolder tick.
+                if (marks.higherChance) drawLine(if (marks.peak) t.ink else t.muted, at(radius + dot + 4.dp.toPx()),
+                    at(radius + dot + if (marks.peak) 11.dp.toPx() else 9.dp.toPx()),
+                    strokeWidth = if (marks.peak) 3.5.dp.toPx() else 2.dp.toPx(), cap = StrokeCap.Round)
                 if (marks.today) {
                     drawCircle(t.accent.todayRing, dot + 3.dp.toPx(), point, style = Stroke(2.dp.toPx()))
                     if (!marks.period) drawCircle(t.ink, 2.5.dp.toPx(), point)

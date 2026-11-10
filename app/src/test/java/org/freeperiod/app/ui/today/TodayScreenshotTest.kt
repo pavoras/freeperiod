@@ -104,6 +104,18 @@ class TodayScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "pt-rBR-w360dp-h800dp-xxhdpi")
     fun ring_ptBRLarge() = capture("ring_ptBRLarge", "regular", Locale.forLanguageTag("pt-BR"), fontScale = 1.5f, ring = true)
 
+    // The round of 2026-11-10: folded card, entering a past period, the home question, the year view and the tips.
+    @Test fun folded_enLight() = capture("folded_enLight", "fertile") { it.copy(cardFolded = true) }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun picking_deLight() = capture("picking_deLight", "regular", Locale.GERMANY) { it.copy(pick = RangePick(LocalDate.of(2026, 4, 8))) }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun question_deLight() = capture("question_deLight", "regular", Locale.GERMANY) {
+        it.copy(question = HomeQuestion.PERIOD_STARTED, questionPeriodId = 1) }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun year_deDark() = capture("year_deDark", "fertile", Locale.GERMANY, dark = true) { it.copy(yearView = true) }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun tips_deLight() = capture("tips_deLight", "regular", Locale.GERMANY) { it.copy(showTips = true) }
+
     @Test fun calendarPredicted_enLight() {
         Locale.setDefault(Locale.US)
         val state = todayFixture("regular", clock())
@@ -122,9 +134,10 @@ class TodayScreenshotTest {
     }
 
     private fun capture(name: String, scenario: String, locale: Locale = Locale.US, dark: Boolean = false,
-        fontScale: Float = 1f, disclaimer: Boolean = false, ring: Boolean = false, accent: Accent = Accent.CORAL) {
+        fontScale: Float = 1f, disclaimer: Boolean = false, ring: Boolean = false, accent: Accent = Accent.CORAL,
+        change: (TodayUiState) -> TodayUiState = { it }) {
         Locale.setDefault(locale)
-        val state = todayFixture(scenario, clock()).copy(ring = ring)
+        val state = change(todayFixture(scenario, clock()).copy(ring = ring))
         compose.setContent {
             val config = Configuration(LocalConfiguration.current).apply { setLocales(LocaleList(locale)); this.fontScale = fontScale }
             CompositionLocalProvider(LocalConfiguration provides config,
@@ -146,7 +159,11 @@ class TodayScreenshotTest {
             compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/today/$name.png")
             return
         }
-        if (scenario == "fertile" && !ring) compose.onNodeWithContentDescription(
+        if (state.showTips) {
+            compose.onNode(isDialog()).captureRoboImage("src/test/screenshots/today/$name.png")
+            return
+        }
+        if (scenario == "fertile" && !ring && !state.yearView) compose.onNodeWithContentDescription(
             if (locale.language == "de") "9 April 2026, erhöhte Chance auf Schwangerschaft, Kalenderschätzung"
             else "9 April 2026, higher chance of pregnancy, calendar estimate").assertExists()
         compose.onRoot().captureRoboImage("src/test/screenshots/today/$name.png")

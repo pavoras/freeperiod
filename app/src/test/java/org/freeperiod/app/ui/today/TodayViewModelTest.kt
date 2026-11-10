@@ -54,6 +54,76 @@ class TodayViewModelTest : DatabaseTest() {
         assertFalse(again.state.value.ring)
     }
 
+    @Test fun longPressThenTapEntersAPastPeriod() = runTest {
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.longPressDay(today.plusDays(1)).join()
+        assertNull(vm.state.value.pick)
+        vm.longPressDay(today.minusDays(20)).join()
+        assertEquals(RangePick(today.minusDays(20)), vm.state.value.pick)
+        vm.pickDay(today.minusDays(16)).join()
+        val saved = repository.snapshot().periods.single()
+        assertEquals(today.minusDays(20), saved.start)
+        assertEquals(today.minusDays(16), saved.end)
+        assertNull(vm.state.value.pick)
+    }
+
+    @Test fun longPressInsideASavedPeriodPicksItsLastDay() = runTest {
+        repository.addPeriod(today.minusDays(10), today.minusDays(8)).getOrThrow()
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.longPressDay(today.minusDays(9)).join()
+        val id = repository.snapshot().periods.single().id
+        assertEquals(RangePick(today.minusDays(10), id), vm.state.value.pick)
+        vm.pickDay(today.minusDays(6)).join()
+        assertEquals(today.minusDays(6), repository.snapshot().periods.single().end)
+    }
+
+    @Test fun savedNoticeIsShownOnlyOnce() = runTest {
+        repository.addPeriod(today.minusDays(2), null).getOrThrow()
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.confirmEnd(today.minusDays(1)).join()
+        assertFalse(vm.state.value.endSavedShown)
+        vm.endSavedShown()
+        vm.refresh().join()
+        assertNotNull(vm.state.value.endSaved)
+        assertTrue(vm.state.value.endSavedShown)
+    }
+
+    @Test fun theFoldedCardIsRemembered() = runTest {
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.foldCard(true).join()
+        val again = viewModel()
+        again.refresh().join()
+        assertTrue(again.state.value.cardFolded)
+    }
+
+    @Test fun anUnusuallyLongPeriodAsksOnceIfItIsOver() = runTest {
+        listOf(90L, 62L, 34L).forEach { repository.addPeriod(today.minusDays(it), today.minusDays(it - 4)).getOrThrow() }
+        repository.addPeriod(today.minusDays(13), null).getOrThrow()
+        val vm = viewModel()
+        vm.refresh().join()
+        assertEquals(HomeQuestion.PERIOD_OVER, vm.state.value.question)
+        vm.answer(HomeQuestion.PERIOD_OVER, false).join()
+        assertNull(vm.state.value.question)
+        val again = viewModel()
+        again.refresh().join()
+        assertNull(again.state.value.question)
+    }
+
+    @Test fun yesToPeriodOverPicksItsLastDay() = runTest {
+        listOf(90L, 62L, 34L).forEach { repository.addPeriod(today.minusDays(it), today.minusDays(it - 4)).getOrThrow() }
+        repository.addPeriod(today.minusDays(13), null).getOrThrow()
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.answer(HomeQuestion.PERIOD_OVER, true).join()
+        assertEquals(today.minusDays(13), vm.state.value.pick?.start)
+        vm.pickDay(today.minusDays(8)).join()
+        assertEquals(today.minusDays(8), repository.snapshot().periods.single { it.start == today.minusDays(13) }.end)
+    }
+
     @Test fun todayUsesStoredSituation() = runTest {
         repository.updateSituation(org.freeperiod.engine.Situation(phase = org.freeperiod.engine.LifePhase.MENOPAUSE))
         val vm = viewModel()

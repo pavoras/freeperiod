@@ -52,7 +52,7 @@ internal fun WeekStrip(date: LocalDate, today: LocalDate, entryDays: Set<LocalDa
                 periodLabel.takeIf { period }, entryLabel.takeIf { day in entryDays }).joinToString(", ")
             Column(Modifier.weight(1f).clip(FpShapes.chip)
                 .background(if (selected) t.accent.selectedChipBackground else Color.Transparent)
-                .selectable(selected, onClick = { onSelect(day) })
+                .selectable(selected, enabled = day <= today, onClick = { onSelect(day) })
                 .clearAndSetSemantics { contentDescription = description; this.selected = selected; role = Role.Tab }
                 .testTag("week-day-$day").padding(vertical = 6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(2.dp)) {
