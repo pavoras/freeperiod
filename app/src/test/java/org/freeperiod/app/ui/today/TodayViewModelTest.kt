@@ -127,6 +127,18 @@ class TodayViewModelTest : DatabaseTest() {
         assertNull(again.state.value.question)
     }
 
+    @Test fun cancellingThePickBringsTheQuestionBack() = runTest {
+        listOf(90L, 62L, 34L).forEach { repository.addPeriod(today.minusDays(it), today.minusDays(it - 4)).getOrThrow() }
+        repository.addPeriod(today.minusDays(13), null).getOrThrow()
+        val vm = viewModel()
+        vm.refresh().join()
+        vm.answer(HomeQuestion.PERIOD_OVER, true).join()
+        assertNull(vm.state.value.question)
+        vm.cancelPick()
+        vm.refresh().join()
+        assertEquals(HomeQuestion.PERIOD_OVER, vm.state.value.question)
+    }
+
     @Test fun yesToPeriodOverPicksItsLastDay() = runTest {
         listOf(90L, 62L, 34L).forEach { repository.addPeriod(today.minusDays(it), today.minusDays(it - 4)).getOrThrow() }
         repository.addPeriod(today.minusDays(13), null).getOrThrow()
