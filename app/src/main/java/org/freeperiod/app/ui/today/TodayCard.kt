@@ -31,7 +31,7 @@ import org.freeperiod.engine.*
 @Composable
 fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
     onLogToday: () -> Unit, onPausePredictions: () -> Unit, modifier: Modifier = Modifier, onJumpToToday: () -> Unit = {},
-    onFold: (() -> Unit)? = null, onPickDay: ((HomeQuestion) -> Unit)? = null) {
+    onFold: (() -> Unit)? = null, onAnswer: ((HomeQuestion, Boolean) -> Unit)? = null) {
     val locale = LocalConfiguration.current.locales[0]
     val prediction = state.prediction
     val t = LocalDaylight.current
@@ -65,14 +65,14 @@ fun TodayCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (Loc
             // A predicted range is already on the timeline (and in the calendar), so the card shows no text for it.
             val rangeOnTimeline = prediction is PredictionState.Range && state.timeline != null
             val hints = todayHints(state)
-            val question = state.question.takeIf { onPickDay != null }
+            val question = state.question.takeIf { onAnswer != null }
             if (!rangeOnTimeline || hints.isNotEmpty() || question != null) Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 if (!rangeOnTimeline) Text(predictionText(prediction, state.today, locale), style = MaterialTheme.typography.bodyLarge)
                 // The question sits under the message it follows from; "Pick a day" below answers it.
                 question?.let { QuestionLine(it) }
                 hints.forEach { Text(stringResource(it), style = MaterialTheme.typography.bodySmall, color = t.muted) }
             }
-            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions, onPickDay = onPickDay)
+            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions, onAnswer = onAnswer)
             onFold?.let { Box(Modifier.offset(y = (-8).dp)) { FoldHandle(folded = false, it) } }
         }
     }
@@ -112,23 +112,36 @@ internal fun QuestionLine(question: HomeQuestion) {
 
 /**
  * Period started/ended and Log today, plus pausing predictions after a missed range: the same on card and ring.
- * With an open question (and [onPickDay]) the first button picks the day in the calendar instead.
+ * With an open question (and [onAnswer]) the first button picks the day in the calendar instead; a missing start
+ * can also be put off with Not yet.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun TodayPrimaryActions(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit,
-    onLogToday: () -> Unit, onPausePredictions: () -> Unit, stacked: Boolean = false, onPickDay: ((HomeQuestion) -> Unit)? = null) {
-    val question = state.question.takeIf { onPickDay != null }
+    onLogToday: () -> Unit, onPausePredictions: () -> Unit, stacked: Boolean = false,
+    onAnswer: ((HomeQuestion, Boolean) -> Unit)? = null) {
+    val question = state.question.takeIf { onAnswer != null }
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         TodayActions(stringResource(when {
             question != null -> R.string.pick_day
             state.ongoingPeriodId == null -> R.string.period_started
             else -> R.string.period_ended
         }), stringResource(R.string.log_today), !state.writing, {
-            if (question != null) onPickDay?.invoke(question)
+            if (question != null) onAnswer?.invoke(question, true)
             else state.periodEndForToday?.let(onConfirmEnd) ?: onStartPeriod()
         }, onLogToday, stacked)
-        if (state.prediction is PredictionState.RangePassed) TextButton(onClick = onPausePredictions, enabled = !state.writing) {
-            Text(stringResource(R.string.pause_predictions))
+        val notYet = question == HomeQuestion.PERIOD_STARTED
+        val pause = state.prediction is PredictionState.RangePassed
+        // Slim padding, so both fit in one row (also in German).
+        val pad = PaddingValues(horizontal = 8.dp)
+        if (notYet || pause) FlowRow(Modifier.offset(x = (-8).dp), horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            if (notYet) TextButton(onClick = { onAnswer?.invoke(HomeQuestion.PERIOD_STARTED, false) }, enabled = !state.writing,
+                contentPadding = pad) {
+                Text(stringResource(R.string.question_not_yet))
+            }
+            if (pause) TextButton(onClick = onPausePredictions, enabled = !state.writing, contentPadding = pad) {
+                Text(stringResource(R.string.pause_predictions))
+            }
         }
     }
 }

@@ -152,8 +152,6 @@ class TodayViewModel(
     /** Yes picks the last day (or the first one); no is remembered for this period. */
     fun answer(question: HomeQuestion, yes: Boolean): Job = viewModelScope.launch {
         val id = mutableState.value.questionPeriodId ?: return@launch
-        // Kept here too, so a refresh that read the settings before the write cannot bring the question back.
-        answered += question to id
         if (yes) {
             val period = repository.snapshot().periods.find { it.id == id }
             mutableState.update {
@@ -161,6 +159,8 @@ class TodayViewModel(
                     RangePick(period.start, period.id) else RangePick(null))
             }
         } else {
+            // Kept here too, so a refresh that read the settings before the write cannot bring the question back.
+            answered += question to id
             mutableState.update { it.copy(question = null) }
             settings.update {
                 if (question == HomeQuestion.PERIOD_OVER) it.copy(askedEndFor = id) else it.copy(askedStartAfter = id)

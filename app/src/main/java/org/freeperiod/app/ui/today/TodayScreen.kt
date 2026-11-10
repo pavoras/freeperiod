@@ -156,7 +156,7 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                 val large = LocalDensity.current.fontScale >= 1.3f
                 var openedLarge by rememberSaveable { mutableStateOf(false) }
                 val folded = state.cardFolded || (large && !openedLarge)
-                val onPickDay: (HomeQuestion) -> Unit = { handlers.onAnswer(it, true) }
+                val onAnswer = handlers.onAnswer
                 var year by rememberSaveable { mutableIntStateOf(state.month.year) }
                 HorizontalPager(pager, Modifier.weight(1f).fillMaxWidth(), key = { it }) { page ->
                     // One screen: only the calendar scrolls and the legend always stays visible (see OneScreenColumn).
@@ -165,12 +165,12 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                             state.pick != null -> Unit
                             // The year needs the room: only the two main buttons stay.
                             state.yearView -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) },
-                                onPausePredictions, null, Modifier.padding(horizontal = 12.dp), onPickDay)
+                                onPausePredictions, null, Modifier.padding(horizontal = 12.dp), onAnswer)
                             folded -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,
-                                { openedLarge = true; handlers.onFoldCard(false) }, Modifier.padding(horizontal = 12.dp), onPickDay)
+                                { openedLarge = true; handlers.onFoldCard(false) }, Modifier.padding(horizontal = 12.dp), onAnswer)
                             else -> TodayCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,
                                 Modifier.padding(horizontal = 12.dp), onJumpToToday, onFold = { openedLarge = false; handlers.onFoldCard(true) },
-                                onPickDay = onPickDay)
+                                onAnswer = onAnswer)
                         }
                     }, flex = {
                         if (state.yearView) YearCalendar(year, state.days, { year = it }, handlers.onOpenMonth,
@@ -247,12 +247,12 @@ private fun PickBanner(pick: RangePick, today: LocalDate, locale: java.util.Loca
 /** The cycle card folded up: only its buttons (and the question, if any), so the calendar gets the screen. */
 @Composable
 private fun FoldedCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit, onLogToday: () -> Unit,
-    onPausePredictions: () -> Unit, onUnfold: (() -> Unit)?, modifier: Modifier, onPickDay: (HomeQuestion) -> Unit) {
+    onPausePredictions: () -> Unit, onUnfold: (() -> Unit)?, modifier: Modifier, onAnswer: (HomeQuestion, Boolean) -> Unit) {
     FpCard(modifier.fillMaxWidth()) {
         Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (onUnfold == null) 12.dp else 0.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)) {
             state.question?.let { QuestionLine(it) }
-            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions, onPickDay = onPickDay)
+            TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions, onAnswer = onAnswer)
             onUnfold?.let { FoldHandle(folded = true, it) }
         }
     }
