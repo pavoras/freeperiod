@@ -314,7 +314,6 @@
     <string name="period_day_label">Periodo · día %1$d</string>
     <string name="pack_day_label">Día %1$d del blíster</string>
     <string name="period_ended">Terminó el periodo</string>
-    <string name="today_space">Tu espacio diario</string>
     <string name="period_end_saved">Guardado: último día de sangrado %1$s</string>
     <string name="edit_period_end">Editar</string>
     <string name="today_scheduled_break">Descanso programado: %1$s</string>

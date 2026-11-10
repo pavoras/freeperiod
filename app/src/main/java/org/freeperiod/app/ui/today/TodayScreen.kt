@@ -115,29 +115,22 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
         Column(Modifier.fillMaxSize().padding(padding).padding(bottom = 8.dp)) {
             Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(start = 20.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
-                // The name never wraps; the line beside it steps aside when two lines are not enough (large text).
-                Row {
+                // The name never wraps.
+                Row(Modifier.weight(1f)) {
                     Text(stringResource(R.string.wordmark_name), style = MaterialTheme.typography.headlineSmall, softWrap = false)
                     Text(stringResource(R.string.wordmark_stop), Modifier.clearAndSetSemantics {},
                         style = MaterialTheme.typography.headlineSmall, color = t.accent.accent, softWrap = false)
                 }
-                val configuration = LocalConfiguration.current
-                var tagline by remember(configuration.fontScale, configuration.screenWidthDp) { mutableStateOf(true) }
-                Box(Modifier.weight(1f).padding(start = 8.dp)) {
-                    if (tagline) Text(stringResource(R.string.today_space), Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodySmall,
-                        color = t.muted, textAlign = androidx.compose.ui.text.style.TextAlign.End, maxLines = 2,
-                        onTextLayout = { if (it.hasVisualOverflow) tagline = false })
-                }
                 // Month or whole year; only for the calendar.
                 // A labelled switch, so it is clear what it does.
                 if (!state.loading && pager.currentPage == 0) OutlinedButton(onClick = { handlers.onYearView(!state.yearView) },
-                    Modifier.padding(start = 8.dp).heightIn(min = 36.dp), border = BorderStroke(1.dp, t.line),
-                    contentPadding = PaddingValues(horizontal = 10.dp)) {
+                    Modifier.padding(start = 8.dp).heightIn(min = 44.dp), border = BorderStroke(1.dp, t.line),
+                    contentPadding = PaddingValues(horizontal = 16.dp)) {
                     Icon(painterResource(if (state.yearView) R.drawable.ic_fp_today else R.drawable.ic_fp_year), null,
-                        Modifier.size(18.dp), tint = t.muted)
-                    Spacer(Modifier.width(6.dp))
+                        Modifier.size(22.dp), tint = t.muted)
+                    Spacer(Modifier.width(8.dp))
                     Text(stringResource(if (state.yearView) R.string.view_month else R.string.view_year),
-                        style = MaterialTheme.typography.labelMedium, color = t.ink)
+                        style = MaterialTheme.typography.labelLarge, color = t.ink)
                 } else Spacer(Modifier.width(12.dp))
             }
             if (state.loading) CircularProgressIndicator(Modifier.padding(24.dp))
@@ -163,9 +156,8 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                     if (page == 0) OneScreenColumn(calendarMinHeight(), modifier = Modifier.fillMaxSize(), top = {
                         when {
                             state.pick != null -> Unit
-                            // The year needs the room: only the two main buttons stay.
-                            state.yearView -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) },
-                                onPausePredictions, null, Modifier.padding(horizontal = 12.dp), onAnswer)
+                            // The year gets the whole room: no card at all.
+                            state.yearView -> Unit
                             folded -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,
                                 { openedLarge = true; handlers.onFoldCard(false) }, Modifier.padding(horizontal = 12.dp), onAnswer)
                             else -> TodayCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,

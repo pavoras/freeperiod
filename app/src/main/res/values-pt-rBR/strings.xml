@@ -318,7 +318,6 @@
     <string name="period_day_label">Menstruação · dia %1$d</string>
     <string name="pack_day_label">Dia %1$d da cartela</string>
     <string name="period_ended">Menstruação encerrada</string>
-    <string name="today_space">Seu espaço diário</string>
     <string name="period_end_saved">Salvo: último dia de sangramento %1$s</string>
     <string name="edit_period_end">Editar</string>
     <string name="today_scheduled_break">Pausa programada %1$s</string>

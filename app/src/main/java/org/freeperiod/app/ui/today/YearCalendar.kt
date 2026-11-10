@@ -13,12 +13,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.LocalDate
@@ -51,12 +53,21 @@ internal fun YearCalendar(year: Int, days: Map<LocalDate, DayMarks>, onYear: (In
             }
         }
         HorizontalDivider(color = t.line)
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            (1..12).chunked(3).forEach { row ->
-                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    row.forEach { number ->
-                        MiniMonth(YearMonth.of(year, number), days, locale, { onMonth(YearMonth.of(year, number)) }, Modifier.weight(1f))
+        // The whole year on one screen: the day rows get a little flatter when needed; only when that would squeeze
+        // them too much (large text, small screens) the months scroll.
+        val label = with(LocalDensity.current) { MaterialTheme.typography.labelLarge.lineHeight.toDp() } + 4.dp
+        BoxWithConstraints(Modifier.weight(1f).fillMaxWidth()) {
+            val square = ((maxWidth - 16.dp) / 3 - 8.dp) / 7
+            val fitting = (maxHeight - 16.dp - 12.dp * 3 - (label + 8.dp) * 4) / 24
+            val cell = if (fitting >= square * 0.75f) minOf(square, fitting) else square
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                (1..12).chunked(3).forEach { row ->
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        row.forEach { number ->
+                            MiniMonth(YearMonth.of(year, number), days, locale, { onMonth(YearMonth.of(year, number)) },
+                                Modifier.weight(1f), cell)
+                        }
                     }
                 }
             }
@@ -65,7 +76,8 @@ internal fun YearCalendar(year: Int, days: Map<LocalDate, DayMarks>, onYear: (In
 }
 
 @Composable
-private fun MiniMonth(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: Locale, onClick: () -> Unit, modifier: Modifier) {
+private fun MiniMonth(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: Locale, onClick: () -> Unit, modifier: Modifier,
+    cell: Dp) {
     val t = LocalDaylight.current
     val colors = remember(t) { todayFillColors(t) }
     val name = month.month.getDisplayName(TextStyle.FULL_STANDALONE, locale)
@@ -80,7 +92,7 @@ private fun MiniMonth(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: 
             Row(Modifier.fillMaxWidth().clearAndSetSemantics {}) {
                 repeat(7) { column ->
                     val number = week * 7 + column - offset + 1
-                    Box(Modifier.weight(1f).aspectRatio(1f), contentAlignment = Alignment.Center) {
+                    Box(Modifier.weight(1f).height(cell), contentAlignment = Alignment.Center) {
                         if (week < weeks && number in 1..month.lengthOfMonth()) {
                             val marks = days[month.atDay(number)] ?: DayMarks(false, false, false, false)
                             Canvas(Modifier.fillMaxSize()) {

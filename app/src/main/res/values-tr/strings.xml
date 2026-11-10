@@ -305,7 +305,6 @@
     <string name="period_day_label">Regl · %1$d. gün</string>
     <string name="pack_day_label">Paketin %1$d. günü</string>
     <string name="period_ended">Reglim bitti</string>
-    <string name="today_space">Günlük alanın</string>
     <string name="period_end_saved">Kaydedildi: son kanama günü %1$s</string>
     <string name="edit_period_end">Düzenle</string>
     <string name="today_scheduled_break">Planlı ara %1$s</string>
