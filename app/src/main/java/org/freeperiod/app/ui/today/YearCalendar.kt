@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
@@ -85,10 +84,11 @@ private fun MiniMonth(month: YearMonth, days: Map<LocalDate, DayMarks>, locale: 
                         if (week < weeks && number in 1..month.lengthOfMonth()) {
                             val marks = days[month.atDay(number)] ?: DayMarks(false, false, false, false)
                             Canvas(Modifier.fillMaxSize()) {
-                                val r = size.minDimension / 2 - 0.5.dp.toPx()
+                                // A small gap between neighbours; expected days get a soft fill, as a dashed ring this
+                                // small would run through the numbers.
+                                val r = size.minDimension / 2 - 1.dp.toPx()
                                 if (marks.period) drawCircle(colors.fill, r)
-                                else if (marks.predicted) drawCircle(t.predicted, r, style = Stroke(1.dp.toPx(),
-                                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(2.dp.toPx(), 2.dp.toPx()))))
+                                else if (marks.predicted) drawCircle(t.predicted.copy(alpha = 0.3f), r)
                                 if (marks.today) drawCircle(t.accent.todayRing, r, style = Stroke(1.5.dp.toPx()))
                                 if (marks.higherChance && !marks.period) drawLine(if (marks.peak) t.ink else t.muted,
                                     Offset(center.x - 2.dp.toPx(), size.height - 1.dp.toPx()),

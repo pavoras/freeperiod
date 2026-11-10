@@ -775,6 +775,9 @@
     <string name="card_unfold">Mostrar cartão</string>
     <string name="year_view">Visão anual</string>
     <string name="month_view">Visão mensal</string>
+    <string name="view_year">Ano</string>
+    <string name="view_month">Mês</string>
+    <string name="import_apps_info">Quais apps são compatíveis?</string>
     <string name="previous_year">Ano anterior</string>
     <string name="next_year">Próximo ano</string>
     <string name="tips_title">Bom saber</string>

@@ -1,5 +1,6 @@
 package org.freeperiod.app.ui.today
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -111,19 +112,31 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
         val pager = rememberPagerState(if (state.ring) 1 else 0) { 2 }
         val scope = rememberCoroutineScope()
         Column(Modifier.fillMaxSize().padding(padding).padding(bottom = 8.dp)) {
-            Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(start = 20.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically,
+            Row(Modifier.fillMaxWidth().heightIn(min = 52.dp).padding(start = 20.dp, end = 12.dp), verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween) {
-                Row(Modifier.weight(1f)) {
-                    Text(stringResource(R.string.wordmark_name), style = MaterialTheme.typography.headlineSmall)
+                // The name never wraps; the line beside it steps aside when two lines are not enough (large text).
+                Row {
+                    Text(stringResource(R.string.wordmark_name), style = MaterialTheme.typography.headlineSmall, softWrap = false)
                     Text(stringResource(R.string.wordmark_stop), Modifier.clearAndSetSemantics {},
-                        style = MaterialTheme.typography.headlineSmall, color = t.accent.accent)
+                        style = MaterialTheme.typography.headlineSmall, color = t.accent.accent, softWrap = false)
                 }
-                Text(stringResource(R.string.today_space), Modifier.weight(0.8f), style = MaterialTheme.typography.bodySmall,
-                    color = t.muted, textAlign = androidx.compose.ui.text.style.TextAlign.End)
+                val configuration = LocalConfiguration.current
+                var tagline by remember(configuration.fontScale, configuration.screenWidthDp) { mutableStateOf(true) }
+                Box(Modifier.weight(1f).padding(start = 8.dp)) {
+                    if (tagline) Text(stringResource(R.string.today_space), Modifier.fillMaxWidth(), style = MaterialTheme.typography.bodySmall,
+                        color = t.muted, textAlign = androidx.compose.ui.text.style.TextAlign.End, maxLines = 2,
+                        onTextLayout = { if (it.hasVisualOverflow) tagline = false })
+                }
                 // Month or whole year; only for the calendar.
-                if (!state.loading && pager.currentPage == 0) IconButton(onClick = { handlers.onYearView(!state.yearView) }) {
-                    Icon(painterResource(if (state.yearView) R.drawable.ic_fp_today else R.drawable.ic_fp_year),
-                        stringResource(if (state.yearView) R.string.month_view else R.string.year_view), tint = t.muted)
+                // A labelled switch, so it is clear what it does.
+                if (!state.loading && pager.currentPage == 0) OutlinedButton(onClick = { handlers.onYearView(!state.yearView) },
+                    Modifier.padding(start = 8.dp).heightIn(min = 36.dp), border = BorderStroke(1.dp, t.line),
+                    contentPadding = PaddingValues(horizontal = 10.dp)) {
+                    Icon(painterResource(if (state.yearView) R.drawable.ic_fp_today else R.drawable.ic_fp_year), null,
+                        Modifier.size(18.dp), tint = t.muted)
+                    Spacer(Modifier.width(6.dp))
+                    Text(stringResource(if (state.yearView) R.string.view_month else R.string.view_year),
+                        style = MaterialTheme.typography.labelMedium, color = t.ink)
                 } else Spacer(Modifier.width(12.dp))
             }
             if (state.loading) CircularProgressIndicator(Modifier.padding(24.dp))
@@ -145,6 +158,9 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
                     if (page == 0) OneScreenColumn(calendarMinHeight(), modifier = Modifier.fillMaxSize(), top = {
                         when {
                             state.pick != null -> Unit
+                            // The year needs the room: only the two main buttons stay.
+                            state.yearView -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) },
+                                onPausePredictions, null, Modifier.padding(horizontal = 12.dp))
                             state.cardFolded -> FoldedCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) },
                                 onPausePredictions, { handlers.onFoldCard(false) }, Modifier.padding(horizontal = 12.dp))
                             else -> TodayCard(state, onStartPeriod, onConfirmEnd, { onDayClick(state.today) }, onPausePredictions,
@@ -195,20 +211,27 @@ fun TodayScreen(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (L
 private fun PickBanner(pick: RangePick, today: LocalDate, locale: java.util.Locale, handlers: TodayHandlers, modifier: Modifier) {
     val t = LocalDaylight.current
     FpCard(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+        Column(Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
             Text(when {
                 pick.start == null -> stringResource(R.string.pick_first_day)
                 pick.periodId != null -> stringResource(R.string.pick_end_day)
                 else -> stringResource(R.string.pick_last_day, formatSpokenDate(pick.start, today, locale))
             }, style = MaterialTheme.typography.bodyLarge)
-            FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.End)) {
-                TextButton(onClick = handlers.onCancelPick) { Text(stringResource(R.string.cancel), color = t.muted) }
+            // Compact buttons, so all three fit in one row on a phone.
+            val pad = PaddingValues(horizontal = 8.dp)
+            val label = MaterialTheme.typography.labelMedium
+            FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                TextButton(onClick = handlers.onCancelPick, contentPadding = pad) {
+                    Text(stringResource(R.string.cancel), color = t.muted, style = label)
+                }
                 if (pick.start != null && pick.periodId == null) {
                     // A start in the last two weeks can still be going on.
-                    if (pick.start >= today.minusDays(13)) TextButton(onClick = { handlers.onPickSingle(true) }) {
-                        Text(stringResource(R.string.pick_still_going))
+                    if (pick.start >= today.minusDays(13)) TextButton(onClick = { handlers.onPickSingle(true) }, contentPadding = pad) {
+                        Text(stringResource(R.string.pick_still_going), style = label)
                     }
-                    TextButton(onClick = { handlers.onPickSingle(false) }) { Text(stringResource(R.string.pick_only_this_day)) }
+                    TextButton(onClick = { handlers.onPickSingle(false) }, contentPadding = pad) {
+                        Text(stringResource(R.string.pick_only_this_day), style = label)
+                    }
                 }
             }
         }
@@ -240,11 +263,12 @@ private fun QuestionCard(question: HomeQuestion, handlers: TodayHandlers, modifi
 /** The cycle card folded up: only its buttons, so the calendar gets the screen. */
 @Composable
 private fun FoldedCard(state: TodayUiState, onStartPeriod: () -> Unit, onConfirmEnd: (LocalDate) -> Unit, onLogToday: () -> Unit,
-    onPausePredictions: () -> Unit, onUnfold: () -> Unit, modifier: Modifier) {
+    onPausePredictions: () -> Unit, onUnfold: (() -> Unit)?, modifier: Modifier) {
     FpCard(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(Modifier.padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = if (onUnfold == null) 12.dp else 0.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp)) {
             TodayPrimaryActions(state, onStartPeriod, onConfirmEnd, onLogToday, onPausePredictions)
-            FoldHandle(folded = true, onUnfold)
+            onUnfold?.let { FoldHandle(folded = true, it) }
         }
     }
 }

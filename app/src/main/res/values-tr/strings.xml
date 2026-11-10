@@ -745,6 +745,9 @@
     <string name="card_unfold">Kartı göster</string>
     <string name="year_view">Yıl görünümü</string>
     <string name="month_view">Ay görünümü</string>
+    <string name="view_year">Yıl</string>
+    <string name="view_month">Ay</string>
+    <string name="import_apps_info">Hangi uygulamalar destekleniyor?</string>
     <string name="previous_year">Önceki yıl</string>
     <string name="next_year">Sonraki yıl</string>
     <string name="tips_title">Bilmekte fayda var</string>

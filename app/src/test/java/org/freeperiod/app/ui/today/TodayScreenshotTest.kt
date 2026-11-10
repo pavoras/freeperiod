@@ -109,7 +109,7 @@ class TodayScreenshotTest {
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun picking_deLight() = capture("picking_deLight", "regular", Locale.GERMANY) { it.copy(pick = RangePick(LocalDate.of(2026, 4, 8))) }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
-    fun question_deLight() = capture("question_deLight", "regular", Locale.GERMANY) {
+    fun question_deLight() = capture("question_deLight", "rangePassed", Locale.GERMANY) {
         it.copy(question = HomeQuestion.PERIOD_STARTED, questionPeriodId = 1) }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun year_deDark() = capture("year_deDark", "fertile", Locale.GERMANY, dark = true) { it.copy(yearView = true) }

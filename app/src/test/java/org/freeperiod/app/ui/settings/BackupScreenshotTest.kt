@@ -15,6 +15,10 @@ class BackupScreenshotTest : SettingsScreenshotFixture() {
         BackupScreen(BackupUiState(), { _, _ -> }, {}, {}, {}, {}, {}, onImport = {})
     }
     @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
+    fun backupForm_deLight() = capture("backup/backupForm_deLight", "Backup & Wiederherstellung", Locale.GERMANY) {
+        BackupScreen(BackupUiState(), { _, _ -> }, {}, {}, {}, {}, {}, onImport = {})
+    }
+    @Test @Config(sdk = [35], qualifiers = "de-rDE-w360dp-h800dp-xxhdpi")
     fun restoreSummary_deLight() = capture("backup/restoreSummary_deLight", "3 Perioden, 12 Tage erfasst", Locale.GERMANY) {
         BackupScreen(BackupUiState(restoreFileSelected = true, summary = BackupSummary(3, clock().dayOfMonth)),
             { _, _ -> }, {}, {}, {}, {}, {})
