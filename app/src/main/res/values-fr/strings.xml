@@ -316,7 +316,6 @@
     <string name="period_day_label">Règles · jour %1$d</string>
     <string name="pack_day_label">Jour %1$d de la plaquette</string>
     <string name="period_ended">Fin des règles</string>
-    <string name="today_space">Ton espace du jour</string>
     <string name="period_end_saved">Enregistré\u00A0: dernier jour de saignement le %1$s</string>
     <string name="edit_period_end">Modifier</string>
     <string name="today_scheduled_break">Pause prévue\u00A0: %1$s</string>

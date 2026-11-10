@@ -306,7 +306,6 @@
     <string name="period_day_label">Periode · Tag %1$d</string>
     <string name="pack_day_label">Packungstag %1$d</string>
     <string name="period_ended">Periode beendet</string>
-    <string name="today_space">Dein täglicher Begleiter</string>
     <string name="period_end_saved">Gespeichert: letzter Blutungstag %1$s</string>
     <string name="edit_period_end">Bearbeiten</string>
     <string name="today_scheduled_break">Geplante Pause %1$s</string>

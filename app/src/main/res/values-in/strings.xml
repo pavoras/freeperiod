@@ -298,7 +298,6 @@
     <string name="period_day_label">Haid · hari ke-%1$d</string>
     <string name="pack_day_label">Kemasan · hari ke-%1$d</string>
     <string name="period_ended">Haid selesai</string>
-    <string name="today_space">Ruang harian kamu</string>
     <string name="period_end_saved">Tersimpan: hari terakhir perdarahan %1$s</string>
     <string name="edit_period_end">Edit</string>
     <string name="today_scheduled_break">Jeda terjadwal %1$s</string>

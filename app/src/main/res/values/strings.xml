@@ -307,7 +307,6 @@
     <string name="period_day_label">Period · day %1$d</string>
     <string name="pack_day_label">Pack day %1$d</string>
     <string name="period_ended">Period ended</string>
-    <string name="today_space">Your daily space</string>
     <string name="period_end_saved">Saved: last bleeding day %1$s</string>
     <string name="edit_period_end">Edit</string>
     <string name="today_scheduled_break">Scheduled break %1$s</string>
