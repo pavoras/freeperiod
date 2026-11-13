@@ -461,7 +461,7 @@
     <string name="import_csv">CSV dosyası seç</string>
     <string name="import_backup">Free&#8288;Period yedeği</string>
     <string name="import_app">Başka uygulamadan dosya</string>
-    <string name="import_flo_password">Flo e-postasındaki parolayı gir.</string>
+    <string name="import_flo_password">Dosyanın şifresini gir. Clue, verilerini istediğinde şifreyi uygulamada gösterir; Flo e-postayla gönderir.</string>
     <string name="import_flo_open">Aç</string>
     <string name="import_flo_wrong_password">Parola yanlış veya dosya bozuk. Hiçbir şey değiştirilmedi.</string>
     <string name="import_app_invalid">İçe aktarılacak bir şey bulunamadı. Flo, Clue, Period Calendar veya Bluemoon dışa aktarım ya da yedek dosyasını seç.</string>

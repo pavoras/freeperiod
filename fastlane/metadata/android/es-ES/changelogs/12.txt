@@ -1,0 +1,2 @@
+• Importar de otras apps: ahora se reconocen los archivos ZIP de Clue y Period Calendar.
+• Si el archivo tiene contraseña, la app te la pide. Clue la muestra en la app cuando solicitas tus datos.

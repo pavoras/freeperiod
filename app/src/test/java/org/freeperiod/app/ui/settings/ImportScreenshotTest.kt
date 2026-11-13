@@ -26,7 +26,7 @@ class ImportScreenshotTest : SettingsScreenshotFixture() {
             notice = org.freeperiod.app.R.string.import_period_calendar_partial, merges = true).let { ImportScreen(it, {}, {}, {}, {}, {}) }
     }
 
-    @Test fun floPassword_enLight() = capture("import/floPassword_enLight", "Enter the password from Flo's e-mail.") {
+    @Test fun floPassword_enLight() = capture("import/floPassword_enLight", "Enter the file's password. Clue shows it in the app when you request your data; Flo sends it by e-mail.") {
         ImportScreen(ImportUiState(floPassword = true), {}, {}, {}, {}, {})
     }
 }

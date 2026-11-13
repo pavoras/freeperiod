@@ -1,0 +1,2 @@
+• Impor dari aplikasi lain: file ZIP dari Clue dan Period Calendar sekarang dikenali.
+• Jika file punya kata sandi, aplikasi akan memintanya. Clue menampilkannya di aplikasi saat kamu meminta datamu.
