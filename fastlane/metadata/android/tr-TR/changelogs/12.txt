@@ -1,0 +1,2 @@
+• Başka uygulamalardan içe aktarma: Clue ve Period Calendar ZIP dosyaları artık tanınıyor.
+• Dosyanın şifresi varsa uygulama sorar. Clue, verilerini istediğinde şifreyi uygulamada gösterir.

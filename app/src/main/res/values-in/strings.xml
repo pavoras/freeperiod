@@ -450,7 +450,7 @@
     <string name="import_csv">Pilih file CSV</string>
     <string name="import_backup">Cadangan Free&#8288;Period</string>
     <string name="import_app">File dari aplikasi lain</string>
-    <string name="import_flo_password">Masukkan sandi dari email Flo.</string>
+    <string name="import_flo_password">Masukkan kata sandi file. Clue menampilkannya di aplikasi saat kamu meminta datamu; Flo mengirimkannya lewat email.</string>
     <string name="import_flo_open">Buka</string>
     <string name="import_flo_wrong_password">Sandi salah, atau file rusak. Tidak ada yang berubah.</string>
     <string name="import_app_invalid">Tidak ada yang bisa diimpor. Pilih file ekspor atau cadangan dari Flo, Clue, Period Calendar atau Bluemoon.</string>

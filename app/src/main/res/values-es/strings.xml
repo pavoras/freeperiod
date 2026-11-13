@@ -474,7 +474,7 @@
     <string name="import_csv">Elegir archivo CSV</string>
     <string name="import_backup">Copia de seguridad de Free&#8288;Period</string>
     <string name="import_app">Archivo de otra app</string>
-    <string name="import_flo_password">Escribe la contraseña del correo de Flo.</string>
+    <string name="import_flo_password">Escribe la contraseña del archivo. Clue la muestra en la app al pedir tus datos; Flo la envía por correo.</string>
     <string name="import_flo_open">Abrir</string>
     <string name="import_flo_wrong_password">La contraseña es incorrecta o el archivo está dañado. No se cambió nada.</string>
     <string name="import_app_invalid">No se encontró nada para importar. Elige el archivo de exportación o copia de seguridad de Flo, Clue, Period Calendar o Bluemoon.</string>

@@ -462,7 +462,7 @@
     <string name="import_csv">CSV-Datei wählen</string>
     <string name="import_backup">Free&#8288;Period-Backup</string>
     <string name="import_app">Datei aus einer anderen App</string>
-    <string name="import_flo_password">Gib das Passwort aus der E-Mail von Flo ein.</string>
+    <string name="import_flo_password">Gib das Passwort der Datei ein. Clue zeigt es in der App, wenn du deine Daten anforderst; Flo schickt es per E-Mail.</string>
     <string name="import_flo_open">Öffnen</string>
     <string name="import_flo_wrong_password">Das Passwort ist falsch oder die Datei ist beschädigt. Es wurde nichts geändert.</string>
     <string name="import_app_invalid">Nichts zum Importieren gefunden. Wähle die Export- oder Backup-Datei aus Flo, Clue, Periodenkalender oder Bluemoon.</string>

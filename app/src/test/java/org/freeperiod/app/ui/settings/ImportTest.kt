@@ -186,6 +186,44 @@ class ImportTest : DatabaseTest() {
         assertTrue(scratch.listFiles().orEmpty().isEmpty())
     }
 
+    @Test fun zippedPeriodCalendarBackupImports() = runTest {
+        val database = sqlite { db ->
+            db.execSQL("CREATE TABLE Period (_id INTEGER PRIMARY KEY, date INTEGER, period INTEGER, cycle INTEGER)")
+            db.execSQL("CREATE TABLE Note (_id INTEGER PRIMARY KEY, date INTEGER, note TEXT, symptom TEXT, mood TEXT)")
+            db.execSQL("INSERT INTO Period (date, period, cycle) VALUES (20260302, 5, 28)")
+        }
+        val inner = zipOf("cloud.db" to database)
+        val pc = java.io.ByteArrayOutputStream().also { out ->
+            java.io.ObjectOutputStream(out).use { o -> o.writeInt(-1); o.writeInt(1); o.writeInt(0); o.write(inner) }
+        }.toByteArray()
+        // The .pc backup zipped again, as when it is shared or downloaded, next to a small other file.
+        bytes = zipOf("PeriodCalendar.pc" to pc, "readme.txt" to "hi".toByteArray())
+        val model = model()
+        model.readApp(Uri.parse("content://test/pczip")).join()
+        assertNull(model.state.value.error)
+        assertFalse(model.state.value.floPassword)
+        assertEquals(listOf(Period(0, day(3, 2), day(3, 6))), model.state.value.periods)
+        model.confirm().join()
+        assertEquals(1, model.state.value.imported)
+    }
+
+    @Test fun zippedClueBackupIsNotTakenForFlo() = runTest {
+        bytes = zipOf("data.cluedata" to """{"data": [{"day": "2026-03-02T00:00:00Z", "period": "heavy"},
+            {"day": "2026-03-03T00:00:00Z", "period": "medium"}]}""".toByteArray())
+        val model = model()
+        model.readApp(Uri.parse("content://test/cluezip")).join()
+        assertNull(model.state.value.error)
+        assertFalse(model.state.value.floPassword)
+        assertEquals(listOf(Period(0, day(3, 2), day(3, 3))), model.state.value.periods)
+        assertTrue(model.state.value.merges)
+    }
+
+    private fun zipOf(vararg files: Pair<String, ByteArray>) = java.io.ByteArrayOutputStream().also { out ->
+        java.util.zip.ZipOutputStream(out).use { z ->
+            files.forEach { (name, content) -> z.putNextEntry(java.util.zip.ZipEntry(name)); z.write(content); z.closeEntry() }
+        }
+    }.toByteArray()
+
     @Test fun otherSqliteFilesAreNotImported() = runTest {
         bytes = sqlite { it.execSQL("CREATE TABLE notes (id INTEGER PRIMARY KEY, text TEXT)") }
         val model = model()

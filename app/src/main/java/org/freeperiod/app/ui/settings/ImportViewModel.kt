@@ -61,59 +61,72 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
 
     /**
      * Another app's file, told apart by its content: Bluemoon's SQLite backup, Period Calendar's backup (.pc),
-     * Clue's backup (JSON with day entries), or Flo's export (the password-protected ZIP from Flo's support, or
-     * the JSON inside it).
+     * Clue's backup (JSON with day entries), or Flo's export (the JSON). Any of these may come in a ZIP, also a
+     * password-protected one (Clue's data download, Flo's export); its files are read the same way.
      */
     fun readApp(uri: Uri?): Job = operation(R.string.file_read_error) {
         if (uri == null) return@operation
         clearFlo()
         text = null
         mutable.value = ImportUiState(busy = true)
-        val bytes = io.read(uri)
-        val today = clock()
-        val database = if (PeriodCalendarImport.isBackup(bytes)) PeriodCalendarImport.database(bytes) ?: ByteArray(0)
-            else bytes.takeIf { AppDatabaseReader.isSqlite(it) }
-        val other = withContext(Dispatchers.IO) {
-            if (database != null) databases?.read(database, today) else ClueImport.parse(bytes, today)
-        }
-        if (database != null && database !== bytes) database.fill(0)
-        val periodCalendar = PeriodCalendarImport.isBackup(bytes)
-        if (other != null || database != null) {
-            bytes.fill(0)
-            fromApp = other
-            // Days with only Clue tags count as entries too.
-            val days = other?.let { data -> data.dayLogs + (data.tagNames.keys - data.dayLogs.map { it.date }.toSet()).map { DayLog(it) } }
-            mutable.update { it.copy(periods = other?.periods.orEmpty(), dayLogs = days.orEmpty().sortedBy { it.date },
-                error = if (other == null) R.string.import_app_invalid else null,
-                notice = R.string.import_period_calendar_partial.takeIf { other != null && periodCalendar }, merges = other != null) }
-            return@operation
-        }
-        floBytes = bytes
-        fromFlo = true
-        parseFlo(null)
+        floBytes = io.read(uri)
+        openApp(null)
     }
 
     fun unlockFlo(password: String): Job = operation(R.string.import_app_invalid) {
         if (password.isEmpty() || floBytes == null) return@operation
         val secret = password.toCharArray()
-        try { parseFlo(secret) } finally { secret.fill('\u0000') }
+        try { openApp(secret) } finally { secret.fill('\u0000') }
     }
 
-    private suspend fun parseFlo(password: CharArray?) {
+    /** Unpacks the chosen file (asking for the password when needed) and shows the first file inside that can be read. */
+    private suspend fun openApp(password: CharArray?) {
         val bytes = floBytes ?: return
-        val result = withContext(Dispatchers.Default) { FloImport.parse(bytes, password, clock()) }
-        if (result != FloImportResult.NeedsPassword && result != FloImportResult.WrongPassword) {
+        val files = try {
+            withContext(Dispatchers.Default) { ImportArchive.files(bytes, password) }
+        } catch (_: ZipPasswordRequired) {
+            mutable.update { it.copy(floPassword = true) }
+            return
+        } catch (_: ZipWrongPassword) {
+            mutable.update { it.copy(floPassword = true, error = R.string.import_flo_wrong_password) }
+            return
+        } catch (_: Exception) {
+            emptyList()
+        }
+        floBytes = null
+        try {
+            val today = clock()
+            for (file in files) if (show(file, today)) return
+            mutable.update { it.copy(floPassword = false, error = R.string.import_app_invalid) }
+        } finally {
+            files.forEach { it.fill(0) }
             bytes.fill(0)
-            floBytes = null
         }
-        mutable.update {
-            when (result) {
-                is FloImportResult.Parsed -> it.copy(periods = result.periods, floPassword = false)
-                FloImportResult.NeedsPassword -> it.copy(floPassword = true)
-                FloImportResult.WrongPassword -> it.copy(floPassword = true, error = R.string.import_flo_wrong_password)
-                FloImportResult.Invalid -> it.copy(floPassword = false, error = R.string.import_app_invalid)
-            }
+    }
+
+    /** Reads one file; false when it is none of the supported apps' files. */
+    private suspend fun show(bytes: ByteArray, today: LocalDate): Boolean {
+        val periodCalendar = PeriodCalendarImport.isBackup(bytes)
+        val database = if (periodCalendar) PeriodCalendarImport.database(bytes)
+            else bytes.takeIf { AppDatabaseReader.isSqlite(it) }
+        val other = withContext(Dispatchers.IO) {
+            if (database != null) databases?.read(database, today) else ClueImport.parse(bytes, today)
         }
+        if (database != null && database !== bytes) database.fill(0)
+        if (other != null) {
+            fromApp = other
+            // Days with only Clue tags count as entries too.
+            val days = other.dayLogs + (other.tagNames.keys - other.dayLogs.map { it.date }.toSet()).map { DayLog(it) }
+            mutable.update { it.copy(periods = other.periods, dayLogs = days.sortedBy { it.date }, floPassword = false,
+                notice = R.string.import_period_calendar_partial.takeIf { periodCalendar }, merges = true) }
+            return true
+        }
+        if (database != null || periodCalendar) return false
+        val flo = withContext(Dispatchers.Default) { FloImport.parse(bytes, null, today) }
+        if (flo !is FloImportResult.Parsed) return false
+        fromFlo = true
+        mutable.update { it.copy(periods = flo.periods, floPassword = false) }
+        return true
     }
 
     private fun clearFlo() {
