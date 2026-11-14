@@ -8,13 +8,20 @@ import org.freeperiod.engine.Period
 /**
  * Periods and diary days read from another app's file. [tagNames] are that app's own tags per day; they
  * become uncategorized FreePeriod tags (an existing one with the same name is reused) when imported.
+ * [items] are the app's options without a FreePeriod counterpart; they become tags in a category.
  */
 data class AppImport(val periods: List<Period>, val dayLogs: List<DayLog>,
-    val tagNames: Map<LocalDate, Set<String>> = emptyMap()) {
-    /** Days with a diary entry or a tag. */
-    val days: Int get() = (dayLogs.map { it.date } + tagNames.keys).distinct().size
+    val tagNames: Map<LocalDate, Set<String>> = emptyMap(), val items: Map<LocalDate, Set<AppItem>> = emptyMap()) {
+    /** Days with a diary entry, a tag or an item. */
+    val days: Int get() = (dayLogs.map { it.date } + tagNames.keys + items.keys).distinct().size
     fun isEmpty() = periods.isEmpty() && days == 0
 }
+
+/**
+ * An option from another app with no FreePeriod counterpart. It becomes a tag in the own items of the built-in
+ * [field] when that category takes several items a day, else in the own category [category] (found by name or created).
+ */
+data class AppItem(val name: String, val category: String, val field: String? = null)
 
 /** Shared rules for apps that log bleeding per day instead of period start and end dates. */
 object BleedingDays {

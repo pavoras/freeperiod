@@ -46,6 +46,9 @@ class ImportArchiveTest {
         assertEquals(setOf(Symptom.CRAMPS, Symptom.BACKACHE), logs.getValue("2026-10-02").symptoms)
         assertEquals(Mood.GOOD, logs.getValue("2026-10-03").mood)
         assertEquals(FlowLevel.SPOTTING, logs.getValue("2026-10-20").flow)
+        // Options without a counterpart are kept under Clue's names; mapped ones are not repeated.
+        assertEquals(mapOf("2026-10-03" to setOf(AppItem("Ok", "Skin")), "2026-10-20" to setOf(AppItem("Red", "Spotting"))),
+            imported.items.mapKeys { it.key.toString() })
     }
 
     @Test fun plainZipNeedsNoPassword() {
