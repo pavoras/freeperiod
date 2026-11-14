@@ -95,13 +95,16 @@ class Repository(
 
     /**
      * Periods and diary days from another app (Clue, Bluemoon). Overlapping periods are skipped; days you
-     * already logged keep their values and only gain what is missing. Returns imported to skipped periods.
+     * already logged keep their values and only gain what is missing. The app's options without a counterpart
+     * become tags: in a built-in category's own items when it takes several a day, else in an own category of
+     * the app's name (an existing category or tag of the same name is reused). Returns imported to skipped periods.
      */
     suspend fun importApp(data: AppImport): Pair<Int, Int> = write {
-        require(data.dayLogs.all { it.date <= clock() } && data.tagNames.keys.all { it <= clock() })
+        require(data.dayLogs.all { it.date <= clock() } && data.tagNames.keys.all { it <= clock() } &&
+            data.items.keys.all { it <= clock() })
         val skipped = insertPeriods(data.periods).size
         val tags = tagsDao.getAll().map { it.domain() }.toMutableList()
-        val categories = categoriesDao.getAll().map { it.domain() }
+        val categories = categoriesDao.getAll().map { it.domain() }.toMutableList()
         val logs = data.dayLogs.associateBy { it.date }.toMutableMap()
         data.tagNames.forEach { (date, names) ->
             val ids = names.map { name ->
@@ -111,10 +114,36 @@ class Repository(
             }
             logs[date] = (logs[date] ?: DayLog(date)).let { it.copy(tagIds = it.tagIds + ids) }
         }
+        suspend fun category(item: AppItem): Long {
+            val field = item.field?.takeIf { it in ownItemFields && !categories.isSingleChoice(it) }
+            categories.find { if (field != null) it.builtInField() == field
+                else it.builtInField() == null && it.name.equals(item.category.trim(), ignoreCase = true) }?.let { return it.id }
+            // Markers stay out of sight; their name only has to stay clear of your own categories (as in the CSV import).
+            val name = field?.let { "builtin:$it" } ?: item.category.trim()
+            var unique = name
+            var suffix = 2
+            while (categories.any { it.name.equals(unique, ignoreCase = true) }) unique = "$name ${suffix++}"
+            val created = CustomCategory(0, unique, field?.let { "builtin:$it" } ?: "tag", 100 + categories.size, false)
+            return created.copy(id = categoriesDao.insert(created.entity())).also { categories += it }.id
+        }
+        val itemIds = data.items.mapValues { (date, items) ->
+            items.map { item ->
+                val categoryId = category(item)
+                tags.find { it.categoryId == categoryId && it.name.equals(item.name.trim(), ignoreCase = true) }?.id
+                    ?: Tag(0, item.name.trim(), categoryId = categoryId).let { tag ->
+                        tag.copy(id = tagsDao.insert(tag.entity())).also { tags += it }.id
+                    }
+            }.toSet().also { ids -> logs[date] = (logs[date] ?: DayLog(date)).let { it.copy(tagIds = it.tagIds + ids) } }
+        }
         val existing = logsDao.getWithTags().map { it.domain() }.associateBy { it.date }
         logs.values.forEach { log ->
-            val merged = BleedingDays.merge(existing[log.date], log, tags, categories)
-            if (!merged.isEmpty()) saveLog(merged)
+            // An item in a category that takes one choice a day may clash with the day's entry: then it stays out.
+            val before = existing[log.date]
+            val merged = BleedingDays.merge(before, log, tags, categories)
+                .takeIf { EntrySelection.valid(it, tags, categories) && (before == null || it != before) }
+                ?: BleedingDays.merge(before, log.withoutTags(itemIds[log.date].orEmpty()), tags, categories)
+            // A day that still is no valid entry is left out rather than failing the whole import.
+            if (!merged.isEmpty() && EntrySelection.valid(merged, tags, categories)) saveLog(merged)
         }
         data.periods.size - skipped to skipped
     }

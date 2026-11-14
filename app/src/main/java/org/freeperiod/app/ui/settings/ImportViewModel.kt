@@ -115,8 +115,8 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
         if (database != null && database !== bytes) database.fill(0)
         if (other != null) {
             fromApp = other
-            // Days with only Clue tags count as entries too.
-            val days = other.dayLogs + (other.tagNames.keys - other.dayLogs.map { it.date }.toSet()).map { DayLog(it) }
+            // Days with only Clue tags or other Clue options count as entries too.
+            val days = other.dayLogs + (other.tagNames.keys + other.items.keys - other.dayLogs.map { it.date }.toSet()).map { DayLog(it) }
             mutable.update { it.copy(periods = other.periods, dayLogs = days.sortedBy { it.date }, floPassword = false,
                 notice = R.string.import_period_calendar_partial.takeIf { periodCalendar }, merges = true) }
             return true

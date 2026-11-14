@@ -142,6 +142,39 @@ class ImportTest : DatabaseTest() {
         assertEquals(setOf(tags.getValue("Long walk"), tags.getValue("Yoga")), logs.getValue(day(3, 20)).tagIds)
     }
 
+    @Test fun clueDownloadKeepsOptionsWithoutCounterpart() = runTest {
+        // Made-up entries in the shape of measurements.json from Clue's "Download my data".
+        content = """[{"type": "period", "date": "2026-03-02", "id": "1", "value": {"option": "heavy"}},
+            {"type": "pain", "date": "2026-03-02", "id": "2", "value": [{"option": "cramps"}, {"option": "vulvar"}]},
+            {"type": "skin", "date": "2026-03-02", "id": "3", "value": [{"option": "ok"}]},
+            {"type": "collection_method", "date": "2026-03-02", "id": "4", "value": [{"option": "tampon"}]},
+            {"type": "sex_life", "date": "2026-03-02", "id": "5", "value": [{"option": "unprotected_sex"}, {"option": "sex_toys"}]},
+            {"type": "skin", "date": "2026-03-03", "id": "6", "value": [{"option": "ok"}]},
+            {"type": "feelings", "date": "2026-03-03", "id": "7", "value": [{"option": "happy"}, {"option": "insecure"}]}]"""
+        repository.addCustomCategory("Skin")
+        repeat(2) {
+            val model = model()
+            model.readApp(Uri.parse("content://test/clue-download")).join()
+            assertNull(model.state.value.error)
+            assertEquals(2, model.state.value.dayLogs.size)
+            model.confirm().join()
+        }
+        val data = repository.snapshot()
+        // Your "Skin" is reused; options of a category that takes several items join it (symptoms), the rest get
+        // an own category under Clue's name. Importing again adds nothing twice.
+        val categories = data.customCategories.associateBy { it.id }
+        val tags = data.tags.associate { (categories[it.categoryId]?.let { c -> c.builtInField() ?: c.name } to it.name) to it.id }
+        assertEquals(setOf("Skin" to "Ok", "Collection method" to "Tampon", "Sex life" to "Sex toys",
+            "symptoms" to "Vulvar", "symptoms" to "Insecure"), tags.keys)
+        assertEquals(4, data.customCategories.size)
+        val logs = data.dayLogs.associateBy { it.date }
+        assertEquals(DayLog(day(3, 2), flow = FlowLevel.HEAVY, symptoms = setOf(Symptom.CRAMPS), sex = setOf(Sex.UNPROTECTED),
+            tagIds = setOf(tags.getValue("Skin" to "Ok"), tags.getValue("Collection method" to "Tampon"),
+                tags.getValue("Sex life" to "Sex toys"), tags.getValue("symptoms" to "Vulvar"))), logs[day(3, 2)])
+        assertEquals(DayLog(day(3, 3), mood = Mood.GOOD,
+            tagIds = setOf(tags.getValue("Skin" to "Ok"), tags.getValue("symptoms" to "Insecure"))), logs[day(3, 3)])
+    }
+
     @Test fun bluemoonBackupImportsAndLeavesNoCopy() = runTest {
         bytes = bluemoonBackup()
         assertEquals(2, bytes!![18].toInt())
