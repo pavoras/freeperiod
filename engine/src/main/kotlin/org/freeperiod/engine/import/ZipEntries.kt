@@ -17,7 +17,7 @@ class ZipWrongPassword : Exception()
  */
 class ZipEntries(private val bytes: ByteArray) {
     data class Entry(val name: String, internal val flags: Int, internal val method: Int, internal val crc: Int,
-        internal val compressed: Int, val size: Int, internal val localOffset: Int) {
+        internal val compressed: Int, val size: Int, internal val localOffset: Int, internal val time: Int = 0) {
         val encrypted get() = flags and 1 != 0
     }
 
@@ -54,7 +54,7 @@ class ZipEntries(private val bytes: ByteArray) {
             val nameLength = header.getShort(28).toUShort().toInt()
             val name = String(bytes, offset + 46, nameLength, Charsets.UTF_8)
             val entry = Entry(name, header.getShort(8).toUShort().toInt(), header.getShort(10).toUShort().toInt(),
-                header.getInt(16), header.getInt(20), header.getInt(24), header.getInt(42))
+                header.getInt(16), header.getInt(20), header.getInt(24), header.getInt(42), header.getShort(12).toUShort().toInt())
             offset += 46 + nameLength + header.getShort(30).toUShort().toInt() + header.getShort(32).toUShort().toInt()
             entry
         }
@@ -88,8 +88,10 @@ class ZipEntries(private val bytes: ByteArray) {
         if (data.size < 12) throw ZipWrongPassword()
         val keys = ZipCryptoKeys(password)
         val plain = ByteArray(data.size) { keys.decrypt(data[it]) }
-        // The last header byte repeats the high byte of the CRC: a quick check before inflating.
-        if (plain[11] != (entry.crc ushr 24).toByte()) throw ZipWrongPassword()
+        // The last header byte repeats the high byte of the CRC, or of the file time when sizes and CRC follow the
+        // data (flag 8, as in Clue's download): a quick check before inflating.
+        val check = if (entry.flags and 8 != 0) (entry.time ushr 8).toByte() else (entry.crc ushr 24).toByte()
+        if (plain[11] != check) throw ZipWrongPassword()
         return plain.copyOfRange(12, plain.size)
     }
 
