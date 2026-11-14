@@ -72,7 +72,8 @@ class ImportTest : DatabaseTest() {
     }
     @Test fun floJsonPreviewsThenImports() = runTest {
         content = """{"operationalData": {"cycles": [
-            {"period_start_date": "2026-03-02 00:00:00.0", "period_end_date": "2026-03-06 00:00:00.0"},
+            {"period_start_date": "2026-03-02 00:00:00.0", "period_end_date": "2026-03-06 00:00:00.0",
+             "period_intensity": "{\"0\": 3, \"2\": 1}"},
             {"period_start_date": "2026-03-30 00:00:00.0", "period_end_date": "2026-04-03 00:00:00.0"}]}}"""
         val model = model()
         model.readApp(Uri.parse("content://test/flo")).join()
@@ -84,6 +85,9 @@ class ImportTest : DatabaseTest() {
         assertEquals(listOf(today.withMonth(3).withDayOfMonth(2) to today.withMonth(3).withDayOfMonth(6),
             today.withMonth(3).withDayOfMonth(30) to today.withDayOfMonth(3)),
             repository.snapshot().periods.sortedBy { it.start }.map { it.start to it.end })
+        // The strength per day comes in too.
+        assertEquals(listOf(DayLog(day(3, 2), flow = FlowLevel.HEAVY), DayLog(day(3, 4), flow = FlowLevel.LIGHT)),
+            repository.snapshot().dayLogs.sortedBy { it.date })
     }
 
     @Test fun floZipAsksForThePasswordFirst() = runTest {
@@ -191,6 +195,14 @@ class ImportTest : DatabaseTest() {
         assertNull(logs[day(3, 3)])
         assertEquals(setOf(Sex.PROTECTED), logs.getValue(day(3, 15)).sex)
         assertEquals(setOf(Sex.UNPROTECTED), logs.getValue(day(3, 16)).sex)
+        // The kind of sex, the contraceptive and the pill come in as items; a pill not taken does not.
+        val data = repository.snapshot()
+        val categories = data.customCategories.associateBy { it.id }
+        val tags = data.tags.associate { it.id to (categories[it.categoryId]?.let { c -> c.builtInField() ?: c.name } to it.name) }
+        assertEquals(setOf("Contraceptive" to "IUD", "Sex type" to "Partner", "medication" to "Pill"),
+            logs.getValue(day(3, 15)).tagIds.map { tags.getValue(it) }.toSet())
+        assertEquals(setOf("Sex type" to "Partner"), logs.getValue(day(3, 16)).tagIds.map { tags.getValue(it) }.toSet())
+        assertNull(logs[day(3, 17)])
     }
 
     @Test fun periodCalendarBackupImports() = runTest {
@@ -278,6 +290,8 @@ class ImportTest : DatabaseTest() {
         }
         db.execSQL("INSERT INTO Sex (id, type, date) VALUES (1, 'PARTNER', '2026-03-15'), (2, 'PARTNER', '2026-03-16')")
         db.execSQL("INSERT INTO ContraceptiveUse (contraceptive, usedOnSexId) VALUES ('IUD', 1)")
+        db.execSQL("CREATE TABLE Pill (id INTEGER PRIMARY KEY, taken INTEGER NOT NULL, is_substitute INTEGER NOT NULL, date TEXT NOT NULL, logged_at TEXT NOT NULL)")
+        db.execSQL("INSERT INTO Pill (taken, is_substitute, date, logged_at) VALUES (1, 0, '2026-03-15', ''), (0, 0, '2026-03-17', '')")
     }
 
     private fun sqlite(fill: (SQLiteDatabase) -> Unit): ByteArray {

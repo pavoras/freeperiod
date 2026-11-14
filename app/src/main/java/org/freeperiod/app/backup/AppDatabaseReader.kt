@@ -38,12 +38,16 @@ class AppDatabaseReader(private val dir: File) {
                             generateSequence { if (rows.moveToNext()) rows.getLong(0) to rows.getString(1) else null }
                                 .groupBy({ it.first }, { it.second })
                         }
-                    db.rawQuery("SELECT id, date FROM Sex", null).use { rows ->
+                    db.rawQuery("SELECT id, date, type FROM Sex", null).use { rows ->
                         generateSequence { if (rows.moveToNext()) BluemoonSex(rows.getString(1),
-                            used[rows.getLong(0)].orEmpty().filterNotNull().toSet()) else null }.toList()
+                            used[rows.getLong(0)].orEmpty().filterNotNull().toSet(), rows.getString(2)) else null }.toList()
                     }
                 }
-                BluemoonImport.map(bleeding, sex, today)
+                val pills = if ("Pill" !in tables) emptyList() else
+                    db.rawQuery("SELECT date FROM Pill WHERE taken", null).use { rows ->
+                        generateSequence { if (rows.moveToNext()) rows.getString(0) else null }.toList()
+                    }
+                BluemoonImport.map(bleeding, sex, today, pills)
             }
         } catch (_: Exception) {
             null

@@ -1,6 +1,8 @@
 package org.freeperiod.engine.importing
 
 import java.time.LocalDate
+import org.freeperiod.engine.DayLog
+import org.freeperiod.engine.FlowLevel
 import org.freeperiod.engine.Period
 import org.junit.Assert.*
 import org.junit.Test
@@ -12,11 +14,12 @@ class FloImportTest {
         {"symptomCheckerData": {"user_signs_data": [{"sign": "Cravings", "present": true}]},
          "operationalData": {"notes": [], "cycles": [
            {"period_start_date": "2025-02-19 00:00:00.0", "period_end_date": "2025-02-24 00:00:00.0",
-            "pregnant": false, "period_intensity": "{}", "additional_fields": "{}"},
+            "pregnant": false, "period_intensity": "{\"0\": 3, \"1\": 2, \"3\": 1, \"4\": 7}", "additional_fields": "{}"},
            {"period_start_date": "2025-01-22 00:00:00.0", "period_end_date": "2025-01-26 00:00:00.0",
             "pregnant": false, "period_intensity": "{}",
             "additional_fields": "{\"prediction\": \"{\\\"period_start_date\\\": \\\"2025-02-17T22:00:00+00:00\\\"}\"}"},
-           {"period_start_date": "2026-10-17 00:00:00.0", "period_end_date": "2026-10-21 00:00:00.0", "pregnant": false},
+           {"period_start_date": "2026-10-17 00:00:00.0", "period_end_date": "2026-10-21 00:00:00.0", "pregnant": false,
+            "period_intensity": "{\"0\": 2, \"3\": 2}"},
            {"period_start_date": "2026-11-12 00:00:00.0", "period_end_date": "2026-11-16 00:00:00.0", "pregnant": false},
            {"period_start_date": null, "period_end_date": "2025-03-01 00:00:00.0"}
          ]}}
@@ -26,20 +29,24 @@ class FloImportTest {
         Period(0, LocalDate.parse("2025-02-19"), LocalDate.parse("2025-02-24")),
         // Ends after today: comes in as ongoing. The one starting in the future is left out.
         Period(0, LocalDate.parse("2026-10-17"), null))
+    // The strength per day counted from the start; an unknown strength and days after today are left out.
+    private val flows = listOf(DayLog(LocalDate.parse("2025-02-19"), flow = FlowLevel.HEAVY),
+        DayLog(LocalDate.parse("2025-02-20"), flow = FlowLevel.MEDIUM), DayLog(LocalDate.parse("2025-02-22"), flow = FlowLevel.LIGHT),
+        DayLog(LocalDate.parse("2026-10-17"), flow = FlowLevel.MEDIUM))
 
-    @Test fun unpackedJsonGivesSortedPeriodsOnly() {
-        assertEquals(FloImportResult.Parsed(expected), FloImport.parse(json.toByteArray(), today = today))
+    @Test fun unpackedJsonGivesSortedPeriodsAndFlow() {
+        assertEquals(FloImportResult.Parsed(expected, flows), FloImport.parse(json.toByteArray(), today = today))
     }
 
     @Test fun passwordProtectedZipFromSupport() {
         val zip = testZip("0000-export.json", json.toByteArray(), "test-password")
         assertEquals(FloImportResult.NeedsPassword, FloImport.parse(zip, today = today))
         assertEquals(FloImportResult.WrongPassword, FloImport.parse(zip, "wrong".toCharArray(), today))
-        assertEquals(FloImportResult.Parsed(expected), FloImport.parse(zip, "test-password".toCharArray(), today))
+        assertEquals(FloImportResult.Parsed(expected, flows), FloImport.parse(zip, "test-password".toCharArray(), today))
     }
 
     @Test fun plainZipNeedsNoPassword() {
-        assertEquals(FloImportResult.Parsed(expected), FloImport.parse(testZip("export.json", json.toByteArray(), null), today = today))
+        assertEquals(FloImportResult.Parsed(expected, flows), FloImport.parse(testZip("export.json", json.toByteArray(), null), today = today))
     }
 
     @Test fun otherFilesAreInvalid() {
