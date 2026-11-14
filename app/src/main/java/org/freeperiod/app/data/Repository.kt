@@ -87,14 +87,8 @@ class Repository(
         parsed.periods.size - skipped to skipped
     }
 
-    /** Periods from another app's export; overlapping ones are skipped. Returns imported to skipped. */
-    suspend fun importPeriods(periods: List<Period>): Pair<Int, Int> = write {
-        val skipped = insertPeriods(periods).size
-        periods.size - skipped to skipped
-    }
-
     /**
-     * Periods and diary days from another app (Clue, Bluemoon). Overlapping periods are skipped; days you
+     * Periods and diary days from another app (Clue, Bluemoon, Flo, Period Calendar). Overlapping periods are skipped; days you
      * already logged keep their values and only gain what is missing. The app's options without a counterpart
      * become tags: in a built-in category's own items when it takes several a day, else in an own category of
      * the app's name (an existing category or tag of the same name is reused). Returns imported to skipped periods.

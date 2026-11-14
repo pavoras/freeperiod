@@ -44,7 +44,6 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
     private var selectedFormat: CsvDateFormat? = null
     /** The chosen Flo file while it waits for its password; cleared after reading. */
     private var floBytes: ByteArray? = null
-    private var fromFlo = false
     /** Periods and days read from Clue or Bluemoon, waiting for confirmation. */
     private var fromApp: AppImport? = null
 
@@ -124,15 +123,15 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
         if (database != null || periodCalendar) return false
         val flo = withContext(Dispatchers.Default) { FloImport.parse(bytes, null, today) }
         if (flo !is FloImportResult.Parsed) return false
-        fromFlo = true
-        mutable.update { it.copy(periods = flo.periods, floPassword = false) }
+        // Flo's periods with the strength per day go in like another app's backup.
+        fromApp = AppImport(flo.periods, flo.dayLogs)
+        mutable.update { it.copy(periods = flo.periods, dayLogs = flo.dayLogs, floPassword = false, merges = flo.dayLogs.isNotEmpty()) }
         return true
     }
 
     private fun clearFlo() {
         floBytes?.fill(0)
         floBytes = null
-        fromFlo = false
         fromApp = null
     }
 
@@ -161,10 +160,8 @@ class ImportViewModel(private val repository: Repository, private val io: Docume
             if ((periods.isEmpty() && state.value.dayLogs.isEmpty()) || state.value.imported != null) return@operation
             val app = fromApp
             val (imported, skipped) = if (app != null) repository.importApp(app)
-                else if (fromFlo) repository.importPeriods(periods)
                 else repository.importCsv(requireNotNull(text), selectedFormat)
             text = null
-            fromFlo = false
             fromApp = null
             selectedFormat = null
             mutable.update { it.copy(imported = imported, skipped = skipped) }
